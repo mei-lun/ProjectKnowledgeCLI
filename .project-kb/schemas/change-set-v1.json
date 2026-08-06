@@ -1,0 +1,76 @@
+{
+  "$id": "https://project-kb.local/schema/change-set-v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "affected_knowledge": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "affected_modules": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "author": {
+      "type": "string"
+    },
+    "base_commit": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "changed_files": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "changed_symbols": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "head_commit": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "id": {
+      "type": "string"
+    },
+    "task_summary": {
+      "type": "string"
+    },
+    "test_results": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "tests_run": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "id",
+    "task_summary",
+    "changed_files",
+    "changed_symbols",
+    "affected_modules",
+    "affected_knowledge",
+    "tests_run",
+    "test_results",
+    "author"
+  ],
+  "type": "object"
+}

@@ -1,0 +1,5 @@
+interface:
+  display_name: "Project Knowledge"
+  short_description: "Retrieve trusted, fresh project knowledge"
+  default_prompt: "Use $project-knowledge to gather fresh project context before changing code."
+

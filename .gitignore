@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+build/
+dist/
+
+<!-- project-kb:gitignore:start -->
+.project-kb/index.db
+.project-kb/index.db-*
+.project-kb/state.json
+.project-kb/write.lock
+.project-kb/events/
+.project-kb/logs/
+<!-- project-kb:gitignore:end -->

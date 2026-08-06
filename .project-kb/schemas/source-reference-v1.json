@@ -1,0 +1,35 @@
+{
+  "$id": "https://project-kb.local/schema/source-reference-v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "hash": {
+      "pattern": "^sha256:",
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "line": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "path": {
+      "type": "string"
+    },
+    "type": {
+      "enum": [
+        "file",
+        "symbol",
+        "commit",
+        "config",
+        "task",
+        "decision"
+      ]
+    }
+  },
+  "required": [
+    "type"
+  ],
+  "type": "object"
+}

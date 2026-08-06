@@ -1,0 +1,54 @@
+{
+  "$id": "https://project-kb.local/schema/proposal-v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "confidence": {
+      "maximum": 1,
+      "minimum": 0,
+      "type": "number"
+    },
+    "evidence": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "operations": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "proposal_id": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "requires_review": {
+      "type": "boolean"
+    },
+    "status": {
+      "enum": [
+        "pending",
+        "applied",
+        "rejected"
+      ]
+    },
+    "target": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "proposal_id",
+    "target",
+    "reason",
+    "evidence",
+    "confidence",
+    "operations",
+    "requires_review",
+    "status"
+  ],
+  "type": "object"
+}

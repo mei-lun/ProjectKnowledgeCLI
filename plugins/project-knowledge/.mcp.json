@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "project-knowledge": {
+      "command": "project-kb",
+      "args": ["mcp", "--project", "."]
+    }
+  }
+}

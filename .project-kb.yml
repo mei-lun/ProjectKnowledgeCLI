@@ -1,0 +1,45 @@
+version: 1
+
+project:
+  name: ProjectKnowledgeCLI
+
+index:
+  engine: builtin
+  include:
+    - **/*
+  exclude:
+    - .git/**
+    - .project-kb/**
+    - .venv/**
+    - venv/**
+    - __pycache__/**
+    - **/__pycache__/**
+    - .pytest_cache/**
+    - **/.pytest_cache/**
+    - node_modules/**
+    - dist/**
+    - build/**
+    - target/**
+    - vendor/**
+    - docs/knowledge/generated/**
+
+knowledge:
+  root: docs/knowledge
+  generated: docs/knowledge/generated
+  curated: docs/knowledge/curated
+  decisions: docs/knowledge/decisions
+
+updates:
+  watch: true
+  debounce_ms: 1000
+  generated_mode: auto
+  curated_mode: proposal
+  proposal_trigger: commit
+
+retrieval:
+  max_tokens: 6000
+  embeddings: disabled
+
+privacy:
+  local_only: true
+  telemetry: false

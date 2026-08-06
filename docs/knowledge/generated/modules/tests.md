@@ -1,0 +1,185 @@
+<!-- 本文件由 project-kb 自动生成，请勿手动编辑。 -->
+
+# 模块：tests
+
+## 文件
+
+- `tests/__init__.py`（Python）
+- `tests/test_config.py`（Python）
+- `tests/test_engine.py`（Python）
+- `tests/test_integration.py`（Python）
+- `tests/test_versioning.py`（Python）
+
+## 符号
+
+- `tests/test_config.py::ConfigTests`：类，位于 `tests/test_config.py:11`（可信度 1.00）
+- `tests/test_config.py::ConfigTests.test_config_round_trip`：方法，位于 `tests/test_config.py:12`（可信度 1.00）
+- `tests/test_config.py::ConfigTests.test_marker_update_preserves_unowned_content`：方法，位于 `tests/test_config.py:23`（可信度 1.00）
+- `tests/test_config.py::ConfigTests.test_token_trimming_respects_budget`：方法，位于 `tests/test_config.py:32`（可信度 1.00）
+- `tests/test_engine.py::EngineTests`：类，位于 `tests/test_engine.py:8`（可信度 1.00）
+- `tests/test_engine.py::EngineTests.test_python_ast_extracts_symbols_calls_inheritance_and_routes`：方法，位于 `tests/test_engine.py:9`（可信度 1.00）
+- `tests/test_engine.py::EngineTests.test_invalid_python_reports_parse_error`：方法，位于 `tests/test_engine.py:30`（可信度 1.00）
+- `tests/test_engine.py::EngineTests.test_generic_parser_marks_relations_low_confidence`：方法，位于 `tests/test_engine.py:34`（可信度 1.00）
+- `tests/test_integration.py::IntegrationTests`：类，位于 `tests/test_integration.py:44`（可信度 1.00）
+- `tests/test_integration.py::IntegrationTests.setUp`：方法，位于 `tests/test_integration.py:45`（可信度 1.00）
+- `tests/test_integration.py::IntegrationTests.tearDown`：方法，位于 `tests/test_integration.py:58`（可信度 1.00）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp`：方法，位于 `tests/test_integration.py:61`（可信度 1.00）
+- `tests/test_integration.py::IntegrationTests.test_dry_run_and_deleted_file_sync`：方法，位于 `tests/test_integration.py:140`（可信度 1.00）
+- `tests/test_integration.py::IntegrationTests.test_install_and_uninstall_only_remove_owned_integration`：方法，位于 `tests/test_integration.py:153`（可信度 1.00）
+- `tests/test_versioning.py::VersioningTests`：类，位于 `tests/test_versioning.py:13`（可信度 1.00）
+- `tests/test_versioning.py::VersioningTests.test_package_version_is_the_single_build_source`：方法，位于 `tests/test_versioning.py:14`（可信度 1.00）
+- `tests/test_versioning.py::VersioningTests.test_patch_version_increment_updates_version_and_changelog`：方法，位于 `tests/test_versioning.py:24`（可信度 1.00）
+- `tests/test_versioning.py::VersioningTests.test_dry_run_does_not_modify_files`：方法，位于 `tests/test_versioning.py:47`（可信度 1.00）
+
+## 结构关系
+
+- `tests/test_config.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `tests/test_config.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
+- `tests/test_config.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
+- `tests/test_config.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `tests/test_engine.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `tests/test_engine.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
+- `tests/test_integration.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `tests/test_integration.py::<module>` 导入 `io`（可信度 1.00，未解析）
+- `tests/test_integration.py::<module>` 导入 `json`（可信度 1.00，未解析）
+- `tests/test_integration.py::<module>` 导入 `subprocess`（可信度 1.00，未解析）
+- `tests/test_integration.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
+- `tests/test_integration.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
+- `tests/test_integration.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `tests/test_versioning.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `tests/test_versioning.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
+- `tests/test_versioning.py::<module>` 导入 `tomllib`（可信度 1.00，未解析）
+- `tests/test_versioning.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
+- `tests/test_versioning.py::<module>` 导入 `datetime.date`（可信度 1.00，未解析）
+- `tests/test_versioning.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `tests/test_versioning.py::<module>` 导入 `project_knowledge.__version__`（可信度 1.00，未解析）
+- `tests/test_config.py::ConfigTests` 继承 `unittest.TestCase`（可信度 0.95，未解析）
+- `tests/test_engine.py::EngineTests` 继承 `unittest.TestCase`（可信度 0.95，未解析）
+- `tests/test_integration.py::IntegrationTests` 继承 `unittest.TestCase`（可信度 0.95，未解析）
+- `tests/test_versioning.py::VersioningTests` 继承 `unittest.TestCase`（可信度 0.95，未解析）
+- `tests/test_config.py::<module>` 导入 `src/project_knowledge/config.py::ProjectConfig`（可信度 0.90，已解析）
+- `tests/test_config.py::<module>` 导入 `src/project_knowledge/util.py::approx_tokens`（可信度 0.90，已解析）
+- `tests/test_config.py::<module>` 导入 `src/project_knowledge/util.py::marker_update`（可信度 0.90，已解析）
+- `tests/test_config.py::<module>` 导入 `src/project_knowledge/util.py::trim_to_tokens`（可信度 0.90，已解析）
+- `tests/test_engine.py::<module>` 导入 `src/project_knowledge/engine.py::GenericParser`（可信度 0.90，已解析）
+- `tests/test_engine.py::<module>` 导入 `src/project_knowledge/engine.py::PythonParser`（可信度 0.90，已解析）
+- `tests/test_integration.py::<module>` 导入 `src/project_knowledge/mcp.py::MCPServer`（可信度 0.90，已解析）
+- `tests/test_integration.py::<module>` 导入 `src/project_knowledge/retrieval.py::KnowledgeAPI`（可信度 0.90，已解析）
+- `tests/test_integration.py::<module>` 导入 `src/project_knowledge/service.py::ProjectService`（可信度 0.90，已解析）
+- `tests/test_integration.py::<module>` 导入 `src/project_knowledge/store.py::KnowledgeStore`（可信度 0.90，已解析）
+- `tests/test_versioning.py::<module>` 导入 `src/project_knowledge/versioning.py::bump_patch_version`（可信度 0.90，已解析）
+- `tests/test_versioning.py::<module>` 导入 `src/project_knowledge/versioning.py::next_patch_version`（可信度 0.90，已解析）
+- `tests/test_versioning.py::<module>` 导入 `src/project_knowledge/versioning.py::read_project_version`（可信度 0.90，已解析）
+- `tests/test_config.py::ConfigTests.test_config_round_trip` 调用 `tempfile.TemporaryDirectory`（可信度 0.80，未解析）
+- `tests/test_config.py::ConfigTests.test_config_round_trip` 调用 `Path`（可信度 0.80，未解析）
+- `tests/test_config.py::ConfigTests.test_config_round_trip` 调用 `src/project_knowledge/config.py::ProjectConfig`（可信度 0.80，已解析）
+- `tests/test_config.py::ConfigTests.test_config_round_trip` 调用 `src/project_knowledge/config.py::ProjectConfig.write`（可信度 0.80，已解析）
+- `tests/test_config.py::ConfigTests.test_config_round_trip` 调用 `src/project_knowledge/config.py::ProjectConfig.load`（可信度 0.80，已解析）
+- `tests/test_config.py::ConfigTests.test_config_round_trip` 调用 `self.assertEqual`（可信度 0.80，未解析）
+- `tests/test_config.py::ConfigTests.test_config_round_trip` 调用 `self.assertEqual`（可信度 0.80，未解析）
+- `tests/test_config.py::ConfigTests.test_config_round_trip` 调用 `self.assertEqual`（可信度 0.80，未解析）
+- `tests/test_config.py::ConfigTests.test_config_round_trip` 调用 `self.assertTrue`（可信度 0.80，未解析）
+- `tests/test_config.py::ConfigTests.test_marker_update_preserves_unowned_content` 调用 `tempfile.TemporaryDirectory`（可信度 0.80，未解析）
+- `tests/test_config.py::ConfigTests.test_marker_update_preserves_unowned_content` 调用 `Path`（可信度 0.80，未解析）
+- `tests/test_config.py::ConfigTests.test_marker_update_preserves_unowned_content` 调用 `path.write_text`（可信度 0.80，未解析）
+- `tests/test_config.py::ConfigTests.test_marker_update_preserves_unowned_content` 调用 `self.assertTrue`（可信度 0.80，未解析）
+- `tests/test_config.py::ConfigTests.test_marker_update_preserves_unowned_content` 调用 `src/project_knowledge/util.py::marker_update`（可信度 0.80，已解析）
+- `tests/test_config.py::ConfigTests.test_marker_update_preserves_unowned_content` 调用 `self.assertIn`（可信度 0.80，未解析）
+- `tests/test_config.py::ConfigTests.test_marker_update_preserves_unowned_content` 调用 `src/project_knowledge/util.py::read_text`（可信度 0.80，已解析）
+- `tests/test_config.py::ConfigTests.test_marker_update_preserves_unowned_content` 调用 `self.assertTrue`（可信度 0.80，未解析）
+- `tests/test_config.py::ConfigTests.test_marker_update_preserves_unowned_content` 调用 `src/project_knowledge/util.py::marker_update`（可信度 0.80，已解析）
+- `tests/test_config.py::ConfigTests.test_marker_update_preserves_unowned_content` 调用 `self.assertEqual`（可信度 0.80，未解析）
+- `tests/test_config.py::ConfigTests.test_marker_update_preserves_unowned_content` 调用 `strip`（可信度 0.80，未解析）
+- `tests/test_config.py::ConfigTests.test_marker_update_preserves_unowned_content` 调用 `src/project_knowledge/util.py::read_text`（可信度 0.80，已解析）
+- `tests/test_config.py::ConfigTests.test_token_trimming_respects_budget` 调用 `src/project_knowledge/util.py::trim_to_tokens`（可信度 0.80，已解析）
+- `tests/test_config.py::ConfigTests.test_token_trimming_respects_budget` 调用 `self.assertLessEqual`（可信度 0.80，未解析）
+- `tests/test_config.py::ConfigTests.test_token_trimming_respects_budget` 调用 `src/project_knowledge/util.py::approx_tokens`（可信度 0.80，已解析）
+- `tests/test_config.py::ConfigTests.test_token_trimming_respects_budget` 调用 `self.assertIn`（可信度 0.80，未解析）
+- `tests/test_config.py::<module>` 调用 `unittest.main`（可信度 0.80，未解析）
+- `tests/test_engine.py::EngineTests.test_python_ast_extracts_symbols_calls_inheritance_and_routes` 调用 `parse`（可信度 0.80，未解析）
+- `tests/test_engine.py::EngineTests.test_python_ast_extracts_symbols_calls_inheritance_and_routes` 调用 `src/project_knowledge/engine.py::PythonParser`（可信度 0.80，已解析）
+- `tests/test_engine.py::EngineTests.test_python_ast_extracts_symbols_calls_inheritance_and_routes` 调用 `self.assertIn`（可信度 0.80，未解析）
+- `tests/test_engine.py::EngineTests.test_python_ast_extracts_symbols_calls_inheritance_and_routes` 调用 `self.assertIn`（可信度 0.80，未解析）
+- `tests/test_engine.py::EngineTests.test_python_ast_extracts_symbols_calls_inheritance_and_routes` 调用 `self.assertIn`（可信度 0.80，未解析）
+- `tests/test_engine.py::EngineTests.test_python_ast_extracts_symbols_calls_inheritance_and_routes` 调用 `self.assertTrue`（可信度 0.80，未解析）
+- `tests/test_engine.py::EngineTests.test_python_ast_extracts_symbols_calls_inheritance_and_routes` 调用 `any`（可信度 0.80，未解析）
+- `tests/test_engine.py::EngineTests.test_python_ast_extracts_symbols_calls_inheritance_and_routes` 调用 `self.assertTrue`（可信度 0.80，未解析）
+- `tests/test_engine.py::EngineTests.test_python_ast_extracts_symbols_calls_inheritance_and_routes` 调用 `any`（可信度 0.80，未解析）
+- `tests/test_engine.py::EngineTests.test_python_ast_extracts_symbols_calls_inheritance_and_routes` 调用 `self.assertEqual`（可信度 0.80，未解析）
+- `tests/test_engine.py::EngineTests.test_invalid_python_reports_parse_error` 调用 `parse`（可信度 0.80，未解析）
+- `tests/test_engine.py::EngineTests.test_invalid_python_reports_parse_error` 调用 `src/project_knowledge/engine.py::PythonParser`（可信度 0.80，已解析）
+- `tests/test_engine.py::EngineTests.test_invalid_python_reports_parse_error` 调用 `self.assertIsNotNone`（可信度 0.80，未解析）
+- `tests/test_engine.py::EngineTests.test_generic_parser_marks_relations_low_confidence` 调用 `parse`（可信度 0.80，未解析）
+- `tests/test_engine.py::EngineTests.test_generic_parser_marks_relations_low_confidence` 调用 `src/project_knowledge/engine.py::GenericParser`（可信度 0.80，已解析）
+- `tests/test_engine.py::EngineTests.test_generic_parser_marks_relations_low_confidence` 调用 `self.assertTrue`（可信度 0.80，未解析）
+- `tests/test_engine.py::EngineTests.test_generic_parser_marks_relations_low_confidence` 调用 `any`（可信度 0.80，未解析）
+- `tests/test_engine.py::EngineTests.test_generic_parser_marks_relations_low_confidence` 调用 `self.assertTrue`（可信度 0.80，未解析）
+- `tests/test_engine.py::EngineTests.test_generic_parser_marks_relations_low_confidence` 调用 `any`（可信度 0.80，未解析）
+- `tests/test_engine.py::EngineTests.test_generic_parser_marks_relations_low_confidence` 调用 `self.assertTrue`（可信度 0.80，未解析）
+- `tests/test_engine.py::EngineTests.test_generic_parser_marks_relations_low_confidence` 调用 `all`（可信度 0.80，未解析）
+- `tests/test_engine.py::<module>` 调用 `unittest.main`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.setUp` 调用 `tempfile.TemporaryDirectory`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.setUp` 调用 `Path`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.setUp` 调用 `subprocess.run`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.setUp` 调用 `str`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.setUp` 调用 `mkdir`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.setUp` 调用 `mkdir`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.setUp` 调用 `write_text`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.setUp` 调用 `write_text`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.setUp` 调用 `write_text`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.tearDown` 调用 `self.temporary.cleanup`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `src/project_knowledge/service.py::ProjectService`（可信度 0.80，已解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `service.initialize`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `self.assertEqual`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `self.assertGreaterEqual`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `self.assertTrue`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `exists`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `self.assertTrue`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `exists`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `self.assertTrue`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `project_map.exists`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `src/project_knowledge/util.py::read_text`（可信度 0.80，已解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `self.assertIn`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `self.assertIn`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `self.assertIn`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `src/project_knowledge/util.py::read_text`（可信度 0.80，已解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `self.assertIn`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `src/project_knowledge/util.py::read_text`（可信度 0.80，已解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `self.assertIn`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `src/project_knowledge/util.py::read_text`（可信度 0.80，已解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `self.assertEqual`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `service.status`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `json.loads`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `src/project_knowledge/util.py::read_text`（可信度 0.80，已解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `self.assertGreaterEqual`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `len`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `self.assertNotIn`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `str`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `json.dumps`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `architecture.write_text`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `self.assertIn`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `service.status`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `src/project_knowledge/service.py::ProjectService.sync`（可信度 0.80，已解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `self.assertIn`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `src/project_knowledge/store.py::KnowledgeStore`（可信度 0.80，已解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `src/project_knowledge/store.py::KnowledgeStore.get_knowledge`（可信度 0.80，已解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `self.assertIsNotNone`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `self.assertEqual`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `write_text`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `src/project_knowledge/retrieval.py::KnowledgeAPI`（可信度 0.80，已解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `src/project_knowledge/retrieval.py::KnowledgeAPI.get`（可信度 0.80，已解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `self.assertNotIn`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `self.assertIn`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `src/project_knowledge/service.py::ProjectService.sync`（可信度 0.80，已解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `self.assertIn`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `src/project_knowledge/util.py::read_text`（可信度 0.80，已解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `src/project_knowledge/store.py::KnowledgeStore`（可信度 0.80，已解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `src/project_knowledge/store.py::KnowledgeStore.get_knowledge`（可信度 0.80，已解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `self.assertEqual`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `src/project_knowledge/service.py::ProjectService.rebuild`（可信度 0.80，已解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `src/project_knowledge/store.py::KnowledgeStore`（可信度 0.80，已解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `self.assertEqual`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `src/project_knowledge/store.py::KnowledgeStore.get_knowledge`（可信度 0.80，已解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `architecture.write_text`（可信度 0.80，未解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `src/project_knowledge/util.py::read_text`（可信度 0.80，已解析）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp` 调用 `src/project_knowledge/service.py::ProjectService.sync`（可信度 0.80，已解析）

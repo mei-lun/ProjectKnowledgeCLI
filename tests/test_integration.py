@@ -1,0 +1,166 @@
+from __future__ import annotations
+
+import io
+import json
+import subprocess
+import tempfile
+import unittest
+from pathlib import Path
+
+from project_knowledge.mcp import MCPServer
+from project_knowledge.retrieval import KnowledgeAPI
+from project_knowledge.service import ProjectService
+from project_knowledge.store import KnowledgeStore
+
+
+APP_V1 = '''
+class Repository:
+    def save(self, value):
+        return value
+
+def create_item(value):
+    return Repository().save(value)
+'''
+
+APP_V2 = '''
+class Repository:
+    def save(self, value):
+        return {"saved": value}
+
+def create_item(value):
+    return Repository().save(value)
+'''
+
+APP_V3 = '''
+class Repository:
+    def save(self, value):
+        return {"id": 1, "saved": value}
+
+def create_item(value):
+    return Repository().save(value)
+'''
+
+
+class IntegrationTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.temporary = tempfile.TemporaryDirectory()
+        self.root = Path(self.temporary.name)
+        subprocess.run(["git", "init", "-q", str(self.root)], check=True)
+        (self.root / "src").mkdir()
+        (self.root / "tests").mkdir()
+        (self.root / "src" / "app.py").write_text(APP_V1, encoding="utf-8")
+        (self.root / "tests" / "test_app.py").write_text(
+            "from src.app import create_item\n\ndef test_create():\n    assert create_item('x')\n",
+            encoding="utf-8",
+        )
+        (self.root / "pyproject.toml").write_text("[project]\nname='sample'\n", encoding="utf-8")
+
+    def tearDown(self) -> None:
+        self.temporary.cleanup()
+
+    def test_init_sync_freshness_retrieval_and_mcp(self) -> None:
+        service = ProjectService(self.root)
+        report = service.initialize()
+        self.assertEqual(report["action"], "init")
+        self.assertGreaterEqual(report["symbols"], 5)
+        self.assertTrue((self.root / ".project-kb" / "index.db").exists())
+        self.assertTrue((self.root / ".project-kb" / "mcp.json").exists())
+        project_map = self.root / "docs" / "knowledge" / "generated" / "project-map.md"
+        self.assertTrue(project_map.exists())
+        project_map_content = project_map.read_text(encoding="utf-8")
+        self.assertIn("# 项目地图：", project_map_content)
+        self.assertIn("| 配置 |", project_map_content)
+        self.assertIn("# 项目知识库：", (self.root / "docs" / "knowledge" / "index.md").read_text(encoding="utf-8"))
+        self.assertIn("# 架构", (self.root / "docs" / "knowledge" / "curated" / "architecture.md").read_text(encoding="utf-8"))
+        module_map = self.root / "docs" / "knowledge" / "generated" / "modules" / "app.py.md"
+        self.assertIn("：类，位于", module_map.read_text(encoding="utf-8"))
+        self.assertEqual(service.status()["pending_files"], [])
+        manifest = json.loads((self.root / ".project-kb" / "manifest.json").read_text(encoding="utf-8"))
+        self.assertGreaterEqual(len(manifest["records"]), 6)
+        self.assertNotIn(str(self.root), json.dumps(manifest))
+
+        architecture = self.root / "docs" / "knowledge" / "curated" / "architecture.md"
+        architecture.write_text(
+            '# Architecture\n\nRepository owns persistence.\n\n<!-- project-kb:source file="src/app.py" -->\n',
+            encoding="utf-8",
+        )
+        self.assertIn("docs/knowledge/curated/architecture.md", service.status()["pending_files"])
+        first_sync = service.sync(task_summary="document repository ownership")
+        self.assertIn("docs/knowledge/curated/architecture.md", first_sync["changed_knowledge"])
+        with KnowledgeStore(service.db_path, readonly=True) as store:
+            curated = store.get_knowledge("curated.architecture")
+            self.assertIsNotNone(curated)
+            self.assertEqual(curated.status, "fresh")
+
+        (self.root / "src" / "app.py").write_text(APP_V2, encoding="utf-8")
+        pending_api = KnowledgeAPI(self.root)
+        pending_record = pending_api.get("generated.module.app.py")
+        self.assertNotIn("content", pending_record)
+        self.assertIn("src/app.py", pending_record["withheld"])
+        service.sync(task_summary="change repository return shape")
+        self.assertIn("Repository owns persistence", architecture.read_text(encoding="utf-8"))
+        with KnowledgeStore(service.db_path, readonly=True) as store:
+            curated = store.get_knowledge("curated.architecture")
+            self.assertEqual(curated.status, "potentially_stale")
+
+        service.rebuild()
+        with KnowledgeStore(service.db_path, readonly=True) as store:
+            self.assertEqual(store.get_knowledge("curated.architecture").status, "potentially_stale")
+
+        architecture.write_text(architecture.read_text(encoding="utf-8") + "\nReviewed against the current source.\n", encoding="utf-8")
+        service.sync(task_summary="review architecture knowledge")
+        with KnowledgeStore(service.db_path, readonly=True) as store:
+            self.assertEqual(store.get_knowledge("curated.architecture").status, "fresh")
+
+        api = KnowledgeAPI(self.root)
+        search = api.search("Repository persistence")
+        self.assertTrue(search["results"])
+        context = api.context("change Repository save behavior", max_tokens=1200)
+        self.assertLessEqual(context["estimated_tokens"], 1200)
+        self.assertLessEqual(len(context["knowledge"]), 4)
+        self.assertIn("python -m pytest", context["verification_commands"])
+        impact = api.impact(files=["src/app.py"])
+        self.assertIn("app.py", impact["affected_modules"])
+        self.assertIn("tests/test_app.py", impact["affected_tests"])
+
+        server = MCPServer(self.root, io.StringIO(), io.StringIO())
+        initialized = server.handle({
+            "jsonrpc": "2.0", "id": 1, "method": "initialize",
+            "params": {"protocolVersion": "2025-06-18", "capabilities": {}, "clientInfo": {"name": "test", "version": "1"}},
+        })
+        self.assertEqual(initialized["result"]["protocolVersion"], "2025-06-18")
+        tools = server.handle({"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}})
+        self.assertEqual(len(tools["result"]["tools"]), 5)
+        called = server.handle({
+            "jsonrpc": "2.0", "id": 3, "method": "tools/call",
+            "params": {"name": "knowledge_status", "arguments": {}},
+        })
+        self.assertFalse(called["result"]["isError"])
+
+    def test_dry_run_and_deleted_file_sync(self) -> None:
+        service = ProjectService(self.root)
+        dry_run = service.initialize(dry_run=True)
+        self.assertFalse((self.root / ".project-kb.yml").exists())
+        self.assertGreater(dry_run["files_to_index"], 0)
+        service.initialize()
+        (self.root / "tests" / "test_app.py").unlink()
+        preview = service.sync(dry_run=True)
+        self.assertEqual(preview["deleted_files"], ["tests/test_app.py"])
+        service.sync()
+        with KnowledgeStore(service.db_path, readonly=True) as store:
+            self.assertNotIn("tests/test_app.py", store.file_hashes())
+
+    def test_install_and_uninstall_only_remove_owned_integration(self) -> None:
+        service = ProjectService(self.root)
+        service.initialize()
+        agents = self.root / "AGENTS.md"
+        agents.write_text("User rule\n\n" + agents.read_text(encoding="utf-8"), encoding="utf-8")
+        result = service.uninstall()
+        self.assertTrue(result["knowledge_preserved"])
+        self.assertIn("User rule", agents.read_text(encoding="utf-8"))
+        self.assertFalse((self.root / ".project-kb" / "mcp.json").exists())
+        self.assertTrue((self.root / "docs" / "knowledge" / "curated" / "architecture.md").exists())
+
+
+if __name__ == "__main__":
+    unittest.main()
