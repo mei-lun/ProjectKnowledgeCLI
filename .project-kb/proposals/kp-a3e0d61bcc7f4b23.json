@@ -1,0 +1,33 @@
+{
+  "change_range": "WP08",
+  "confidence": 0.95,
+  "created_at": "2026-08-07T08:30:30+08:00",
+  "evidence": [
+    "src/project_knowledge/config.py",
+    "src/project_knowledge/schemas.py",
+    "src/project_knowledge/service.py"
+  ],
+  "operations": [
+    {
+      "block_id": "wp08-terms",
+      "content": "- **配置模式版本（Config schema version）**：用于区分可迁移配置语义的整数版本；0.1.10 当前版本为 1。\n- **配置迁移（Config migration）**：通过 dry-run 预览并显式应用的前向升级；必须保留未知用户字段，对未来高版本显式失败。\n- **客户端所有权标记（Client ownership marker）**：Project Knowledge 在 Claude、Cursor、Gemini 或 AGENTS 文件中唯一允许自动更新的受控区块；标记外内容属于用户。\n",
+      "op": "upsert_generated_block"
+    }
+  ],
+  "proposal_id": "kp-a3e0d61bcc7f4b23",
+  "reason": "WP08 配置迁移与客户端兼容复核",
+  "requires_review": true,
+  "result_hash": "sha256:0653514e661b9e32fd93d4251a464346ef737eeac91408e97cb200e6ca906c8c",
+  "review_reason": "已核对 0.1.10 源码、回归测试与兼容性矩阵",
+  "reviewed_at": "2026-08-07T08:31:18+08:00",
+  "reviewer": "Codex",
+  "schema_version": 1,
+  "source_hashes": {
+    "src/project_knowledge/config.py": "sha256:7d0321ee6682ad910859e3f29c82e8d0fda63ce352883bf0e18f8aa21f7f5543",
+    "src/project_knowledge/schemas.py": "sha256:d78ed920fe7f46b8c386eb5029b6e43f09092939d05bce146ba8cc115ae7c1dd",
+    "src/project_knowledge/service.py": "sha256:e54741174c584aa32c4df5f941eba67f356cd4f5e73dc5cccb7549561b609348"
+  },
+  "status": "applied",
+  "target": "docs/knowledge/curated/glossary.md",
+  "target_hash": "sha256:aeb31e3f2bb57ee14342279ed580aad7e2483f909f6c31d01253d94f527cab7d"
+}

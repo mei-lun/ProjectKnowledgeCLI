@@ -3,50 +3,141 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": {
+    "change_range": {
+      "minLength": 1,
+      "type": "string"
+    },
     "confidence": {
       "maximum": 1,
       "minimum": 0,
       "type": "number"
     },
+    "conflict_reason": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "created_at": {
+      "minLength": 1,
+      "type": "string"
+    },
     "evidence": {
       "items": {
+        "minLength": 1,
         "type": "string"
       },
+      "minItems": 1,
       "type": "array"
     },
     "operations": {
       "items": {
-        "type": "string"
+        "additionalProperties": false,
+        "properties": {
+          "block_id": {
+            "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "deleted_sources": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "op": {
+            "enum": [
+              "upsert_generated_block",
+              "delete_generated_block",
+              "append_adr_draft"
+            ]
+          },
+          "supersedes": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "op"
+        ],
+        "type": "object"
       },
+      "minItems": 1,
       "type": "array"
     },
     "proposal_id": {
+      "pattern": "^kp-[0-9a-f]{16}$",
       "type": "string"
     },
     "reason": {
+      "minLength": 1,
       "type": "string"
     },
     "requires_review": {
       "type": "boolean"
     },
+    "result_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "review_reason": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "reviewed_at": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "reviewer": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "schema_version": {
+      "enum": [
+        1
+      ]
+    },
+    "source_hashes": {
+      "additionalProperties": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "type": "object"
+    },
     "status": {
       "enum": [
         "pending",
         "applied",
-        "rejected"
+        "rejected",
+        "conflicted"
       ]
     },
     "target": {
+      "pattern": "^(?!/)(?![A-Za-z]:[\\\\/])(?!.*(?:^|/)\\.\\.(?:/|$)).+",
+      "type": "string"
+    },
+    "target_hash": {
+      "pattern": "^(?:sha256:[0-9a-f]{64}|missing)$",
       "type": "string"
     }
   },
   "required": [
+    "schema_version",
     "proposal_id",
     "target",
+    "target_hash",
     "reason",
     "evidence",
+    "source_hashes",
     "confidence",
     "operations",
+    "created_at",
     "requires_review",
     "status"
   ],

@@ -1,0 +1,33 @@
+{
+  "change_range": "WP09-0.1.12",
+  "confidence": 0.95,
+  "created_at": "2026-08-07T08:55:48+08:00",
+  "evidence": [
+    "docs/project-knowledge-system-audit.md",
+    "src/project_knowledge/retrieval.py",
+    "tests/test_retrieval_wp06.py"
+  ],
+  "operations": [
+    {
+      "block_id": "retrieval-contract",
+      "content": "- 0.1.9 WP-07：watcher 必须使用每项目单协调锁、记录 PID/heartbeat/结构化日志；同步必须进行二次哈希校验，分支变化必须单独报告并补偿；hooks 只能写入工具拥有的标记区块。\n- 0.1.10 WP-08：配置升级必须先支持 dry-run，保留未知用户字段，并对高于当前版本的配置显式失败；Claude、Cursor、Gemini 适配必须幂等且卸载只删除工具拥有区块；补丁升级必须同步核心包、CHANGELOG 与 Codex 插件版本。\n- 0.1.11 WP-09：中文任务到标识符的扩展必须使用显式短语词元表，完整 snake_case 组合优先于宽泛分词；新增映射必须有召回回归和 Token 预算断言，不得降低冻结质量阈值。\n- 发布不变量：同一发布批次的核心包版本与 Codex 插件版本必须一致。\n- 0.1.12 WP-09：长知识文档必须按任务相关性截取并保持 Token 上限；不变量、回滚和验证行不能因固定首段裁剪被静默遗漏。\n",
+      "op": "upsert_generated_block"
+    }
+  ],
+  "proposal_id": "kp-7f9827361c039c3b",
+  "reason": "WP09 相关片段截取与 0.1.12 版本复核",
+  "requires_review": true,
+  "result_hash": "sha256:ac7ac08b5d193b3e69af61749af573ed45cb2b904512ebf3664e9f065ee97247",
+  "review_reason": "已核对长文档末尾不变量回归和上下文 Token 预算",
+  "reviewed_at": "2026-08-07T08:56:20+08:00",
+  "reviewer": "Codex",
+  "schema_version": 1,
+  "source_hashes": {
+    "docs/project-knowledge-system-audit.md": "sha256:fcce0a25e9a9bb3975a46539d3afb1eddb3c2566ced0af6b25947283159705dc",
+    "src/project_knowledge/retrieval.py": "sha256:d90c09291dd22ce9e1e2d592e46ffe2c94726481b32e2379015fd2543e2cb41e",
+    "tests/test_retrieval_wp06.py": "sha256:462856ce988466674b8fc69e795376ebd945ca9f22bee6388160be571abd9d85"
+  },
+  "status": "applied",
+  "target": "docs/knowledge/curated/conventions.md",
+  "target_hash": "sha256:297a2a398307d1f7a1cd43736e9e2b950c85a7d4a1daf19a02584b69f66e1aa4"
+}

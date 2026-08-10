@@ -1,0 +1,33 @@
+{
+  "change_range": "HEAD",
+  "confidence": 0.8,
+  "created_at": "2026-08-07T07:57:27+08:00",
+  "evidence": [
+    "src/project_knowledge/service.py",
+    "src/project_knowledge/util.py",
+    "tests/test_watch_wp07.py"
+  ],
+  "operations": [
+    {
+      "block_id": "proposal-capabilities",
+      "content": "- 0.1.9 WP-07 已补充单项目 watcher 协调、二次哈希稳定解析、分支对齐、崩溃健康状态、结构化日志和受控 Git hooks；跨进程 daemon 仍需后续接入。",
+      "op": "upsert_generated_block"
+    }
+  ],
+  "proposal_id": "kp-a517a64d9ce08299",
+  "reason": "0.1.9 WP-07：补充 watcher/竞态/Git 健康边界",
+  "requires_review": true,
+  "result_hash": "sha256:6f34c2d4dba77dc38598f796d55b2681760875e3e1d22f1c0bb0e6044cfc9271",
+  "review_reason": "WP-07 测试已通过并核对源码与审计需求",
+  "reviewed_at": "2026-08-07T07:57:42+08:00",
+  "reviewer": "codex",
+  "schema_version": 1,
+  "source_hashes": {
+    "src/project_knowledge/service.py": "sha256:26b020b1d4bcd41dcb5fddcab5f18846bb897e8fb4fd17730cbde8d31097e411",
+    "src/project_knowledge/util.py": "sha256:6dfc2137d898294c0f7a5336fa6fefda06a5c8a0c215db091a71dd58aaa35ad2",
+    "tests/test_watch_wp07.py": "sha256:c8bc7a76f81445aca8c257ede3bc10e1ca0f985a8bade697e049d5bd5f1d2f54"
+  },
+  "status": "applied",
+  "target": "docs/knowledge/curated/architecture.md",
+  "target_hash": "sha256:166619b12fbae36d9de04df86a7263d12056f250aeddc9c412329f82988101d6"
+}

@@ -87,17 +87,21 @@ class IntegrationTests(unittest.TestCase):
         self.assertIn("docs/knowledge/curated/architecture.md", service.status()["pending_files"])
         first_sync = service.sync(task_summary="document repository ownership")
         self.assertIn("docs/knowledge/curated/architecture.md", first_sync["changed_knowledge"])
+        self.assertIsNone(first_sync["semantic_update"])
         with KnowledgeStore(service.db_path, readonly=True) as store:
             curated = store.get_knowledge("curated.architecture")
             self.assertIsNotNone(curated)
             self.assertEqual(curated.status, "fresh")
+            self.assertEqual(curated.confidence, "verified")
 
         (self.root / "src" / "app.py").write_text(APP_V2, encoding="utf-8")
         pending_api = KnowledgeAPI(self.root)
         pending_record = pending_api.get("generated.module.app.py")
         self.assertNotIn("content", pending_record)
         self.assertIn("src/app.py", pending_record["withheld"])
-        service.sync(task_summary="change repository return shape")
+        source_sync = service.sync(task_summary="change repository return shape")
+        self.assertRegex(source_sync["semantic_update"], r"^sq-[0-9a-f]{16}$")
+        self.assertGreaterEqual(service.status()["semantic_update_queue"], 1)
         self.assertIn("Repository owns persistence", architecture.read_text(encoding="utf-8"))
         with KnowledgeStore(service.db_path, readonly=True) as store:
             curated = store.get_knowledge("curated.architecture")
@@ -160,6 +164,64 @@ class IntegrationTests(unittest.TestCase):
         self.assertIn("User rule", agents.read_text(encoding="utf-8"))
         self.assertFalse((self.root / ".project-kb" / "mcp.json").exists())
         self.assertTrue((self.root / "docs" / "knowledge" / "curated" / "architecture.md").exists())
+
+    def test_template_is_inferred_until_human_content_replaces_marker(self) -> None:
+        service = ProjectService(self.root)
+        service.initialize()
+        architecture = self.root / "docs" / "knowledge" / "curated" / "architecture.md"
+        self.assertIn("project-kb:template", architecture.read_text(encoding="utf-8"))
+        with KnowledgeStore(service.db_path, readonly=True) as store:
+            self.assertEqual(store.get_knowledge("curated.architecture").confidence, "inferred")
+
+        architecture.write_text("# 架构\n\n经人工确认的架构边界。\n", encoding="utf-8")
+        service.sync(task_summary="确认架构意图")
+        with KnowledgeStore(service.db_path, readonly=True) as store:
+            self.assertEqual(store.get_knowledge("curated.architecture").confidence, "verified")
+
+    def test_commit_alignment_is_distinct_from_content_freshness(self) -> None:
+        service = ProjectService(self.root)
+        service.initialize()
+        subprocess.run(["git", "-C", str(self.root), "config", "user.email", "tests@example.com"], check=True)
+        subprocess.run(["git", "-C", str(self.root), "config", "user.name", "Project KB Tests"], check=True)
+        subprocess.run(["git", "-C", str(self.root), "add", "."], check=True)
+        subprocess.run(["git", "-C", str(self.root), "commit", "-qm", "baseline"], check=True)
+
+        before = service.status()
+        self.assertTrue(before["content_fresh"])
+        self.assertFalse(before["commit_aligned"])
+        self.assertFalse(service.check()[1])
+
+        result = service.sync(task_summary="对齐提交元数据")
+        self.assertEqual(result["changed_files"], [])
+        self.assertTrue(result["commit_reconciled"])
+        after = service.status()
+        self.assertTrue(after["content_fresh"])
+        self.assertTrue(after["commit_aligned"])
+        self.assertTrue(service.check()[1])
+
+    def test_large_module_reports_symbol_and_relation_truncation(self) -> None:
+        functions = "\n".join(f"def function_{number}():\n    return helper()" for number in range(305))
+        (self.root / "src" / "large.py").write_text("def helper():\n    return 1\n\n" + functions, encoding="utf-8")
+        ProjectService(self.root).initialize()
+        module = self.root / "docs" / "knowledge" / "generated" / "modules" / "large.py.md"
+        content = module.read_text(encoding="utf-8")
+        self.assertIn("符号内容已截断", content)
+        self.assertIn("关系内容已截断", content)
+
+    def test_doctor_and_check_report_unwired_configuration(self) -> None:
+        from project_knowledge.config import ProjectConfig
+
+        ProjectConfig(
+            project_name="sample", embeddings="local", local_only=False, telemetry=True
+        ).write(self.root)
+        service = ProjectService(self.root)
+        doctor = service.doctor()
+        fields = {item["field"] for item in doctor["configuration_warnings"]}
+        self.assertIn("retrieval.embeddings", fields)
+        self.assertIn("privacy.local_only", fields)
+        service.initialize()
+        status, _ = service.check()
+        self.assertEqual(status["configuration_warnings"], doctor["configuration_warnings"])
 
 
 if __name__ == "__main__":

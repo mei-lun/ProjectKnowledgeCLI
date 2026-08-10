@@ -22,10 +22,14 @@ index:
     - target/**
     - vendor/**
     - docs/knowledge/generated/**
+    - docs/knowledge/drafts/**
+    - evaluation/reports/**
+    - evaluation/baselines/**
 
 knowledge:
   root: docs/knowledge
   generated: docs/knowledge/generated
+  drafts: docs/knowledge/drafts
   curated: docs/knowledge/curated
   decisions: docs/knowledge/decisions
 
@@ -43,3 +47,20 @@ retrieval:
 privacy:
   local_only: true
   telemetry: false
+
+provider:
+  id: disabled
+  model: ""
+  endpoint: ""
+  enabled: false
+  allow_network: false
+  authorization: ""
+  api_key_env: ""
+  timeout_seconds: 30
+  max_retries: 2
+  cache: true
+  checkpoint: true
+  max_files: 20
+  max_tokens: 12000
+  prompt_version: feature-guide-v1
+  output_schema_version: semantic-draft-v1

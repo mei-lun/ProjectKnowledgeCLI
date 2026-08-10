@@ -1,0 +1,31 @@
+{
+  "change_range": "WP09-0.1.12",
+  "confidence": 0.95,
+  "created_at": "2026-08-07T08:55:57+08:00",
+  "evidence": [
+    "src/project_knowledge/retrieval.py",
+    "tests/test_retrieval_wp06.py"
+  ],
+  "operations": [
+    {
+      "block_id": "retrieval-guide",
+      "content": "功能开发上下文除返回代码符号、影响关系和验证命令外，涉及 watcher 或 Git 分支变更时必须提示读取 watcher_health、branch_aligned、二次哈希结果和结构化日志；跨进程 daemon 尚未实现的结论必须标为 unknown。\n\n涉及配置或客户端集成的功能开发必须先检查 config-v1 Schema 与 migrate dry-run 结果，并把用户扩展字段、客户端所有权标记和知识库保留作为验收不变量。Windows 原生 watcher/hooks 尚未实机复验时必须列入 unknowns。\n\n中文功能描述可以通过显式、可审计的短语词元映射召回英文源码标识符；返回的 reference implementation 和 extension point 仍必须指向真实符号，映射本身不能作为业务事实。\n\n明确不变量：未知用户配置字段在迁移和校验时不能被静默丢弃。\n长文档知识片段按任务相关行和邻近上下文截取，确保开发指导中的不变量、回滚和验证步骤即使位于文档末尾也能进入有限上下文。\n",
+      "op": "upsert_generated_block"
+    }
+  ],
+  "proposal_id": "kp-b9088241b986ed04",
+  "reason": "WP09 相关片段截取与 0.1.12 版本复核",
+  "requires_review": true,
+  "result_hash": "sha256:60c46216e9738b6931bc29c36f60558d88ce6624880ec6fc06667c4cd2416706",
+  "review_reason": "已核对长文档末尾不变量回归和上下文 Token 预算",
+  "reviewed_at": "2026-08-07T08:56:27+08:00",
+  "reviewer": "Codex",
+  "schema_version": 1,
+  "source_hashes": {
+    "src/project_knowledge/retrieval.py": "sha256:d90c09291dd22ce9e1e2d592e46ffe2c94726481b32e2379015fd2543e2cb41e",
+    "tests/test_retrieval_wp06.py": "sha256:462856ce988466674b8fc69e795376ebd945ca9f22bee6388160be571abd9d85"
+  },
+  "status": "applied",
+  "target": "docs/knowledge/curated/feature-guide-generation.md",
+  "target_hash": "sha256:4b03ab836ce90613cedcc783668e9df608858ca518c12486777114e798fd4fd1"
+}

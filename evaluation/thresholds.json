@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "frozen_for_version": "0.1.8",
+  "dataset": "questions.jsonl",
+  "minimum_samples": 40,
+  "required_strategies": [
+    "hybrid",
+    "grep_read",
+    "code",
+    "markdown",
+    "codegraph"
+  ],
+  "allowed_unavailable_strategies": [
+    "codegraph"
+  ],
+  "minimum": {
+    "generated_source_coverage": 0.88
+  },
+  "maximum": {},
+  "strategies": {
+    "hybrid": {
+      "minimum": {
+        "file_recall": 0.94,
+        "symbol_recall": 0.8,
+        "call_path_recall": 1.0,
+        "extension_point_recall": 0.5,
+        "invariant_recall": 0.14,
+        "design_reason_recall": 1.0,
+        "success_rate": 0.4
+      },
+      "maximum": {
+        "average_context_tokens": 2000,
+        "average_tool_calls": 4.0
+      }
+    },
+    "code": {
+      "minimum": {
+        "file_recall": 0.92,
+        "symbol_recall": 0.8,
+        "call_path_recall": 1.0,
+        "success_rate": 0.4
+      },
+      "maximum": {
+        "average_context_tokens": 700,
+        "average_tool_calls": 3.0
+      }
+    },
+    "grep_read": {
+      "minimum": {
+        "file_recall": 0.67,
+        "file_precision": 0.29
+      },
+      "maximum": {
+        "average_context_tokens": 7000,
+        "average_tool_calls": 8.0
+      }
+    },
+    "markdown": {
+      "minimum": {
+        "file_recall": 0.9,
+        "file_precision": 0.085,
+        "invariant_recall": 0.4,
+        "design_reason_recall": 1.0
+      },
+      "maximum": {
+        "average_context_tokens": 16000,
+        "average_tool_calls": 5.0
+      }
+    }
+  },
+  "allowed_regression": {
+    "file_recall": 0.02,
+    "file_precision": 0.02,
+    "symbol_recall": 0.02,
+    "symbol_precision": 0.02,
+    "call_path_recall": 0.02,
+    "extension_point_recall": 0.02,
+    "invariant_recall": 0.02,
+    "design_reason_recall": 0.02,
+    "success_rate": 0.02,
+    "generated_source_coverage": 0.01,
+    "average_context_tokens": 500,
+    "average_tool_calls": 0.5
+  }
+}

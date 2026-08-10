@@ -1,0 +1,35 @@
+{
+  "change_range": "HEAD",
+  "confidence": 0.95,
+  "created_at": "2026-08-07T11:02:17+08:00",
+  "evidence": [
+    "src/project_knowledge/evaluate.py",
+    "src/project_knowledge/knowledge.py",
+    "tests/test_evaluate.py",
+    "tests/test_wp02_knowledge.py"
+  ],
+  "operations": [
+    {
+      "block_id": "retrieval-guide",
+      "content": "功能开发上下文除返回代码符号、影响关系和验证命令外，涉及 watcher 或 Git 分支变更时必须提示读取 watcher_health、branch_aligned、二次哈希结果和结构化日志；跨进程 daemon 尚未实现的结论必须标为 unknown。\n\n涉及配置或客户端集成的功能开发必须先检查 config-v1 Schema 与 migrate dry-run 结果，并把用户扩展字段、客户端所有权标记和知识库保留作为验收不变量；未知用户配置字段在迁移和校验时不能被静默丢弃。Windows 原生 watcher/hooks 尚未实机复验时必须列入 unknowns。\n\n中文功能描述可以通过显式、可审计的短语词元映射召回英文源码标识符；返回的 reference implementation 和 extension point 仍必须指向真实符号，映射本身不能作为业务事实。\n长文档知识片段按任务相关行和邻近上下文截取，确保开发指导中的不变量、回滚和验证步骤即使位于文档末尾也能进入有限上下文。\n安全不变量、回滚和验证语句在有限上下文中获得明确优先级；该优先级只影响片段选择，不改变来源可信度或自动审核状态。\n涉及 Lua/Skynet 功能开发时，context 可以引用生成的入口证据页和只读范围报告；静态启动/派发来源必须带路径与行号，动态服务发现、协议运行时名称和启动命令必须保留在 unknowns。\n<!-- project-kb:source file=\"src/project_knowledge/engine.py\" -->\n<!-- project-kb:source file=\"src/project_knowledge/real_project.py\" -->\n<!-- project-kb:source file=\"tests/test_wp02_knowledge.py\" -->\n当项目没有 Lua/Skynet 入口时，入口知识页必须明确显示未检测到，并引用解析器/生成器实现作为来源；不得让空页降低 generated source coverage。Markdown 仅在源码模块相对相关性达到 0.8 时保留该模块页，避免宽泛来源降低 precision。\n<!-- project-kb:source file=\"src/project_knowledge/knowledge.py\" -->\n<!-- project-kb:source file=\"src/project_knowledge/evaluate.py\" -->\n",
+      "op": "upsert_generated_block"
+    }
+  ],
+  "proposal_id": "kp-ad695e139e10c6ce",
+  "reason": "复核 0.1.15 Markdown 0.8 相对相关性门最终实现。",
+  "requires_review": true,
+  "result_hash": "sha256:ed59b8c3be27748dc6768f951ba91be39e6f006304da65fec1da2942c3e99900",
+  "review_reason": "确认不扩大三页预算、不降低阈值，并以 0.8 相对相关性门平衡 recall 与 precision。",
+  "reviewed_at": "2026-08-07T11:02:17+08:00",
+  "reviewer": "codex",
+  "schema_version": 1,
+  "source_hashes": {
+    "src/project_knowledge/evaluate.py": "sha256:f0a8b683ab99886527d2b9a7d0c2f435f2eb9cdd7cd865efd792d0aec0ffb36d",
+    "src/project_knowledge/knowledge.py": "sha256:ab16f6c9ac5cc167ba713a4b4682301d865be3565646d9296da0f0ea6c54cc6d",
+    "tests/test_evaluate.py": "sha256:47452455504a9596c6b0b6f8dc0f4a95643f502a127e0f853225ce083ff24033",
+    "tests/test_wp02_knowledge.py": "sha256:1c3d9a72ffc4c3a03f13280b41a4687c6147278da8cfc1398113be115a43ef5c"
+  },
+  "status": "applied",
+  "target": "docs/knowledge/curated/feature-guide-generation.md",
+  "target_hash": "sha256:a0d97a252c831d15451e85c14d8f1beb5f318a59b7c14663a7797fc96bebbb3d"
+}

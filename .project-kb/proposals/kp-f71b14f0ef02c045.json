@@ -1,0 +1,31 @@
+{
+  "change_range": "WP09",
+  "confidence": 0.95,
+  "created_at": "2026-08-07T08:42:51+08:00",
+  "evidence": [
+    "src/project_knowledge/retrieval.py",
+    "tests/test_retrieval_wp06.py"
+  ],
+  "operations": [
+    {
+      "block_id": "retrieval-guide",
+      "content": "功能开发上下文除返回代码符号、影响关系和验证命令外，涉及 watcher 或 Git 分支变更时必须提示读取 watcher_health、branch_aligned、二次哈希结果和结构化日志；跨进程 daemon 尚未实现的结论必须标为 unknown。\n\n涉及配置或客户端集成的功能开发必须先检查 config-v1 Schema 与 migrate dry-run 结果，并把用户扩展字段、客户端所有权标记和知识库保留作为验收不变量。Windows 原生 watcher/hooks 尚未实机复验时必须列入 unknowns。\n\n中文功能描述可以通过显式、可审计的短语词元映射召回英文源码标识符；返回的 reference implementation 和 extension point 仍必须指向真实符号，映射本身不能作为业务事实。\n",
+      "op": "upsert_generated_block"
+    }
+  ],
+  "proposal_id": "kp-f71b14f0ef02c045",
+  "reason": "WP09 中文标识符召回复核",
+  "requires_review": true,
+  "result_hash": "sha256:8c8b27bebb3416461e25f932142b2b50e8bc42492eaa96498f7d9a125a5beaff",
+  "review_reason": "已核对 0.1.11 检索实现、失败回归和预算约束",
+  "reviewed_at": "2026-08-07T08:43:25+08:00",
+  "reviewer": "Codex",
+  "schema_version": 1,
+  "source_hashes": {
+    "src/project_knowledge/retrieval.py": "sha256:8a4fd632d3e9c1fc56a9b22b0f758d4ab66c251e1687f3524d77467bf588bae4",
+    "tests/test_retrieval_wp06.py": "sha256:2537941f0503231d64d91bfd7d7ca9dadde25620a7cba65e383585386bc758ad"
+  },
+  "status": "applied",
+  "target": "docs/knowledge/curated/feature-guide-generation.md",
+  "target_hash": "sha256:db62bd96797ad537a39e7294aebad2733a57e2d6e6fe31fe46b73c93d22a6b85"
+}

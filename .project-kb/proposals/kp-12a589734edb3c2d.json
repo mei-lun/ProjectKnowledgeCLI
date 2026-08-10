@@ -1,0 +1,30 @@
+{
+  "change_range": "HEAD",
+  "confidence": 0.8,
+  "created_at": "2026-08-07T07:06:16+08:00",
+  "evidence": [
+    "src/project_knowledge/engine.py",
+    "tests/test_engine.py"
+  ],
+  "operations": [
+    {
+      "content": "# ADR-0002：CodeGraph Adapter 边界与本地替代方案\n\n- 状态：已接受\n- 日期：2026-08-07\n- 版本：0.1.8\n- 决策者：项目维护者\n\n## 背景\n\n审计要求 CodeGraph 与内置索引引擎具有相同公共契约，同时禁止在 CodeGraph 不可用时用 builtin 结果冒充。当前仓库没有可复现、可锁定版本的真实 CodeGraph 服务，也没有 Lua/Skynet 运行时图的稳定外部接口。\n\n## 决策\n\n1. CodeIndexEngine 的公共契约固定为 initialize、sync、search_symbols、get_source、trace、impact、affected_tests 和 status。\n2. 0.1.8 起由 BuiltinCodeIndexEngine 作为默认、离线、可复现的正式替代实现；它提供 Python AST、Lua/Skynet 证据、SQL、配置和有界图查询，并在 status 中公开精确语言、保守语言、能力与限制。\n3. engine: codegraph 不回退到 builtin，当前继续返回 adapter_unavailable/明确错误。只有在接入可验证的 CodeGraph 服务、版本锁定、同契约适配器测试和失败降级报告后，才允许实现该选项。\n4. 业务开发指导必须把静态结构事实与运行时语义分开：动态分派、反射、依赖注入、Lua metatable、协议运行时名称必须标为待验证，不得生成确定性结论。\n\n## 后续接入门槛\n\n- 提供 CodeGraph 服务版本、连接方式、项目隔离和离线失败行为；\n- 为 builtin 与 CodeGraph 编写同一组契约测试；\n- 用 Lua/Skynet 代表性工程完成随机边精度、5 个主入口和影响分析对照；\n- 在 doctor/status 中报告真实 Adapter 版本、能力和不可用原因；\n- 通过 evaluation/thresholds.json 的冻结门槛，且不得降低已有 builtin 基线。\n\n## 影响\n\n该决策使当前系统可在无外部服务时稳定运行，同时明确不能把静态索引当作完整运行时知识。CodeGraph 后续属于可插拔增强，不影响现有项目知识库格式和 CLI。\n",
+      "op": "append_adr_draft"
+    }
+  ],
+  "proposal_id": "kp-12a589734edb3c2d",
+  "reason": "WP-01：记录 CodeGraph Adapter 的正式替代边界与后续接入门槛",
+  "requires_review": true,
+  "result_hash": "sha256:e7181857966a72a5e959085e8941c20abac94b9678325bd961af76fbf30976fd",
+  "review_reason": "审计确认：Builtin 作为本地替代，CodeGraph 保持显式不可用",
+  "reviewed_at": "2026-08-07T07:06:54+08:00",
+  "reviewer": "codex",
+  "schema_version": 1,
+  "source_hashes": {
+    "src/project_knowledge/engine.py": "sha256:eaf47eed8d38a594b706014ac8fb3b9a024713e71442c170cabf011768d8da4a",
+    "tests/test_engine.py": "sha256:6dc9fc50a5f9daae30ca9c9a39c6c56a56f40273a12408f72ba5941f79ace22f"
+  },
+  "status": "applied",
+  "target": "docs/knowledge/decisions/0002-codegraph-adapter-boundary.md",
+  "target_hash": "missing"
+}

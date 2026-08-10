@@ -1,0 +1,31 @@
+{
+  "change_range": "WP09-0.1.13",
+  "confidence": 0.95,
+  "created_at": "2026-08-07T09:02:01+08:00",
+  "evidence": [
+    "src/project_knowledge/retrieval.py",
+    "tests/test_retrieval_wp06.py"
+  ],
+  "operations": [
+    {
+      "block_id": "retrieval-guide",
+      "content": "功能开发上下文除返回代码符号、影响关系和验证命令外，涉及 watcher 或 Git 分支变更时必须提示读取 watcher_health、branch_aligned、二次哈希结果和结构化日志；跨进程 daemon 尚未实现的结论必须标为 unknown。\n\n涉及配置或客户端集成的功能开发必须先检查 config-v1 Schema 与 migrate dry-run 结果，并把用户扩展字段、客户端所有权标记和知识库保留作为验收不变量。Windows 原生 watcher/hooks 尚未实机复验时必须列入 unknowns。\n\n中文功能描述可以通过显式、可审计的短语词元映射召回英文源码标识符；返回的 reference implementation 和 extension point 仍必须指向真实符号，映射本身不能作为业务事实。\n\n明确不变量：未知用户配置字段在迁移和校验时不能被静默丢弃。\n长文档知识片段按任务相关行和邻近上下文截取，确保开发指导中的不变量、回滚和验证步骤即使位于文档末尾也能进入有限上下文。\n安全不变量、回滚和验证语句在有限上下文中获得明确优先级；该优先级只影响片段选择，不改变来源可信度或自动审核状态。\n",
+      "op": "upsert_generated_block"
+    }
+  ],
+  "proposal_id": "kp-e3452f76894300c2",
+  "reason": "WP09 安全约束片段优先级复核",
+  "requires_review": true,
+  "result_hash": "sha256:78b34b19e2281f1a87c3247cc36b77461a99e1337942a2262f0a13a2757d59b6",
+  "review_reason": "已核对安全约束优先级实现、预算与回归",
+  "reviewed_at": "2026-08-07T09:02:36+08:00",
+  "reviewer": "Codex",
+  "schema_version": 1,
+  "source_hashes": {
+    "src/project_knowledge/retrieval.py": "sha256:b1d2cecc7605d68528fe5c00c064b6009b49067e8c0265c648f3c7d59d85af04",
+    "tests/test_retrieval_wp06.py": "sha256:462856ce988466674b8fc69e795376ebd945ca9f22bee6388160be571abd9d85"
+  },
+  "status": "applied",
+  "target": "docs/knowledge/curated/feature-guide-generation.md",
+  "target_hash": "sha256:60c46216e9738b6931bc29c36f60558d88ce6624880ec6fc06667c4cd2416706"
+}

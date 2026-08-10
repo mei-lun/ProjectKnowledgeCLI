@@ -1,6 +1,74 @@
 from __future__ import annotations
 
+import re
 from typing import Any
+
+
+class SchemaValidationError(ValueError):
+    """Raised when a runtime payload violates its published JSON Schema subset."""
+
+
+def validate_instance(value: Any, schema: dict[str, Any], path: str = "$") -> None:
+    """Validate the JSON Schema features used by Project Knowledge System payloads."""
+    if "enum" in schema and value not in schema["enum"]:
+        raise SchemaValidationError(f"{path}: {value!r} 不在允许值 {schema['enum']!r} 中")
+
+    expected = schema.get("type")
+    if expected is not None:
+        choices = expected if isinstance(expected, list) else [expected]
+        if not any(_matches_type(value, choice) for choice in choices):
+            raise SchemaValidationError(f"{path}: 期望类型 {choices!r}，实际为 {type(value).__name__}")
+
+    if isinstance(value, dict):
+        required = schema.get("required", [])
+        for key in required:
+            if key not in value:
+                raise SchemaValidationError(f"{path}: 缺少必填字段 {key!r}")
+        properties = schema.get("properties", {})
+        additional = schema.get("additionalProperties", True)
+        for key, item in value.items():
+            child_path = f"{path}.{key}"
+            if key in properties:
+                validate_instance(item, properties[key], child_path)
+            elif additional is False:
+                raise SchemaValidationError(f"{path}: 不允许字段 {key!r}")
+            elif isinstance(additional, dict):
+                validate_instance(item, additional, child_path)
+
+    if isinstance(value, list):
+        if len(value) < schema.get("minItems", 0):
+            raise SchemaValidationError(f"{path}: 数组元素少于 {schema['minItems']} 个")
+        if "maxItems" in schema and len(value) > schema["maxItems"]:
+            raise SchemaValidationError(f"{path}: 数组元素多于 {schema['maxItems']} 个")
+        if isinstance(schema.get("items"), dict):
+            for index, item in enumerate(value):
+                validate_instance(item, schema["items"], f"{path}[{index}]")
+
+    if isinstance(value, str):
+        if len(value) < schema.get("minLength", 0):
+            raise SchemaValidationError(f"{path}: 字符串长度小于 {schema['minLength']}")
+        pattern = schema.get("pattern")
+        if pattern and re.search(pattern, value) is None:
+            raise SchemaValidationError(f"{path}: 不匹配模式 {pattern!r}")
+
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        if "minimum" in schema and value < schema["minimum"]:
+            raise SchemaValidationError(f"{path}: 小于最小值 {schema['minimum']}")
+        if "maximum" in schema and value > schema["maximum"]:
+            raise SchemaValidationError(f"{path}: 大于最大值 {schema['maximum']}")
+
+
+def _matches_type(value: Any, expected: str) -> bool:
+    matches = {
+        "null": value is None,
+        "object": isinstance(value, dict),
+        "array": isinstance(value, list),
+        "string": isinstance(value, str),
+        "boolean": isinstance(value, bool),
+        "integer": isinstance(value, int) and not isinstance(value, bool),
+        "number": isinstance(value, (int, float)) and not isinstance(value, bool),
+    }
+    return matches.get(expected, False)
 
 
 SOURCE_REFERENCE_SCHEMA: dict[str, Any] = {
@@ -28,7 +96,7 @@ KNOWLEDGE_RECORD_SCHEMA: dict[str, Any] = {
         "kind": {"type": "string", "minLength": 1},
         "title": {"type": "string", "minLength": 1},
         "path": {"type": "string", "minLength": 1},
-        "ownership": {"enum": ["generated", "curated", "decision"]},
+        "ownership": {"enum": ["generated", "draft", "curated", "decision"]},
         "confidence": {"enum": ["verified", "generated", "inferred"]},
         "status": {"enum": ["fresh", "potentially_stale", "stale", "conflicted"]},
         "sources": {"type": "array", "items": SOURCE_REFERENCE_SCHEMA},
@@ -63,29 +131,262 @@ CHANGE_SET_SCHEMA: dict[str, Any] = {
     "additionalProperties": False,
 }
 
+RELATIVE_PATH_PATTERN = r"^(?!/)(?![A-Za-z]:[\\/])(?!.*(?:^|/)\.\.(?:/|$)).+"
+
+PATCH_OPERATION_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "required": ["op"],
+    "properties": {
+        "op": {"enum": ["upsert_generated_block", "delete_generated_block", "append_adr_draft"]},
+        "content": {"type": "string"},
+        "block_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"},
+        "supersedes": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "deleted_sources": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    },
+    "additionalProperties": False,
+}
+
 PROPOSAL_SCHEMA: dict[str, Any] = {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://project-kb.local/schema/proposal-v1.json",
     "type": "object",
-    "required": ["proposal_id", "target", "reason", "evidence", "confidence", "operations", "requires_review", "status"],
+    "required": [
+        "schema_version", "proposal_id", "target", "target_hash", "reason", "evidence", "source_hashes",
+        "confidence", "operations", "created_at", "requires_review", "status",
+    ],
     "properties": {
-        "proposal_id": {"type": "string"},
-        "target": {"type": "string"},
-        "reason": {"type": "string"},
-        "evidence": {"type": "array", "items": {"type": "string"}},
+        "schema_version": {"enum": [1]},
+        "proposal_id": {"type": "string", "pattern": "^kp-[0-9a-f]{16}$"},
+        "target": {"type": "string", "pattern": RELATIVE_PATH_PATTERN},
+        "target_hash": {"type": "string", "pattern": "^(?:sha256:[0-9a-f]{64}|missing)$"},
+        "reason": {"type": "string", "minLength": 1},
+        "evidence": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "source_hashes": {
+            "type": "object",
+            "additionalProperties": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        },
         "confidence": {"type": "number", "minimum": 0, "maximum": 1},
-        "operations": {"type": "array", "items": {"type": "string"}},
+        "operations": {"type": "array", "minItems": 1, "items": PATCH_OPERATION_SCHEMA},
+        "created_at": {"type": "string", "minLength": 1},
+        "change_range": {"type": "string", "minLength": 1},
         "requires_review": {"type": "boolean"},
-        "status": {"enum": ["pending", "applied", "rejected"]},
+        "status": {"enum": ["pending", "applied", "rejected", "conflicted"]},
+        "reviewer": {"type": "string", "minLength": 1},
+        "reviewed_at": {"type": "string", "minLength": 1},
+        "review_reason": {"type": "string", "minLength": 1},
+        "result_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "conflict_reason": {"type": "string", "minLength": 1},
+    },
+    "additionalProperties": False,
+}
+
+SECRET_REDACTION_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "required": ["kind", "line", "replacement"],
+    "properties": {
+        "kind": {"type": "string", "minLength": 1},
+        "line": {"type": "integer", "minimum": 1},
+        "replacement": {"type": "string", "pattern": r"^\[REDACTED:[a-z0-9_-]+\]$"},
+    },
+    "additionalProperties": False,
+}
+
+OMITTED_EVIDENCE_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "required": ["path", "reason"],
+    "properties": {
+        "path": {"type": "string", "pattern": RELATIVE_PATH_PATTERN},
+        "reason": {"enum": ["high_risk_path", "file_limit", "token_limit", "unreadable"]},
+    },
+    "additionalProperties": False,
+}
+
+EVIDENCE_ITEM_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "required": ["kind", "path", "content", "content_hash", "tokens", "redactions"],
+    "properties": {
+        "kind": {"enum": ["file", "symbol", "knowledge", "config", "relation"]},
+        "path": {"type": "string", "pattern": RELATIVE_PATH_PATTERN},
+        "content": {"type": "string"},
+        "content_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "tokens": {"type": "integer", "minimum": 0},
+        "redactions": {"type": "array", "items": SECRET_REDACTION_SCHEMA},
+        "symbol_id": {"type": "string", "minLength": 1},
+        "start_line": {"type": "integer", "minimum": 1},
+        "end_line": {"type": "integer", "minimum": 1},
+    },
+    "additionalProperties": False,
+}
+
+EVIDENCE_PACK_SCHEMA: dict[str, Any] = {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://project-kb.local/schema/evidence-pack-v1.json",
+    "type": "object",
+    "required": [
+        "schema_version", "task", "items", "omitted", "files_considered",
+        "files_included", "estimated_tokens", "pack_hash",
+    ],
+    "properties": {
+        "schema_version": {"enum": [1]},
+        "task": {"type": "string", "minLength": 1},
+        "items": {"type": "array", "items": EVIDENCE_ITEM_SCHEMA},
+        "omitted": {"type": "array", "items": OMITTED_EVIDENCE_SCHEMA},
+        "files_considered": {"type": "integer", "minimum": 0},
+        "files_included": {"type": "integer", "minimum": 0},
+        "estimated_tokens": {"type": "integer", "minimum": 0},
+        "pack_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "source_commit": {"type": ["string", "null"]},
     },
     "additionalProperties": False,
 }
 
 
+SEMANTIC_SOURCE_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "required": ["type", "path", "line", "hash", "authority"],
+    "properties": {
+        "type": {"enum": ["file", "symbol"]},
+        "path": {"type": "string", "pattern": RELATIVE_PATH_PATTERN},
+        "id": {"type": "string", "minLength": 1},
+        "line": {"type": "integer", "minimum": 1},
+        "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "authority": {"enum": ["source", "candidate"]},
+    },
+    "additionalProperties": False,
+}
+
+FEATURE_STATEMENT_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "required": ["text", "sources"],
+    "properties": {
+        "text": {"type": "string", "minLength": 1},
+        "sources": {"type": "array", "minItems": 1, "items": SEMANTIC_SOURCE_SCHEMA},
+    },
+    "additionalProperties": False,
+}
+
+WORKFLOW_STEP_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "required": ["order", "text", "sources"],
+    "properties": {
+        "order": {"type": "integer", "minimum": 1},
+        "text": {"type": "string", "minLength": 1},
+        "sources": {"type": "array", "minItems": 1, "items": SEMANTIC_SOURCE_SCHEMA},
+    },
+    "additionalProperties": False,
+}
+
+WORKFLOW_SCHEMA: dict[str, Any] = {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://project-kb.local/schema/workflow-v1.json",
+    "type": "object",
+    "required": ["title", "steps"],
+    "properties": {
+        "title": {"type": "string", "minLength": 1},
+        "steps": {"type": "array", "minItems": 1, "items": WORKFLOW_STEP_SCHEMA},
+    },
+    "additionalProperties": False,
+}
+
+RECIPE_SCHEMA: dict[str, Any] = {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://project-kb.local/schema/recipe-v1.json",
+    "type": "object",
+    "required": ["title", "goal", "prerequisites", "steps", "verification", "rollback"],
+    "properties": {
+        "title": {"type": "string", "minLength": 1},
+        "goal": {"type": "string", "minLength": 1},
+        "prerequisites": {"type": "array", "items": FEATURE_STATEMENT_SCHEMA},
+        "steps": {"type": "array", "minItems": 1, "items": FEATURE_STATEMENT_SCHEMA},
+        "verification": {"type": "array", "minItems": 1, "items": FEATURE_STATEMENT_SCHEMA},
+        "rollback": {"type": "array", "items": FEATURE_STATEMENT_SCHEMA},
+    },
+    "additionalProperties": False,
+}
+
+UNKNOWN_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "required": ["text", "reason", "needed_evidence"],
+    "properties": {
+        "text": {"type": "string", "minLength": 1},
+        "reason": {"type": "string", "minLength": 1},
+        "needed_evidence": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    },
+    "additionalProperties": False,
+}
+
+FEATURE_GUIDE_DRAFT_SCHEMA: dict[str, Any] = {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://project-kb.local/schema/feature-guide-draft-v1.json",
+    "type": "object",
+    "required": [
+        "schema_version", "feature_id", "title", "domain", "lifecycle", "summary",
+        "responsibilities", "entrypoints", "workflow", "dependencies", "data_and_state",
+        "invariants", "extension_points", "recipe", "tests", "pitfalls", "unknowns",
+    ],
+    "properties": {
+        "schema_version": {"enum": [1]},
+        "feature_id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+        "title": {"type": "string", "minLength": 1},
+        "domain": {"type": "string", "minLength": 1},
+        "lifecycle": {"enum": ["draft"]},
+        "summary": FEATURE_STATEMENT_SCHEMA,
+        "responsibilities": {"type": "array", "minItems": 1, "items": FEATURE_STATEMENT_SCHEMA},
+        "entrypoints": {"type": "array", "minItems": 1, "items": FEATURE_STATEMENT_SCHEMA},
+        "workflow": WORKFLOW_SCHEMA,
+        "dependencies": {"type": "array", "items": FEATURE_STATEMENT_SCHEMA},
+        "data_and_state": {"type": "array", "items": FEATURE_STATEMENT_SCHEMA},
+        "invariants": {"type": "array", "items": FEATURE_STATEMENT_SCHEMA},
+        "extension_points": {"type": "array", "minItems": 1, "items": FEATURE_STATEMENT_SCHEMA},
+        "recipe": RECIPE_SCHEMA,
+        "tests": {"type": "array", "minItems": 1, "items": FEATURE_STATEMENT_SCHEMA},
+        "pitfalls": {"type": "array", "items": FEATURE_STATEMENT_SCHEMA},
+        "unknowns": {"type": "array", "items": UNKNOWN_SCHEMA},
+    },
+    "additionalProperties": False,
+}
+
+
+CONFIG_SCHEMA: dict[str, Any] = {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://project-kb.local/schema/config-v1.json",
+    "type": "object",
+    "required": ["version"],
+    "properties": {
+        "version": {"enum": [0, 1]},
+        "project": {
+            "type": "object",
+            "properties": {"name": {"type": "string", "minLength": 1}},
+            "additionalProperties": True,
+        },
+        "index": {
+            "type": "object",
+            "properties": {
+                "engine": {"enum": ["builtin", "codegraph"]},
+                "include": {"type": "array", "items": {"type": "string"}},
+                "exclude": {"type": "array", "items": {"type": "string"}},
+            },
+            "additionalProperties": True,
+        },
+        "knowledge": {"type": "object", "additionalProperties": True},
+        "updates": {"type": "object", "additionalProperties": True},
+        "retrieval": {"type": "object", "additionalProperties": True},
+        "privacy": {"type": "object", "additionalProperties": True},
+        "provider": {"type": "object", "additionalProperties": True},
+    },
+    "additionalProperties": True,
+}
+
+
 def all_schemas() -> dict[str, dict[str, Any]]:
     return {
+        "config-v1.json": CONFIG_SCHEMA,
         "source-reference-v1.json": SOURCE_REFERENCE_SCHEMA,
         "knowledge-record-v1.json": KNOWLEDGE_RECORD_SCHEMA,
         "change-set-v1.json": CHANGE_SET_SCHEMA,
         "proposal-v1.json": PROPOSAL_SCHEMA,
+        "evidence-pack-v1.json": EVIDENCE_PACK_SCHEMA,
+        "workflow-v1.json": WORKFLOW_SCHEMA,
+        "recipe-v1.json": RECIPE_SCHEMA,
+        "feature-guide-draft-v1.json": FEATURE_GUIDE_DRAFT_SCHEMA,
     }

@@ -19,6 +19,17 @@ class ConfigTests(unittest.TestCase):
             self.assertEqual(actual.include, ["src/**", "config/**"])
             self.assertEqual(actual.debounce_ms, 250)
             self.assertTrue(actual.local_only)
+            self.assertEqual(actual.provider_id, "disabled")
+            self.assertFalse(actual.provider_enabled)
+            self.assertFalse(actual.provider_allow_network)
+            self.assertEqual(actual.provider_max_tokens, 12000)
+            self.assertEqual(actual.drafts_root, "docs/knowledge/drafts")
+
+    def test_default_excludes_keep_evaluation_outputs_out_of_the_test_index(self) -> None:
+        config = ProjectConfig()
+        self.assertIn("evaluation/reports/**", config.exclude)
+        self.assertIn("evaluation/baselines/**", config.exclude)
+        self.assertIn("docs/knowledge/drafts/**", config.exclude)
 
     def test_marker_update_preserves_unowned_content(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
@@ -35,7 +46,15 @@ class ConfigTests(unittest.TestCase):
         self.assertLessEqual(approx_tokens(trimmed), 90)
         self.assertIn("truncated", trimmed)
 
+    def test_capability_warnings_name_every_unwired_setting(self) -> None:
+        config = ProjectConfig(embeddings="local", local_only=False, telemetry=True)
+        fields = {item["field"] for item in config.capability_warnings()}
+        self.assertNotIn("updates.curated_mode", fields)
+        self.assertNotIn("updates.proposal_trigger", fields)
+        self.assertIn("retrieval.embeddings", fields)
+        self.assertIn("privacy.local_only", fields)
+        self.assertIn("privacy.telemetry", fields)
+
 
 if __name__ == "__main__":
     unittest.main()
-

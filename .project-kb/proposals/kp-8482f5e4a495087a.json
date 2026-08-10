@@ -1,0 +1,35 @@
+{
+  "change_range": "WP08",
+  "confidence": 0.95,
+  "created_at": "2026-08-07T08:30:17+08:00",
+  "evidence": [
+    "src/project_knowledge/config.py",
+    "src/project_knowledge/service.py",
+    "src/project_knowledge/versioning.py",
+    "tests/test_wp08.py"
+  ],
+  "operations": [
+    {
+      "block_id": "retrieval-contract",
+      "content": "- 0.1.9 WP-07：watcher 必须使用每项目单协调锁、记录 PID/heartbeat/结构化日志；同步必须进行二次哈希校验，分支变化必须单独报告并补偿；hooks 只能写入工具拥有的标记区块。\n- 0.1.10 WP-08：配置升级必须先支持 dry-run，保留未知用户字段，并对高于当前版本的配置显式失败；Claude、Cursor、Gemini 适配必须幂等且卸载只删除工具拥有区块；补丁升级必须同步核心包、CHANGELOG 与 Codex 插件版本。\n",
+      "op": "upsert_generated_block"
+    }
+  ],
+  "proposal_id": "kp-8482f5e4a495087a",
+  "reason": "WP08 配置迁移与客户端兼容复核",
+  "requires_review": true,
+  "result_hash": "sha256:40cbf5ee7e44d22685038669524d7fea5576b24364df587a1d9215d25db69160",
+  "review_reason": "已核对 0.1.10 源码、回归测试与兼容性矩阵",
+  "reviewed_at": "2026-08-07T08:31:03+08:00",
+  "reviewer": "Codex",
+  "schema_version": 1,
+  "source_hashes": {
+    "src/project_knowledge/config.py": "sha256:7d0321ee6682ad910859e3f29c82e8d0fda63ce352883bf0e18f8aa21f7f5543",
+    "src/project_knowledge/service.py": "sha256:e54741174c584aa32c4df5f941eba67f356cd4f5e73dc5cccb7549561b609348",
+    "src/project_knowledge/versioning.py": "sha256:28c1eb70f34cef82854e409a23843cfe22a0c29eff5595dab889fd32b2f1cedb",
+    "tests/test_wp08.py": "sha256:30b002357dbaed5f016180a40ad76a1398ecc9e2e1d6a2c50e7a24db4c54ba5b"
+  },
+  "status": "applied",
+  "target": "docs/knowledge/curated/conventions.md",
+  "target_hash": "sha256:165cf203e12c7601db435500b00d362e04aacc39b35f29af4132c585a6210439"
+}

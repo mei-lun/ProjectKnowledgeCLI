@@ -1,0 +1,51 @@
+{
+  "environment": {
+    "cpu_count": 16,
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "processor": "x86_64",
+    "python": "3.12.3"
+  },
+  "generated_at": "2026-08-07T00:29:50+08:00",
+  "index_health": {
+    "commit_aligned": true,
+    "conflicted_knowledge": 0,
+    "content_fresh": true,
+    "stale_knowledge": 0
+  },
+  "limitations": [
+    "本报告只证明只读镜像初始化和结构事实索引，不证明业务标准答案正确。",
+    "Lua/Skynet 专用语义需要 WP-01/WP-02 Adapter 和 D-007 业务审核。"
+  ],
+  "mirror_initialization": {
+    "duration_ms": 128589.984,
+    "indexed_files": 2882,
+    "modules": 8,
+    "parse_errors": 1,
+    "parse_success_rate": 0.9997,
+    "relations": 160537,
+    "source_files": 2881,
+    "symbols": 35043
+  },
+  "probe_context": {
+    "duration_ms": 70235.56,
+    "estimated_tokens": 1966,
+    "gaps": [],
+    "returned_files": 8,
+    "returned_symbols": 0
+  },
+  "schema_version": 1,
+  "source": {
+    "discovered_files": 2881,
+    "excluded_patterns": [
+      ".svn/**",
+      "**/.svn/**",
+      "**/*.log",
+      "**/*.dump",
+      "**/*.core"
+    ],
+    "inventory_sha256": "sha256:04527c8c0f76c94f3e7a0e156bc54ceb1892a033947c1390905422595c5a08d4",
+    "name": "11.0.0.0",
+    "revision": null,
+    "unchanged": true
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "change_range": "HEAD",
+  "confidence": 0.8,
+  "created_at": "2026-08-07T07:28:29+08:00",
+  "evidence": [
+    "src/project_knowledge/engine.py",
+    "src/project_knowledge/retrieval.py"
+  ],
+  "operations": [
+    {
+      "block_id": "proposal-capabilities",
+      "content": "- WP-01/WP-02 已补充 CodeIndexEngine 公共契约、Lua/Skynet/SQL/配置证据解析；0.1.8 检索候选按精确匹配优先并收窄候选，CodeGraph 仍按 ADR-0002 显式不可用。",
+      "op": "upsert_generated_block"
+    }
+  ],
+  "proposal_id": "kp-147578e4926ad33f",
+  "reason": "0.1.8：检索候选收窄后复核架构来源哈希",
+  "requires_review": true,
+  "result_hash": "sha256:166619b12fbae36d9de04df86a7263d12056f250aeddc9c412329f82988101d6",
+  "review_reason": "已运行回归测试并核对引擎与检索源码",
+  "reviewed_at": "2026-08-07T07:28:44+08:00",
+  "reviewer": "codex",
+  "schema_version": 1,
+  "source_hashes": {
+    "src/project_knowledge/engine.py": "sha256:eaf47eed8d38a594b706014ac8fb3b9a024713e71442c170cabf011768d8da4a",
+    "src/project_knowledge/retrieval.py": "sha256:12df393e8adf0bb70d9d844e7f72d923e1e9d4836cfce32b4543055df29b52eb"
+  },
+  "status": "applied",
+  "target": "docs/knowledge/curated/architecture.md",
+  "target_hash": "sha256:0b3b4d9fa1a4971a1b903a32105c36f4fe3ab9c79db58f0dedd616736a80f395"
+}

@@ -1,0 +1,47 @@
+{
+  "affected_knowledge": [
+    "curated.architecture",
+    "curated.feature.guide.generation",
+    "generated.module.project_knowledge",
+    "generated.project-map"
+  ],
+  "base_commit": "991f7ba1a25c706ad9002ebdf85ea4f0bf89f947",
+  "changed_files": [
+    "src/project_knowledge/retrieval.py"
+  ],
+  "changed_symbols": [
+    "src/project_knowledge/retrieval.py::<module>",
+    "src/project_knowledge/retrieval.py::KnowledgeAPI",
+    "src/project_knowledge/retrieval.py::KnowledgeAPI.__init__",
+    "src/project_knowledge/retrieval.py::KnowledgeAPI.status",
+    "src/project_knowledge/retrieval.py::KnowledgeAPI.classify_task",
+    "src/project_knowledge/retrieval.py::KnowledgeAPI.get",
+    "src/project_knowledge/retrieval.py::KnowledgeAPI.search",
+    "src/project_knowledge/retrieval.py::KnowledgeAPI.impact",
+    "src/project_knowledge/retrieval.py::KnowledgeAPI.context",
+    "src/project_knowledge/retrieval.py::KnowledgeAPI._summary",
+    "src/project_knowledge/retrieval.py::KnowledgeAPI._score_breakdown",
+    "src/project_knowledge/retrieval.py::KnowledgeAPI._why_selected",
+    "src/project_knowledge/retrieval.py::KnowledgeAPI._impact_explanation",
+    "src/project_knowledge/retrieval.py::KnowledgeAPI._module_from_path",
+    "src/project_knowledge/retrieval.py::KnowledgeAPI._reference_implementations",
+    "src/project_knowledge/retrieval.py::KnowledgeAPI._extension_points",
+    "src/project_knowledge/retrieval.py::KnowledgeAPI._pending_sources",
+    "src/project_knowledge/retrieval.py::KnowledgeAPI._context_summary",
+    "src/project_knowledge/retrieval.py::KnowledgeAPI._verification_commands",
+    "src/project_knowledge/retrieval.py::KnowledgeAPI._fit_context",
+    "src/project_knowledge/retrieval.py::KnowledgeAPI._fit_context.size",
+    "src/project_knowledge/retrieval.py::KnowledgeAPI._record_query"
+  ],
+  "changeset_id": "change-20260807-061525",
+  "created_at": "2026-08-07T06:15:25+08:00",
+  "head_commit": "991f7ba1a25c706ad9002ebdf85ea4f0bf89f947",
+  "proposal_ids": [
+    "kp-6e773e9beb519b28"
+  ],
+  "queue_id": "sq-29ad4eaf865fefb8",
+  "schema_version": 1,
+  "status": "proposal_created",
+  "task_summary": "manual synchronization",
+  "updated_at": "2026-08-07T06:15:49+08:00"
+}

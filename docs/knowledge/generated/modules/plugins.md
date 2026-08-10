@@ -23,8 +23,8 @@
 - `plugins/project-knowledge/scripts/project_status.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
 - `plugins/project-knowledge/scripts/project_status.py::<module>` 导入 `subprocess`（可信度 1.00，未解析）
 - `plugins/project-knowledge/scripts/project_status.py::<module>` 导入 `sys`（可信度 1.00，未解析）
-- `plugins/project-knowledge/hooks/sync_after_task.py::main` 调用 `src/project_knowledge/retrieval.py::KnowledgeAPI.get`（可信度 0.80，已解析）
-- `plugins/project-knowledge/hooks/sync_after_task.py::main` 调用 `src/project_knowledge/retrieval.py::KnowledgeAPI.get`（可信度 0.80，已解析）
+- `plugins/project-knowledge/hooks/sync_after_task.py::main` 调用 `os.environ.get`（可信度 0.80，未解析）
+- `plugins/project-knowledge/hooks/sync_after_task.py::main` 调用 `os.environ.get`（可信度 0.80，未解析）
 - `plugins/project-knowledge/hooks/sync_after_task.py::main` 调用 `subprocess.run`（可信度 0.80，未解析）
 - `plugins/project-knowledge/hooks/sync_after_task.py::<module>` 调用 `SystemExit`（可信度 0.80，未解析）
 - `plugins/project-knowledge/hooks/sync_after_task.py::<module>` 调用 `main`（可信度 0.80，未解析）

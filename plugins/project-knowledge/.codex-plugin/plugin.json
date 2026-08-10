@@ -1,12 +1,17 @@
 {
   "name": "project-knowledge",
-  "version": "0.1.0",
+  "version": "0.1.15",
   "description": "Source-traceable, freshness-aware project knowledge for Codex",
   "author": {
     "name": "Project Knowledge contributors"
   },
   "license": "Apache-2.0",
-  "keywords": ["project-knowledge", "code-index", "mcp", "local-first"],
+  "keywords": [
+    "project-knowledge",
+    "code-index",
+    "mcp",
+    "local-first"
+  ],
   "skills": "./skills/",
   "interface": {
     "displayName": "Project Knowledge",
@@ -14,7 +19,9 @@
     "longDescription": "Queries a local project index and versioned knowledge base, returning compact task context with source references, confidence, freshness, impact, and verification guidance.",
     "developerName": "Project Knowledge contributors",
     "category": "Productivity",
-    "capabilities": ["Interactive"],
+    "capabilities": [
+      "Interactive"
+    ],
     "defaultPrompt": [
       "Get fresh project context before implementing this change.",
       "Trace the impact of these files and symbols.",

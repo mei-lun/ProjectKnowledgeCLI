@@ -1,0 +1,26 @@
+{
+  "affected_knowledge": [
+    "generated.module.plugins",
+    "generated.module.project_knowledge",
+    "generated.project-map"
+  ],
+  "base_commit": "991f7ba1a25c706ad9002ebdf85ea4f0bf89f947",
+  "changed_files": [
+    "plugins/project-knowledge/.codex-plugin/plugin.json",
+    "src/project_knowledge/__init__.py"
+  ],
+  "changed_symbols": [
+    "src/project_knowledge/__init__.py::<module>"
+  ],
+  "changeset_id": "change-20260807-093008",
+  "created_at": "2026-08-07T09:30:08+08:00",
+  "head_commit": "991f7ba1a25c706ad9002ebdf85ea4f0bf89f947",
+  "proposal_ids": [
+    "kp-4947d02d30fb43f2"
+  ],
+  "queue_id": "sq-1478eced7009b572",
+  "schema_version": 1,
+  "status": "proposal_created",
+  "task_summary": "manual synchronization",
+  "updated_at": "2026-08-07T09:31:09+08:00"
+}

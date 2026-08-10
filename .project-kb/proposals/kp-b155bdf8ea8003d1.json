@@ -1,0 +1,35 @@
+{
+  "change_range": "HEAD",
+  "confidence": 0.8,
+  "created_at": "2026-08-07T07:29:00+08:00",
+  "evidence": [
+    "src/project_knowledge/knowledge.py",
+    "src/project_knowledge/retrieval.py",
+    "src/project_knowledge/semantic.py",
+    "src/project_knowledge/service.py"
+  ],
+  "operations": [
+    {
+      "block_id": "retrieval-guide",
+      "content": "任务上下文先分类 new_feature、bug_fix、refactor、impact_analysis 或 investigation，再联合 Feature Guide、代码符号和有界影响关系返回 likely_modules、reference_implementations、extension_points、verification_commands 与 unknowns。0.1.8 起符号候选按精确匹配优先并限制每个词的候选数，保留稳定 ID、相对路径与行号；动态行为仍必须实时核验。",
+      "op": "upsert_generated_block"
+    }
+  ],
+  "proposal_id": "kp-b155bdf8ea8003d1",
+  "reason": "0.1.8：更新任务上下文候选收窄后的功能指南检索约定",
+  "requires_review": true,
+  "result_hash": "sha256:a3bbd0592fe2ca19628aba7a3f2ecf3dfa90518d1a24ae8c9c658b85614644c7",
+  "review_reason": "已运行 retrieval 与 semantic 回归测试并核对源码",
+  "reviewed_at": "2026-08-07T07:29:14+08:00",
+  "reviewer": "codex",
+  "schema_version": 1,
+  "source_hashes": {
+    "src/project_knowledge/knowledge.py": "sha256:6d45b30277788c5c8cf6a55724af61b30d8f0dab80bbe6328b68c018d82c6584",
+    "src/project_knowledge/retrieval.py": "sha256:12df393e8adf0bb70d9d844e7f72d923e1e9d4836cfce32b4543055df29b52eb",
+    "src/project_knowledge/semantic.py": "sha256:aac3e93a91a0730802c327bf7c93e7a5a51421c7493621743e972fd62a65930a",
+    "src/project_knowledge/service.py": "sha256:674717984b38036d2a70fd208f52944d14cff31278496937913a0971a0b4003a"
+  },
+  "status": "applied",
+  "target": "docs/knowledge/curated/feature-guide-generation.md",
+  "target_hash": "sha256:ddcb1ff9eb50f34e2c76dfdb596411544eddb94b9ca4b9b2b8302b32b303b6fe"
+}

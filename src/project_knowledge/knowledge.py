@@ -8,11 +8,13 @@ from typing import Iterable
 
 from .config import ProjectConfig
 from .models import KnowledgeRecord, SourceReference
+from .schemas import KNOWLEDGE_RECORD_SCHEMA, validate_instance
 from .store import KnowledgeStore
 from .util import atomic_json, atomic_write, hash_file, read_text, slug, utc_now
 
 
 GENERATED_NOTICE = "<!-- 本文件由 project-kb 自动生成，请勿手动编辑。 -->"
+TEMPLATE_MARKER = '<!-- project-kb:template status="unreviewed" -->'
 SOURCE_MARKER = re.compile(r'<!--\s*project-kb:source\s+(file|symbol)="([^"]+)"\s*-->')
 LANGUAGE_TITLES = {"Configuration": "配置", "Python": "Python"}
 SYMBOL_KIND_TITLES = {"module": "模块", "class": "类", "function": "函数", "method": "方法"}
@@ -25,6 +27,7 @@ class KnowledgeGenerator:
         self.config = config
         self.store = store
         self.generated_root = root / config.generated_root
+        self.drafts_root = root / config.drafts_root
         self.curated_root = root / config.curated_root
         self.decisions_root = root / config.decisions_root
         self.now = utc_now()
@@ -33,7 +36,7 @@ class KnowledgeGenerator:
     def generate(self, refresh_generated: bool = True) -> list[KnowledgeRecord]:
         self._ensure_curated_templates()
         if refresh_generated:
-            generated = [self._project_map(), *self._module_maps(), self._routes(), self._test_map()]
+            generated = [self._project_map(), *self._module_maps(), self._routes(), self._entrypoints(), self._test_map()]
             generated = [record for record in generated if record is not None]
             for record in generated:
                 self.store.upsert_knowledge(record)
@@ -48,6 +51,11 @@ class KnowledgeGenerator:
         for record in decisions:
             self.store.upsert_knowledge(record)
         self.store.delete_missing_knowledge({record.id for record in decisions}, "decision")
+
+        drafts = self._draft_records()
+        for record in drafts:
+            self.store.upsert_knowledge(record)
+        self.store.delete_missing_knowledge({record.id for record in drafts}, "draft")
 
         records = self.store.all_knowledge()
         self._knowledge_index(records)
@@ -168,6 +176,14 @@ class KnowledgeGenerator:
                 "SELECT source, target, kind, confidence, resolved FROM relations WHERE path IN (SELECT path FROM files WHERE module = ?) ORDER BY confidence DESC LIMIT 150",
                 [module],
             )
+            symbol_total = self.store.connection.execute(
+                "SELECT COUNT(*) FROM symbols WHERE path IN (SELECT path FROM files WHERE module = ?) AND kind != 'module'",
+                (module,),
+            ).fetchone()[0]
+            relation_total = self.store.connection.execute(
+                "SELECT COUNT(*) FROM relations WHERE path IN (SELECT path FROM files WHERE module = ?)",
+                (module,),
+            ).fetchone()[0]
             file_lines = "\n".join(
                 f"- `{item['path']}`（{LANGUAGE_TITLES.get(item['language'], item['language'])}）"
                 for item in files
@@ -182,6 +198,16 @@ class KnowledgeGenerator:
                 f"（可信度 {item['confidence']:.2f}，{'已解析' if item['resolved'] else '未解析'}）"
                 for item in relations
             ) or "- 未检测到结构关系"
+            symbol_notice = (
+                f"> 符号内容已截断：共 {symbol_total} 个，当前页面仅展示前 {len(symbols)} 个；"
+                "请使用 knowledge_context 或 knowledge_search 获取精确范围。\n\n"
+                if symbol_total > len(symbols) else ""
+            )
+            relation_notice = (
+                f"> 关系内容已截断：共 {relation_total} 条，当前页面仅展示前 {len(relations)} 条；"
+                "请使用 knowledge_impact 获取完整的任务相关子图。\n\n"
+                if relation_total > len(relations) else ""
+            )
             content = f"""{GENERATED_NOTICE}
 
 # 模块：{module}
@@ -192,11 +218,11 @@ class KnowledgeGenerator:
 
 ## 符号
 
-{symbol_lines}
+{symbol_notice}{symbol_lines}
 
 ## 结构关系
 
-{relation_lines}
+{relation_notice}{relation_lines}
 """
             sources = [SourceReference(type="file", path=item["path"]) for item in files]
             relative = f"{self.config.generated_root}/modules/{slug(module)}.md"
@@ -205,6 +231,60 @@ class KnowledgeGenerator:
                 relative_path=relative, content=content, sources=sources, tags=["module", module],
             ))
         return records
+
+    def _entrypoints(self) -> KnowledgeRecord:
+        relations = self.store.rows(
+            "SELECT source, target, kind, path, line, confidence FROM relations "
+            "WHERE kind IN ('service_start', 'dispatch') ORDER BY path, line, kind"
+        )
+        rows: list[str] = []
+        sources: list[SourceReference] = []
+        for item in relations:
+            label = "Skynet 启动" if item["kind"] == "service_start" else "协议派发"
+            rows.append(
+                f"| {label} | {item['source']} | {item['target']} | "
+                f"{item['path']}:{item['line']} | {item['confidence']:.2f} |"
+            )
+            sources.append(SourceReference(type="file", path=item["path"], line=item["line"]))
+        filename_rows = self.store.rows(
+            "SELECT path FROM files WHERE language = 'Lua' "
+            "AND (lower(path) LIKE '%/main.lua' OR lower(path) LIKE 'main.lua' "
+            "OR lower(path) LIKE '%/bootstrap.lua' OR lower(path) LIKE 'bootstrap.lua' "
+            "OR lower(path) LIKE '%/start.lua' OR lower(path) LIKE 'start.lua') ORDER BY path"
+        )
+        known_paths = {item["path"] for item in relations}
+        for item in filename_rows:
+            if item["path"] in known_paths:
+                continue
+            rows.append(
+                f"| 文件名推断入口 | {item['path']}::<module> | 需要人工确认 | "
+                f"{item['path']}:1 | 0.55 |"
+            )
+            sources.append(SourceReference(type="file", path=item["path"], line=1))
+        if not sources:
+            sources.extend([SourceReference(type="file", path="src/project_knowledge/engine.py"), SourceReference(type="file", path="src/project_knowledge/knowledge.py")])
+        body = "\n".join(rows) or "| - | 未检测到静态入口 | - | - | - |"
+        content = f"""{GENERATED_NOTICE}
+
+# Lua/Skynet 入口证据
+
+本页只记录源码中可定位的启动和协议派发证据。动态启动命令、运行时生成的协议名和服务发现结果必须现场验证。
+
+| 类型 | 来源符号 | 目标 | 源码位置 | 置信度 |
+| --- | --- | --- | --- | ---: |
+{body}
+
+## 使用约束
+
+- “Skynet 启动”表示检测到 skynet.start 或 skynetx.start。
+- “协议派发”表示检测到 skynet.dispatch、protocol.dispatch、protocol.run 或 protocol.exec。
+- “文件名推断入口”只表示文件命名线索，不是已验证的启动入口。
+"""
+        return self._record(
+            record_id="generated.entrypoints", kind="entrypoint", title="Lua/Skynet 入口证据",
+            relative_path=f"{self.config.generated_root}/entrypoints.md", content=content,
+            sources=sources, tags=["entrypoints", "lua", "skynet", "runtime-boundary"],
+        )
 
     def _routes(self) -> KnowledgeRecord:
         routes = self.store.rows("SELECT method, route, handler, path, line FROM routes ORDER BY route, method")
@@ -257,21 +337,33 @@ class KnowledgeGenerator:
 
     def _ensure_curated_templates(self) -> None:
         templates = {
-            self.curated_root / "architecture.md": """# 架构
+            self.curated_root / "architecture.md": f"""{TEMPLATE_MARKER}
+
+# 架构
 
 在此记录模块职责、边界和架构原则。
+
+完成核验后请删除顶部的 `project-kb:template` 标记；删除前本页仅按推断信息处理。
 
 当陈述依赖代码事实时，请添加来源标记：
 
 `&lt;!-- project-kb:source file="src/example.py" --&gt;`
 """,
-            self.curated_root / "conventions.md": """# 约定
+            self.curated_root / "conventions.md": f"""{TEMPLATE_MARKER}
+
+# 约定
 
 在此记录项目特有的编码、测试和评审约定。
+
+完成核验后请删除顶部的 `project-kb:template` 标记。
 """,
-            self.curated_root / "glossary.md": """# 术语表
+            self.curated_root / "glossary.md": f"""{TEMPLATE_MARKER}
+
+# 术语表
 
 在此记录领域术语及其在项目中的准确含义。
+
+完成核验后请删除顶部的 `project-kb:template` 标记。
 """,
         }
         for path, content in templates.items():
@@ -290,14 +382,23 @@ class KnowledgeGenerator:
             content = read_text(path)
             title_match = re.search(r"^#\s+(.+)$", content, re.MULTILINE)
             title = title_match.group(1).strip() if title_match else path.stem.replace("-", " ").title()
-            kind = "decision" if ownership == "decision" else (path.parent.name if path.parent != base else path.stem)
+            if ownership == "decision":
+                kind = "decision"
+            elif ownership == "draft" and path.parent.name == "features":
+                kind = "feature-guide"
+            else:
+                kind = path.parent.name if path.parent != base else path.stem
             sources = [
                 SourceReference(type=source_type, path=value if source_type == "file" else None, id=value if source_type == "symbol" else None)
                 for source_type, value in SOURCE_MARKER.findall(content)
             ]
-            record_id = f"{ownership}.{slug(path.relative_to(base).with_suffix('').as_posix()).replace('-', '.')}"
+            if ownership == "draft" and path.parent.name == "features":
+                record_id = f"draft.feature.{path.stem}"
+            else:
+                record_id = f"{ownership}.{slug(path.relative_to(base).with_suffix('').as_posix()).replace('-', '.')}"
             existing = self.store.get_knowledge(record_id)
             current_hashes = self._source_hashes(sources)
+            is_template = TEMPLATE_MARKER in content
             expected_keys = {source.id or source.path for source in sources}
             missing = any(key not in current_hashes for key in expected_keys if key)
             content_changed = bool(existing and existing.content != content)
@@ -315,12 +416,12 @@ class KnowledgeGenerator:
                 baseline = current_hashes
             records.append(KnowledgeRecord(
                 id=record_id, kind=kind, title=title, path=relative, ownership=ownership,
-                confidence="verified" if ownership in {"curated", "decision"} else "generated",
+                confidence="inferred" if is_template else ("verified" if ownership in {"curated", "decision"} else "generated"),
                 status=status, sources=sources,
                 source_commit=self.commit if content_changed or not existing else existing.source_commit,
                 source_hashes=baseline,
-                last_verified_at=self.now if content_changed or not existing else existing.last_verified_at,
-                tags=[ownership, *path.relative_to(base).parts[:-1]], content=content,
+                last_verified_at=None if is_template else (self.now if content_changed or not existing else existing.last_verified_at),
+                tags=[ownership, *(["template"] if is_template else []), *path.relative_to(base).parts[:-1]], content=content,
             ))
         return records
 
@@ -330,11 +431,14 @@ class KnowledgeGenerator:
     def _decision_records(self) -> list[KnowledgeRecord]:
         return self._document_records(self.decisions_root, "decision")
 
+    def _draft_records(self) -> list[KnowledgeRecord]:
+        return self._document_records(self.drafts_root, "draft")
+
     def _knowledge_index(self, records: list[KnowledgeRecord]) -> None:
         groups: dict[str, list[KnowledgeRecord]] = defaultdict(list)
         for record in records:
             groups[record.ownership].append(record)
-        ownership_titles = {"generated": "自动生成", "curated": "人工维护", "decision": "架构决策"}
+        ownership_titles = {"generated": "自动生成", "draft": "语义草案", "curated": "人工维护", "decision": "架构决策"}
         status_titles = {
             "fresh": "新鲜",
             "potentially_stale": "可能过期",
@@ -343,7 +447,7 @@ class KnowledgeGenerator:
         }
         confidence_titles = {"verified": "已验证", "generated": "自动生成", "inferred": "推断"}
         sections: list[str] = [GENERATED_NOTICE, "", f"# 项目知识库：{self.config.project_name}", ""]
-        for ownership in ["generated", "curated", "decision"]:
+        for ownership in ["draft", "curated", "decision", "generated"]:
             sections.extend([f"## {ownership_titles[ownership]}", ""])
             for record in sorted(groups.get(ownership, []), key=lambda item: item.id):
                 status = status_titles.get(record.status, record.status)
@@ -358,11 +462,14 @@ class KnowledgeGenerator:
         atomic_write(self.root / self.config.knowledge_root / "index.md", "\n".join(sections))
 
     def _manifest(self, records: list[KnowledgeRecord]) -> None:
+        serialized_records = [record.to_dict() for record in records]
+        for index, record in enumerate(serialized_records):
+            validate_instance(record, KNOWLEDGE_RECORD_SCHEMA, f"$.records[{index}]")
         manifest = {
             "schema_version": 1,
             "project": self.config.project_name,
             "generated_at": self.now,
             "source_commit": self.commit,
-            "records": [record.to_dict() for record in records],
+            "records": serialized_records,
         }
         atomic_json(self.root / ".project-kb" / "manifest.json", manifest)

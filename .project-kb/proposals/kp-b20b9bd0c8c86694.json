@@ -1,0 +1,31 @@
+{
+  "change_range": "HEAD",
+  "confidence": 0.8,
+  "created_at": "2026-08-07T07:57:27+08:00",
+  "evidence": [
+    "src/project_knowledge/retrieval.py",
+    "src/project_knowledge/service.py"
+  ],
+  "operations": [
+    {
+      "block_id": "retrieval-guide",
+      "content": "功能开发上下文除返回代码符号、影响关系和验证命令外，涉及 watcher 或 Git 分支变更时必须提示读取 watcher_health、branch_aligned、二次哈希结果和结构化日志；跨进程 daemon 尚未实现的结论必须标为 unknown。",
+      "op": "upsert_generated_block"
+    }
+  ],
+  "proposal_id": "kp-b20b9bd0c8c86694",
+  "reason": "0.1.9 WP-07：功能指导需披露 watcher/Git 变更验证",
+  "requires_review": true,
+  "result_hash": "sha256:0c19adf31aab18a5e15c51cd1de87dad5f51316d6b3b6a3ffcdf16bbba619a4d",
+  "review_reason": "WP-07 测试已通过并核对源码与审计需求",
+  "reviewed_at": "2026-08-07T07:57:45+08:00",
+  "reviewer": "codex",
+  "schema_version": 1,
+  "source_hashes": {
+    "src/project_knowledge/retrieval.py": "sha256:12df393e8adf0bb70d9d844e7f72d923e1e9d4836cfce32b4543055df29b52eb",
+    "src/project_knowledge/service.py": "sha256:26b020b1d4bcd41dcb5fddcab5f18846bb897e8fb4fd17730cbde8d31097e411"
+  },
+  "status": "applied",
+  "target": "docs/knowledge/curated/feature-guide-generation.md",
+  "target_hash": "sha256:a3bbd0592fe2ca19628aba7a3f2ecf3dfa90518d1a24ae8c9c658b85614644c7"
+}

@@ -1,0 +1,53 @@
+{
+  "affected_knowledge": [
+    "curated.architecture",
+    "curated.conventions",
+    "curated.feature.guide.generation",
+    "decision.0003.lua.skynet.entry.evidence",
+    "generated.entrypoints",
+    "generated.module.project_knowledge",
+    "generated.module.tests",
+    "generated.project-map",
+    "generated.test-map"
+  ],
+  "base_commit": "991f7ba1a25c706ad9002ebdf85ea4f0bf89f947",
+  "changed_files": [
+    "src/project_knowledge/knowledge.py",
+    "tests/test_wp02_knowledge.py"
+  ],
+  "changed_symbols": [
+    "src/project_knowledge/knowledge.py::<module>",
+    "src/project_knowledge/knowledge.py::KnowledgeGenerator",
+    "src/project_knowledge/knowledge.py::KnowledgeGenerator.__init__",
+    "src/project_knowledge/knowledge.py::KnowledgeGenerator.generate",
+    "src/project_knowledge/knowledge.py::KnowledgeGenerator._source_hashes",
+    "src/project_knowledge/knowledge.py::KnowledgeGenerator._record",
+    "src/project_knowledge/knowledge.py::KnowledgeGenerator._project_map",
+    "src/project_knowledge/knowledge.py::KnowledgeGenerator._module_maps",
+    "src/project_knowledge/knowledge.py::KnowledgeGenerator._entrypoints",
+    "src/project_knowledge/knowledge.py::KnowledgeGenerator._routes",
+    "src/project_knowledge/knowledge.py::KnowledgeGenerator._test_map",
+    "src/project_knowledge/knowledge.py::KnowledgeGenerator._ensure_curated_templates",
+    "src/project_knowledge/knowledge.py::KnowledgeGenerator._document_records",
+    "src/project_knowledge/knowledge.py::KnowledgeGenerator._curated_records",
+    "src/project_knowledge/knowledge.py::KnowledgeGenerator._decision_records",
+    "src/project_knowledge/knowledge.py::KnowledgeGenerator._draft_records",
+    "src/project_knowledge/knowledge.py::KnowledgeGenerator._knowledge_index",
+    "src/project_knowledge/knowledge.py::KnowledgeGenerator._manifest",
+    "tests/test_wp02_knowledge.py::<module>",
+    "tests/test_wp02_knowledge.py::LuaEntrypointKnowledgeTests",
+    "tests/test_wp02_knowledge.py::LuaEntrypointKnowledgeTests.test_empty_entrypoint_page_still_has_parser_source_anchors",
+    "tests/test_wp02_knowledge.py::LuaEntrypointKnowledgeTests.test_generated_entrypoint_page_is_source_traceable_and_chinese"
+  ],
+  "changeset_id": "change-20260807-102943",
+  "created_at": "2026-08-07T10:29:43+08:00",
+  "head_commit": "991f7ba1a25c706ad9002ebdf85ea4f0bf89f947",
+  "proposal_ids": [
+    "kp-d5a607b35ac333d0"
+  ],
+  "queue_id": "sq-0627b55e2696f639",
+  "schema_version": 1,
+  "status": "proposal_created",
+  "task_summary": "manual synchronization",
+  "updated_at": "2026-08-07T10:49:01+08:00"
+}

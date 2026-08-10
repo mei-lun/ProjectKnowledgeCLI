@@ -1,0 +1,35 @@
+{
+  "change_range": "WP08",
+  "confidence": 0.95,
+  "created_at": "2026-08-07T08:30:11+08:00",
+  "evidence": [
+    "src/project_knowledge/config.py",
+    "src/project_knowledge/schemas.py",
+    "src/project_knowledge/service.py",
+    "src/project_knowledge/versioning.py"
+  ],
+  "operations": [
+    {
+      "block_id": "proposal-capabilities",
+      "content": "- 0.1.9 WP-07 已补充单项目 watcher 协调、二次哈希稳定解析、分支对齐、崩溃健康状态、结构化日志和受控 Git hooks；跨进程 daemon 仍需后续接入。\n- 0.1.10 WP-08 新增 config-v1 Schema、v0→v1 可预览迁移、Claude/Cursor/Gemini 标记适配和核心/插件版本同步。客户端文件只是集成层，索引、知识、Proposal 与 MCP 继续由 ProjectService 和本地 SQLite 统一管理。\n",
+      "op": "upsert_generated_block"
+    }
+  ],
+  "proposal_id": "kp-cbae60aaf1bb5d03",
+  "reason": "WP08 配置迁移与客户端兼容复核",
+  "requires_review": true,
+  "result_hash": "sha256:5154cb361fb26b1499646a1418f2e93c0df06975d40154867d89caa9eab1f4ef",
+  "review_reason": "已核对 0.1.10 源码、回归测试与兼容性矩阵",
+  "reviewed_at": "2026-08-07T08:30:55+08:00",
+  "reviewer": "Codex",
+  "schema_version": 1,
+  "source_hashes": {
+    "src/project_knowledge/config.py": "sha256:7d0321ee6682ad910859e3f29c82e8d0fda63ce352883bf0e18f8aa21f7f5543",
+    "src/project_knowledge/schemas.py": "sha256:d78ed920fe7f46b8c386eb5029b6e43f09092939d05bce146ba8cc115ae7c1dd",
+    "src/project_knowledge/service.py": "sha256:e54741174c584aa32c4df5f941eba67f356cd4f5e73dc5cccb7549561b609348",
+    "src/project_knowledge/versioning.py": "sha256:28c1eb70f34cef82854e409a23843cfe22a0c29eff5595dab889fd32b2f1cedb"
+  },
+  "status": "applied",
+  "target": "docs/knowledge/curated/architecture.md",
+  "target_hash": "sha256:6f34c2d4dba77dc38598f796d55b2681760875e3e1d22f1c0bb0e6044cfc9271"
+}

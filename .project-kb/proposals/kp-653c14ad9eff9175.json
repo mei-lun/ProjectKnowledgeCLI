@@ -1,0 +1,31 @@
+{
+  "change_range": "HEAD",
+  "confidence": 0.9,
+  "created_at": "2026-08-07T06:03:49+08:00",
+  "evidence": [
+    "src/project_knowledge/retrieval.py",
+    "src/project_knowledge/semantic.py"
+  ],
+  "operations": [
+    {
+      "block_id": "retrieval-guide",
+      "content": "<!-- project-kb:generated:block id=retrieval-guide -->\n任务上下文先分类 new_feature、bug_fix、refactor、impact_analysis 或 investigation，再联合 Feature Guide、代码符号和影响关系返回 likely_modules、reference_implementations、extension_points、verification_commands 与 unknowns。参考实现和扩展点必须保留稳定符号 ID、相对路径与行号；不能确认的动态行为不得包装成确定事实。\n<!-- project-kb:generated:block-end -->",
+      "op": "upsert_generated_block"
+    }
+  ],
+  "proposal_id": "kp-653c14ad9eff9175",
+  "reason": "补充 WP-06 从 Feature Guide 到功能开发上下文的检索契约。",
+  "requires_review": true,
+  "result_hash": "sha256:e744f16f6c03408ca95a21958af371b8069b541896ab6402adbde9cb9d3edd2f",
+  "review_reason": "已核对 Feature Guide、代码符号与影响分析联合检索契约。",
+  "reviewed_at": "2026-08-07T06:04:02+08:00",
+  "reviewer": "codex",
+  "schema_version": 1,
+  "source_hashes": {
+    "src/project_knowledge/retrieval.py": "sha256:2c607ba60029267233c577b72b80d700df1f535b9aeb426a6309c63d04b5c461",
+    "src/project_knowledge/semantic.py": "sha256:aac3e93a91a0730802c327bf7c93e7a5a51421c7493621743e972fd62a65930a"
+  },
+  "status": "applied",
+  "target": "docs/knowledge/curated/feature-guide-generation.md",
+  "target_hash": "sha256:4ffdcd52947f5832261131bb6e391b15428494dd8b25b86cac50be56464a2b62"
+}

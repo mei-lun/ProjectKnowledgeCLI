@@ -1,0 +1,33 @@
+{
+  "change_range": "WP09-invariant",
+  "confidence": 0.95,
+  "created_at": "2026-08-07T09:05:26+08:00",
+  "evidence": [
+    "src/project_knowledge/config.py",
+    "src/project_knowledge/retrieval.py",
+    "tests/test_wp08.py"
+  ],
+  "operations": [
+    {
+      "block_id": "retrieval-guide",
+      "content": "功能开发上下文除返回代码符号、影响关系和验证命令外，涉及 watcher 或 Git 分支变更时必须提示读取 watcher_health、branch_aligned、二次哈希结果和结构化日志；跨进程 daemon 尚未实现的结论必须标为 unknown。\n\n涉及配置或客户端集成的功能开发必须先检查 config-v1 Schema 与 migrate dry-run 结果，并把用户扩展字段、客户端所有权标记和知识库保留作为验收不变量；未知用户配置字段在迁移和校验时不能被静默丢弃。Windows 原生 watcher/hooks 尚未实机复验时必须列入 unknowns。\n\n中文功能描述可以通过显式、可审计的短语词元映射召回英文源码标识符；返回的 reference implementation 和 extension point 仍必须指向真实符号，映射本身不能作为业务事实。\n长文档知识片段按任务相关行和邻近上下文截取，确保开发指导中的不变量、回滚和验证步骤即使位于文档末尾也能进入有限上下文。\n安全不变量、回滚和验证语句在有限上下文中获得明确优先级；该优先级只影响片段选择，不改变来源可信度或自动审核状态。\n",
+      "op": "upsert_generated_block"
+    }
+  ],
+  "proposal_id": "kp-e513d72d15b76b0e",
+  "reason": "合并配置验收不变量与相关片段",
+  "requires_review": true,
+  "result_hash": "sha256:3d8374f485b513029637a050410ba96f740c214e0c456b60f6c522ebb07089ca",
+  "review_reason": "已核对配置迁移测试和上下文相关片段结果",
+  "reviewed_at": "2026-08-07T09:05:37+08:00",
+  "reviewer": "Codex",
+  "schema_version": 1,
+  "source_hashes": {
+    "src/project_knowledge/config.py": "sha256:7d0321ee6682ad910859e3f29c82e8d0fda63ce352883bf0e18f8aa21f7f5543",
+    "src/project_knowledge/retrieval.py": "sha256:b1d2cecc7605d68528fe5c00c064b6009b49067e8c0265c648f3c7d59d85af04",
+    "tests/test_wp08.py": "sha256:30b002357dbaed5f016180a40ad76a1398ecc9e2e1d6a2c50e7a24db4c54ba5b"
+  },
+  "status": "applied",
+  "target": "docs/knowledge/curated/feature-guide-generation.md",
+  "target_hash": "sha256:78b34b19e2281f1a87c3247cc36b77461a99e1337942a2262f0a13a2757d59b6"
+}

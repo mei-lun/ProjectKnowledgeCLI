@@ -31,6 +31,9 @@ class VersioningTests(unittest.TestCase):
                 "# 变更日志\n\n## [0.1.0] - 2026-08-06\n\n- 初始版本。\n",
                 encoding="utf-8",
             )
+            plugin = root / "plugins" / "project-knowledge" / ".codex-plugin" / "plugin.json"
+            plugin.parent.mkdir(parents=True)
+            plugin.write_text('{"name": "project-knowledge", "version": "0.1.0"}\n', encoding="utf-8")
 
             old_version, new_version = bump_patch_version(
                 root,
@@ -43,6 +46,7 @@ class VersioningTests(unittest.TestCase):
             changelog = (root / "CHANGELOG.md").read_text(encoding="utf-8")
             self.assertLess(changelog.index("## [0.1.1]"), changelog.index("## [0.1.0]"))
             self.assertIn("增加版本控制。", changelog)
+            self.assertEqual(__import__("json").loads(plugin.read_text(encoding="utf-8"))["version"], "0.1.1")
 
     def test_dry_run_does_not_modify_files(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
@@ -51,6 +55,9 @@ class VersioningTests(unittest.TestCase):
             package.mkdir(parents=True)
             version_path = package / "__init__.py"
             version_path.write_text('__version__ = "1.2.3"\n', encoding="utf-8")
+            plugin = root / "plugins" / "project-knowledge" / ".codex-plugin" / "plugin.json"
+            plugin.parent.mkdir(parents=True)
+            plugin.write_text('{"name": "project-knowledge", "version": "1.2.3"}\n', encoding="utf-8")
 
             self.assertEqual(next_patch_version("1.2.3"), "1.2.4")
             self.assertEqual(
@@ -59,6 +66,7 @@ class VersioningTests(unittest.TestCase):
             )
             self.assertEqual(read_project_version(root), "1.2.3")
             self.assertFalse((root / "CHANGELOG.md").exists())
+            self.assertEqual(__import__("json").loads(plugin.read_text(encoding="utf-8"))["version"], "1.2.3")
 
 
 if __name__ == "__main__":

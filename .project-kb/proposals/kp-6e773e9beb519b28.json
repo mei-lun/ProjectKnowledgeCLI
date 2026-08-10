@@ -1,0 +1,29 @@
+{
+  "change_range": "HEAD",
+  "confidence": 0.9,
+  "created_at": "2026-08-07T06:15:49+08:00",
+  "evidence": [
+    "src/project_knowledge/retrieval.py"
+  ],
+  "operations": [
+    {
+      "block_id": "proposal-capabilities",
+      "content": "<!-- project-kb:generated:block id=proposal-capabilities -->\n- Proposal 审核链覆盖稳定 ID、目标/来源哈希复核、generated block 局部更新、ADR 草案追加和 Semantic Update Queue。\n- WP-06 检索链先对任务做确定性分类，再返回功能域、参考实现、扩展点、评分拆解、选中理由、影响范围、验证命令和 unknowns；新增功能与影响分析默认有界追踪两跳关系，并优先保留知识正文 Token 预算。\n<!-- project-kb:generated:block-end -->",
+      "op": "upsert_generated_block"
+    }
+  ],
+  "proposal_id": "kp-6e773e9beb519b28",
+  "reason": "复核 WP-06 上下文预算与检索解释实现。",
+  "requires_review": true,
+  "result_hash": "sha256:b5dab91df4231160336a92f7a498a1dc8913a93df6da0805d02dcbdb71a3f992",
+  "review_reason": "已核对最终上下文 Token 优先级、测试和评测修复。",
+  "reviewed_at": "2026-08-07T06:16:05+08:00",
+  "reviewer": "codex",
+  "schema_version": 1,
+  "source_hashes": {
+    "src/project_knowledge/retrieval.py": "sha256:3c93d25b4895f5476fc793beaca89296c71a5315c114a2f9029d8ab9785c0227"
+  },
+  "status": "applied",
+  "target": "docs/knowledge/curated/architecture.md",
+  "target_hash": "sha256:0f8f83fc549ba6388ff8c0e1af1e2746f1ff27d742cb472a50889ef0a53d2de2"
+}

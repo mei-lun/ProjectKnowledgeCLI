@@ -1,0 +1,92 @@
+{
+  "environment": {
+    "cpu_count": 16,
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "processor": "x86_64",
+    "python": "3.12.3"
+  },
+  "fixture": {
+    "language": "Python",
+    "layout": "src/benchmark/file_N.py",
+    "template_sha256": "sha256:686966f6262146662f42fb7a9a29c390c28d8c7f8a17ff760c0ef2da4b210cca"
+  },
+  "generated_at": "2026-08-07T00:50:12+08:00",
+  "repetitions": 5,
+  "results": [
+    {
+      "context": {
+        "average_ms": 7376.045,
+        "max_ms": 7586.791,
+        "p50_ms": 7359.753,
+        "p95_ms": 7584.851,
+        "p99_ms": 7586.403,
+        "samples": 5
+      },
+      "file_count": 500,
+      "indexed_files": 501,
+      "initialization": {
+        "cold_ms": 9287.063
+      },
+      "noop_sync": {
+        "average_ms": 3965.14,
+        "max_ms": 4241.633,
+        "p50_ms": 3917.245,
+        "p95_ms": 4205.443,
+        "p99_ms": 4234.395,
+        "samples": 5
+      },
+      "relations": 500,
+      "stale_detection": {
+        "latency_ms": 3895.421,
+        "passed": true
+      },
+      "status": {
+        "average_ms": 3588.857,
+        "max_ms": 3701.138,
+        "p50_ms": 3551.952,
+        "p95_ms": 3694.806,
+        "p99_ms": 3699.872,
+        "samples": 5
+      },
+      "symbols": 1500
+    },
+    {
+      "context": {
+        "average_ms": 95025.913,
+        "max_ms": 154927.151,
+        "p50_ms": 81106.772,
+        "p95_ms": 141078.033,
+        "p99_ms": 152157.328,
+        "samples": 5
+      },
+      "file_count": 5000,
+      "indexed_files": 5001,
+      "initialization": {
+        "cold_ms": 93076.135
+      },
+      "noop_sync": {
+        "average_ms": 36650.435,
+        "max_ms": 39367.978,
+        "p50_ms": 36010.543,
+        "p95_ms": 38774.838,
+        "p99_ms": 39249.35,
+        "samples": 5
+      },
+      "relations": 5000,
+      "stale_detection": {
+        "latency_ms": 35692.366,
+        "passed": true
+      },
+      "status": {
+        "average_ms": 36342.081,
+        "max_ms": 37535.706,
+        "p50_ms": 36386.442,
+        "p95_ms": 37507.632,
+        "p99_ms": 37530.091,
+        "samples": 5
+      },
+      "symbols": 15000
+    }
+  ],
+  "schema_version": 1
+}

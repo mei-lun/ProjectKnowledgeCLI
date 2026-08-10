@@ -1,0 +1,37 @@
+{
+  "change_range": "HEAD",
+  "confidence": 0.9,
+  "created_at": "2026-08-07T06:29:28+08:00",
+  "evidence": [
+    ".github/workflows/quality.yml",
+    "docs/project-knowledge-system-audit.md",
+    "evaluation/thresholds.json",
+    "scripts/bump_version.py",
+    "src/project_knowledge/__init__.py"
+  ],
+  "operations": [
+    {
+      "block_id": "retrieval-contract",
+      "content": "<!-- project-kb:generated:block id=retrieval-contract -->\n- 功能开发上下文必须返回可解释的任务类型、候选模块、参考实现、扩展点、影响范围、验证命令和 unknowns；评分必须披露文本、可信度、新鲜度、类型与模块加权。\n- 多跳影响分析默认受 max_hops 与 max_relations 双重边界约束；无法静态解析的动态派发、反射和依赖注入必须提示读取实时源码。\n<!-- project-kb:generated:block-end -->",
+      "op": "upsert_generated_block"
+    }
+  ],
+  "proposal_id": "kp-16d627b59e2d5765",
+  "reason": "复核 0.1.7 评测阈值、审计报告和 CI 基线变化。",
+  "requires_review": true,
+  "result_hash": "sha256:28467ced8c33aa488dd31fd60a12a3d6ab9caf5d2af7816a84d3a9c7ba44edc5",
+  "review_reason": "已核对所有来源哈希和 0.1.7 审计/评测变更。",
+  "reviewed_at": "2026-08-07T06:29:44+08:00",
+  "reviewer": "codex",
+  "schema_version": 1,
+  "source_hashes": {
+    ".github/workflows/quality.yml": "sha256:9ebcb689b50344ba4cb8b37f3354a9a739c1c3846f4f9ca3b017ebbd7d52428f",
+    "docs/project-knowledge-system-audit.md": "sha256:d8fa404d3f7def3e8b3479315026471728ea2de79df0a787408bc5760a36bda9",
+    "evaluation/thresholds.json": "sha256:919f46f7c571cc5b972402e04fcc437d7cc03fad9f0064b3312fba04014284d0",
+    "scripts/bump_version.py": "sha256:84f254dec8f3c3e1fd1dd58d995a675db61fd03839c215cf77733ad41c0c821d",
+    "src/project_knowledge/__init__.py": "sha256:a783481035ecde23afde3faafba4b2d0d94a600f61909760e12579f23535b1c8"
+  },
+  "status": "applied",
+  "target": "docs/knowledge/curated/conventions.md",
+  "target_hash": "sha256:28467ced8c33aa488dd31fd60a12a3d6ab9caf5d2af7816a84d3a9c7ba44edc5"
+}

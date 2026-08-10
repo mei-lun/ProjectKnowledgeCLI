@@ -1,0 +1,35 @@
+{
+  "change_range": "HEAD",
+  "confidence": 0.95,
+  "created_at": "2026-08-07T10:19:17+08:00",
+  "evidence": [
+    "src/project_knowledge/engine.py",
+    "src/project_knowledge/knowledge.py",
+    "src/project_knowledge/real_project.py",
+    "tests/test_wp02_evidence.py"
+  ],
+  "operations": [
+    {
+      "block_id": "retrieval-contract",
+      "content": "- 0.1.9 WP-07：watcher 必须使用每项目单协调锁、记录 PID/heartbeat/结构化日志；同步必须进行二次哈希校验，分支变化必须单独报告并补偿；hooks 只能写入工具拥有的标记区块。\n- 0.1.10 WP-08：配置升级必须先支持 dry-run，保留未知用户字段，并对高于当前版本的配置显式失败；Claude、Cursor、Gemini 适配必须幂等且卸载只删除工具拥有区块；补丁升级必须同步核心包、CHANGELOG 与 Codex 插件版本。\n- 0.1.11 WP-09：中文任务到标识符的扩展必须使用显式短语词元表，完整 snake_case 组合优先于宽泛分词；新增映射必须有召回回归和 Token 预算断言，不得降低冻结质量阈值。\n- 发布不变量：同一发布批次的核心包版本与 Codex 插件版本必须一致。\n- 0.1.12 WP-09：长知识文档必须按任务相关性截取并保持 Token 上限；不变量、回滚和验证行不能因固定首段裁剪被静默遗漏。\n- 0.1.13 WP-09：安全约束行可获得片段优先级加成，但仍受总 Token 预算、来源追踪和实时源码核验约束。\n- 0.1.14 WP-09：同一批修改或新增内容只递增一次补丁版本；版本知识必须同时引用核心版本文件和 CHANGELOG，不能只依赖版本工具实现。\n<!-- project-kb:source file=\"src/project_knowledge/__init__.py\" -->\n<!-- project-kb:source file=\"CHANGELOG.md\" -->\n- 0.1.15 WP-02：Lua/Skynet 入口检索必须区分已检测的 Skynet 启动、协议派发和仅按文件名推断的入口；后两类动态语义必须进入 unknowns 或人工确认。\n<!-- project-kb:source file=\"src/project_knowledge/engine.py\" -->\n<!-- project-kb:source file=\"src/project_knowledge/real_project.py\" -->\n<!-- project-kb:source file=\"src/project_knowledge/knowledge.py\" -->\n<!-- project-kb:source file=\"tests/test_wp02_evidence.py\" -->\n",
+      "op": "upsert_generated_block"
+    }
+  ],
+  "proposal_id": "kp-dc5d3ffb2d9a8b51",
+  "reason": "复核 0.1.15 WP02 入口检索与动态 unknowns 约定。",
+  "requires_review": true,
+  "result_hash": "sha256:1b5dfa309e850797789bb359d9bcc4f90e3d585be31b0d6154de087e4dbfec86",
+  "review_reason": "确认入口类别和动态 unknowns 与 WP02 源码实现一致。",
+  "reviewed_at": "2026-08-07T10:19:32+08:00",
+  "reviewer": "codex",
+  "schema_version": 1,
+  "source_hashes": {
+    "src/project_knowledge/engine.py": "sha256:7ca42160a5611fdd968b9ce6e960584e19bfb7a5f4aa3c1668305092b23c40a9",
+    "src/project_knowledge/knowledge.py": "sha256:f5c8f5a3a7800fc031e1848e58c775905352735295bf1753949747bed2d2b6af",
+    "src/project_knowledge/real_project.py": "sha256:fd9b662a08ddb024b9db426790846dc1206e37c40c2aa53ec3fdea60ad77dca3",
+    "tests/test_wp02_evidence.py": "sha256:2cde542c77d113d7091b804eb51c947b3e635e43341fe82185a1ab359adec8ef"
+  },
+  "status": "applied",
+  "target": "docs/knowledge/curated/conventions.md",
+  "target_hash": "sha256:5b36bfdbbc528c0008f0ae5b2c12681b05d0cb1192f0b79556a3655695e2bef8"
+}

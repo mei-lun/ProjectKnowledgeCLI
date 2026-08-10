@@ -1,0 +1,29 @@
+{
+  "affected_knowledge": [
+    "curated.conventions",
+    "generated.module.evaluation",
+    "generated.module.github",
+    "generated.module.project_knowledge",
+    "generated.project-map"
+  ],
+  "base_commit": "991f7ba1a25c706ad9002ebdf85ea4f0bf89f947",
+  "changed_files": [
+    ".github/workflows/quality.yml",
+    "evaluation/thresholds.json",
+    "src/project_knowledge/__init__.py"
+  ],
+  "changed_symbols": [
+    "src/project_knowledge/__init__.py::<module>"
+  ],
+  "changeset_id": "change-20260807-062635",
+  "created_at": "2026-08-07T06:26:35+08:00",
+  "head_commit": "991f7ba1a25c706ad9002ebdf85ea4f0bf89f947",
+  "proposal_ids": [
+    "kp-2d4df5f05d5b92c7"
+  ],
+  "queue_id": "sq-c2014e7a98fafb49",
+  "schema_version": 1,
+  "status": "proposal_created",
+  "task_summary": "manual synchronization",
+  "updated_at": "2026-08-07T06:27:00+08:00"
+}

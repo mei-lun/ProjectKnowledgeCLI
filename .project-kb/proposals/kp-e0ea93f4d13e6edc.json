@@ -1,0 +1,29 @@
+{
+  "change_range": "HEAD",
+  "confidence": 0.8,
+  "created_at": "2026-08-07T04:59:07+08:00",
+  "evidence": [
+    "src/project_knowledge/service.py"
+  ],
+  "operations": [
+    {
+      "block_id": "proposal-capabilities",
+      "content": "ProposalService 提供稳定 ID、目标与来源哈希复核、结构化 generated block Patch、ADR 只追加草案、apply/reject 审计、冲突冻结和幂等应用。ProjectService 仅在源码新增、修改或删除时创建 Semantic Update Queue 项，并排除 .github、docs、evaluation、tests 与 .project-kb；纯知识同步不会制造新的语义待办。",
+      "op": "upsert_generated_block"
+    }
+  ],
+  "proposal_id": "kp-e0ea93f4d13e6edc",
+  "reason": "确认队列过滤不污染 CI 与文档变更",
+  "requires_review": true,
+  "result_hash": "sha256:c7c32e10beb2aa061afe81ede44cf5a11235dd6b6519aa6b55ff96c2812179e8",
+  "review_reason": "已核对路径过滤实现、57 项测试和最终状态",
+  "reviewed_at": "2026-08-07T04:59:24+08:00",
+  "reviewer": "codex",
+  "schema_version": 1,
+  "source_hashes": {
+    "src/project_knowledge/service.py": "sha256:674717984b38036d2a70fd208f52944d14cff31278496937913a0971a0b4003a"
+  },
+  "status": "applied",
+  "target": "docs/knowledge/curated/architecture.md",
+  "target_hash": "sha256:48f1ae3d955dbf13e629796d87493c71ff1ffabcb77225c217cf2ceeaedb23cc"
+}

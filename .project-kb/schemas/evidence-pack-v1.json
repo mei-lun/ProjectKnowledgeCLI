@@ -1,0 +1,153 @@
+{
+  "$id": "https://project-kb.local/schema/evidence-pack-v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "estimated_tokens": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "files_considered": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "files_included": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "items": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "content_hash": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "end_line": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "kind": {
+            "enum": [
+              "file",
+              "symbol",
+              "knowledge",
+              "config",
+              "relation"
+            ]
+          },
+          "path": {
+            "pattern": "^(?!/)(?![A-Za-z]:[\\\\/])(?!.*(?:^|/)\\.\\.(?:/|$)).+",
+            "type": "string"
+          },
+          "redactions": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "line": {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "replacement": {
+                  "pattern": "^\\[REDACTED:[a-z0-9_-]+\\]$",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "kind",
+                "line",
+                "replacement"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "start_line": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "symbol_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "tokens": {
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "kind",
+          "path",
+          "content",
+          "content_hash",
+          "tokens",
+          "redactions"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "omitted": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "path": {
+            "pattern": "^(?!/)(?![A-Za-z]:[\\\\/])(?!.*(?:^|/)\\.\\.(?:/|$)).+",
+            "type": "string"
+          },
+          "reason": {
+            "enum": [
+              "high_risk_path",
+              "file_limit",
+              "token_limit",
+              "unreadable"
+            ]
+          }
+        },
+        "required": [
+          "path",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "pack_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "schema_version": {
+      "enum": [
+        1
+      ]
+    },
+    "source_commit": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "task": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "task",
+    "items",
+    "omitted",
+    "files_considered",
+    "files_included",
+    "estimated_tokens",
+    "pack_hash"
+  ],
+  "type": "object"
+}

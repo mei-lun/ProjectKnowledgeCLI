@@ -1,0 +1,35 @@
+{
+  "change_range": "WP08",
+  "confidence": 0.95,
+  "created_at": "2026-08-07T08:30:35+08:00",
+  "evidence": [
+    "docs/compatibility-matrix.md",
+    "src/project_knowledge/config.py",
+    "src/project_knowledge/provider.py",
+    "src/project_knowledge/schemas.py"
+  ],
+  "operations": [
+    {
+      "block_id": "wp08-provider-compatibility",
+      "content": "## WP-08 配置兼容补充\n\nProvider 配置属于 config-v1 Schema 的可扩展对象。v0→v1 迁移不会删除自定义 Provider 字段；高于 v1 的配置由旧程序显式拒绝，避免静默误解网络授权。当前正式 Provider ID 仍只有 disabled、fake、http-json，客户端适配不改变 Provider 的网络授权或证据外发边界。\n",
+      "op": "upsert_generated_block"
+    }
+  ],
+  "proposal_id": "kp-8afd0e40ac031596",
+  "reason": "WP08 配置迁移与客户端兼容复核",
+  "requires_review": true,
+  "result_hash": "sha256:b33ebf561958116e83d28ae65ff6e356d1e59db13ce0dfffcf99e22ec547a418",
+  "review_reason": "已核对 0.1.10 源码、回归测试与兼容性矩阵",
+  "reviewed_at": "2026-08-07T08:31:23+08:00",
+  "reviewer": "Codex",
+  "schema_version": 1,
+  "source_hashes": {
+    "docs/compatibility-matrix.md": "sha256:3daf4bed1a2a97a6e6fb19dc94dacccb5eddb6e5e06a63c1b8e24e80f9e35baa",
+    "src/project_knowledge/config.py": "sha256:7d0321ee6682ad910859e3f29c82e8d0fda63ce352883bf0e18f8aa21f7f5543",
+    "src/project_knowledge/provider.py": "sha256:f30830ca8b98dc9f4b154decbf62e8c9cfe542dc74246efd28a35790080d3369",
+    "src/project_knowledge/schemas.py": "sha256:d78ed920fe7f46b8c386eb5029b6e43f09092939d05bce146ba8cc115ae7c1dd"
+  },
+  "status": "applied",
+  "target": "docs/knowledge/curated/provider-and-evidence.md",
+  "target_hash": "sha256:893a4c327d8c2fead72681c727789fde016f2b0b97ee2a6e345c335e228c18e1"
+}

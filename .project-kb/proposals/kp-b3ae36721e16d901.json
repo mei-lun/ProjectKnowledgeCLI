@@ -1,0 +1,31 @@
+{
+  "change_range": "HEAD",
+  "confidence": 0.8,
+  "created_at": "2026-08-07T07:39:17+08:00",
+  "evidence": [
+    "docs/project-knowledge-system-audit.md",
+    "evaluation/thresholds.json"
+  ],
+  "operations": [
+    {
+      "block_id": "retrieval-contract",
+      "content": "- 功能开发上下文必须返回可解释的任务类型、候选模块、参考实现、扩展点、影响范围、验证命令和 unknowns；评分必须披露文本、可信度、新鲜度、类型与模块加权。\\n- 多跳影响分析默认受 max_hops 与 max_relations 双重边界约束；无法静态解析的动态派发、反射和依赖注入必须提示读取实时源码。\\n- 0.1.8 已完成 WP-06、WP-01/WP-02 本地 MVP；40 题冻结阈值沿用 0.1.7，另设 5 题 Lua/Skynet 适配补充集，后续以真实业务验收继续校准。",
+      "op": "upsert_generated_block"
+    }
+  ],
+  "proposal_id": "kp-b3ae36721e16d901",
+  "reason": "0.1.8：更新冻结阈值版本与 WP-01/WP-02 规则",
+  "requires_review": true,
+  "result_hash": "sha256:9ab11863a1c2d315a3b1b869f82e2c5599f034890193c083496d561665391c57",
+  "review_reason": "已核对 0.1.8 阈值、审计报告和补充评估集",
+  "reviewed_at": "2026-08-07T07:39:48+08:00",
+  "reviewer": "codex",
+  "schema_version": 1,
+  "source_hashes": {
+    "docs/project-knowledge-system-audit.md": "sha256:6cda6aec20479f7aa47212cbbaa49f9df299474236a78f9b0570416b30f7af2f",
+    "evaluation/thresholds.json": "sha256:df671121ff2d15d94af27e1357774bb31b256cbe5141d75ef61ea564f9be2942"
+  },
+  "status": "applied",
+  "target": "docs/knowledge/curated/conventions.md",
+  "target_hash": "sha256:c44f7e3a2851026059e506889116e5bb16bd082ea0682c46fb8762180153df76"
+}

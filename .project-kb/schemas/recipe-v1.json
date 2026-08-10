@@ -1,0 +1,274 @@
+{
+  "$id": "https://project-kb.local/schema/recipe-v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "goal": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "prerequisites": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "sources": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "authority": {
+                  "enum": [
+                    "source",
+                    "candidate"
+                  ]
+                },
+                "hash": {
+                  "pattern": "^sha256:[0-9a-f]{64}$",
+                  "type": "string"
+                },
+                "id": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "line": {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "path": {
+                  "pattern": "^(?!/)(?![A-Za-z]:[\\\\/])(?!.*(?:^|/)\\.\\.(?:/|$)).+",
+                  "type": "string"
+                },
+                "type": {
+                  "enum": [
+                    "file",
+                    "symbol"
+                  ]
+                }
+              },
+              "required": [
+                "type",
+                "path",
+                "line",
+                "hash",
+                "authority"
+              ],
+              "type": "object"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "text": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "text",
+          "sources"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "rollback": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "sources": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "authority": {
+                  "enum": [
+                    "source",
+                    "candidate"
+                  ]
+                },
+                "hash": {
+                  "pattern": "^sha256:[0-9a-f]{64}$",
+                  "type": "string"
+                },
+                "id": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "line": {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "path": {
+                  "pattern": "^(?!/)(?![A-Za-z]:[\\\\/])(?!.*(?:^|/)\\.\\.(?:/|$)).+",
+                  "type": "string"
+                },
+                "type": {
+                  "enum": [
+                    "file",
+                    "symbol"
+                  ]
+                }
+              },
+              "required": [
+                "type",
+                "path",
+                "line",
+                "hash",
+                "authority"
+              ],
+              "type": "object"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "text": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "text",
+          "sources"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "steps": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "sources": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "authority": {
+                  "enum": [
+                    "source",
+                    "candidate"
+                  ]
+                },
+                "hash": {
+                  "pattern": "^sha256:[0-9a-f]{64}$",
+                  "type": "string"
+                },
+                "id": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "line": {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "path": {
+                  "pattern": "^(?!/)(?![A-Za-z]:[\\\\/])(?!.*(?:^|/)\\.\\.(?:/|$)).+",
+                  "type": "string"
+                },
+                "type": {
+                  "enum": [
+                    "file",
+                    "symbol"
+                  ]
+                }
+              },
+              "required": [
+                "type",
+                "path",
+                "line",
+                "hash",
+                "authority"
+              ],
+              "type": "object"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "text": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "text",
+          "sources"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "title": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "verification": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "sources": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "authority": {
+                  "enum": [
+                    "source",
+                    "candidate"
+                  ]
+                },
+                "hash": {
+                  "pattern": "^sha256:[0-9a-f]{64}$",
+                  "type": "string"
+                },
+                "id": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "line": {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "path": {
+                  "pattern": "^(?!/)(?![A-Za-z]:[\\\\/])(?!.*(?:^|/)\\.\\.(?:/|$)).+",
+                  "type": "string"
+                },
+                "type": {
+                  "enum": [
+                    "file",
+                    "symbol"
+                  ]
+                }
+              },
+              "required": [
+                "type",
+                "path",
+                "line",
+                "hash",
+                "authority"
+              ],
+              "type": "object"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "text": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "text",
+          "sources"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    }
+  },
+  "required": [
+    "title",
+    "goal",
+    "prerequisites",
+    "steps",
+    "verification",
+    "rollback"
+  ],
+  "type": "object"
+}

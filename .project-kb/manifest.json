@@ -1,22 +1,34 @@
 {
-  "generated_at": "2026-08-06T22:37:16+08:00",
+  "generated_at": "2026-08-07T16:50:12+08:00",
   "project": "ProjectKnowledgeCLI",
   "records": [
     {
       "confidence": "verified",
       "id": "curated.architecture",
       "kind": "architecture",
-      "last_verified_at": "2026-08-06T22:26:28+08:00",
+      "last_verified_at": "2026-08-07T11:02:50+08:00",
       "ownership": "curated",
       "path": "docs/knowledge/curated/architecture.md",
-      "source_commit": "042d4ea63aa29a9f64b8bcb548b2b45681555188",
+      "source_commit": "991f7ba1a25c706ad9002ebdf85ea4f0bf89f947",
       "source_hashes": {
-        "src/project_knowledge/engine.py": "sha256:08410705ef4f69908f91b079323559f8a466c987175e510fc341294fa1070386",
-        "src/project_knowledge/knowledge.py": "sha256:45539e6e7ebcb0cc0f691adfe19531dfd322c588671583ead766ce2f279a31e7",
-        "src/project_knowledge/mcp.py": "sha256:4157aec530e33a127643cb991212bf97b009e7d1014fe13b754a8d2ac85a4a11",
-        "src/project_knowledge/retrieval.py": "sha256:5b0515a62f112846dce59df1e768cd94558a51e4d2c298f2c8ae7da3f00ac5d0",
-        "src/project_knowledge/service.py": "sha256:b77d50ee0e57892613afb8c5526d168bc35e152302eb1aa2d6493e09a65b22ae",
-        "src/project_knowledge/store.py": "sha256:f15ab352ada71e017bb51eda633047277514173c9ac8604bbbe71256df1d0137"
+        "evaluation/real_project_harness.py": "sha256:d970b13db02dcc3f0f6500599a5018a9fd37595186a275a9f6aa8e4b3922a915",
+        "src/project_knowledge/engine.py": "sha256:7ca42160a5611fdd968b9ce6e960584e19bfb7a5f4aa3c1668305092b23c40a9",
+        "src/project_knowledge/evaluate.py": "sha256:f0a8b683ab99886527d2b9a7d0c2f435f2eb9cdd7cd865efd792d0aec0ffb36d",
+        "src/project_knowledge/evidence.py": "sha256:a6e2d8b52da925698170141f61673d32647c7b3bbbab9eac2838524dce0e0197",
+        "src/project_knowledge/knowledge.py": "sha256:ab16f6c9ac5cc167ba713a4b4682301d865be3565646d9296da0f0ea6c54cc6d",
+        "src/project_knowledge/mcp.py": "sha256:2d1abb3d05ed5dd0f1f17ffdee05d6f0eb583fb5fece6c695cf61940bc1d82cc",
+        "src/project_knowledge/performance.py": "sha256:ff1633c2be5d487fc46420221c468dfa952339e9314d4324fb3899c2845ccbab",
+        "src/project_knowledge/proposal.py": "sha256:a375105e363ba431be8f3b7ae981f98af834fc2b19b93e65f083b18d341716ad",
+        "src/project_knowledge/provider.py": "sha256:f30830ca8b98dc9f4b154decbf62e8c9cfe542dc74246efd28a35790080d3369",
+        "src/project_knowledge/real_project.py": "sha256:fd9b662a08ddb024b9db426790846dc1206e37c40c2aa53ec3fdea60ad77dca3",
+        "src/project_knowledge/retrieval.py": "sha256:b1d2cecc7605d68528fe5c00c064b6009b49067e8c0265c648f3c7d59d85af04",
+        "src/project_knowledge/schemas.py": "sha256:d78ed920fe7f46b8c386eb5029b6e43f09092939d05bce146ba8cc115ae7c1dd",
+        "src/project_knowledge/semantic.py": "sha256:aac3e93a91a0730802c327bf7c93e7a5a51421c7493621743e972fd62a65930a",
+        "src/project_knowledge/service.py": "sha256:e54741174c584aa32c4df5f941eba67f356cd4f5e73dc5cccb7549561b609348",
+        "src/project_knowledge/store.py": "sha256:f15ab352ada71e017bb51eda633047277514173c9ac8604bbbe71256df1d0137",
+        "tests/test_evaluate.py": "sha256:47452455504a9596c6b0b6f8dc0f4a95643f502a127e0f853225ce083ff24033",
+        "tests/test_wp02_evidence.py": "sha256:2cde542c77d113d7091b804eb51c947b3e635e43341fe82185a1ab359adec8ef",
+        "tests/test_wp02_knowledge.py": "sha256:1c3d9a72ffc4c3a03f13280b41a4687c6147278da8cfc1398113be115a43ef5c"
       },
       "sources": [
         {
@@ -42,6 +54,70 @@
         {
           "path": "src/project_knowledge/mcp.py",
           "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/evaluate.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/performance.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/real_project.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/evidence.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/provider.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/semantic.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/proposal.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/schemas.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/engine.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/real_project.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/knowledge.py",
+          "type": "file"
+        },
+        {
+          "path": "evaluation/real_project_harness.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_wp02_evidence.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/evaluate.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_evaluate.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_wp02_knowledge.py",
+          "type": "file"
         }
       ],
       "status": "fresh",
@@ -54,26 +130,39 @@
       "confidence": "verified",
       "id": "curated.conventions",
       "kind": "conventions",
-      "last_verified_at": "2026-08-06T22:37:16+08:00",
+      "last_verified_at": "2026-08-07T11:02:50+08:00",
       "ownership": "curated",
       "path": "docs/knowledge/curated/conventions.md",
-      "source_commit": "042d4ea63aa29a9f64b8bcb548b2b45681555188",
+      "source_commit": "991f7ba1a25c706ad9002ebdf85ea4f0bf89f947",
       "source_hashes": {
+        "CHANGELOG.md": "sha256:d499b332fe1da14bd9c90274edff12474cee8ebadc2e58c352a08b9547682dce",
+        "docs/project-knowledge-system-audit.md": "sha256:bf84bae956749723b8441ae2839f0a3660aa531b3a22e5aa88b20fdec5553db1",
+        "evaluation/thresholds.json": "sha256:df671121ff2d15d94af27e1357774bb31b256cbe5141d75ef61ea564f9be2942",
         "pyproject.toml": "sha256:8723ebe262c16975fa387bbe4365ee73f394546c9c050f4fcd81288d1097d206",
         "scripts/bump_version.py": "sha256:84f254dec8f3c3e1fd1dd58d995a675db61fd03839c215cf77733ad41c0c821d",
-        "src/project_knowledge/__init__.py": "sha256:8cd4ceeae574e2efb19590ac5d6f65c7d945169ca327ef44c9ba0b2f46d93eb6",
-        "src/project_knowledge/knowledge.py": "sha256:45539e6e7ebcb0cc0f691adfe19531dfd322c588671583ead766ce2f279a31e7",
-        "src/project_knowledge/util.py": "sha256:485f1cb19a1be6a0a41e2b2a3c643ecc01ad8bddaa3e55539805829bd8f1002a",
-        "src/project_knowledge/versioning.py": "sha256:f3eea7a34d6b17948a404a5d72bb6730be7ba975241609bd56635e01bc505d96",
-        "tests/test_integration.py": "sha256:937dfd9e64f5181d162f3d5aff6cda36ef1598e1f9a5e409d33ac00a378ae21f"
+        "src/project_knowledge/__init__.py": "sha256:c35b41a0c24dfdba654df604eedeb52ceadbd0fe393112ac7c49b34142f140c8",
+        "src/project_knowledge/config.py": "sha256:7d0321ee6682ad910859e3f29c82e8d0fda63ce352883bf0e18f8aa21f7f5543",
+        "src/project_knowledge/engine.py": "sha256:7ca42160a5611fdd968b9ce6e960584e19bfb7a5f4aa3c1668305092b23c40a9",
+        "src/project_knowledge/evaluate.py": "sha256:f0a8b683ab99886527d2b9a7d0c2f435f2eb9cdd7cd865efd792d0aec0ffb36d",
+        "src/project_knowledge/evidence.py": "sha256:a6e2d8b52da925698170141f61673d32647c7b3bbbab9eac2838524dce0e0197",
+        "src/project_knowledge/knowledge.py": "sha256:ab16f6c9ac5cc167ba713a4b4682301d865be3565646d9296da0f0ea6c54cc6d",
+        "src/project_knowledge/proposal.py": "sha256:a375105e363ba431be8f3b7ae981f98af834fc2b19b93e65f083b18d341716ad",
+        "src/project_knowledge/provider.py": "sha256:f30830ca8b98dc9f4b154decbf62e8c9cfe542dc74246efd28a35790080d3369",
+        "src/project_knowledge/real_project.py": "sha256:fd9b662a08ddb024b9db426790846dc1206e37c40c2aa53ec3fdea60ad77dca3",
+        "src/project_knowledge/schemas.py": "sha256:d78ed920fe7f46b8c386eb5029b6e43f09092939d05bce146ba8cc115ae7c1dd",
+        "src/project_knowledge/semantic.py": "sha256:aac3e93a91a0730802c327bf7c93e7a5a51421c7493621743e972fd62a65930a",
+        "src/project_knowledge/util.py": "sha256:6dfc2137d898294c0f7a5336fa6fefda06a5c8a0c215db091a71dd58aaa35ad2",
+        "src/project_knowledge/versioning.py": "sha256:28c1eb70f34cef82854e409a23843cfe22a0c29eff5595dab889fd32b2f1cedb",
+        "tests/test_evaluate.py": "sha256:47452455504a9596c6b0b6f8dc0f4a95643f502a127e0f853225ce083ff24033",
+        "tests/test_integration.py": "sha256:4e0da8217238bfad172841f20a29ffbbe1cf6266fbb49d4caec4641388c33b0c",
+        "tests/test_proposal.py": "sha256:c860e3c64b1bbcea4baafb3552cf52c5995aeeae8c191cde64acc697c3226c86",
+        "tests/test_semantic.py": "sha256:5096d0b214e11b63da79bbdf3b3a606ccd1623010770b0c1d693ded2e1ac4886",
+        "tests/test_wp02_evidence.py": "sha256:2cde542c77d113d7091b804eb51c947b3e635e43341fe82185a1ab359adec8ef",
+        "tests/test_wp02_knowledge.py": "sha256:1c3d9a72ffc4c3a03f13280b41a4687c6147278da8cfc1398113be115a43ef5c"
       },
       "sources": [
         {
           "path": "pyproject.toml",
-          "type": "file"
-        },
-        {
-          "path": "src/project_knowledge/__init__.py",
           "type": "file"
         },
         {
@@ -82,6 +171,10 @@
         },
         {
           "path": "scripts/bump_version.py",
+          "type": "file"
+        },
+        {
+          "path": "docs/project-knowledge-system-audit.md",
           "type": "file"
         },
         {
@@ -95,9 +188,89 @@
         {
           "path": "src/project_knowledge/util.py",
           "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/evaluate.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/real_project.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/config.py",
+          "type": "file"
+        },
+        {
+          "path": "evaluation/thresholds.json",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/evidence.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/provider.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/semantic.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/schemas.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_semantic.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/proposal.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_proposal.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/__init__.py",
+          "type": "file"
+        },
+        {
+          "path": "CHANGELOG.md",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/engine.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/real_project.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/knowledge.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_wp02_evidence.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/evaluate.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_evaluate.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_wp02_knowledge.py",
+          "type": "file"
         }
       ],
-      "status": "fresh",
+      "status": "potentially_stale",
       "tags": [
         "curated"
       ],
@@ -105,19 +278,134 @@
     },
     {
       "confidence": "verified",
+      "id": "curated.feature.guide.generation",
+      "kind": "feature-guide-generation",
+      "last_verified_at": "2026-08-07T11:02:50+08:00",
+      "ownership": "curated",
+      "path": "docs/knowledge/curated/feature-guide-generation.md",
+      "source_commit": "991f7ba1a25c706ad9002ebdf85ea4f0bf89f947",
+      "source_hashes": {
+        "src/project_knowledge/engine.py": "sha256:7ca42160a5611fdd968b9ce6e960584e19bfb7a5f4aa3c1668305092b23c40a9",
+        "src/project_knowledge/evaluate.py": "sha256:f0a8b683ab99886527d2b9a7d0c2f435f2eb9cdd7cd865efd792d0aec0ffb36d",
+        "src/project_knowledge/knowledge.py": "sha256:ab16f6c9ac5cc167ba713a4b4682301d865be3565646d9296da0f0ea6c54cc6d",
+        "src/project_knowledge/proposal.py": "sha256:a375105e363ba431be8f3b7ae981f98af834fc2b19b93e65f083b18d341716ad",
+        "src/project_knowledge/real_project.py": "sha256:fd9b662a08ddb024b9db426790846dc1206e37c40c2aa53ec3fdea60ad77dca3",
+        "src/project_knowledge/retrieval.py": "sha256:b1d2cecc7605d68528fe5c00c064b6009b49067e8c0265c648f3c7d59d85af04",
+        "src/project_knowledge/schemas.py": "sha256:d78ed920fe7f46b8c386eb5029b6e43f09092939d05bce146ba8cc115ae7c1dd",
+        "src/project_knowledge/semantic.py": "sha256:aac3e93a91a0730802c327bf7c93e7a5a51421c7493621743e972fd62a65930a",
+        "src/project_knowledge/service.py": "sha256:e54741174c584aa32c4df5f941eba67f356cd4f5e73dc5cccb7549561b609348",
+        "tests/test_proposal.py": "sha256:c860e3c64b1bbcea4baafb3552cf52c5995aeeae8c191cde64acc697c3226c86",
+        "tests/test_semantic.py": "sha256:5096d0b214e11b63da79bbdf3b3a606ccd1623010770b0c1d693ded2e1ac4886",
+        "tests/test_wp02_knowledge.py": "sha256:1c3d9a72ffc4c3a03f13280b41a4687c6147278da8cfc1398113be115a43ef5c"
+      },
+      "sources": [
+        {
+          "path": "src/project_knowledge/semantic.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/schemas.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/semantic.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/schemas.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/knowledge.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/retrieval.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/service.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/proposal.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_proposal.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_semantic.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/engine.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/real_project.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_wp02_knowledge.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/knowledge.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/evaluate.py",
+          "type": "file"
+        }
+      ],
+      "status": "fresh",
+      "tags": [
+        "curated"
+      ],
+      "title": "功能开发指南生成约定"
+    },
+    {
+      "confidence": "verified",
       "id": "curated.glossary",
       "kind": "glossary",
-      "last_verified_at": "2026-08-06T22:23:16+08:00",
+      "last_verified_at": "2026-08-07T08:33:15+08:00",
       "ownership": "curated",
       "path": "docs/knowledge/curated/glossary.md",
-      "source_commit": "042d4ea63aa29a9f64b8bcb548b2b45681555188",
+      "source_commit": "991f7ba1a25c706ad9002ebdf85ea4f0bf89f947",
       "source_hashes": {
         "docs/project-knowledge-system-design.md": "sha256:38fdbcb8884dfa6607d1626adf3c9848d7d73bba3759b5e05ee5cf815401fa2f",
-        "src/project_knowledge/models.py": "sha256:9b273998620a8f170cc62c7c606f8440a171d2450d300c4c547c39f706c6b856"
+        "src/project_knowledge/evidence.py": "sha256:a6e2d8b52da925698170141f61673d32647c7b3bbbab9eac2838524dce0e0197",
+        "src/project_knowledge/models.py": "sha256:ba171bac907a4f4eaf49d817cc20b6a1cfecf79aec2c0e96fdaf0021e8dc66e9",
+        "src/project_knowledge/proposal.py": "sha256:a375105e363ba431be8f3b7ae981f98af834fc2b19b93e65f083b18d341716ad",
+        "src/project_knowledge/provider.py": "sha256:f30830ca8b98dc9f4b154decbf62e8c9cfe542dc74246efd28a35790080d3369",
+        "src/project_knowledge/schemas.py": "sha256:d78ed920fe7f46b8c386eb5029b6e43f09092939d05bce146ba8cc115ae7c1dd",
+        "src/project_knowledge/semantic.py": "sha256:aac3e93a91a0730802c327bf7c93e7a5a51421c7493621743e972fd62a65930a"
       },
       "sources": [
         {
           "path": "src/project_knowledge/models.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/evidence.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/provider.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/semantic.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/proposal.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/schemas.py",
           "type": "file"
         },
         {
@@ -133,27 +421,87 @@
     },
     {
       "confidence": "verified",
+      "id": "curated.provider.and.evidence",
+      "kind": "provider-and-evidence",
+      "last_verified_at": "2026-08-07T08:33:15+08:00",
+      "ownership": "curated",
+      "path": "docs/knowledge/curated/provider-and-evidence.md",
+      "source_commit": "991f7ba1a25c706ad9002ebdf85ea4f0bf89f947",
+      "source_hashes": {
+        "src/project_knowledge/cli.py": "sha256:8455600298603987002cf66d42802008eb1b0987ddcd5594235867a8e93b2568",
+        "src/project_knowledge/config.py": "sha256:7d0321ee6682ad910859e3f29c82e8d0fda63ce352883bf0e18f8aa21f7f5543",
+        "src/project_knowledge/evidence.py": "sha256:a6e2d8b52da925698170141f61673d32647c7b3bbbab9eac2838524dce0e0197",
+        "src/project_knowledge/models.py": "sha256:ba171bac907a4f4eaf49d817cc20b6a1cfecf79aec2c0e96fdaf0021e8dc66e9",
+        "src/project_knowledge/proposal.py": "sha256:a375105e363ba431be8f3b7ae981f98af834fc2b19b93e65f083b18d341716ad",
+        "src/project_knowledge/provider.py": "sha256:f30830ca8b98dc9f4b154decbf62e8c9cfe542dc74246efd28a35790080d3369",
+        "src/project_knowledge/schemas.py": "sha256:d78ed920fe7f46b8c386eb5029b6e43f09092939d05bce146ba8cc115ae7c1dd",
+        "src/project_knowledge/semantic.py": "sha256:aac3e93a91a0730802c327bf7c93e7a5a51421c7493621743e972fd62a65930a"
+      },
+      "sources": [
+        {
+          "path": "src/project_knowledge/proposal.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/evidence.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/provider.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/config.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/cli.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/models.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/schemas.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/semantic.py",
+          "type": "file"
+        }
+      ],
+      "status": "fresh",
+      "tags": [
+        "curated"
+      ],
+      "title": "Provider 与 EvidencePack"
+    },
+    {
+      "confidence": "verified",
       "id": "decision.0001.local.first.core",
       "kind": "decision",
-      "last_verified_at": "2026-08-06T22:37:16+08:00",
+      "last_verified_at": "2026-08-07T08:33:15+08:00",
       "ownership": "decision",
       "path": "docs/knowledge/decisions/0001-local-first-core.md",
-      "source_commit": "042d4ea63aa29a9f64b8bcb548b2b45681555188",
+      "source_commit": "991f7ba1a25c706ad9002ebdf85ea4f0bf89f947",
       "source_hashes": {
         "docs/project-knowledge-system-design.md": "sha256:38fdbcb8884dfa6607d1626adf3c9848d7d73bba3759b5e05ee5cf815401fa2f",
         "pyproject.toml": "sha256:8723ebe262c16975fa387bbe4365ee73f394546c9c050f4fcd81288d1097d206",
-        "src/project_knowledge/__init__.py": "sha256:8cd4ceeae574e2efb19590ac5d6f65c7d945169ca327ef44c9ba0b2f46d93eb6",
-        "src/project_knowledge/engine.py": "sha256:08410705ef4f69908f91b079323559f8a466c987175e510fc341294fa1070386",
-        "src/project_knowledge/mcp.py": "sha256:4157aec530e33a127643cb991212bf97b009e7d1014fe13b754a8d2ac85a4a11",
-        "src/project_knowledge/versioning.py": "sha256:f3eea7a34d6b17948a404a5d72bb6730be7ba975241609bd56635e01bc505d96"
+        "src/project_knowledge/engine.py": "sha256:eaf47eed8d38a594b706014ac8fb3b9a024713e71442c170cabf011768d8da4a",
+        "src/project_knowledge/evaluate.py": "sha256:a7f97f300c650a24f0415049469306c3be72fabeef36758f5fac3e0b4c6e3c99",
+        "src/project_knowledge/evidence.py": "sha256:a6e2d8b52da925698170141f61673d32647c7b3bbbab9eac2838524dce0e0197",
+        "src/project_knowledge/mcp.py": "sha256:2d1abb3d05ed5dd0f1f17ffdee05d6f0eb583fb5fece6c695cf61940bc1d82cc",
+        "src/project_knowledge/proposal.py": "sha256:a375105e363ba431be8f3b7ae981f98af834fc2b19b93e65f083b18d341716ad",
+        "src/project_knowledge/provider.py": "sha256:f30830ca8b98dc9f4b154decbf62e8c9cfe542dc74246efd28a35790080d3369",
+        "src/project_knowledge/real_project.py": "sha256:1ffb7ca3250335125ca34071eb07aca1f8456598e24a04c3d54adf4cc6066fb1",
+        "src/project_knowledge/schemas.py": "sha256:d78ed920fe7f46b8c386eb5029b6e43f09092939d05bce146ba8cc115ae7c1dd",
+        "src/project_knowledge/semantic.py": "sha256:aac3e93a91a0730802c327bf7c93e7a5a51421c7493621743e972fd62a65930a",
+        "src/project_knowledge/versioning.py": "sha256:28c1eb70f34cef82854e409a23843cfe22a0c29eff5595dab889fd32b2f1cedb"
       },
       "sources": [
         {
           "path": "pyproject.toml",
-          "type": "file"
-        },
-        {
-          "path": "src/project_knowledge/__init__.py",
           "type": "file"
         },
         {
@@ -169,26 +517,206 @@
           "type": "file"
         },
         {
+          "path": "src/project_knowledge/real_project.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/evaluate.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/evidence.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/provider.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/semantic.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/proposal.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/schemas.py",
+          "type": "file"
+        },
+        {
           "path": "docs/project-knowledge-system-design.md",
           "type": "file"
         }
       ],
-      "status": "fresh",
+      "status": "potentially_stale",
       "tags": [
         "decision"
       ],
       "title": "ADR 0001：本地优先、无依赖的 MVP 核心"
     },
     {
+      "confidence": "verified",
+      "id": "decision.0002.codegraph.adapter.boundary",
+      "kind": "decision",
+      "last_verified_at": "2026-08-07T07:09:24+08:00",
+      "ownership": "decision",
+      "path": "docs/knowledge/decisions/0002-codegraph-adapter-boundary.md",
+      "source_commit": "991f7ba1a25c706ad9002ebdf85ea4f0bf89f947",
+      "sources": [],
+      "status": "fresh",
+      "tags": [
+        "decision"
+      ],
+      "title": "ADR-0002：CodeGraph Adapter 边界与本地替代方案"
+    },
+    {
+      "confidence": "verified",
+      "id": "decision.0003.lua.skynet.entry.evidence",
+      "kind": "decision",
+      "last_verified_at": "2026-08-07T10:21:53+08:00",
+      "ownership": "decision",
+      "path": "docs/knowledge/decisions/0003-lua-skynet-entry-evidence.md",
+      "source_commit": "991f7ba1a25c706ad9002ebdf85ea4f0bf89f947",
+      "source_hashes": {
+        "evaluation/real_project_harness.py": "sha256:d970b13db02dcc3f0f6500599a5018a9fd37595186a275a9f6aa8e4b3922a915",
+        "src/project_knowledge/engine.py": "sha256:7ca42160a5611fdd968b9ce6e960584e19bfb7a5f4aa3c1668305092b23c40a9",
+        "src/project_knowledge/knowledge.py": "sha256:f5c8f5a3a7800fc031e1848e58c775905352735295bf1753949747bed2d2b6af",
+        "src/project_knowledge/real_project.py": "sha256:fd9b662a08ddb024b9db426790846dc1206e37c40c2aa53ec3fdea60ad77dca3",
+        "tests/test_wp02_evidence.py": "sha256:2cde542c77d113d7091b804eb51c947b3e635e43341fe82185a1ab359adec8ef",
+        "tests/test_wp02_knowledge.py": "sha256:e2a39c3a5d864637dbe0edbe619ebf962653ac3fe19e7d30f59bc5564be45975"
+      },
+      "sources": [
+        {
+          "path": "src/project_knowledge/engine.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/real_project.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/knowledge.py",
+          "type": "file"
+        },
+        {
+          "path": "evaluation/real_project_harness.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_wp02_evidence.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_wp02_knowledge.py",
+          "type": "file"
+        }
+      ],
+      "status": "potentially_stale",
+      "tags": [
+        "decision"
+      ],
+      "title": "ADR 0003：Lua/Skynet 入口证据与只读 revision 边界"
+    },
+    {
+      "confidence": "generated",
+      "id": "generated.entrypoints",
+      "kind": "entrypoint",
+      "last_generated_at": "2026-08-07T16:50:12+08:00",
+      "ownership": "generated",
+      "path": "docs/knowledge/generated/entrypoints.md",
+      "source_commit": "991f7ba1a25c706ad9002ebdf85ea4f0bf89f947",
+      "source_hashes": {
+        "src/project_knowledge/engine.py": "sha256:7ca42160a5611fdd968b9ce6e960584e19bfb7a5f4aa3c1668305092b23c40a9",
+        "src/project_knowledge/knowledge.py": "sha256:ab16f6c9ac5cc167ba713a4b4682301d865be3565646d9296da0f0ea6c54cc6d"
+      },
+      "sources": [
+        {
+          "path": "src/project_knowledge/engine.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/knowledge.py",
+          "type": "file"
+        }
+      ],
+      "status": "fresh",
+      "tags": [
+        "entrypoints",
+        "lua",
+        "skynet",
+        "runtime-boundary"
+      ],
+      "title": "Lua/Skynet 入口证据"
+    },
+    {
+      "confidence": "generated",
+      "id": "generated.module.evaluation",
+      "kind": "module",
+      "last_generated_at": "2026-08-07T16:50:12+08:00",
+      "ownership": "generated",
+      "path": "docs/knowledge/generated/modules/evaluation.md",
+      "source_commit": "991f7ba1a25c706ad9002ebdf85ea4f0bf89f947",
+      "source_hashes": {
+        "evaluation/performance_harness.py": "sha256:e2e4e3180624bb56a5cd72c4ec4becd6b2fe4a9b044bd4f1d5bac409084b65e0",
+        "evaluation/real_project_harness.py": "sha256:d970b13db02dcc3f0f6500599a5018a9fd37595186a275a9f6aa8e4b3922a915",
+        "evaluation/thresholds.json": "sha256:df671121ff2d15d94af27e1357774bb31b256cbe5141d75ef61ea564f9be2942"
+      },
+      "sources": [
+        {
+          "path": "evaluation/performance_harness.py",
+          "type": "file"
+        },
+        {
+          "path": "evaluation/real_project_harness.py",
+          "type": "file"
+        },
+        {
+          "path": "evaluation/thresholds.json",
+          "type": "file"
+        }
+      ],
+      "status": "fresh",
+      "tags": [
+        "module",
+        "evaluation"
+      ],
+      "title": "模块：evaluation"
+    },
+    {
+      "confidence": "generated",
+      "id": "generated.module.github",
+      "kind": "module",
+      "last_generated_at": "2026-08-07T16:50:12+08:00",
+      "ownership": "generated",
+      "path": "docs/knowledge/generated/modules/github.md",
+      "source_commit": "991f7ba1a25c706ad9002ebdf85ea4f0bf89f947",
+      "source_hashes": {
+        ".github/workflows/quality.yml": "sha256:25d7361fd153f45224df0b2caf3e4a9adcc29cdca513c4f295f9a20089d1cffa"
+      },
+      "sources": [
+        {
+          "path": ".github/workflows/quality.yml",
+          "type": "file"
+        }
+      ],
+      "status": "fresh",
+      "tags": [
+        "module",
+        ".github"
+      ],
+      "title": "模块：.github"
+    },
+    {
       "confidence": "generated",
       "id": "generated.module.plugins",
       "kind": "module",
-      "last_generated_at": "2026-08-06T22:37:16+08:00",
+      "last_generated_at": "2026-08-07T16:50:12+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/plugins.md",
-      "source_commit": "042d4ea63aa29a9f64b8bcb548b2b45681555188",
+      "source_commit": "991f7ba1a25c706ad9002ebdf85ea4f0bf89f947",
       "source_hashes": {
-        "plugins/project-knowledge/.codex-plugin/plugin.json": "sha256:b2b59059b603bb89db8dc369e6216c6926a45bbff7f128015b7463f8987ef386",
+        "plugins/project-knowledge/.codex-plugin/plugin.json": "sha256:88993c2a1980947715e086b37c142170a8d80149f7e54e8a1dfc66dd5f4749a5",
         "plugins/project-knowledge/.mcp.json": "sha256:072d3643cbe55c77fda5316adb51858e49132b1aac079a741c811a26b3b94c1e",
         "plugins/project-knowledge/hooks/sync_after_task.py": "sha256:17a639cbf549923ae57be2bb45ff88706a38cbcaa8556d25588fe7d3912ce110",
         "plugins/project-knowledge/scripts/project_status.py": "sha256:7f8532a6c877d51ed78ebf71d7c35c700d28691483f44c16717f39fe0b3ec7cc",
@@ -227,26 +755,32 @@
       "confidence": "generated",
       "id": "generated.module.project_knowledge",
       "kind": "module",
-      "last_generated_at": "2026-08-06T22:37:16+08:00",
+      "last_generated_at": "2026-08-07T16:50:12+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/project_knowledge.md",
-      "source_commit": "042d4ea63aa29a9f64b8bcb548b2b45681555188",
+      "source_commit": "991f7ba1a25c706ad9002ebdf85ea4f0bf89f947",
       "source_hashes": {
-        "src/project_knowledge/__init__.py": "sha256:8cd4ceeae574e2efb19590ac5d6f65c7d945169ca327ef44c9ba0b2f46d93eb6",
+        "src/project_knowledge/__init__.py": "sha256:c35b41a0c24dfdba654df604eedeb52ceadbd0fe393112ac7c49b34142f140c8",
         "src/project_knowledge/__main__.py": "sha256:2cdd23d4f5cd6c3b3e4cb690ad16d560637767b9ca5b2a3cf129fcc0a5ebc82b",
-        "src/project_knowledge/cli.py": "sha256:7e9a000964fbcf87ad1c2edeb3692797e17c08a6db4cb1ab19aa428c1779efe6",
-        "src/project_knowledge/config.py": "sha256:897cb4d549ffd64570f7edc0f7acafbf16bf8aba3974948b169fd940bc557eda",
-        "src/project_knowledge/engine.py": "sha256:08410705ef4f69908f91b079323559f8a466c987175e510fc341294fa1070386",
-        "src/project_knowledge/evaluate.py": "sha256:a897c866f4b471b2c800d16b574475455c77e44eae54653b9a143b687243a36e",
-        "src/project_knowledge/knowledge.py": "sha256:45539e6e7ebcb0cc0f691adfe19531dfd322c588671583ead766ce2f279a31e7",
-        "src/project_knowledge/mcp.py": "sha256:4157aec530e33a127643cb991212bf97b009e7d1014fe13b754a8d2ac85a4a11",
-        "src/project_knowledge/models.py": "sha256:9b273998620a8f170cc62c7c606f8440a171d2450d300c4c547c39f706c6b856",
-        "src/project_knowledge/retrieval.py": "sha256:5b0515a62f112846dce59df1e768cd94558a51e4d2c298f2c8ae7da3f00ac5d0",
-        "src/project_knowledge/schemas.py": "sha256:88b3b1eb75aa713b8b9c5e6183906106151da76d2682be539f4c786af7a4ecc8",
-        "src/project_knowledge/service.py": "sha256:b77d50ee0e57892613afb8c5526d168bc35e152302eb1aa2d6493e09a65b22ae",
+        "src/project_knowledge/cli.py": "sha256:8455600298603987002cf66d42802008eb1b0987ddcd5594235867a8e93b2568",
+        "src/project_knowledge/config.py": "sha256:7d0321ee6682ad910859e3f29c82e8d0fda63ce352883bf0e18f8aa21f7f5543",
+        "src/project_knowledge/engine.py": "sha256:7ca42160a5611fdd968b9ce6e960584e19bfb7a5f4aa3c1668305092b23c40a9",
+        "src/project_knowledge/evaluate.py": "sha256:f0a8b683ab99886527d2b9a7d0c2f435f2eb9cdd7cd865efd792d0aec0ffb36d",
+        "src/project_knowledge/evidence.py": "sha256:a6e2d8b52da925698170141f61673d32647c7b3bbbab9eac2838524dce0e0197",
+        "src/project_knowledge/knowledge.py": "sha256:ab16f6c9ac5cc167ba713a4b4682301d865be3565646d9296da0f0ea6c54cc6d",
+        "src/project_knowledge/mcp.py": "sha256:2d1abb3d05ed5dd0f1f17ffdee05d6f0eb583fb5fece6c695cf61940bc1d82cc",
+        "src/project_knowledge/models.py": "sha256:ba171bac907a4f4eaf49d817cc20b6a1cfecf79aec2c0e96fdaf0021e8dc66e9",
+        "src/project_knowledge/performance.py": "sha256:ff1633c2be5d487fc46420221c468dfa952339e9314d4324fb3899c2845ccbab",
+        "src/project_knowledge/proposal.py": "sha256:a375105e363ba431be8f3b7ae981f98af834fc2b19b93e65f083b18d341716ad",
+        "src/project_knowledge/provider.py": "sha256:f30830ca8b98dc9f4b154decbf62e8c9cfe542dc74246efd28a35790080d3369",
+        "src/project_knowledge/real_project.py": "sha256:fd9b662a08ddb024b9db426790846dc1206e37c40c2aa53ec3fdea60ad77dca3",
+        "src/project_knowledge/retrieval.py": "sha256:b1d2cecc7605d68528fe5c00c064b6009b49067e8c0265c648f3c7d59d85af04",
+        "src/project_knowledge/schemas.py": "sha256:d78ed920fe7f46b8c386eb5029b6e43f09092939d05bce146ba8cc115ae7c1dd",
+        "src/project_knowledge/semantic.py": "sha256:aac3e93a91a0730802c327bf7c93e7a5a51421c7493621743e972fd62a65930a",
+        "src/project_knowledge/service.py": "sha256:e54741174c584aa32c4df5f941eba67f356cd4f5e73dc5cccb7549561b609348",
         "src/project_knowledge/store.py": "sha256:f15ab352ada71e017bb51eda633047277514173c9ac8604bbbe71256df1d0137",
-        "src/project_knowledge/util.py": "sha256:485f1cb19a1be6a0a41e2b2a3c643ecc01ad8bddaa3e55539805829bd8f1002a",
-        "src/project_knowledge/versioning.py": "sha256:f3eea7a34d6b17948a404a5d72bb6730be7ba975241609bd56635e01bc505d96"
+        "src/project_knowledge/util.py": "sha256:6dfc2137d898294c0f7a5336fa6fefda06a5c8a0c215db091a71dd58aaa35ad2",
+        "src/project_knowledge/versioning.py": "sha256:28c1eb70f34cef82854e409a23843cfe22a0c29eff5595dab889fd32b2f1cedb"
       },
       "sources": [
         {
@@ -274,6 +808,10 @@
           "type": "file"
         },
         {
+          "path": "src/project_knowledge/evidence.py",
+          "type": "file"
+        },
+        {
           "path": "src/project_knowledge/knowledge.py",
           "type": "file"
         },
@@ -286,11 +824,31 @@
           "type": "file"
         },
         {
+          "path": "src/project_knowledge/performance.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/proposal.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/provider.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/real_project.py",
+          "type": "file"
+        },
+        {
           "path": "src/project_knowledge/retrieval.py",
           "type": "file"
         },
         {
           "path": "src/project_knowledge/schemas.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/semantic.py",
           "type": "file"
         },
         {
@@ -321,12 +879,12 @@
       "confidence": "generated",
       "id": "generated.module.root",
       "kind": "module",
-      "last_generated_at": "2026-08-06T22:37:16+08:00",
+      "last_generated_at": "2026-08-07T16:50:12+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/root.md",
-      "source_commit": "042d4ea63aa29a9f64b8bcb548b2b45681555188",
+      "source_commit": "991f7ba1a25c706ad9002ebdf85ea4f0bf89f947",
       "source_hashes": {
-        ".project-kb.yml": "sha256:49a91ebeaf01b7e5d19c8a7dbb39187be6e5571861de9474014f1abcce2f3cc2",
+        ".project-kb.yml": "sha256:e01e73c58691764462ebcfaceb13c96b2db6e093a06e6f0bfde386b18afee1fe",
         "pyproject.toml": "sha256:8723ebe262c16975fa387bbe4365ee73f394546c9c050f4fcd81288d1097d206"
       },
       "sources": [
@@ -350,10 +908,10 @@
       "confidence": "generated",
       "id": "generated.module.scripts",
       "kind": "module",
-      "last_generated_at": "2026-08-06T22:37:16+08:00",
+      "last_generated_at": "2026-08-07T16:50:12+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/scripts.md",
-      "source_commit": "042d4ea63aa29a9f64b8bcb548b2b45681555188",
+      "source_commit": "991f7ba1a25c706ad9002ebdf85ea4f0bf89f947",
       "source_hashes": {
         "scripts/bump_version.py": "sha256:84f254dec8f3c3e1fd1dd58d995a675db61fd03839c215cf77733ad41c0c821d"
       },
@@ -374,16 +932,27 @@
       "confidence": "generated",
       "id": "generated.module.tests",
       "kind": "module",
-      "last_generated_at": "2026-08-06T22:37:16+08:00",
+      "last_generated_at": "2026-08-07T16:50:12+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/tests.md",
-      "source_commit": "042d4ea63aa29a9f64b8bcb548b2b45681555188",
+      "source_commit": "991f7ba1a25c706ad9002ebdf85ea4f0bf89f947",
       "source_hashes": {
         "tests/__init__.py": "sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
-        "tests/test_config.py": "sha256:53fde221689b942cf0271d21b01165bb3cb92702d21dc9ea0bede37597515edd",
-        "tests/test_engine.py": "sha256:7aad045f23ee56e1339cd2a76585dff1d5da00a2b674dd8d927635d1dc5f5c51",
-        "tests/test_integration.py": "sha256:937dfd9e64f5181d162f3d5aff6cda36ef1598e1f9a5e409d33ac00a378ae21f",
-        "tests/test_versioning.py": "sha256:32d5fb568b5879d51ffcabc3ec2d3df7536e06b7f5feeae6d44046b2fdedba7a"
+        "tests/test_config.py": "sha256:b170829f183a322a98cca09a6308ec20999625824ab863f2595b4b1d1f3a1314",
+        "tests/test_engine.py": "sha256:6dc9fc50a5f9daae30ca9c9a39c6c56a56f40273a12408f72ba5941f79ace22f",
+        "tests/test_engine_wp01_wp02.py": "sha256:aa008f1f56889e0c981ba8f73a59c449e866fa1bdc27d44cc0c1abc6081d0a9a",
+        "tests/test_evaluate.py": "sha256:47452455504a9596c6b0b6f8dc0f4a95643f502a127e0f853225ce083ff24033",
+        "tests/test_integration.py": "sha256:4e0da8217238bfad172841f20a29ffbbe1cf6266fbb49d4caec4641388c33b0c",
+        "tests/test_proposal.py": "sha256:c860e3c64b1bbcea4baafb3552cf52c5995aeeae8c191cde64acc697c3226c86",
+        "tests/test_provider.py": "sha256:d102bc1491a9ffd31cdb98a3aab10db56c91b315560e4bd6a11c4d41314fc8ea",
+        "tests/test_retrieval_wp06.py": "sha256:462856ce988466674b8fc69e795376ebd945ca9f22bee6388160be571abd9d85",
+        "tests/test_schemas.py": "sha256:18de3ca98051cc8895aeb3ed9a8e7d4bd97d7cb5de4a72886614371e3291cdc4",
+        "tests/test_semantic.py": "sha256:5096d0b214e11b63da79bbdf3b3a606ccd1623010770b0c1d693ded2e1ac4886",
+        "tests/test_versioning.py": "sha256:954ef4ea592d10ee884c875a6f51339fcca9a005ce0599fdf1220c6e506175de",
+        "tests/test_watch_wp07.py": "sha256:4643a4d2b2d18ebbdf7bf6c71564f4c4b56f9efbf2fa0734008a6607134582c8",
+        "tests/test_wp02_evidence.py": "sha256:2cde542c77d113d7091b804eb51c947b3e635e43341fe82185a1ab359adec8ef",
+        "tests/test_wp02_knowledge.py": "sha256:1c3d9a72ffc4c3a03f13280b41a4687c6147278da8cfc1398113be115a43ef5c",
+        "tests/test_wp08.py": "sha256:30b002357dbaed5f016180a40ad76a1398ecc9e2e1d6a2c50e7a24db4c54ba5b"
       },
       "sources": [
         {
@@ -399,11 +968,55 @@
           "type": "file"
         },
         {
+          "path": "tests/test_engine_wp01_wp02.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_evaluate.py",
+          "type": "file"
+        },
+        {
           "path": "tests/test_integration.py",
           "type": "file"
         },
         {
+          "path": "tests/test_proposal.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_provider.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_retrieval_wp06.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_schemas.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_semantic.py",
+          "type": "file"
+        },
+        {
           "path": "tests/test_versioning.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_watch_wp07.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_wp02_evidence.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_wp02_knowledge.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_wp08.py",
           "type": "file"
         }
       ],
@@ -418,43 +1031,80 @@
       "confidence": "generated",
       "id": "generated.project-map",
       "kind": "project",
-      "last_generated_at": "2026-08-06T22:37:16+08:00",
+      "last_generated_at": "2026-08-07T16:50:12+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/project-map.md",
-      "source_commit": "042d4ea63aa29a9f64b8bcb548b2b45681555188",
+      "source_commit": "991f7ba1a25c706ad9002ebdf85ea4f0bf89f947",
       "source_hashes": {
-        ".project-kb.yml": "sha256:49a91ebeaf01b7e5d19c8a7dbb39187be6e5571861de9474014f1abcce2f3cc2",
-        "plugins/project-knowledge/.codex-plugin/plugin.json": "sha256:b2b59059b603bb89db8dc369e6216c6926a45bbff7f128015b7463f8987ef386",
+        ".github/workflows/quality.yml": "sha256:25d7361fd153f45224df0b2caf3e4a9adcc29cdca513c4f295f9a20089d1cffa",
+        ".project-kb.yml": "sha256:e01e73c58691764462ebcfaceb13c96b2db6e093a06e6f0bfde386b18afee1fe",
+        "evaluation/performance_harness.py": "sha256:e2e4e3180624bb56a5cd72c4ec4becd6b2fe4a9b044bd4f1d5bac409084b65e0",
+        "evaluation/real_project_harness.py": "sha256:d970b13db02dcc3f0f6500599a5018a9fd37595186a275a9f6aa8e4b3922a915",
+        "evaluation/thresholds.json": "sha256:df671121ff2d15d94af27e1357774bb31b256cbe5141d75ef61ea564f9be2942",
+        "plugins/project-knowledge/.codex-plugin/plugin.json": "sha256:88993c2a1980947715e086b37c142170a8d80149f7e54e8a1dfc66dd5f4749a5",
         "plugins/project-knowledge/.mcp.json": "sha256:072d3643cbe55c77fda5316adb51858e49132b1aac079a741c811a26b3b94c1e",
         "plugins/project-knowledge/hooks/sync_after_task.py": "sha256:17a639cbf549923ae57be2bb45ff88706a38cbcaa8556d25588fe7d3912ce110",
         "plugins/project-knowledge/scripts/project_status.py": "sha256:7f8532a6c877d51ed78ebf71d7c35c700d28691483f44c16717f39fe0b3ec7cc",
         "plugins/project-knowledge/skills/project-knowledge/agents/openai.yaml": "sha256:dfb233e13fa9e0b3a8448a697db0b865606beeb94d073989d065446ae3e65268",
         "pyproject.toml": "sha256:8723ebe262c16975fa387bbe4365ee73f394546c9c050f4fcd81288d1097d206",
         "scripts/bump_version.py": "sha256:84f254dec8f3c3e1fd1dd58d995a675db61fd03839c215cf77733ad41c0c821d",
-        "src/project_knowledge/__init__.py": "sha256:8cd4ceeae574e2efb19590ac5d6f65c7d945169ca327ef44c9ba0b2f46d93eb6",
+        "src/project_knowledge/__init__.py": "sha256:c35b41a0c24dfdba654df604eedeb52ceadbd0fe393112ac7c49b34142f140c8",
         "src/project_knowledge/__main__.py": "sha256:2cdd23d4f5cd6c3b3e4cb690ad16d560637767b9ca5b2a3cf129fcc0a5ebc82b",
-        "src/project_knowledge/cli.py": "sha256:7e9a000964fbcf87ad1c2edeb3692797e17c08a6db4cb1ab19aa428c1779efe6",
-        "src/project_knowledge/config.py": "sha256:897cb4d549ffd64570f7edc0f7acafbf16bf8aba3974948b169fd940bc557eda",
-        "src/project_knowledge/engine.py": "sha256:08410705ef4f69908f91b079323559f8a466c987175e510fc341294fa1070386",
-        "src/project_knowledge/evaluate.py": "sha256:a897c866f4b471b2c800d16b574475455c77e44eae54653b9a143b687243a36e",
-        "src/project_knowledge/knowledge.py": "sha256:45539e6e7ebcb0cc0f691adfe19531dfd322c588671583ead766ce2f279a31e7",
-        "src/project_knowledge/mcp.py": "sha256:4157aec530e33a127643cb991212bf97b009e7d1014fe13b754a8d2ac85a4a11",
-        "src/project_knowledge/models.py": "sha256:9b273998620a8f170cc62c7c606f8440a171d2450d300c4c547c39f706c6b856",
-        "src/project_knowledge/retrieval.py": "sha256:5b0515a62f112846dce59df1e768cd94558a51e4d2c298f2c8ae7da3f00ac5d0",
-        "src/project_knowledge/schemas.py": "sha256:88b3b1eb75aa713b8b9c5e6183906106151da76d2682be539f4c786af7a4ecc8",
-        "src/project_knowledge/service.py": "sha256:b77d50ee0e57892613afb8c5526d168bc35e152302eb1aa2d6493e09a65b22ae",
+        "src/project_knowledge/cli.py": "sha256:8455600298603987002cf66d42802008eb1b0987ddcd5594235867a8e93b2568",
+        "src/project_knowledge/config.py": "sha256:7d0321ee6682ad910859e3f29c82e8d0fda63ce352883bf0e18f8aa21f7f5543",
+        "src/project_knowledge/engine.py": "sha256:7ca42160a5611fdd968b9ce6e960584e19bfb7a5f4aa3c1668305092b23c40a9",
+        "src/project_knowledge/evaluate.py": "sha256:f0a8b683ab99886527d2b9a7d0c2f435f2eb9cdd7cd865efd792d0aec0ffb36d",
+        "src/project_knowledge/evidence.py": "sha256:a6e2d8b52da925698170141f61673d32647c7b3bbbab9eac2838524dce0e0197",
+        "src/project_knowledge/knowledge.py": "sha256:ab16f6c9ac5cc167ba713a4b4682301d865be3565646d9296da0f0ea6c54cc6d",
+        "src/project_knowledge/mcp.py": "sha256:2d1abb3d05ed5dd0f1f17ffdee05d6f0eb583fb5fece6c695cf61940bc1d82cc",
+        "src/project_knowledge/models.py": "sha256:ba171bac907a4f4eaf49d817cc20b6a1cfecf79aec2c0e96fdaf0021e8dc66e9",
+        "src/project_knowledge/performance.py": "sha256:ff1633c2be5d487fc46420221c468dfa952339e9314d4324fb3899c2845ccbab",
+        "src/project_knowledge/proposal.py": "sha256:a375105e363ba431be8f3b7ae981f98af834fc2b19b93e65f083b18d341716ad",
+        "src/project_knowledge/provider.py": "sha256:f30830ca8b98dc9f4b154decbf62e8c9cfe542dc74246efd28a35790080d3369",
+        "src/project_knowledge/real_project.py": "sha256:fd9b662a08ddb024b9db426790846dc1206e37c40c2aa53ec3fdea60ad77dca3",
+        "src/project_knowledge/retrieval.py": "sha256:b1d2cecc7605d68528fe5c00c064b6009b49067e8c0265c648f3c7d59d85af04",
+        "src/project_knowledge/schemas.py": "sha256:d78ed920fe7f46b8c386eb5029b6e43f09092939d05bce146ba8cc115ae7c1dd",
+        "src/project_knowledge/semantic.py": "sha256:aac3e93a91a0730802c327bf7c93e7a5a51421c7493621743e972fd62a65930a",
+        "src/project_knowledge/service.py": "sha256:e54741174c584aa32c4df5f941eba67f356cd4f5e73dc5cccb7549561b609348",
         "src/project_knowledge/store.py": "sha256:f15ab352ada71e017bb51eda633047277514173c9ac8604bbbe71256df1d0137",
-        "src/project_knowledge/util.py": "sha256:485f1cb19a1be6a0a41e2b2a3c643ecc01ad8bddaa3e55539805829bd8f1002a",
-        "src/project_knowledge/versioning.py": "sha256:f3eea7a34d6b17948a404a5d72bb6730be7ba975241609bd56635e01bc505d96",
+        "src/project_knowledge/util.py": "sha256:6dfc2137d898294c0f7a5336fa6fefda06a5c8a0c215db091a71dd58aaa35ad2",
+        "src/project_knowledge/versioning.py": "sha256:28c1eb70f34cef82854e409a23843cfe22a0c29eff5595dab889fd32b2f1cedb",
         "tests/__init__.py": "sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
-        "tests/test_config.py": "sha256:53fde221689b942cf0271d21b01165bb3cb92702d21dc9ea0bede37597515edd",
-        "tests/test_engine.py": "sha256:7aad045f23ee56e1339cd2a76585dff1d5da00a2b674dd8d927635d1dc5f5c51",
-        "tests/test_integration.py": "sha256:937dfd9e64f5181d162f3d5aff6cda36ef1598e1f9a5e409d33ac00a378ae21f",
-        "tests/test_versioning.py": "sha256:32d5fb568b5879d51ffcabc3ec2d3df7536e06b7f5feeae6d44046b2fdedba7a"
+        "tests/test_config.py": "sha256:b170829f183a322a98cca09a6308ec20999625824ab863f2595b4b1d1f3a1314",
+        "tests/test_engine.py": "sha256:6dc9fc50a5f9daae30ca9c9a39c6c56a56f40273a12408f72ba5941f79ace22f",
+        "tests/test_engine_wp01_wp02.py": "sha256:aa008f1f56889e0c981ba8f73a59c449e866fa1bdc27d44cc0c1abc6081d0a9a",
+        "tests/test_evaluate.py": "sha256:47452455504a9596c6b0b6f8dc0f4a95643f502a127e0f853225ce083ff24033",
+        "tests/test_integration.py": "sha256:4e0da8217238bfad172841f20a29ffbbe1cf6266fbb49d4caec4641388c33b0c",
+        "tests/test_proposal.py": "sha256:c860e3c64b1bbcea4baafb3552cf52c5995aeeae8c191cde64acc697c3226c86",
+        "tests/test_provider.py": "sha256:d102bc1491a9ffd31cdb98a3aab10db56c91b315560e4bd6a11c4d41314fc8ea",
+        "tests/test_retrieval_wp06.py": "sha256:462856ce988466674b8fc69e795376ebd945ca9f22bee6388160be571abd9d85",
+        "tests/test_schemas.py": "sha256:18de3ca98051cc8895aeb3ed9a8e7d4bd97d7cb5de4a72886614371e3291cdc4",
+        "tests/test_semantic.py": "sha256:5096d0b214e11b63da79bbdf3b3a606ccd1623010770b0c1d693ded2e1ac4886",
+        "tests/test_versioning.py": "sha256:954ef4ea592d10ee884c875a6f51339fcca9a005ce0599fdf1220c6e506175de",
+        "tests/test_watch_wp07.py": "sha256:4643a4d2b2d18ebbdf7bf6c71564f4c4b56f9efbf2fa0734008a6607134582c8",
+        "tests/test_wp02_evidence.py": "sha256:2cde542c77d113d7091b804eb51c947b3e635e43341fe82185a1ab359adec8ef",
+        "tests/test_wp02_knowledge.py": "sha256:1c3d9a72ffc4c3a03f13280b41a4687c6147278da8cfc1398113be115a43ef5c",
+        "tests/test_wp08.py": "sha256:30b002357dbaed5f016180a40ad76a1398ecc9e2e1d6a2c50e7a24db4c54ba5b"
       },
       "sources": [
         {
+          "path": ".github/workflows/quality.yml",
+          "type": "file"
+        },
+        {
           "path": ".project-kb.yml",
+          "type": "file"
+        },
+        {
+          "path": "evaluation/performance_harness.py",
+          "type": "file"
+        },
+        {
+          "path": "evaluation/real_project_harness.py",
+          "type": "file"
+        },
+        {
+          "path": "evaluation/thresholds.json",
           "type": "file"
         },
         {
@@ -510,6 +1160,10 @@
           "type": "file"
         },
         {
+          "path": "src/project_knowledge/evidence.py",
+          "type": "file"
+        },
+        {
           "path": "src/project_knowledge/knowledge.py",
           "type": "file"
         },
@@ -522,11 +1176,31 @@
           "type": "file"
         },
         {
+          "path": "src/project_knowledge/performance.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/proposal.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/provider.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/real_project.py",
+          "type": "file"
+        },
+        {
           "path": "src/project_knowledge/retrieval.py",
           "type": "file"
         },
         {
           "path": "src/project_knowledge/schemas.py",
+          "type": "file"
+        },
+        {
+          "path": "src/project_knowledge/semantic.py",
           "type": "file"
         },
         {
@@ -558,11 +1232,55 @@
           "type": "file"
         },
         {
+          "path": "tests/test_engine_wp01_wp02.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_evaluate.py",
+          "type": "file"
+        },
+        {
           "path": "tests/test_integration.py",
           "type": "file"
         },
         {
+          "path": "tests/test_proposal.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_provider.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_retrieval_wp06.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_schemas.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_semantic.py",
+          "type": "file"
+        },
+        {
           "path": "tests/test_versioning.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_watch_wp07.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_wp02_evidence.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_wp02_knowledge.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_wp08.py",
           "type": "file"
         }
       ],
@@ -579,10 +1297,11 @@
       "confidence": "generated",
       "id": "generated.routes",
       "kind": "route",
-      "last_generated_at": "2026-08-06T22:37:16+08:00",
+      "last_generated_at": "2026-08-07T16:50:12+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/routes.md",
-      "source_commit": "042d4ea63aa29a9f64b8bcb548b2b45681555188",
+      "source_commit": "991f7ba1a25c706ad9002ebdf85ea4f0bf89f947",
+      "sources": [],
       "status": "fresh",
       "tags": [
         "routes",
@@ -594,16 +1313,27 @@
       "confidence": "generated",
       "id": "generated.test-map",
       "kind": "test",
-      "last_generated_at": "2026-08-06T22:37:16+08:00",
+      "last_generated_at": "2026-08-07T16:50:12+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/test-map.md",
-      "source_commit": "042d4ea63aa29a9f64b8bcb548b2b45681555188",
+      "source_commit": "991f7ba1a25c706ad9002ebdf85ea4f0bf89f947",
       "source_hashes": {
         "tests/__init__.py": "sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
-        "tests/test_config.py": "sha256:53fde221689b942cf0271d21b01165bb3cb92702d21dc9ea0bede37597515edd",
-        "tests/test_engine.py": "sha256:7aad045f23ee56e1339cd2a76585dff1d5da00a2b674dd8d927635d1dc5f5c51",
-        "tests/test_integration.py": "sha256:937dfd9e64f5181d162f3d5aff6cda36ef1598e1f9a5e409d33ac00a378ae21f",
-        "tests/test_versioning.py": "sha256:32d5fb568b5879d51ffcabc3ec2d3df7536e06b7f5feeae6d44046b2fdedba7a"
+        "tests/test_config.py": "sha256:b170829f183a322a98cca09a6308ec20999625824ab863f2595b4b1d1f3a1314",
+        "tests/test_engine.py": "sha256:6dc9fc50a5f9daae30ca9c9a39c6c56a56f40273a12408f72ba5941f79ace22f",
+        "tests/test_engine_wp01_wp02.py": "sha256:aa008f1f56889e0c981ba8f73a59c449e866fa1bdc27d44cc0c1abc6081d0a9a",
+        "tests/test_evaluate.py": "sha256:47452455504a9596c6b0b6f8dc0f4a95643f502a127e0f853225ce083ff24033",
+        "tests/test_integration.py": "sha256:4e0da8217238bfad172841f20a29ffbbe1cf6266fbb49d4caec4641388c33b0c",
+        "tests/test_proposal.py": "sha256:c860e3c64b1bbcea4baafb3552cf52c5995aeeae8c191cde64acc697c3226c86",
+        "tests/test_provider.py": "sha256:d102bc1491a9ffd31cdb98a3aab10db56c91b315560e4bd6a11c4d41314fc8ea",
+        "tests/test_retrieval_wp06.py": "sha256:462856ce988466674b8fc69e795376ebd945ca9f22bee6388160be571abd9d85",
+        "tests/test_schemas.py": "sha256:18de3ca98051cc8895aeb3ed9a8e7d4bd97d7cb5de4a72886614371e3291cdc4",
+        "tests/test_semantic.py": "sha256:5096d0b214e11b63da79bbdf3b3a606ccd1623010770b0c1d693ded2e1ac4886",
+        "tests/test_versioning.py": "sha256:954ef4ea592d10ee884c875a6f51339fcca9a005ce0599fdf1220c6e506175de",
+        "tests/test_watch_wp07.py": "sha256:4643a4d2b2d18ebbdf7bf6c71564f4c4b56f9efbf2fa0734008a6607134582c8",
+        "tests/test_wp02_evidence.py": "sha256:2cde542c77d113d7091b804eb51c947b3e635e43341fe82185a1ab359adec8ef",
+        "tests/test_wp02_knowledge.py": "sha256:1c3d9a72ffc4c3a03f13280b41a4687c6147278da8cfc1398113be115a43ef5c",
+        "tests/test_wp08.py": "sha256:30b002357dbaed5f016180a40ad76a1398ecc9e2e1d6a2c50e7a24db4c54ba5b"
       },
       "sources": [
         {
@@ -619,11 +1349,55 @@
           "type": "file"
         },
         {
+          "path": "tests/test_engine_wp01_wp02.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_evaluate.py",
+          "type": "file"
+        },
+        {
           "path": "tests/test_integration.py",
           "type": "file"
         },
         {
+          "path": "tests/test_proposal.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_provider.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_retrieval_wp06.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_schemas.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_semantic.py",
+          "type": "file"
+        },
+        {
           "path": "tests/test_versioning.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_watch_wp07.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_wp02_evidence.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_wp02_knowledge.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_wp08.py",
           "type": "file"
         }
       ],
@@ -636,5 +1410,5 @@
     }
   ],
   "schema_version": 1,
-  "source_commit": "042d4ea63aa29a9f64b8bcb548b2b45681555188"
+  "source_commit": "991f7ba1a25c706ad9002ebdf85ea4f0bf89f947"
 }

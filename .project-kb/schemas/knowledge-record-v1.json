@@ -33,6 +33,7 @@
     "ownership": {
       "enum": [
         "generated",
+        "draft",
         "curated",
         "decision"
       ]

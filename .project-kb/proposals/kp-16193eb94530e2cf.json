@@ -1,0 +1,35 @@
+{
+  "change_range": "HEAD",
+  "confidence": 0.95,
+  "created_at": "2026-08-07T10:19:47+08:00",
+  "evidence": [
+    "src/project_knowledge/engine.py",
+    "src/project_knowledge/knowledge.py",
+    "src/project_knowledge/real_project.py",
+    "tests/test_wp02_knowledge.py"
+  ],
+  "operations": [
+    {
+      "block_id": "retrieval-guide",
+      "content": "功能开发上下文除返回代码符号、影响关系和验证命令外，涉及 watcher 或 Git 分支变更时必须提示读取 watcher_health、branch_aligned、二次哈希结果和结构化日志；跨进程 daemon 尚未实现的结论必须标为 unknown。\n\n涉及配置或客户端集成的功能开发必须先检查 config-v1 Schema 与 migrate dry-run 结果，并把用户扩展字段、客户端所有权标记和知识库保留作为验收不变量；未知用户配置字段在迁移和校验时不能被静默丢弃。Windows 原生 watcher/hooks 尚未实机复验时必须列入 unknowns。\n\n中文功能描述可以通过显式、可审计的短语词元映射召回英文源码标识符；返回的 reference implementation 和 extension point 仍必须指向真实符号，映射本身不能作为业务事实。\n长文档知识片段按任务相关行和邻近上下文截取，确保开发指导中的不变量、回滚和验证步骤即使位于文档末尾也能进入有限上下文。\n安全不变量、回滚和验证语句在有限上下文中获得明确优先级；该优先级只影响片段选择，不改变来源可信度或自动审核状态。\n涉及 Lua/Skynet 功能开发时，context 可以引用生成的入口证据页和只读范围报告；静态启动/派发来源必须带路径与行号，动态服务发现、协议运行时名称和启动命令必须保留在 unknowns。\n<!-- project-kb:source file=\"src/project_knowledge/engine.py\" -->\n<!-- project-kb:source file=\"src/project_knowledge/real_project.py\" -->\n<!-- project-kb:source file=\"tests/test_wp02_knowledge.py\" -->\n",
+      "op": "upsert_generated_block"
+    }
+  ],
+  "proposal_id": "kp-16193eb94530e2cf",
+  "reason": "复核 0.1.15 Lua/Skynet 入口证据在功能开发 context 中的使用边界。",
+  "requires_review": true,
+  "result_hash": "sha256:b0ede3bcec02ca6ea28f845132a818fd465496822e833b8b7c1b913a46373c95",
+  "review_reason": "确认入口来源可追溯，动态运行时边界保留为 unknowns。",
+  "reviewed_at": "2026-08-07T10:20:04+08:00",
+  "reviewer": "codex",
+  "schema_version": 1,
+  "source_hashes": {
+    "src/project_knowledge/engine.py": "sha256:7ca42160a5611fdd968b9ce6e960584e19bfb7a5f4aa3c1668305092b23c40a9",
+    "src/project_knowledge/knowledge.py": "sha256:f5c8f5a3a7800fc031e1848e58c775905352735295bf1753949747bed2d2b6af",
+    "src/project_knowledge/real_project.py": "sha256:fd9b662a08ddb024b9db426790846dc1206e37c40c2aa53ec3fdea60ad77dca3",
+    "tests/test_wp02_knowledge.py": "sha256:e2a39c3a5d864637dbe0edbe619ebf962653ac3fe19e7d30f59bc5564be45975"
+  },
+  "status": "applied",
+  "target": "docs/knowledge/curated/feature-guide-generation.md",
+  "target_hash": "sha256:3d8374f485b513029637a050410ba96f740c214e0c456b60f6c522ebb07089ca"
+}

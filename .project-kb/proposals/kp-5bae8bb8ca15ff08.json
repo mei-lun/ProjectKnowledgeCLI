@@ -1,0 +1,35 @@
+{
+  "change_range": "WP09-final",
+  "confidence": 0.95,
+  "created_at": "2026-08-07T08:48:07+08:00",
+  "evidence": [
+    "src/project_knowledge/config.py",
+    "src/project_knowledge/retrieval.py",
+    "tests/test_retrieval_wp06.py",
+    "tests/test_wp08.py"
+  ],
+  "operations": [
+    {
+      "block_id": "retrieval-guide",
+      "content": "功能开发上下文除返回代码符号、影响关系和验证命令外，涉及 watcher 或 Git 分支变更时必须提示读取 watcher_health、branch_aligned、二次哈希结果和结构化日志；跨进程 daemon 尚未实现的结论必须标为 unknown。\n\n涉及配置或客户端集成的功能开发必须先检查 config-v1 Schema 与 migrate dry-run 结果，并把用户扩展字段、客户端所有权标记和知识库保留作为验收不变量。Windows 原生 watcher/hooks 尚未实机复验时必须列入 unknowns。\n\n中文功能描述可以通过显式、可审计的短语词元映射召回英文源码标识符；返回的 reference implementation 和 extension point 仍必须指向真实符号，映射本身不能作为业务事实。\n\n明确不变量：未知用户配置字段在迁移和校验时不能被静默丢弃。\n",
+      "op": "upsert_generated_block"
+    }
+  ],
+  "proposal_id": "kp-5bae8bb8ca15ff08",
+  "reason": "WP09 词元优先级与明确不变量复核",
+  "requires_review": true,
+  "result_hash": "sha256:4b03ab836ce90613cedcc783668e9df608858ca518c12486777114e798fd4fd1",
+  "review_reason": "已核对完整失败问法、精确符号结果和源码不变量",
+  "reviewed_at": "2026-08-07T08:48:39+08:00",
+  "reviewer": "Codex",
+  "schema_version": 1,
+  "source_hashes": {
+    "src/project_knowledge/config.py": "sha256:7d0321ee6682ad910859e3f29c82e8d0fda63ce352883bf0e18f8aa21f7f5543",
+    "src/project_knowledge/retrieval.py": "sha256:805edc2a9c8aaf136193189ea75a0ea3e530d5aa7bf63d6b5374590cdb59db33",
+    "tests/test_retrieval_wp06.py": "sha256:977c583c199e561ad061c01d9774b20d257525965e2c8595dbfe5f317cfac96d",
+    "tests/test_wp08.py": "sha256:30b002357dbaed5f016180a40ad76a1398ecc9e2e1d6a2c50e7a24db4c54ba5b"
+  },
+  "status": "applied",
+  "target": "docs/knowledge/curated/feature-guide-generation.md",
+  "target_hash": "sha256:8c8b27bebb3416461e25f932142b2b50e8bc42492eaa96498f7d9a125a5beaff"
+}

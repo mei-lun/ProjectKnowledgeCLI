@@ -1,0 +1,35 @@
+{
+  "change_range": "HEAD",
+  "confidence": 0.95,
+  "created_at": "2026-08-07T11:02:17+08:00",
+  "evidence": [
+    "src/project_knowledge/evaluate.py",
+    "src/project_knowledge/knowledge.py",
+    "tests/test_evaluate.py",
+    "tests/test_wp02_knowledge.py"
+  ],
+  "operations": [
+    {
+      "block_id": "proposal-capabilities",
+      "content": "- 0.1.15 WP-02：BuiltinCodeIndexEngine 对 Lua/Skynet 暴露可追溯入口证据，区分 Skynet 启动、协议派发和文件名推断入口；推断入口必须标注“需要人工确认”。\n- 0.1.15 WP-02：真实项目只读 harness 增加范围 dry-run、排除项、风险列表和 revision 证据；无 SVN 命令时使用选中文件内容哈希作为稳定 file_hash_only revision，不向源目录写入。\n- 0.1.15 WP-02：Lua/Skynet 入口知识页进入 generated Knowledge，静态启动与协议派发来源可被功能开发上下文检索；动态启动命令、运行时协议名和服务发现仍属于 unknowns。\n<!-- project-kb:source file=\"src/project_knowledge/engine.py\" -->\n<!-- project-kb:source file=\"src/project_knowledge/real_project.py\" -->\n<!-- project-kb:source file=\"src/project_knowledge/knowledge.py\" -->\n<!-- project-kb:source file=\"evaluation/real_project_harness.py\" -->\n<!-- project-kb:source file=\"tests/test_wp02_evidence.py\" -->\n- 0.1.15 WP-09：only-Markdown 仍限制三页；仅当非测试源码模块候选得分至少达到当前第三页的 0.8 时才替换低优先页面，防止新增 generated 页面挤掉代码来源且避免为 recall 牺牲 precision。不得增加页数或降低阈值。\n<!-- project-kb:source file=\"src/project_knowledge/evaluate.py\" -->\n<!-- project-kb:source file=\"tests/test_evaluate.py\" -->\n<!-- project-kb:source file=\"tests/test_wp02_knowledge.py\" -->\n",
+      "op": "upsert_generated_block"
+    }
+  ],
+  "proposal_id": "kp-aae4493b9fd96ed5",
+  "reason": "复核 0.1.15 Markdown 0.8 相对相关性门最终实现。",
+  "requires_review": true,
+  "result_hash": "sha256:3ac0a03f04a66f1952ddb2e59d26b06c76a5406f8aec2a3f4e893306c005e129",
+  "review_reason": "确认不扩大三页预算、不降低阈值，并以 0.8 相对相关性门平衡 recall 与 precision。",
+  "reviewed_at": "2026-08-07T11:02:17+08:00",
+  "reviewer": "codex",
+  "schema_version": 1,
+  "source_hashes": {
+    "src/project_knowledge/evaluate.py": "sha256:f0a8b683ab99886527d2b9a7d0c2f435f2eb9cdd7cd865efd792d0aec0ffb36d",
+    "src/project_knowledge/knowledge.py": "sha256:ab16f6c9ac5cc167ba713a4b4682301d865be3565646d9296da0f0ea6c54cc6d",
+    "tests/test_evaluate.py": "sha256:47452455504a9596c6b0b6f8dc0f4a95643f502a127e0f853225ce083ff24033",
+    "tests/test_wp02_knowledge.py": "sha256:1c3d9a72ffc4c3a03f13280b41a4687c6147278da8cfc1398113be115a43ef5c"
+  },
+  "status": "applied",
+  "target": "docs/knowledge/curated/architecture.md",
+  "target_hash": "sha256:523836f58df63dadce379dbd512c3f3d54817920eefaca97b69e5738a4205388"
+}

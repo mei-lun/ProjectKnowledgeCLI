@@ -1,0 +1,31 @@
+{
+  "change_range": "HEAD",
+  "confidence": 0.9,
+  "created_at": "2026-08-07T05:59:31+08:00",
+  "evidence": [
+    "src/project_knowledge/retrieval.py",
+    "tests/test_retrieval_wp06.py"
+  ],
+  "operations": [
+    {
+      "block_id": "proposal-capabilities",
+      "content": "<!-- project-kb:generated:block id=proposal-capabilities -->\n- Proposal 审核链覆盖稳定 ID、目标/来源哈希复核、generated block 局部更新、ADR 草案追加和 Semantic Update Queue。\n- WP-06 检索链先对任务做确定性分类，再返回功能域、参考实现、扩展点、评分拆解、选中理由、影响范围、验证命令和 unknowns；新增功能与影响分析默认有界追踪两跳关系。\n<!-- project-kb:generated:block-end -->",
+      "op": "upsert_generated_block"
+    }
+  ],
+  "proposal_id": "kp-88ff042a8303c0cb",
+  "reason": "完成 WP-06：功能开发导向的任务分类、解释型检索、参考实现、扩展点和有界多跳影响分析。",
+  "requires_review": true,
+  "result_hash": "sha256:0f8f83fc549ba6388ff8c0e1af1e2746f1ff27d742cb472a50889ef0a53d2de2",
+  "review_reason": "已核对 WP-06 实现与测试，批准更新 curated 架构。",
+  "reviewed_at": "2026-08-07T06:00:06+08:00",
+  "reviewer": "codex",
+  "schema_version": 1,
+  "source_hashes": {
+    "src/project_knowledge/retrieval.py": "sha256:2c607ba60029267233c577b72b80d700df1f535b9aeb426a6309c63d04b5c461",
+    "tests/test_retrieval_wp06.py": "sha256:9befb5ce4af01eed53e42381724d771f5112daae0fa559f133615a5458fc8376"
+  },
+  "status": "applied",
+  "target": "docs/knowledge/curated/architecture.md",
+  "target_hash": "sha256:c7c32e10beb2aa061afe81ede44cf5a11235dd6b6519aa6b55ff96c2812179e8"
+}

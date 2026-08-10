@@ -56,6 +56,28 @@ def atomic_json(path: Path, value: Any) -> None:
     atomic_write(path, json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True) + "\n")
 
 
+def append_jsonl(path: Path, value: Any) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8", newline="\n") as handle:
+        handle.write(json.dumps(value, ensure_ascii=False, sort_keys=True) + "\n")
+        handle.flush()
+        os.fsync(handle.fileno())
+
+
+def process_alive(pid: int | None) -> bool:
+    if not pid or pid <= 0:
+        return False
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    except OSError:
+        return False
+    return True
+
+
 def run_git(root: Path, *args: str) -> str | None:
     try:
         result = subprocess.run(
@@ -120,6 +142,68 @@ def trim_to_tokens(text: str, budget: int) -> str:
 class ProjectLockError(RuntimeError):
     pass
 
+
+
+
+@contextmanager
+def watcher_lock(root: Path, stale_after: int = 600) -> Iterator[dict[str, Any]]:
+    """Acquire the single per-project watcher coordinator lease."""
+    lock_path = root / ".project-kb" / "watcher.lock"
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {"pid": os.getpid(), "created_at": time.time(), "root": str(root.resolve())}
+    for attempt in range(2):
+        try:
+            descriptor = os.open(lock_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+            with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
+                json.dump(payload, handle, ensure_ascii=False, sort_keys=True)
+                handle.write("\n")
+                handle.flush()
+                os.fsync(handle.fileno())
+            break
+        except FileExistsError:
+            try:
+                current = json.loads(lock_path.read_text(encoding="utf-8"))
+                owner_pid = int(current.get("pid", 0))
+                created_at = float(current.get("created_at", lock_path.stat().st_mtime))
+            except (FileNotFoundError, ValueError, TypeError, json.JSONDecodeError, OSError):
+                continue
+            stale = (not process_alive(owner_pid)) or (time.time() - created_at > stale_after)
+            if stale and attempt == 0:
+                lock_path.unlink(missing_ok=True)
+                continue
+            raise ProjectLockError(
+                f"another watcher coordinator holds {lock_path} (pid={owner_pid})"
+            )
+    else:
+        raise ProjectLockError(f"unable to acquire watcher coordinator {lock_path}")
+    try:
+        yield payload
+    finally:
+        try:
+            current = json.loads(lock_path.read_text(encoding="utf-8"))
+            if int(current.get("pid", 0)) == os.getpid():
+                lock_path.unlink(missing_ok=True)
+        except (FileNotFoundError, ValueError, TypeError, json.JSONDecodeError, OSError):
+            pass
+
+
+def script_marker_update(path: Path, marker: str, body: str | None) -> bool:
+    """Update a shell-script-owned marker block while preserving user content."""
+    start = f"# project-kb:{marker}:start"
+    end = f"# project-kb:{marker}:end"
+    current = read_text(path) if path.exists() else ""
+    pattern = re.compile(re.escape(start) + r".*?" + re.escape(end) + r"\n?", re.DOTALL)
+    replacement = "" if body is None else f"{start}\n{body.rstrip()}\n{end}\n"
+    if pattern.search(current):
+        updated = pattern.sub(replacement, current, count=1)
+    elif body is None:
+        return False
+    else:
+        updated = current.rstrip() + ("\n\n" if current.strip() else "") + replacement
+    if updated == current:
+        return False
+    atomic_write(path, updated)
+    return True
 
 @contextmanager
 def project_lock(root: Path, stale_after: int = 600) -> Iterator[None]:

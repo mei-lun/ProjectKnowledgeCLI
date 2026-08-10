@@ -1,0 +1,31 @@
+{
+  "change_range": "HEAD",
+  "confidence": 0.9,
+  "created_at": "2026-08-07T06:27:00+08:00",
+  "evidence": [
+    "scripts/bump_version.py",
+    "src/project_knowledge/__init__.py"
+  ],
+  "operations": [
+    {
+      "block_id": "retrieval-contract",
+      "content": "<!-- project-kb:generated:block id=retrieval-contract -->\n- 功能开发上下文必须返回可解释的任务类型、候选模块、参考实现、扩展点、影响范围、验证命令和 unknowns；评分必须披露文本、可信度、新鲜度、类型与模块加权。\n- 多跳影响分析默认受 max_hops 与 max_relations 双重边界约束；无法静态解析的动态派发、反射和依赖注入必须提示读取实时源码。\n<!-- project-kb:generated:block-end -->",
+      "op": "upsert_generated_block"
+    }
+  ],
+  "proposal_id": "kp-2d4df5f05d5b92c7",
+  "reason": "同步 0.1.7 版本元数据并复核版本约定。",
+  "requires_review": true,
+  "result_hash": "sha256:28467ced8c33aa488dd31fd60a12a3d6ab9caf5d2af7816a84d3a9c7ba44edc5",
+  "review_reason": "已核对 0.1.7 版本规则和检索约定。",
+  "reviewed_at": "2026-08-07T06:27:17+08:00",
+  "reviewer": "codex",
+  "schema_version": 1,
+  "source_hashes": {
+    "scripts/bump_version.py": "sha256:84f254dec8f3c3e1fd1dd58d995a675db61fd03839c215cf77733ad41c0c821d",
+    "src/project_knowledge/__init__.py": "sha256:a783481035ecde23afde3faafba4b2d0d94a600f61909760e12579f23535b1c8"
+  },
+  "status": "applied",
+  "target": "docs/knowledge/curated/conventions.md",
+  "target_hash": "sha256:28467ced8c33aa488dd31fd60a12a3d6ab9caf5d2af7816a84d3a9c7ba44edc5"
+}

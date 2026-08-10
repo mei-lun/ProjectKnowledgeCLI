@@ -28,7 +28,7 @@ TOOLS: list[dict[str, Any]] = [
     {
         "name": "knowledge_search",
         "title": "Search project knowledge",
-        "description": "Search generated, curated, and decision knowledge with confidence and freshness.",
+        "description": "Search generated, draft, curated, and decision knowledge with confidence and freshness.",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -165,4 +165,3 @@ def serve(project: str | Path = ".") -> None:
     except RuntimeError:
         pass
     MCPServer(project).serve()
-

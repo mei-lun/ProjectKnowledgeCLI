@@ -1,0 +1,31 @@
+{
+  "change_range": "HEAD",
+  "confidence": 0.8,
+  "created_at": "2026-08-07T04:38:52+08:00",
+  "evidence": [
+    "src/project_knowledge/proposal.py",
+    "src/project_knowledge/service.py"
+  ],
+  "operations": [
+    {
+      "block_id": "proposal-capabilities",
+      "content": "ProposalService 提供稳定 ID、目标与来源哈希复核、结构化 generated block Patch、ADR 只追加草案、apply/reject 审计、冲突冻结和幂等应用。ProjectService 仅在源码新增、修改或删除时创建 Semantic Update Queue 项，纯 curated 审核同步不会制造新的语义待办。",
+      "op": "upsert_generated_block"
+    }
+  ],
+  "proposal_id": "kp-e2f830550968667a",
+  "reason": "确认 Semantic Update Queue 只跟踪源码变化",
+  "requires_review": true,
+  "result_hash": "sha256:477a40ae7eb8108b424d94ffdb3016ec75eeadda385be5f1dc25f8ae2b904284",
+  "review_reason": "已核对队列触发修正、57 项测试和目标 diff",
+  "reviewed_at": "2026-08-07T04:39:10+08:00",
+  "reviewer": "codex",
+  "schema_version": 1,
+  "source_hashes": {
+    "src/project_knowledge/proposal.py": "sha256:a375105e363ba431be8f3b7ae981f98af834fc2b19b93e65f083b18d341716ad",
+    "src/project_knowledge/service.py": "sha256:cf083d595339e8dcfaf2ec003137e2d075499b468452ae5e9bfe423ae8334558"
+  },
+  "status": "applied",
+  "target": "docs/knowledge/curated/architecture.md",
+  "target_hash": "sha256:8e0a67f051acf9c4810878a7b7afc3172bd21fe0ec49e2a7c300b2555f33e2ee"
+}

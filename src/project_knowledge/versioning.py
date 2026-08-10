@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import re
 from datetime import date
 from pathlib import Path
@@ -71,9 +72,19 @@ def bump_patch_version(
     version_text = _replace_version(version_path.read_text(encoding="utf-8"), new_version)
     changelog_text = changelog_path.read_text(encoding="utf-8") if changelog_path.exists() else "# 变更日志\n"
     changelog_text = _prepend_changelog_entry(changelog_text, new_version, message, changed_on or date.today())
+    plugin_path = root / "plugins" / "project-knowledge" / ".codex-plugin" / "plugin.json"
+    plugin_text: str | None = None
+    if plugin_path.exists():
+        plugin_manifest = json.loads(plugin_path.read_text(encoding="utf-8"))
+        if not isinstance(plugin_manifest, dict) or "version" not in plugin_manifest:
+            raise ValueError(f"插件清单缺少 version：{plugin_path}")
+        plugin_manifest["version"] = new_version
+        plugin_text = json.dumps(plugin_manifest, ensure_ascii=False, indent=2) + "\n"
     if not dry_run:
         atomic_write(version_path, version_text)
         atomic_write(changelog_path, changelog_text)
+        if plugin_text is not None:
+            atomic_write(plugin_path, plugin_text)
     return old_version, new_version
 
 

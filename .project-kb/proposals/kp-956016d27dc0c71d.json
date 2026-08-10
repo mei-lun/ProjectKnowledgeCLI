@@ -1,0 +1,33 @@
+{
+  "change_range": "HEAD",
+  "confidence": 0.8,
+  "created_at": "2026-08-07T07:57:27+08:00",
+  "evidence": [
+    "docs/project-knowledge-system-audit.md",
+    "src/project_knowledge/service.py",
+    "src/project_knowledge/util.py"
+  ],
+  "operations": [
+    {
+      "block_id": "retrieval-contract",
+      "content": "- 0.1.9 WP-07：watcher 必须使用每项目单协调锁、记录 PID/heartbeat/结构化日志；同步必须进行二次哈希校验，分支变化必须单独报告并补偿；hooks 只能写入工具拥有的标记区块。",
+      "op": "upsert_generated_block"
+    }
+  ],
+  "proposal_id": "kp-956016d27dc0c71d",
+  "reason": "0.1.9 WP-07：记录 watcher 与 Git 生命周期约定",
+  "requires_review": true,
+  "result_hash": "sha256:165cf203e12c7601db435500b00d362e04aacc39b35f29af4132c585a6210439",
+  "review_reason": "WP-07 测试已通过并核对源码与审计需求",
+  "reviewed_at": "2026-08-07T07:57:42+08:00",
+  "reviewer": "codex",
+  "schema_version": 1,
+  "source_hashes": {
+    "docs/project-knowledge-system-audit.md": "sha256:6cda6aec20479f7aa47212cbbaa49f9df299474236a78f9b0570416b30f7af2f",
+    "src/project_knowledge/service.py": "sha256:26b020b1d4bcd41dcb5fddcab5f18846bb897e8fb4fd17730cbde8d31097e411",
+    "src/project_knowledge/util.py": "sha256:6dfc2137d898294c0f7a5336fa6fefda06a5c8a0c215db091a71dd58aaa35ad2"
+  },
+  "status": "applied",
+  "target": "docs/knowledge/curated/conventions.md",
+  "target_hash": "sha256:9ab11863a1c2d315a3b1b869f82e2c5599f034890193c083496d561665391c57"
+}

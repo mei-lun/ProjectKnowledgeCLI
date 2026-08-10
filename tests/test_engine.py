@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 import unittest
+import tempfile
+from pathlib import Path
 
-from project_knowledge.engine import GenericParser, PythonParser
+from project_knowledge.config import ProjectConfig
+from project_knowledge.engine import GenericParser, PythonParser, create_engine
 
 
 class EngineTests(unittest.TestCase):
@@ -41,7 +44,47 @@ def create_item():
         self.assertTrue(any(route.route == "/health" for route in result.routes))
         self.assertTrue(all(relation.confidence < 1 for relation in result.relations))
 
+    def test_unavailable_codegraph_engine_fails_explicitly(self) -> None:
+        with self.assertRaisesRegex(ValueError, "codegraph.*不可用|codegraph.*unavailable"):
+            create_engine(ProjectConfig(engine="codegraph"))
+
+    def test_generic_parser_disambiguates_repeated_lua_function_ids(self) -> None:
+        result = GenericParser(
+            "service/player.lua",
+            "function handler.run() return 1 end\nfunction handler.run() return 2 end\n",
+            "Lua",
+        ).parse()
+        ids = [symbol.id for symbol in result.symbols]
+        self.assertEqual(len(ids), len(set(ids)))
+        self.assertIn("service/player.lua::handler.run", ids)
+        self.assertIn("service/player.lua::handler.run@2", ids)
+
+    def test_python_parser_disambiguates_repeated_definition_ids(self) -> None:
+        result = PythonParser(
+            "src/redefined.py",
+            "def feature():\n    return 1\n\ndef feature():\n    return 2\n",
+        ).parse()
+        ids = [symbol.id for symbol in result.symbols]
+        self.assertEqual(len(ids), len(set(ids)))
+        self.assertIn("src/redefined.py::feature", ids)
+        self.assertIn("src/redefined.py::feature@4", ids)
+
+    def test_discovery_excludes_evaluation_outputs_to_prevent_self_contamination(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "src").mkdir()
+            (root / "evaluation" / "reports").mkdir(parents=True)
+            (root / "evaluation" / "baselines").mkdir(parents=True)
+            (root / "src" / "app.py").write_text("def app(): pass\n", encoding="utf-8")
+            (root / "evaluation" / "reports" / "latest.json").write_text("{}\n", encoding="utf-8")
+            (root / "evaluation" / "baselines" / "base.json").write_text("{}\n", encoding="utf-8")
+
+            paths = {item.path for item in create_engine(ProjectConfig()).discover(root, ProjectConfig())}
+
+            self.assertIn("src/app.py", paths)
+            self.assertNotIn("evaluation/reports/latest.json", paths)
+            self.assertNotIn("evaluation/baselines/base.json", paths)
+
 
 if __name__ == "__main__":
     unittest.main()
-

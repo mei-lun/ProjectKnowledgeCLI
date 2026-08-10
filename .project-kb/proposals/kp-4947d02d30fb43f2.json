@@ -1,0 +1,35 @@
+{
+  "change_range": "WP09-markdown-0.1.14",
+  "confidence": 0.95,
+  "created_at": "2026-08-07T09:31:09+08:00",
+  "evidence": [
+    "CHANGELOG.md",
+    "src/project_knowledge/__init__.py",
+    "src/project_knowledge/evaluate.py",
+    "src/project_knowledge/versioning.py"
+  ],
+  "operations": [
+    {
+      "block_id": "retrieval-contract",
+      "content": "- 0.1.9 WP-07：watcher 必须使用每项目单协调锁、记录 PID/heartbeat/结构化日志；同步必须进行二次哈希校验，分支变化必须单独报告并补偿；hooks 只能写入工具拥有的标记区块。\n- 0.1.10 WP-08：配置升级必须先支持 dry-run，保留未知用户字段，并对高于当前版本的配置显式失败；Claude、Cursor、Gemini 适配必须幂等且卸载只删除工具拥有区块；补丁升级必须同步核心包、CHANGELOG 与 Codex 插件版本。\n- 0.1.11 WP-09：中文任务到标识符的扩展必须使用显式短语词元表，完整 snake_case 组合优先于宽泛分词；新增映射必须有召回回归和 Token 预算断言，不得降低冻结质量阈值。\n- 发布不变量：同一发布批次的核心包版本与 Codex 插件版本必须一致。\n- 0.1.12 WP-09：长知识文档必须按任务相关性截取并保持 Token 上限；不变量、回滚和验证行不能因固定首段裁剪被静默遗漏。\n- 0.1.13 WP-09：安全约束行可获得片段优先级加成，但仍受总 Token 预算、来源追踪和实时源码核验约束。\n- 0.1.14 WP-09：同一批修改或新增内容只递增一次补丁版本；版本知识必须同时引用核心版本文件和 CHANGELOG，不能只依赖版本工具实现。\n<!-- project-kb:source file=\"src/project_knowledge/__init__.py\" -->\n<!-- project-kb:source file=\"CHANGELOG.md\" -->\n",
+      "op": "upsert_generated_block"
+    }
+  ],
+  "proposal_id": "kp-4947d02d30fb43f2",
+  "reason": "修复 Markdown 版本来源锚点与明确补丁不变量",
+  "requires_review": true,
+  "result_hash": "sha256:5b36bfdbbc528c0008f0ae5b2c12681b05d0cb1192f0b79556a3655695e2bef8",
+  "review_reason": "已核对版本工具、核心版本、CHANGELOG 和 Markdown 失败题",
+  "reviewed_at": "2026-08-07T09:31:18+08:00",
+  "reviewer": "Codex",
+  "schema_version": 1,
+  "source_hashes": {
+    "CHANGELOG.md": "sha256:4b326f255b08c74718906f740ef633f1ef79c0748f1391f3388c465f5e4007f4",
+    "src/project_knowledge/__init__.py": "sha256:542bd39697b936027294559e7273ae963ac5e93f5b97ecdf51a4bb7ecfc4c7d5",
+    "src/project_knowledge/evaluate.py": "sha256:a7f97f300c650a24f0415049469306c3be72fabeef36758f5fac3e0b4c6e3c99",
+    "src/project_knowledge/versioning.py": "sha256:28c1eb70f34cef82854e409a23843cfe22a0c29eff5595dab889fd32b2f1cedb"
+  },
+  "status": "applied",
+  "target": "docs/knowledge/curated/conventions.md",
+  "target_hash": "sha256:3637dec907a571e7945182b9f43ce90efab95aaa23c923a990771b987f90e671"
+}

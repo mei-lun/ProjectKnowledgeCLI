@@ -1,0 +1,37 @@
+{
+  "change_range": "HEAD",
+  "confidence": 0.95,
+  "created_at": "2026-08-07T10:17:30+08:00",
+  "evidence": [
+    "evaluation/real_project_harness.py",
+    "src/project_knowledge/engine.py",
+    "src/project_knowledge/knowledge.py",
+    "src/project_knowledge/real_project.py",
+    "tests/test_wp02_evidence.py"
+  ],
+  "operations": [
+    {
+      "block_id": "proposal-capabilities",
+      "content": "- 0.1.15 WP-02：BuiltinCodeIndexEngine 对 Lua/Skynet 暴露可追溯入口证据，区分 Skynet 启动、协议派发和文件名推断入口；推断入口必须标注“需要人工确认”。\n- 0.1.15 WP-02：真实项目只读 harness 增加范围 dry-run、排除项、风险列表和 revision 证据；无 SVN 命令时使用选中文件内容哈希作为稳定 file_hash_only revision，不向源目录写入。\n- 0.1.15 WP-02：Lua/Skynet 入口知识页进入 generated Knowledge，静态启动与协议派发来源可被功能开发上下文检索；动态启动命令、运行时协议名和服务发现仍属于 unknowns。\n<!-- project-kb:source file=\"src/project_knowledge/engine.py\" -->\n<!-- project-kb:source file=\"src/project_knowledge/real_project.py\" -->\n<!-- project-kb:source file=\"src/project_knowledge/knowledge.py\" -->\n<!-- project-kb:source file=\"evaluation/real_project_harness.py\" -->\n<!-- project-kb:source file=\"tests/test_wp02_evidence.py\" -->\n",
+      "op": "upsert_generated_block"
+    }
+  ],
+  "proposal_id": "kp-5962b194e292853c",
+  "reason": "复核 0.1.15 WP02 Lua/Skynet 入口与只读 revision 证据。",
+  "requires_review": true,
+  "result_hash": "sha256:8e44465dcb7365e9fd2160a3653720b06b500c78dd9283925d11e97d82fd4e8f",
+  "review_reason": "复核源码锚点、入口证据和动态运行时 unknowns 后应用。",
+  "reviewed_at": "2026-08-07T10:17:47+08:00",
+  "reviewer": "codex",
+  "schema_version": 1,
+  "source_hashes": {
+    "evaluation/real_project_harness.py": "sha256:d970b13db02dcc3f0f6500599a5018a9fd37595186a275a9f6aa8e4b3922a915",
+    "src/project_knowledge/engine.py": "sha256:7ca42160a5611fdd968b9ce6e960584e19bfb7a5f4aa3c1668305092b23c40a9",
+    "src/project_knowledge/knowledge.py": "sha256:f5c8f5a3a7800fc031e1848e58c775905352735295bf1753949747bed2d2b6af",
+    "src/project_knowledge/real_project.py": "sha256:fd9b662a08ddb024b9db426790846dc1206e37c40c2aa53ec3fdea60ad77dca3",
+    "tests/test_wp02_evidence.py": "sha256:2cde542c77d113d7091b804eb51c947b3e635e43341fe82185a1ab359adec8ef"
+  },
+  "status": "applied",
+  "target": "docs/knowledge/curated/architecture.md",
+  "target_hash": "sha256:a5325649d55354a06e52be77e4fa70bcbf4047362e157c2d20e022885c5c8248"
+}

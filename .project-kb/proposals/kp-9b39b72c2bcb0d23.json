@@ -1,0 +1,36 @@
+{
+  "change_range": "HEAD",
+  "confidence": 0.95,
+  "created_at": "2026-08-07T10:21:12+08:00",
+  "evidence": [
+    "evaluation/real_project_harness.py",
+    "src/project_knowledge/engine.py",
+    "src/project_knowledge/knowledge.py",
+    "src/project_knowledge/real_project.py",
+    "tests/test_wp02_evidence.py"
+  ],
+  "operations": [
+    {
+      "content": "# ADR 0003：Lua/Skynet 入口证据与只读 revision 边界\n\n状态：草案\n\n## 背景\n\n真实 Lua/Skynet 项目需要在不写入源目录的前提下获得可追溯的启动入口、协议派发入口、范围风险和可重复 revision。静态分析不能证明动态服务发现、运行时协议名称或启动命令。\n\n## 决策\n\n1. BuiltinCodeIndexEngine 输出带路径、行号、来源符号、证据文本和置信度的入口记录，区分 Skynet 启动、协议派发和文件名推断入口。\n2. 真实项目 harness 提供 dry-run，只输出选中文件、排除项、风险和入口，不创建镜像。\n3. 有 SVN 时记录 SVN revision；没有 SVN 命令时使用选中文件路径与内容哈希组成稳定的 file_hash_only revision。\n4. 入口知识页进入 generated Knowledge，可参与功能开发 context；文件名推断和动态运行时结论必须保留人工确认或 unknowns。\n5. 只读镜像继续只复制允许索引的文件，并用源目录全树快照证明未写入源项目。\n\n## 验收证据\n\n- src/project_knowledge/engine.py\n- src/project_knowledge/real_project.py\n- src/project_knowledge/knowledge.py\n- evaluation/real_project_harness.py\n- tests/test_wp02_evidence.py\n- tests/test_wp02_knowledge.py\n\n<!-- project-kb:source file=\"src/project_knowledge/engine.py\" -->\n<!-- project-kb:source file=\"src/project_knowledge/real_project.py\" -->\n<!-- project-kb:source file=\"src/project_knowledge/knowledge.py\" -->\n<!-- project-kb:source file=\"evaluation/real_project_harness.py\" -->\n<!-- project-kb:source file=\"tests/test_wp02_evidence.py\" -->\n<!-- project-kb:source file=\"tests/test_wp02_knowledge.py\" -->\n",
+      "op": "append_adr_draft"
+    }
+  ],
+  "proposal_id": "kp-9b39b72c2bcb0d23",
+  "reason": "记录 0.1.15 WP02 的入口证据和只读 revision 边界，不改写既有 ADR。",
+  "requires_review": true,
+  "result_hash": "sha256:322b981c21971728eb09551f8eef5021dc7d22a5b8c8c79a3c2e51a00ab776bf",
+  "review_reason": "确认新增 ADR，不改写 ADR-0001，动态边界和证据来源完整。",
+  "reviewed_at": "2026-08-07T10:21:33+08:00",
+  "reviewer": "codex",
+  "schema_version": 1,
+  "source_hashes": {
+    "evaluation/real_project_harness.py": "sha256:d970b13db02dcc3f0f6500599a5018a9fd37595186a275a9f6aa8e4b3922a915",
+    "src/project_knowledge/engine.py": "sha256:7ca42160a5611fdd968b9ce6e960584e19bfb7a5f4aa3c1668305092b23c40a9",
+    "src/project_knowledge/knowledge.py": "sha256:f5c8f5a3a7800fc031e1848e58c775905352735295bf1753949747bed2d2b6af",
+    "src/project_knowledge/real_project.py": "sha256:fd9b662a08ddb024b9db426790846dc1206e37c40c2aa53ec3fdea60ad77dca3",
+    "tests/test_wp02_evidence.py": "sha256:2cde542c77d113d7091b804eb51c947b3e635e43341fe82185a1ab359adec8ef"
+  },
+  "status": "applied",
+  "target": "docs/knowledge/decisions/0003-lua-skynet-entry-evidence.md",
+  "target_hash": "missing"
+}

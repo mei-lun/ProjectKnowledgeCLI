@@ -1,0 +1,31 @@
+{
+  "change_range": "WP09",
+  "confidence": 0.95,
+  "created_at": "2026-08-07T08:42:39+08:00",
+  "evidence": [
+    "src/project_knowledge/retrieval.py",
+    "tests/test_retrieval_wp06.py"
+  ],
+  "operations": [
+    {
+      "block_id": "proposal-capabilities",
+      "content": "- 0.1.9 WP-07 已补充单项目 watcher 协调、二次哈希稳定解析、分支对齐、崩溃健康状态、结构化日志和受控 Git hooks；跨进程 daemon 仍需后续接入。\n- 0.1.10 WP-08 新增 config-v1 Schema、v0→v1 可预览迁移、Claude/Cursor/Gemini 标记适配和核心/插件版本同步。客户端文件只是集成层，索引、知识、Proposal 与 MCP 继续由 ProjectService 和本地 SQLite 统一管理。\n- 0.1.11 WP-09 在确定性检索层加入中文功能短语到英文标识符词元/蛇形组合的可解释扩展；精确符号排序、SQLite 图查询和 Token 裁剪契约保持不变。\n",
+      "op": "upsert_generated_block"
+    }
+  ],
+  "proposal_id": "kp-1d2c3779033415a4",
+  "reason": "WP09 中文标识符召回复核",
+  "requires_review": true,
+  "result_hash": "sha256:be4fd7ef12bccaa8223ee0442966c82ccd02036dc29de26e9c7ffea3c6dae7eb",
+  "review_reason": "已核对 0.1.11 检索实现、失败回归和预算约束",
+  "reviewed_at": "2026-08-07T08:43:10+08:00",
+  "reviewer": "Codex",
+  "schema_version": 1,
+  "source_hashes": {
+    "src/project_knowledge/retrieval.py": "sha256:8a4fd632d3e9c1fc56a9b22b0f758d4ab66c251e1687f3524d77467bf588bae4",
+    "tests/test_retrieval_wp06.py": "sha256:2537941f0503231d64d91bfd7d7ca9dadde25620a7cba65e383585386bc758ad"
+  },
+  "status": "applied",
+  "target": "docs/knowledge/curated/architecture.md",
+  "target_hash": "sha256:5154cb361fb26b1499646a1418f2e93c0df06975d40154867d89caa9eab1f4ef"
+}

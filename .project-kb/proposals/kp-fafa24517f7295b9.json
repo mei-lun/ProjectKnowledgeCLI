@@ -1,0 +1,29 @@
+{
+  "change_range": "HEAD",
+  "confidence": 0.8,
+  "created_at": "2026-08-07T04:35:40+08:00",
+  "evidence": [
+    "src/project_knowledge/proposal.py"
+  ],
+  "operations": [
+    {
+      "block_id": "proposal-capabilities",
+      "content": "ProposalService 提供稳定 ID、目标与来源哈希复核、结构化 generated block Patch、ADR 只追加草案、apply/reject 审计、冲突冻结和幂等应用。",
+      "op": "upsert_generated_block"
+    }
+  ],
+  "proposal_id": "kp-fafa24517f7295b9",
+  "reason": "记录 0.1.6 Proposal 审核能力摘要",
+  "requires_review": true,
+  "result_hash": "sha256:8e0a67f051acf9c4810878a7b7afc3172bd21fe0ec49e2a7c300b2555f33e2ee",
+  "review_reason": "已核对实现、57 项测试和 35 题质量门",
+  "reviewed_at": "2026-08-07T04:36:20+08:00",
+  "reviewer": "codex",
+  "schema_version": 1,
+  "source_hashes": {
+    "src/project_knowledge/proposal.py": "sha256:a375105e363ba431be8f3b7ae981f98af834fc2b19b93e65f083b18d341716ad"
+  },
+  "status": "applied",
+  "target": "docs/knowledge/curated/architecture.md",
+  "target_hash": "sha256:afaddf770f8ce6c51476f99197a1ba9178beb8248469c1dc3647bc68dbdecd51"
+}
