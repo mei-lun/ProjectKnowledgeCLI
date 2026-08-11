@@ -5,6 +5,7 @@ import tempfile
 from pathlib import Path
 
 from project_knowledge.config import ProjectConfig
+from project_knowledge.codegraph import CodeGraphEngine
 from project_knowledge.engine import GenericParser, PythonParser, create_engine
 
 
@@ -44,9 +45,9 @@ def create_item():
         self.assertTrue(any(route.route == "/health" for route in result.routes))
         self.assertTrue(all(relation.confidence < 1 for relation in result.relations))
 
-    def test_unavailable_codegraph_engine_fails_explicitly(self) -> None:
-        with self.assertRaisesRegex(ValueError, "codegraph.*不可用|codegraph.*unavailable"):
-            create_engine(ProjectConfig(engine="codegraph"))
+    def test_codegraph_engine_is_available_as_a_public_adapter(self) -> None:
+        engine = create_engine(ProjectConfig(engine="codegraph", codegraph_command="/usr/bin/codegraph"))
+        self.assertIsInstance(engine, CodeGraphEngine)
 
     def test_generic_parser_disambiguates_repeated_lua_function_ids(self) -> None:
         result = GenericParser(

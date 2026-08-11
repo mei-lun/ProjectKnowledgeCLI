@@ -363,6 +363,9 @@ CONFIG_SCHEMA: dict[str, Any] = {
             "type": "object",
             "properties": {
                 "engine": {"enum": ["builtin", "codegraph"]},
+                "codegraph_command": {"type": "string"},
+                "codegraph_dir": {"type": "string", "pattern": "^[A-Za-z0-9._-]+$"},
+                "codegraph_timeout_seconds": {"type": "integer", "minimum": 1},
                 "include": {"type": "array", "items": {"type": "string"}},
                 "exclude": {"type": "array", "items": {"type": "string"}},
             },

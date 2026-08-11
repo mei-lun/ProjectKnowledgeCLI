@@ -149,7 +149,7 @@ class SemanticKnowledgeTests(unittest.TestCase):
 
         self.assertEqual(result["record_id"], "draft.feature.bag-item-use")
         self.assertEqual(result["lifecycle"], "draft")
-        markdown = self.root / "docs" / "knowledge" / "drafts" / "features" / "bag-item-use.md"
+        markdown = self.root / ".project-kb" / "drafts" / "features" / "bag-item-use.md"
         structured = self.root / ".project-kb" / "drafts" / "features" / "bag-item-use.json"
         self.assertTrue(markdown.exists())
         self.assertTrue(structured.exists())
@@ -171,7 +171,7 @@ class SemanticKnowledgeTests(unittest.TestCase):
 
         proposal_service = ProposalService(self.root)
         proposal = proposal_service.create_from_feature_draft("bag-item-use", change_range="HEAD")
-        curated = self.root / "docs" / "knowledge" / "curated" / "features" / "bag-item-use.md"
+        curated = self.root / ".project-kb" / "curated" / "features" / "bag-item-use.md"
         self.assertEqual(proposal.status, "pending")
         self.assertFalse(curated.exists())
         proposal_service.apply(proposal.proposal_id, reviewer="reviewer", review_reason="来源与内容已人工确认")
@@ -185,7 +185,7 @@ class SemanticKnowledgeTests(unittest.TestCase):
         )
         with self.assertRaises(FeatureGuideValidationError):
             invalid.generate_feature_guide(pack, persist=True)
-        self.assertFalse((self.root / "docs" / "knowledge" / "drafts").exists())
+        self.assertFalse((self.root / ".project-kb" / "drafts" / "features" / "bag-item-use.json").exists())
         with KnowledgeStore(self.project.db_path, readonly=True) as store:
             self.assertIsNone(store.get_knowledge("draft.feature.bag-item-use"))
         self.assertFalse(any((self.root / ".project-kb" / "provider-cache").glob("*.json")))

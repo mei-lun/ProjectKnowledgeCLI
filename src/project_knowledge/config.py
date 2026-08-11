@@ -12,6 +12,7 @@ from .util import atomic_write
 DEFAULT_EXCLUDES = [
     ".git/**",
     ".project-kb/**",
+    ".project-kb/drafts/**",
     ".venv/**",
     "venv/**",
     "__pycache__/**",
@@ -35,13 +36,16 @@ class ProjectConfig:
     version: int = 1
     project_name: str = "project"
     engine: str = "builtin"
+    codegraph_command: str = ""
+    codegraph_dir: str = ".codegraph"
+    codegraph_timeout_seconds: int = 120
     include: list[str] = field(default_factory=lambda: ["**/*"])
     exclude: list[str] = field(default_factory=lambda: list(DEFAULT_EXCLUDES))
-    knowledge_root: str = "docs/knowledge"
-    generated_root: str = "docs/knowledge/generated"
-    drafts_root: str = "docs/knowledge/drafts"
-    curated_root: str = "docs/knowledge/curated"
-    decisions_root: str = "docs/knowledge/decisions"
+    knowledge_root: str = ".project-kb"
+    generated_root: str = ".project-kb/generated"
+    drafts_root: str = ".project-kb/drafts"
+    curated_root: str = ".project-kb/curated"
+    decisions_root: str = ".project-kb/decisions"
     watch: bool = True
     debounce_ms: int = 1000
     generated_mode: str = "auto"
@@ -146,13 +150,16 @@ class ProjectConfig:
             version=int(raw.get("version", 1)),
             project_name=str(project.get("name", root.name)),
             engine=str(index.get("engine", "builtin")),
+            codegraph_command=str(index.get("codegraph_command", "")),
+            codegraph_dir=str(index.get("codegraph_dir", ".codegraph")),
+            codegraph_timeout_seconds=int(index.get("codegraph_timeout_seconds", 120)),
             include=list(index.get("include", ["**/*"])),
             exclude=list(index.get("exclude", DEFAULT_EXCLUDES)),
-            knowledge_root=str(knowledge.get("root", "docs/knowledge")),
-            generated_root=str(knowledge.get("generated", "docs/knowledge/generated")),
-            drafts_root=str(knowledge.get("drafts", "docs/knowledge/drafts")),
-            curated_root=str(knowledge.get("curated", "docs/knowledge/curated")),
-            decisions_root=str(knowledge.get("decisions", "docs/knowledge/decisions")),
+            knowledge_root=str(knowledge.get("root", ".project-kb")),
+            generated_root=str(knowledge.get("generated", ".project-kb/generated")),
+            drafts_root=str(knowledge.get("drafts", ".project-kb/drafts")),
+            curated_root=str(knowledge.get("curated", ".project-kb/curated")),
+            decisions_root=str(knowledge.get("decisions", ".project-kb/decisions")),
             watch=bool(updates.get("watch", True)),
             debounce_ms=int(updates.get("debounce_ms", 1000)),
             generated_mode=str(updates.get("generated_mode", "auto")),
@@ -192,6 +199,9 @@ class ProjectConfig:
             "",
             "index:",
             f"  engine: {self.engine}",
+            f"  codegraph_command: {json.dumps(self.codegraph_command, ensure_ascii=False)}",
+            f"  codegraph_dir: {self.codegraph_dir}",
+            f"  codegraph_timeout_seconds: {self.codegraph_timeout_seconds}",
             "  include:",
             *lines(self.include, 4),
             "  exclude:",

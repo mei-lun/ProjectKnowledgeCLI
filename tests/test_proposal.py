@@ -23,7 +23,7 @@ class ProposalTests(unittest.TestCase):
         (self.root / "src" / "app.py").write_text("def create_item():\n    return 1\n", encoding="utf-8")
         (self.root / "pyproject.toml").write_text("[project]\nname='sample'\n", encoding="utf-8")
         ProjectService(self.root).initialize()
-        self.architecture = self.root / "docs" / "knowledge" / "curated" / "architecture.md"
+        self.architecture = self.root / ".project-kb" / "curated" / "architecture.md"
         self.architecture.write_text(
             "# 架构\n\n人工维护的边界，不得覆盖。\n\n"
             '<!-- project-kb:generated id="entrypoints" -->\n旧入口\n<!-- /project-kb:generated -->\n',
@@ -38,11 +38,11 @@ class ProposalTests(unittest.TestCase):
         before = self.architecture.read_text(encoding="utf-8")
         operation = PatchOperation(op="upsert_generated_block", block_id="entrypoints", content="新入口：create_item")
         first = self.proposals.create(
-            target="docs/knowledge/curated/architecture.md", reason="入口实现已更新",
+            target=".project-kb/curated/architecture.md", reason="入口实现已更新",
             evidence=["src/app.py"], operations=[operation], confidence=0.9, change_range="HEAD",
         )
         second = self.proposals.create(
-            target="docs/knowledge/curated/architecture.md", reason="入口实现已更新",
+            target=".project-kb/curated/architecture.md", reason="入口实现已更新",
             evidence=["src/app.py"], operations=[operation], confidence=0.9, change_range="HEAD",
         )
         self.assertEqual(first.proposal_id, second.proposal_id)
@@ -71,7 +71,7 @@ class ProposalTests(unittest.TestCase):
     def test_reject_retains_audit_record_without_touching_target(self) -> None:
         before = self.architecture.read_text(encoding="utf-8")
         proposal = self.proposals.create(
-            target="docs/knowledge/curated/architecture.md", reason="候选内容", evidence=["src/app.py"],
+            target=".project-kb/curated/architecture.md", reason="候选内容", evidence=["src/app.py"],
             operations=[PatchOperation(op="upsert_generated_block", block_id="entrypoints", content="候选入口")],
         )
         rejected = self.proposals.reject(proposal.proposal_id, reviewer="reviewer", review_reason="结论不成立")
@@ -83,7 +83,7 @@ class ProposalTests(unittest.TestCase):
 
     def test_changed_target_marks_proposal_conflicted_and_prevents_apply(self) -> None:
         proposal = self.proposals.create(
-            target="docs/knowledge/curated/architecture.md", reason="更新入口", evidence=["src/app.py"],
+            target=".project-kb/curated/architecture.md", reason="更新入口", evidence=["src/app.py"],
             operations=[PatchOperation(op="upsert_generated_block", block_id="entrypoints", content="新入口")],
         )
         self.architecture.write_text(self.architecture.read_text(encoding="utf-8") + "\n并发人工修改。\n", encoding="utf-8")
@@ -97,7 +97,7 @@ class ProposalTests(unittest.TestCase):
 
     def test_changed_evidence_marks_proposal_stale_even_when_target_is_unchanged(self) -> None:
         proposal = self.proposals.create(
-            target="docs/knowledge/curated/architecture.md", reason="更新入口", evidence=["src/app.py"],
+            target=".project-kb/curated/architecture.md", reason="更新入口", evidence=["src/app.py"],
             operations=[PatchOperation(op="upsert_generated_block", block_id="entrypoints", content="新入口")],
         )
         (self.root / "src" / "app.py").write_text("def create_item():\n    return 2\n", encoding="utf-8")
@@ -110,12 +110,12 @@ class ProposalTests(unittest.TestCase):
     def test_delete_requires_supersedes_evidence_and_only_removes_named_block(self) -> None:
         with self.assertRaises(ValueError):
             self.proposals.create(
-                target="docs/knowledge/curated/architecture.md", reason="删除旧入口", evidence=["src/app.py"],
+                target=".project-kb/curated/architecture.md", reason="删除旧入口", evidence=["src/app.py"],
                 operations=[PatchOperation(op="delete_generated_block", block_id="entrypoints")],
             )
         proposal = self.proposals.create(
-            target="docs/knowledge/curated/architecture.md", reason="旧入口已由新流程替代",
-            evidence=["src/app.py", "docs/knowledge/curated/feature-guide-generation.md"],
+            target=".project-kb/curated/architecture.md", reason="旧入口已由新流程替代",
+            evidence=["src/app.py", ".project-kb/curated/feature-guide-generation.md"],
             operations=[PatchOperation(
                 op="delete_generated_block", block_id="entrypoints",
                 supersedes=["feature.new-entrypoint"], deleted_sources=["src/legacy-entrypoint.py"],
@@ -127,22 +127,22 @@ class ProposalTests(unittest.TestCase):
         self.assertNotIn('id="entrypoints"', content)
 
     def test_adr_operation_only_creates_new_draft_and_never_rewrites_existing_adr(self) -> None:
-        accepted = self.root / "docs" / "knowledge" / "decisions" / "0001-local-first-core.md"
+        accepted = self.root / ".project-kb" / "decisions" / "0001-local-first-core.md"
         accepted.parent.mkdir(parents=True, exist_ok=True)
         accepted.write_text("# ADR 0001\n\n状态：已接受\n", encoding="utf-8")
         accepted_before = accepted.read_text(encoding="utf-8")
         proposal = self.proposals.create(
-            target="docs/knowledge/decisions/0002-proposal-review.md", reason="记录提案审核边界",
+            target=".project-kb/decisions/0002-proposal-review.md", reason="记录提案审核边界",
             evidence=["docs/project-knowledge-system-design.md"],
             operations=[PatchOperation(op="append_adr_draft", content="# ADR-0002：提案审核边界\n\n采用显式审核后应用。", supersedes=["decision.local-first-core"])],
         )
         self.proposals.apply(proposal.proposal_id, reviewer="mei", review_reason="创建待评审 ADR")
-        draft = self.root / "docs" / "knowledge" / "decisions" / "0002-proposal-review.md"
+        draft = self.root / ".project-kb" / "decisions" / "0002-proposal-review.md"
         self.assertIn("状态：草案", draft.read_text(encoding="utf-8"))
         self.assertEqual(accepted.read_text(encoding="utf-8"), accepted_before)
         with self.assertRaises(ValueError):
             self.proposals.create(
-                target="docs/knowledge/decisions/0001-local-first-core.md", reason="尝试改写已接受 ADR",
+                target=".project-kb/decisions/0001-local-first-core.md", reason="尝试改写已接受 ADR",
                 evidence=["src/app.py"],
                 operations=[PatchOperation(op="upsert_generated_block", block_id="decision", content="不允许")],
             )
@@ -151,7 +151,7 @@ class ProposalTests(unittest.TestCase):
         stdout = io.StringIO()
         with contextlib.redirect_stdout(stdout):
             exit_code = main([
-                "propose", "HEAD", "--project", str(self.root), "--target", "docs/knowledge/curated/architecture.md",
+                "propose", "HEAD", "--project", str(self.root), "--target", ".project-kb/curated/architecture.md",
                 "--reason", "CLI 更新入口", "--evidence", "src/app.py", "--operation", "upsert_generated_block",
                 "--block-id", "entrypoints", "--content", "CLI 新入口", "--dry-run", "--json",
             ])
@@ -162,7 +162,7 @@ class ProposalTests(unittest.TestCase):
         stdout = io.StringIO()
         with contextlib.redirect_stdout(stdout):
             self.assertEqual(main([
-                "propose", "HEAD", "--project", str(self.root), "--target", "docs/knowledge/curated/architecture.md",
+                "propose", "HEAD", "--project", str(self.root), "--target", ".project-kb/curated/architecture.md",
                 "--reason", "CLI 更新入口", "--evidence", "src/app.py", "--operation", "upsert_generated_block",
                 "--block-id", "entrypoints", "--content", "CLI 新入口", "--json",
             ]), 0)
@@ -172,7 +172,7 @@ class ProposalTests(unittest.TestCase):
         ]), 0)
 
         other = self.proposals.create(
-            target="docs/knowledge/curated/architecture.md", reason="拒绝候选", evidence=["src/app.py"],
+            target=".project-kb/curated/architecture.md", reason="拒绝候选", evidence=["src/app.py"],
             operations=[PatchOperation(op="upsert_generated_block", block_id="other", content="候选")],
         )
         self.assertEqual(main([

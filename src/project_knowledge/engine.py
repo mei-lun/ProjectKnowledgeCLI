@@ -686,7 +686,8 @@ class GenericParser:
 
 def create_engine(config: ProjectConfig) -> CodeIndexEngine:
     if config.engine == "codegraph":
-        raise ValueError("codegraph 引擎当前不可用；请使用 engine: builtin，或安装后续版本提供的真实 CodeGraph Adapter")
+        from .codegraph import CodeGraphEngine
+        return CodeGraphEngine(config)
     if config.engine != "builtin":
         raise ValueError(f"unsupported index engine: {config.engine}")
     return BuiltinCodeIndexEngine()

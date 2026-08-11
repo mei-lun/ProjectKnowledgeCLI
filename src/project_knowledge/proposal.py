@@ -93,7 +93,7 @@ class ProposalService:
         if not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", feature_id):
             raise ValueError(f"无效 Feature Guide ID：{feature_id}")
         structured_path = self.root / ".project-kb" / "drafts" / "features" / f"{feature_id}.json"
-        markdown_path = self.root / "docs" / "knowledge" / "drafts" / "features" / f"{feature_id}.md"
+        markdown_path = self.root / ".project-kb" / "drafts" / "features" / f"{feature_id}.md"
         if not structured_path.exists() or not markdown_path.exists():
             raise ValueError(f"Feature Guide 草案不完整：{feature_id}")
         payload = json.loads(structured_path.read_text(encoding="utf-8"))
@@ -109,7 +109,7 @@ class ProposalService:
             *source_paths,
         ]
         return self.create(
-            target=f"docs/knowledge/curated/features/{feature_id}.md",
+            target=f".project-kb/curated/features/{feature_id}.md",
             reason=f"将已校验来源的 Feature Guide 草案 {feature_id} 提交人工审核",
             evidence=evidence,
             operations=[PatchOperation(
@@ -254,14 +254,14 @@ class ProposalService:
             raise ValueError("提案置信度必须位于 0 到 1")
         if not operations:
             raise ValueError("提案必须包含至少一个 Patch operation")
-        is_decision = target.startswith("docs/knowledge/decisions/")
+        is_decision = target.startswith(".project-kb/decisions/")
         if is_decision:
             if target_path.exists():
                 raise ValueError("ADR 只允许创建新草案，不能改写已有决策")
             if len(operations) != 1 or operations[0].op != "append_adr_draft":
                 raise ValueError("ADR 目标只允许 append_adr_draft operation")
         elif any(item.op == "append_adr_draft" for item in operations):
-            raise ValueError("append_adr_draft 只能写入 docs/knowledge/decisions/")
+            raise ValueError("append_adr_draft 只能写入 .project-kb/decisions/")
         for operation in operations:
             if operation.op in {"upsert_generated_block", "delete_generated_block"}:
                 if not operation.block_id or not BLOCK_ID_PATTERN.fullmatch(operation.block_id):
@@ -282,8 +282,8 @@ class ProposalService:
             raise ValueError("目标必须位于项目目录内")
         relative = pure.as_posix()
         allowed = (
-            relative.startswith("docs/knowledge/curated/")
-            or relative.startswith("docs/knowledge/decisions/")
+            relative.startswith(".project-kb/curated/")
+            or relative.startswith(".project-kb/decisions/")
         )
         if not allowed or not relative.endswith(".md"):
             raise ValueError("提案目标必须是 curated 或 decisions 下的 Markdown")
@@ -344,7 +344,7 @@ class ProposalService:
         atomic_json(self._proposal_path(proposal.proposal_id), payload)
 
     def _apply_operations(self, initial: str, proposal: Proposal, reviewer: str) -> str:
-        if proposal.target.startswith("docs/knowledge/decisions/"):
+        if proposal.target.startswith(".project-kb/decisions/"):
             return self._render_adr_draft(proposal, reviewer)
         content = initial
         for operation in proposal.operations:

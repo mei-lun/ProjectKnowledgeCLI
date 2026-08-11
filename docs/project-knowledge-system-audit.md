@@ -1334,3 +1334,32 @@ WP-00 基线可靠性
 | 2026-08-07 | 0.1.3 | 建立 WP-09 首个可重复基线：20 题、多策略质量门、真实项目只读镜像和 500/5000 性能报告；31 项测试、编译与差异检查通过；工作包持续进行 |
 | 2026-08-06 | 0.1.2 | 完成 WP-00：提交对齐、配置告警、模板可信度、截断披露与运行时 Schema 校验 |
 | 2026-08-06 | 0.1.1 | 建立首次完整需求对齐审计和后续实施基线 |
+
+
+## 18.1 本阶段复核（WP-CG-01、WP-GUIDE-01）
+
+本阶段按用户重新确认的最小目标验收：复用已安装的 CodeGraph，建立本地、可增量更新的项目级知识库，并生成类别级开发指导，而不是为登录、花园或公会某个具体功能写静态说明。
+
+| 需求 ID | 验收内容 | 当前状态 | 证据 | 后续边界 |
+| --- | --- | --- | --- | --- |
+| CG-01 | 通过 CodeGraph 公开 CLI/API 完成初始化、同步、状态、文件、符号、调用关系、影响范围和测试查询 | 已完成 | `src/project_knowledge/codegraph.py`、`tests/test_codegraph.py` | 不读取私有数据库 |
+| CG-02 | CodeGraph 是代码事实权威，本地 SQLite 仅作兼容缓存 | 已完成 | `CodeGraphEngine.parse` 实现说明 | 缓存不能替代指导证据 |
+| CG-03 | gardenserver Lua/Skynet/zn 规则适配，事实带源码路径和行号 | 已完成（首版） | `src/project_knowledge/gardenserver.py`、`.project-kb/evidence/*.json` | 动态调用和隐式约定需人工确认 |
+| GUIDE-01 | 第一层输出跨项目可迁移的方法论 | 已完成（中文基线） | `src/project_knowledge/guidance_templates.py`、`.project-kb/methodology/*.json` | LLM 重写/扩展是后续增强 |
+| GUIDE-02 | 第二层输出当前项目适配，覆盖普通活动、普通玩家功能、登录模块 | 已完成（首版） | `.project-kb/guides/*.json`、`.project-kb/generated/*.md` | 真实开发任务评测后再提升为 verified |
+| GUIDE-03 | 代码变化后 CodeGraph 与第二层指导同步 | 已完成（增量路径） | `ProjectService.sync/watch` 先同步 CodeGraph 再刷新指导；watch 回归测试 | 未对 gardenserver 业务源做破坏性修改演示 |
+| DIR-01 | PKS 自有生成文件统一在 `.project-kb`，默认中文展示 | 已完成 | 单目录配置、中文文件名回归测试 | CodeGraph 1.5 自身要求可识别的 `.codegraph` 运行时目录，不能被 PKS 改名 |
+| VER-01 | 每批变更只递增一次补丁版本并记录中文变更 | 已完成 | `src/project_knowledge/__init__.py`、`CHANGELOG.md` | 下一批变更继续递增一次 |
+
+| 2026-08-11 | 0.1.16 | 完成 CodeGraph 公开 CLI 适配、gardenserver 规则证据和三类两层中文开发指导；PKS 自有产物统一 `.project-kb`，CodeGraph 上游 `.codegraph` 限制已记录；90 项测试通过 |
+
+### 与原始需求的偏差处理
+
+1. 原审计把 CodeGraph 和 Feature Guide 列为后续里程碑；按用户当前优先级，本阶段提前完成适配闭环。
+2. 本阶段没有重写 CodeGraph，也没有读取私有数据库；事实查询全部走公开 CLI。
+3. 第一层当前采用可审计的内置中文模板，保证离线和无模型时有可用基线；LLM 生成、评测和人工审核仍未宣称完成。
+4. “单目录”已落实到 PKS 产物；CodeGraph 的 `.codegraph` 是上游固定运行时目录，强行搬入 `.project-kb` 会导致 Windows CodeGraph 报未初始化，因此保留并在配置中显式说明。
+
+### 真实项目验收
+
+gardenserver 首次初始化已完成：PKS 约 1,295 个文件、11,101 个符号、54,857 条关系、0 个解析错误；CodeGraph 1.5.0 报告约 1,296 个文件、17,550 个节点、44,169 条边、无待同步变更。三类中文指导均写入 `.project-kb/generated/`，包含第一层方法论、第二层项目事实、来源行号和待人工确认项。

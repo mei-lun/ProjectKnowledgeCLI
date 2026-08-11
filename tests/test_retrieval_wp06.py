@@ -81,7 +81,7 @@ class RetrievalWP06Tests(unittest.TestCase):
         self.assertLessEqual(versioning["estimated_tokens"], versioning["token_budget"])
 
     def test_context_extracts_task_relevant_invariant_from_end_of_long_knowledge(self) -> None:
-        knowledge_path = self.root / "docs" / "knowledge" / "curated" / "conventions.md"
+        knowledge_path = self.root / ".project-kb" / "curated" / "conventions.md"
         invariant = "同一发布批次的核心包版本与 Codex 插件版本必须一致。"
         original = knowledge_path.read_text(encoding="utf-8")
         noise = "\n".join(f"无关背景说明 {index}" for index in range(600))

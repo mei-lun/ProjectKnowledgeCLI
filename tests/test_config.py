@@ -23,13 +23,14 @@ class ConfigTests(unittest.TestCase):
             self.assertFalse(actual.provider_enabled)
             self.assertFalse(actual.provider_allow_network)
             self.assertEqual(actual.provider_max_tokens, 12000)
-            self.assertEqual(actual.drafts_root, "docs/knowledge/drafts")
+            self.assertEqual(actual.drafts_root, ".project-kb/drafts")
+            self.assertEqual(actual.codegraph_dir, ".codegraph")
 
     def test_default_excludes_keep_evaluation_outputs_out_of_the_test_index(self) -> None:
         config = ProjectConfig()
         self.assertIn("evaluation/reports/**", config.exclude)
         self.assertIn("evaluation/baselines/**", config.exclude)
-        self.assertIn("docs/knowledge/drafts/**", config.exclude)
+        self.assertIn(".project-kb/drafts/**", config.exclude)
 
     def test_marker_update_preserves_unowned_content(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

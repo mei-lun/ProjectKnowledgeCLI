@@ -12,6 +12,7 @@ from typing import Any
 
 from .config import ProjectConfig
 from .engine import CodeIndexEngine, IndexedFile, create_engine
+from .guidance import GuidanceService
 from .knowledge import KnowledgeGenerator
 from .models import ChangeSet
 from .proposal import ProposalService
@@ -75,22 +76,32 @@ class ProjectService:
         self._watch_lease: dict[str, Any] | None = None
 
     def initialize(self, dry_run: bool = False) -> dict[str, Any]:
-        discovered = self.engine.discover(self.root, self.config)
         if dry_run:
+            if self.config.engine == "codegraph":
+                from .engine import BuiltinCodeIndexEngine
+                discovered = BuiltinCodeIndexEngine().discover(self.root, self.config)
+            else:
+                discovered = self.engine.discover(self.root, self.config)
             return {
                 "action": "init",
                 "dry_run": True,
                 "project_root": str(self.root),
                 "files_to_index": len(discovered),
-                "files_to_create": [".project-kb.yml", ".project-kb/manifest.json", "docs/knowledge/index.md", "AGENTS.md"],
+                "files_to_create": [
+                    ".project-kb.yml", ".project-kb/manifest.json",
+                    ".project-kb/generated/项目地图.md", ".project-kb/generated/开发指导索引.md",
+                ],
             }
         with project_lock(self.root):
             self._prepare_project()
             self.config = ProjectConfig.load(self.root)
             self.engine = create_engine(self.config)
+            codegraph = self.engine.initialize(self.root, self.config) if self.config.engine == "codegraph" else None
             discovered = self.engine.discover(self.root, self.config)
             result = self._atomic_rebuild(discovered)
         result["action"] = "init"
+        if codegraph is not None:
+            result["codegraph"] = codegraph
         return result
 
     def rebuild(self, dry_run: bool = False) -> dict[str, Any]:
@@ -108,12 +119,11 @@ class ProjectService:
         if not (self.root / ".project-kb.yml").exists():
             self.config = ProjectConfig(project_name=self.root.name)
             self.config.write(self.root)
-        for directory in ["events", "proposals", "proposals/queue", "logs"]:
+        for directory in ["events", "proposals", "proposals/queue", "logs", "state", "codegraph", "evidence", "methodology", "guides", "generated", "drafts", "curated", "decisions"]:
             (self.root / ".project-kb" / directory).mkdir(parents=True, exist_ok=True)
         for name, schema in all_schemas().items():
             atomic_json(self.root / ".project-kb" / "schemas" / name, schema)
         marker_update(self.root / ".gitignore", "gitignore", GITIGNORE_BODY)
-        marker_update(self.root / "AGENTS.md", "instructions", AGENTS_BODY)
         self._write_mcp_config()
 
     def _atomic_rebuild(self, discovered: list[IndexedFile]) -> dict[str, Any]:
@@ -153,7 +163,11 @@ class ProjectService:
                 store.set_meta("last_full_index_duration_ms", str(duration))
                 store.connection.commit()
             self._write_state("idle")
-            return self._report(counts, discovered, len(records), duration)
+            report = self._report(counts, discovered, len(records), duration)
+            guidance = self._refresh_guidance()
+            if guidance is not None:
+                report["guidance"] = guidance
+            return report
         finally:
             temporary.unlink(missing_ok=True)
             Path(str(temporary) + "-wal").unlink(missing_ok=True)
@@ -162,6 +176,9 @@ class ProjectService:
     def sync(self, dry_run: bool = False, task_summary: str = "manual synchronization") -> dict[str, Any]:
         self._require_initialized()
         started = time.monotonic()
+        codegraph_sync = None
+        if self.config.engine == "codegraph" and not dry_run:
+            codegraph_sync = self.engine.sync(self.root, self.config)
         discovered = self.engine.discover(self.root, self.config)
         by_path = {item.path: item for item in discovered}
         with KnowledgeStore(self.db_path, readonly=True) as readonly:
@@ -229,6 +246,7 @@ class ProjectService:
             self._write_state("running", pid=os.getpid(), coordinator=self._watch_lease)
         else:
             self._write_state("idle")
+        guidance = self._refresh_guidance()
         return {
             "action": "sync", "changed_files": changed, "deleted_files": deleted, "changed_knowledge": knowledge_changed,
             "affected_modules": affected_modules, "affected_knowledge": affected_knowledge,
@@ -236,7 +254,20 @@ class ProjectService:
             "semantic_update": queue_item["queue_id"] if queue_item else None,
             "commit_reconciled": commit_changed,
             "branch_reconciled": branch_changed,
+            "codegraph": codegraph_sync,
+            "guidance": guidance,
         }
+
+    def _refresh_guidance(self) -> dict[str, Any] | None:
+        if self.config.engine != "codegraph" or self.config.project_name.lower() != "gardenserver":
+            return None
+        try:
+            client = getattr(self.engine, "client", None)
+            result = GuidanceService(self.root, client=client).generate()
+            return {"status": result["status"], "categories": result["categories"], "generated_at": result["generated_at"]}
+        except (OSError, RuntimeError, ValueError) as error:
+            self._log_event("guidance_refresh_failed", error=str(error))
+            return {"status": "stale", "error": str(error)}
 
     def _parse_stable(self, item: IndexedFile, attempts: int = 3):
         current = item
@@ -522,7 +553,7 @@ class ProjectService:
         recommendations = ["Review unresolved and low-confidence relations before high-risk changes."]
         architecture = self.root / self.config.curated_root / "architecture.md"
         if not architecture.exists() or "Document module responsibilities" in architecture.read_text(encoding="utf-8", errors="replace"):
-            recommendations.insert(0, "Complete docs/knowledge/curated/architecture.md with verified boundaries.")
+            recommendations.insert(0, "Complete .project-kb/curated/architecture.md with verified boundaries.")
         return {
             "project_root": str(self.root), "files_scanned": len(files), "parse_success_rate": round(
                 (len(files) - counts["parse_errors"]) / max(1, len(files)), 4

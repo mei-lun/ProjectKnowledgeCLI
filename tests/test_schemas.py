@@ -18,7 +18,7 @@ class SchemaTests(unittest.TestCase):
             id="generated.routes",
             kind="route",
             title="路由",
-            path="docs/knowledge/generated/routes.md",
+            path=".project-kb/generated/routes.md",
             ownership="generated",
             confidence="generated",
         ).to_dict()
@@ -30,7 +30,7 @@ class SchemaTests(unittest.TestCase):
             "id": "",
             "kind": "route",
             "title": "路由",
-            "path": "docs/knowledge/generated/routes.md",
+            "path": ".project-kb/generated/routes.md",
             "ownership": "automatic",
             "confidence": "generated",
             "status": "fresh",
@@ -59,7 +59,7 @@ class SchemaTests(unittest.TestCase):
     def test_proposal_schema_requires_structured_patch_operations(self) -> None:
         invalid = {
             "schema_version": 1, "proposal_id": "kp-0123456789abcdef",
-            "target": "docs/knowledge/curated/architecture.md", "target_hash": "sha256:" + "0" * 64,
+            "target": ".project-kb/curated/architecture.md", "target_hash": "sha256:" + "0" * 64,
             "reason": "更新入口", "evidence": ["src/app.py"], "confidence": 0.8,
             "source_hashes": {},
             "operations": ["update_source_reference"], "requires_review": True,

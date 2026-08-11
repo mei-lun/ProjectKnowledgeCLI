@@ -65,28 +65,28 @@ class IntegrationTests(unittest.TestCase):
         self.assertGreaterEqual(report["symbols"], 5)
         self.assertTrue((self.root / ".project-kb" / "index.db").exists())
         self.assertTrue((self.root / ".project-kb" / "mcp.json").exists())
-        project_map = self.root / "docs" / "knowledge" / "generated" / "project-map.md"
+        project_map = self.root / ".project-kb" / "generated" / "project-map.md"
         self.assertTrue(project_map.exists())
         project_map_content = project_map.read_text(encoding="utf-8")
         self.assertIn("# 项目地图：", project_map_content)
         self.assertIn("| 配置 |", project_map_content)
-        self.assertIn("# 项目知识库：", (self.root / "docs" / "knowledge" / "index.md").read_text(encoding="utf-8"))
-        self.assertIn("# 架构", (self.root / "docs" / "knowledge" / "curated" / "architecture.md").read_text(encoding="utf-8"))
-        module_map = self.root / "docs" / "knowledge" / "generated" / "modules" / "app.py.md"
+        self.assertIn("# 项目知识库：", (self.root / ".project-kb" / "index.md").read_text(encoding="utf-8"))
+        self.assertIn("# 架构", (self.root / ".project-kb" / "curated" / "architecture.md").read_text(encoding="utf-8"))
+        module_map = self.root / ".project-kb" / "generated" / "modules" / "app.py.md"
         self.assertIn("：类，位于", module_map.read_text(encoding="utf-8"))
         self.assertEqual(service.status()["pending_files"], [])
         manifest = json.loads((self.root / ".project-kb" / "manifest.json").read_text(encoding="utf-8"))
         self.assertGreaterEqual(len(manifest["records"]), 6)
         self.assertNotIn(str(self.root), json.dumps(manifest))
 
-        architecture = self.root / "docs" / "knowledge" / "curated" / "architecture.md"
+        architecture = self.root / ".project-kb" / "curated" / "architecture.md"
         architecture.write_text(
             '# Architecture\n\nRepository owns persistence.\n\n<!-- project-kb:source file="src/app.py" -->\n',
             encoding="utf-8",
         )
-        self.assertIn("docs/knowledge/curated/architecture.md", service.status()["pending_files"])
+        self.assertIn(".project-kb/curated/architecture.md", service.status()["pending_files"])
         first_sync = service.sync(task_summary="document repository ownership")
-        self.assertIn("docs/knowledge/curated/architecture.md", first_sync["changed_knowledge"])
+        self.assertIn(".project-kb/curated/architecture.md", first_sync["changed_knowledge"])
         self.assertIsNone(first_sync["semantic_update"])
         with KnowledgeStore(service.db_path, readonly=True) as store:
             curated = store.get_knowledge("curated.architecture")
@@ -157,18 +157,19 @@ class IntegrationTests(unittest.TestCase):
     def test_install_and_uninstall_only_remove_owned_integration(self) -> None:
         service = ProjectService(self.root)
         service.initialize()
+        service.install()
         agents = self.root / "AGENTS.md"
         agents.write_text("User rule\n\n" + agents.read_text(encoding="utf-8"), encoding="utf-8")
         result = service.uninstall()
         self.assertTrue(result["knowledge_preserved"])
         self.assertIn("User rule", agents.read_text(encoding="utf-8"))
         self.assertFalse((self.root / ".project-kb" / "mcp.json").exists())
-        self.assertTrue((self.root / "docs" / "knowledge" / "curated" / "architecture.md").exists())
+        self.assertTrue((self.root / ".project-kb" / "curated" / "architecture.md").exists())
 
     def test_template_is_inferred_until_human_content_replaces_marker(self) -> None:
         service = ProjectService(self.root)
         service.initialize()
-        architecture = self.root / "docs" / "knowledge" / "curated" / "architecture.md"
+        architecture = self.root / ".project-kb" / "curated" / "architecture.md"
         self.assertIn("project-kb:template", architecture.read_text(encoding="utf-8"))
         with KnowledgeStore(service.db_path, readonly=True) as store:
             self.assertEqual(store.get_knowledge("curated.architecture").confidence, "inferred")
@@ -203,7 +204,7 @@ class IntegrationTests(unittest.TestCase):
         functions = "\n".join(f"def function_{number}():\n    return helper()" for number in range(305))
         (self.root / "src" / "large.py").write_text("def helper():\n    return 1\n\n" + functions, encoding="utf-8")
         ProjectService(self.root).initialize()
-        module = self.root / "docs" / "knowledge" / "generated" / "modules" / "large.py.md"
+        module = self.root / ".project-kb" / "generated" / "modules" / "large.py.md"
         content = module.read_text(encoding="utf-8")
         self.assertIn("符号内容已截断", content)
         self.assertIn("关系内容已截断", content)
