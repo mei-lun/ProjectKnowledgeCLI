@@ -7,10 +7,14 @@
 - `src/project_knowledge/__init__.py`（Python）
 - `src/project_knowledge/__main__.py`（Python）
 - `src/project_knowledge/cli.py`（Python）
+- `src/project_knowledge/codegraph.py`（Python）
 - `src/project_knowledge/config.py`（Python）
 - `src/project_knowledge/engine.py`（Python）
 - `src/project_knowledge/evaluate.py`（Python）
 - `src/project_knowledge/evidence.py`（Python）
+- `src/project_knowledge/gardenserver.py`（Python）
+- `src/project_knowledge/guidance.py`（Python）
+- `src/project_knowledge/guidance_templates.py`（Python）
 - `src/project_knowledge/knowledge.py`（Python）
 - `src/project_knowledge/mcp.py`（Python）
 - `src/project_knowledge/models.py`（Python）
@@ -28,23 +32,61 @@
 
 ## 符号
 
-> 符号内容已截断：共 343 个，当前页面仅展示前 300 个；请使用 knowledge_context 或 knowledge_search 获取精确范围。
+> 符号内容已截断：共 399 个，当前页面仅展示前 300 个；请使用 knowledge_context 或 knowledge_search 获取精确范围。
 
 - `src/project_knowledge/cli.py::_common`：函数，位于 `src/project_knowledge/cli.py:23`（可信度 1.00）
 - `src/project_knowledge/cli.py::build_parser`：函数，位于 `src/project_knowledge/cli.py:32`（可信度 1.00）
 - `src/project_knowledge/cli.py::_human`：函数，位于 `src/project_knowledge/cli.py:126`（可信度 1.00）
 - `src/project_knowledge/cli.py::main`：函数，位于 `src/project_knowledge/cli.py:137`（可信度 1.00）
-- `src/project_knowledge/config.py::ProjectConfig`：类，位于 `src/project_knowledge/config.py:34`（可信度 1.00）
-- `src/project_knowledge/config.py::ProjectConfig.load_raw`：方法，位于 `src/project_knowledge/config.py:71`（可信度 1.00）
-- `src/project_knowledge/config.py::ProjectConfig.validate_file`：方法，位于 `src/project_knowledge/config.py:82`（可信度 1.00）
-- `src/project_knowledge/config.py::ProjectConfig.migrate_file`：方法，位于 `src/project_knowledge/config.py:88`（可信度 1.00）
-- `src/project_knowledge/config.py::ProjectConfig.load`：方法，位于 `src/project_knowledge/config.py:129`（可信度 1.00）
-- `src/project_knowledge/config.py::ProjectConfig.dump`：方法，位于 `src/project_knowledge/config.py:182`（可信度 1.00）
-- `src/project_knowledge/config.py::ProjectConfig.dump.lines`：方法，位于 `src/project_knowledge/config.py:183`（可信度 1.00）
-- `src/project_knowledge/config.py::ProjectConfig.write`：方法，位于 `src/project_knowledge/config.py:242`（可信度 1.00）
-- `src/project_knowledge/config.py::ProjectConfig.capability_warnings`：方法，位于 `src/project_knowledge/config.py:245`（可信度 1.00）
-- `src/project_knowledge/config.py::_scalar`：函数，位于 `src/project_knowledge/config.py:301`（可信度 1.00）
-- `src/project_knowledge/config.py::parse_simple_yaml`：函数，位于 `src/project_knowledge/config.py:317`（可信度 1.00）
+- `src/project_knowledge/codegraph.py::CodeGraphError`：类，位于 `src/project_knowledge/codegraph.py:15`（可信度 1.00）
+- `src/project_knowledge/codegraph.py::CodeGraphCommand`：类，位于 `src/project_knowledge/codegraph.py:20`（可信度 1.00）
+- `src/project_knowledge/codegraph.py::CodeGraphCommandResolver`：类，位于 `src/project_knowledge/codegraph.py:25`（可信度 1.00）
+- `src/project_knowledge/codegraph.py::CodeGraphCommandResolver.__init__`：方法，位于 `src/project_knowledge/codegraph.py:30`（可信度 1.00）
+- `src/project_knowledge/codegraph.py::CodeGraphCommandResolver.resolve`：方法，位于 `src/project_knowledge/codegraph.py:33`（可信度 1.00）
+- `src/project_knowledge/codegraph.py::CodeGraphCommandResolver._from_value`：方法，位于 `src/project_knowledge/codegraph.py:59`（可信度 1.00）
+- `src/project_knowledge/codegraph.py::CodeGraphCommandResolver._windows_path`：方法，位于 `src/project_knowledge/codegraph.py:68`（可信度 1.00）
+- `src/project_knowledge/codegraph.py::_host_path`：函数，位于 `src/project_knowledge/codegraph.py:76`（可信度 1.00）
+- `src/project_knowledge/codegraph.py::CodeGraphClient`：类，位于 `src/project_knowledge/codegraph.py:80`（可信度 1.00）
+- `src/project_knowledge/codegraph.py::CodeGraphClient.__init__`：方法，位于 `src/project_knowledge/codegraph.py:81`（可信度 1.00）
+- `src/project_knowledge/codegraph.py::CodeGraphClient.command_display`：方法，位于 `src/project_knowledge/codegraph.py:89`（可信度 1.00）
+- `src/project_knowledge/codegraph.py::CodeGraphClient._effective_argv`：方法，位于 `src/project_knowledge/codegraph.py:92`（可信度 1.00）
+- `src/project_knowledge/codegraph.py::CodeGraphClient._run`：方法，位于 `src/project_knowledge/codegraph.py:106`（可信度 1.00）
+- `src/project_knowledge/codegraph.py::CodeGraphClient.init`：方法，位于 `src/project_knowledge/codegraph.py:136`（可信度 1.00）
+- `src/project_knowledge/codegraph.py::CodeGraphClient.sync`：方法，位于 `src/project_knowledge/codegraph.py:142`（可信度 1.00）
+- `src/project_knowledge/codegraph.py::CodeGraphClient.status`：方法，位于 `src/project_knowledge/codegraph.py:145`（可信度 1.00）
+- `src/project_knowledge/codegraph.py::CodeGraphClient.files`：方法，位于 `src/project_knowledge/codegraph.py:148`（可信度 1.00）
+- `src/project_knowledge/codegraph.py::CodeGraphClient.query`：方法，位于 `src/project_knowledge/codegraph.py:152`（可信度 1.00）
+- `src/project_knowledge/codegraph.py::CodeGraphClient.callers`：方法，位于 `src/project_knowledge/codegraph.py:159`（可信度 1.00）
+- `src/project_knowledge/codegraph.py::CodeGraphClient.callees`：方法，位于 `src/project_knowledge/codegraph.py:162`（可信度 1.00）
+- `src/project_knowledge/codegraph.py::CodeGraphClient.impact`：方法，位于 `src/project_knowledge/codegraph.py:165`（可信度 1.00）
+- `src/project_knowledge/codegraph.py::CodeGraphClient.affected_tests`：方法，位于 `src/project_knowledge/codegraph.py:168`（可信度 1.00）
+- `src/project_knowledge/codegraph.py::CodeGraphClient.source`：方法，位于 `src/project_knowledge/codegraph.py:172`（可信度 1.00）
+- `src/project_knowledge/codegraph.py::CodeGraphEngine`：类，位于 `src/project_knowledge/codegraph.py:176`（可信度 1.00）
+- `src/project_knowledge/codegraph.py::CodeGraphEngine.__init__`：方法，位于 `src/project_knowledge/codegraph.py:179`（可信度 1.00）
+- `src/project_knowledge/codegraph.py::CodeGraphEngine._client`：方法，位于 `src/project_knowledge/codegraph.py:184`（可信度 1.00）
+- `src/project_knowledge/codegraph.py::CodeGraphEngine._builtin_engine`：方法，位于 `src/project_knowledge/codegraph.py:189`（可信度 1.00）
+- `src/project_knowledge/codegraph.py::CodeGraphEngine.discover`：方法，位于 `src/project_knowledge/codegraph.py:195`（可信度 1.00）
+- `src/project_knowledge/codegraph.py::CodeGraphEngine.parse`：方法，位于 `src/project_knowledge/codegraph.py:216`（可信度 1.00）
+- `src/project_knowledge/codegraph.py::CodeGraphEngine.initialize`：方法，位于 `src/project_knowledge/codegraph.py:221`（可信度 1.00）
+- `src/project_knowledge/codegraph.py::CodeGraphEngine.sync`：方法，位于 `src/project_knowledge/codegraph.py:224`（可信度 1.00）
+- `src/project_knowledge/codegraph.py::CodeGraphEngine.status`：方法，位于 `src/project_knowledge/codegraph.py:227`（可信度 1.00）
+- `src/project_knowledge/codegraph.py::CodeGraphEngine.search_symbols`：方法，位于 `src/project_knowledge/codegraph.py:232`（可信度 1.00）
+- `src/project_knowledge/codegraph.py::CodeGraphEngine.get_source`：方法，位于 `src/project_knowledge/codegraph.py:246`（可信度 1.00）
+- `src/project_knowledge/codegraph.py::CodeGraphEngine.trace`：方法，位于 `src/project_knowledge/codegraph.py:252`（可信度 1.00）
+- `src/project_knowledge/codegraph.py::CodeGraphEngine.impact`：方法，位于 `src/project_knowledge/codegraph.py:266`（可信度 1.00）
+- `src/project_knowledge/codegraph.py::CodeGraphEngine.affected_tests`：方法，位于 `src/project_knowledge/codegraph.py:270`（可信度 1.00）
+- `src/project_knowledge/codegraph.py::CodeGraphEngine.entrypoints`：方法，位于 `src/project_knowledge/codegraph.py:274`（可信度 1.00）
+- `src/project_knowledge/config.py::ProjectConfig`：类，位于 `src/project_knowledge/config.py:35`（可信度 1.00）
+- `src/project_knowledge/config.py::ProjectConfig.load_raw`：方法，位于 `src/project_knowledge/config.py:75`（可信度 1.00）
+- `src/project_knowledge/config.py::ProjectConfig.validate_file`：方法，位于 `src/project_knowledge/config.py:86`（可信度 1.00）
+- `src/project_knowledge/config.py::ProjectConfig.migrate_file`：方法，位于 `src/project_knowledge/config.py:92`（可信度 1.00）
+- `src/project_knowledge/config.py::ProjectConfig.load`：方法，位于 `src/project_knowledge/config.py:133`（可信度 1.00）
+- `src/project_knowledge/config.py::ProjectConfig.dump`：方法，位于 `src/project_knowledge/config.py:189`（可信度 1.00）
+- `src/project_knowledge/config.py::ProjectConfig.dump.lines`：方法，位于 `src/project_knowledge/config.py:190`（可信度 1.00）
+- `src/project_knowledge/config.py::ProjectConfig.write`：方法，位于 `src/project_knowledge/config.py:252`（可信度 1.00）
+- `src/project_knowledge/config.py::ProjectConfig.capability_warnings`：方法，位于 `src/project_knowledge/config.py:255`（可信度 1.00）
+- `src/project_knowledge/config.py::_scalar`：函数，位于 `src/project_knowledge/config.py:311`（可信度 1.00）
+- `src/project_knowledge/config.py::parse_simple_yaml`：函数，位于 `src/project_knowledge/config.py:327`（可信度 1.00）
 - `src/project_knowledge/engine.py::IndexedFile`：类，位于 `src/project_knowledge/engine.py:63`（可信度 1.00）
 - `src/project_knowledge/engine.py::CodeIndexEngine`：类，位于 `src/project_knowledge/engine.py:72`（可信度 1.00）
 - `src/project_knowledge/engine.py::CodeIndexEngine.discover`：方法，位于 `src/project_knowledge/engine.py:74`（可信度 1.00）
@@ -130,6 +172,23 @@
 - `src/project_knowledge/evidence.py::EvidencePackBuilder.build`：方法，位于 `src/project_knowledge/evidence.py:124`（可信度 1.00）
 - `src/project_knowledge/evidence.py::EvidencePackBuilder._normalize_path`：方法，位于 `src/project_knowledge/evidence.py:186`（可信度 1.00）
 - `src/project_knowledge/evidence.py::EvidencePackBuilder._high_risk`：方法，位于 `src/project_knowledge/evidence.py:198`（可信度 1.00）
+- `src/project_knowledge/gardenserver.py::GardenFact`：类，位于 `src/project_knowledge/gardenserver.py:21`（可信度 1.00）
+- `src/project_knowledge/gardenserver.py::GardenFact.to_dict`：方法，位于 `src/project_knowledge/gardenserver.py:30`（可信度 1.00）
+- `src/project_knowledge/gardenserver.py::GardenserverRuleAdapter`：类，位于 `src/project_knowledge/gardenserver.py:34`（可信度 1.00）
+- `src/project_knowledge/gardenserver.py::GardenserverRuleAdapter.__init__`：方法，位于 `src/project_knowledge/gardenserver.py:48`（可信度 1.00）
+- `src/project_knowledge/gardenserver.py::GardenserverRuleAdapter.collect`：方法，位于 `src/project_knowledge/gardenserver.py:52`（可信度 1.00）
+- `src/project_knowledge/gardenserver.py::GardenserverRuleAdapter._candidate_paths`：方法，位于 `src/project_knowledge/gardenserver.py:78`（可信度 1.00）
+- `src/project_knowledge/gardenserver.py::GardenserverRuleAdapter._candidate_paths.has_any`：方法，位于 `src/project_knowledge/gardenserver.py:85`（可信度 1.00）
+- `src/project_knowledge/gardenserver.py::GardenserverRuleAdapter._codegraph_facts`：方法，位于 `src/project_knowledge/gardenserver.py:98`（可信度 1.00）
+- `src/project_knowledge/gardenserver.py::GuidanceEvidenceCollector`：类，位于 `src/project_knowledge/gardenserver.py:125`（可信度 1.00）
+- `src/project_knowledge/gardenserver.py::GuidanceEvidenceCollector.__init__`：方法，位于 `src/project_knowledge/gardenserver.py:126`（可信度 1.00）
+- `src/project_knowledge/gardenserver.py::GuidanceEvidenceCollector.collect_all`：方法，位于 `src/project_knowledge/gardenserver.py:129`（可信度 1.00）
+- `src/project_knowledge/guidance.py::GuidanceService`：类，位于 `src/project_knowledge/guidance.py:20`（可信度 1.00）
+- `src/project_knowledge/guidance.py::GuidanceService.__init__`：方法，位于 `src/project_knowledge/guidance.py:23`（可信度 1.00）
+- `src/project_knowledge/guidance.py::GuidanceService.generate`：方法，位于 `src/project_knowledge/guidance.py:28`（可信度 1.00）
+- `src/project_knowledge/guidance.py::GuidanceService._build_document`：方法，位于 `src/project_knowledge/guidance.py:40`（可信度 1.00）
+- `src/project_knowledge/guidance.py::GuidanceService._persist`：方法，位于 `src/project_knowledge/guidance.py:76`（可信度 1.00）
+- `src/project_knowledge/guidance.py::GuidanceService._render`：方法，位于 `src/project_knowledge/guidance.py:97`（可信度 1.00）
 - `src/project_knowledge/knowledge.py::KnowledgeGenerator`：类，位于 `src/project_knowledge/knowledge.py:24`（可信度 1.00）
 - `src/project_knowledge/knowledge.py::KnowledgeGenerator.__init__`：方法，位于 `src/project_knowledge/knowledge.py:25`（可信度 1.00）
 - `src/project_knowledge/knowledge.py::KnowledgeGenerator.generate`：方法，位于 `src/project_knowledge/knowledge.py:36`（可信度 1.00）
@@ -275,65 +334,10 @@
 - `src/project_knowledge/retrieval.py::KnowledgeAPI._why_selected`：方法，位于 `src/project_knowledge/retrieval.py:394`（可信度 1.00）
 - `src/project_knowledge/retrieval.py::KnowledgeAPI._impact_explanation`：方法，位于 `src/project_knowledge/retrieval.py:401`（可信度 1.00）
 - `src/project_knowledge/retrieval.py::KnowledgeAPI._module_from_path`：方法，位于 `src/project_knowledge/retrieval.py:406`（可信度 1.00）
-- `src/project_knowledge/retrieval.py::KnowledgeAPI._reference_implementations`：方法，位于 `src/project_knowledge/retrieval.py:411`（可信度 1.00）
-- `src/project_knowledge/retrieval.py::KnowledgeAPI._extension_points`：方法，位于 `src/project_knowledge/retrieval.py:417`（可信度 1.00）
-- `src/project_knowledge/retrieval.py::KnowledgeAPI._pending_sources`：方法，位于 `src/project_knowledge/retrieval.py:422`（可信度 1.00）
-- `src/project_knowledge/retrieval.py::KnowledgeAPI._context_summary`：方法，位于 `src/project_knowledge/retrieval.py:426`（可信度 1.00）
-- `src/project_knowledge/retrieval.py::KnowledgeAPI._verification_commands`：方法，位于 `src/project_knowledge/retrieval.py:432`（可信度 1.00）
-- `src/project_knowledge/retrieval.py::KnowledgeAPI._fit_context`：方法，位于 `src/project_knowledge/retrieval.py:450`（可信度 1.00）
-- `src/project_knowledge/retrieval.py::KnowledgeAPI._fit_context.size`：方法，位于 `src/project_knowledge/retrieval.py:461`（可信度 1.00）
-- `src/project_knowledge/retrieval.py::KnowledgeAPI._record_query`：方法，位于 `src/project_knowledge/retrieval.py:494`（可信度 1.00）
-- `src/project_knowledge/schemas.py::SchemaValidationError`：类，位于 `src/project_knowledge/schemas.py:7`（可信度 1.00）
-- `src/project_knowledge/schemas.py::validate_instance`：函数，位于 `src/project_knowledge/schemas.py:11`（可信度 1.00）
-- `src/project_knowledge/schemas.py::_matches_type`：函数，位于 `src/project_knowledge/schemas.py:61`（可信度 1.00）
-- `src/project_knowledge/schemas.py::all_schemas`：函数，位于 `src/project_knowledge/schemas.py:381`（可信度 1.00）
-- `src/project_knowledge/semantic.py::FeatureGuideValidationError`：类，位于 `src/project_knowledge/semantic.py:17`（可信度 1.00）
-- `src/project_knowledge/semantic.py::FeatureGuideValidator`：类，位于 `src/project_knowledge/semantic.py:21`（可信度 1.00）
-- `src/project_knowledge/semantic.py::FeatureGuideValidator.__init__`：方法，位于 `src/project_knowledge/semantic.py:22`（可信度 1.00）
-- `src/project_knowledge/semantic.py::FeatureGuideValidator.validate`：方法，位于 `src/project_knowledge/semantic.py:26`（可信度 1.00）
-- `src/project_knowledge/semantic.py::FeatureGuideValidator._safe_path`：方法，位于 `src/project_knowledge/semantic.py:67`（可信度 1.00）
-- `src/project_knowledge/semantic.py::SemanticKnowledgeService`：类，位于 `src/project_knowledge/semantic.py:77`（可信度 1.00）
-- `src/project_knowledge/semantic.py::SemanticKnowledgeService.__init__`：方法，位于 `src/project_knowledge/semantic.py:78`（可信度 1.00）
-- `src/project_knowledge/semantic.py::SemanticKnowledgeService.generate_feature_guide`：方法，位于 `src/project_knowledge/semantic.py:84`（可信度 1.00）
-- `src/project_knowledge/semantic.py::SemanticKnowledgeService.discover_feature_candidates`：方法，位于 `src/project_knowledge/semantic.py:119`（可信度 1.00）
-- `src/project_knowledge/semantic.py::_iter_citations`：函数，位于 `src/project_knowledge/semantic.py:152`（可信度 1.00）
-- `src/project_knowledge/semantic.py::_source_markers`：函数，位于 `src/project_knowledge/semantic.py:167`（可信度 1.00）
-- `src/project_knowledge/semantic.py::_statement_lines`：函数，位于 `src/project_knowledge/semantic.py:177`（可信度 1.00）
-- `src/project_knowledge/semantic.py::render_feature_guide`：函数，位于 `src/project_knowledge/semantic.py:187`（可信度 1.00）
-- `src/project_knowledge/service.py::ProjectService`：类，位于 `src/project_knowledge/service.py:67`（可信度 1.00）
-- `src/project_knowledge/service.py::ProjectService.__init__`：方法，位于 `src/project_knowledge/service.py:68`（可信度 1.00）
-- `src/project_knowledge/service.py::ProjectService.initialize`：方法，位于 `src/project_knowledge/service.py:77`（可信度 1.00）
-- `src/project_knowledge/service.py::ProjectService.rebuild`：方法，位于 `src/project_knowledge/service.py:96`（可信度 1.00）
-- `src/project_knowledge/service.py::ProjectService._prepare_project`：方法，位于 `src/project_knowledge/service.py:106`（可信度 1.00）
-- `src/project_knowledge/service.py::ProjectService._atomic_rebuild`：方法，位于 `src/project_knowledge/service.py:119`（可信度 1.00）
-- `src/project_knowledge/service.py::ProjectService.sync`：方法，位于 `src/project_knowledge/service.py:162`（可信度 1.00）
-- `src/project_knowledge/service.py::ProjectService._parse_stable`：方法，位于 `src/project_knowledge/service.py:241`（可信度 1.00）
-- `src/project_knowledge/service.py::ProjectService._watcher_health`：方法，位于 `src/project_knowledge/service.py:277`（可信度 1.00）
-- `src/project_knowledge/service.py::ProjectService._log_event`：方法，位于 `src/project_knowledge/service.py:293`（可信度 1.00）
-- `src/project_knowledge/service.py::ProjectService.status`：方法，位于 `src/project_knowledge/service.py:301`（可信度 1.00）
-- `src/project_knowledge/service.py::ProjectService.check`：方法，位于 `src/project_knowledge/service.py:373`（可信度 1.00）
-- `src/project_knowledge/service.py::ProjectService.migrate`：方法，位于 `src/project_knowledge/service.py:383`（可信度 1.00）
-- `src/project_knowledge/service.py::ProjectService._client_targets`：方法，位于 `src/project_knowledge/service.py:389`（可信度 1.00）
-- `src/project_knowledge/service.py::ProjectService.watch`：方法，位于 `src/project_knowledge/service.py:396`（可信度 1.00）
-- `src/project_knowledge/service.py::ProjectService.install`：方法，位于 `src/project_knowledge/service.py:420`（可信度 1.00）
-- `src/project_knowledge/service.py::ProjectService.uninstall`：方法，位于 `src/project_knowledge/service.py:456`（可信度 1.00）
-- `src/project_knowledge/service.py::ProjectService.doctor`：方法，位于 `src/project_knowledge/service.py:492`（可信度 1.00）
-- `src/project_knowledge/service.py::ProjectService._update_metadata`：方法，位于 `src/project_knowledge/service.py:510`（可信度 1.00）
-- `src/project_knowledge/service.py::ProjectService._report`：方法，位于 `src/project_knowledge/service.py:520`（可信度 1.00）
-- `src/project_knowledge/service.py::ProjectService._write_state`：方法，位于 `src/project_knowledge/service.py:536`（可信度 1.00）
-- `src/project_knowledge/service.py::ProjectService._write_mcp_config`：方法，位于 `src/project_knowledge/service.py:558`（可信度 1.00）
-- `src/project_knowledge/service.py::ProjectService._pending_knowledge`：方法，位于 `src/project_knowledge/service.py:568`（可信度 1.00）
-- `src/project_knowledge/service.py::ProjectService._require_initialized`：方法，位于 `src/project_knowledge/service.py:585`（可信度 1.00）
-- `src/project_knowledge/store.py::KnowledgeStore`：类，位于 `src/project_knowledge/store.py:16`（可信度 1.00）
-- `src/project_knowledge/store.py::KnowledgeStore.__init__`：方法，位于 `src/project_knowledge/store.py:17`（可信度 1.00）
-- `src/project_knowledge/store.py::KnowledgeStore.close`：方法，位于 `src/project_knowledge/store.py:32`（可信度 1.00）
-- `src/project_knowledge/store.py::KnowledgeStore.__enter__`：方法，位于 `src/project_knowledge/store.py:35`（可信度 1.00）
-- `src/project_knowledge/store.py::KnowledgeStore.__exit__`：方法，位于 `src/project_knowledge/store.py:38`（可信度 1.00）
-- `src/project_knowledge/store.py::KnowledgeStore.transaction`：方法，位于 `src/project_knowledge/store.py:42`（可信度 1.00）
 
 ## 结构关系
 
-> 关系内容已截断：共 3280 条，当前页面仅展示前 150 条；请使用 knowledge_impact 获取完整的任务相关子图。
+> 关系内容已截断：共 3667 条，当前页面仅展示前 150 条；请使用 knowledge_impact 获取完整的任务相关子图。
 
 - `src/project_knowledge/__main__.py::<module>` 导入 `cli.main`（可信度 1.00，未解析）
 - `src/project_knowledge/cli.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
@@ -346,13 +350,6 @@
 - `src/project_knowledge/cli.py::<module>` 导入 `evaluate.STRATEGIES`（可信度 1.00，未解析）
 - `src/project_knowledge/cli.py::<module>` 导入 `mcp.serve`（可信度 1.00，未解析）
 - `src/project_knowledge/cli.py::<module>` 导入 `schemas.FEATURE_GUIDE_DRAFT_SCHEMA`（可信度 1.00，未解析）
-- `src/project_knowledge/config.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `src/project_knowledge/config.py::<module>` 导入 `json`（可信度 1.00，未解析）
-- `src/project_knowledge/config.py::<module>` 导入 `dataclasses.dataclass`（可信度 1.00，未解析）
-- `src/project_knowledge/config.py::<module>` 导入 `dataclasses.field`（可信度 1.00，未解析）
-- `src/project_knowledge/config.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
-- `src/project_knowledge/config.py::<module>` 导入 `typing.Any`（可信度 1.00，未解析）
-- `src/project_knowledge/config.py::<module>` 导入 `schemas.CONFIG_SCHEMA`（可信度 1.00，未解析）
 - `src/project_knowledge/evidence.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
 - `src/project_knowledge/evidence.py::<module>` 导入 `fnmatch`（可信度 1.00，未解析）
 - `src/project_knowledge/evidence.py::<module>` 导入 `json`（可信度 1.00，未解析）
@@ -384,17 +381,6 @@
 - `src/project_knowledge/performance.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
 - `src/project_knowledge/performance.py::<module>` 导入 `typing.Any`（可信度 1.00，未解析）
 - `src/project_knowledge/performance.py::<module>` 导入 `typing.Callable`（可信度 1.00，未解析）
-- `src/project_knowledge/proposal.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `src/project_knowledge/proposal.py::<module>` 导入 `difflib`（可信度 1.00，未解析）
-- `src/project_knowledge/proposal.py::<module>` 导入 `hashlib`（可信度 1.00，未解析）
-- `src/project_knowledge/proposal.py::<module>` 导入 `json`（可信度 1.00，未解析）
-- `src/project_knowledge/proposal.py::<module>` 导入 `re`（可信度 1.00，未解析）
-- `src/project_knowledge/proposal.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
-- `src/project_knowledge/proposal.py::<module>` 导入 `pathlib.PurePosixPath`（可信度 1.00，未解析）
-- `src/project_knowledge/proposal.py::<module>` 导入 `typing.Any`（可信度 1.00，未解析）
-- `src/project_knowledge/proposal.py::<module>` 导入 `typing.Iterable`（可信度 1.00，未解析）
-- `src/project_knowledge/proposal.py::<module>` 导入 `schemas.FEATURE_GUIDE_DRAFT_SCHEMA`（可信度 1.00，未解析）
-- `src/project_knowledge/proposal.py::<module>` 导入 `schemas.PROPOSAL_SCHEMA`（可信度 1.00，未解析）
 - `src/project_knowledge/provider.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
 - `src/project_knowledge/provider.py::<module>` 导入 `json`（可信度 1.00，未解析）
 - `src/project_knowledge/provider.py::<module>` 导入 `os`（可信度 1.00，未解析）
@@ -412,9 +398,6 @@
 - `src/project_knowledge/provider.py::<module>` 导入 `typing.Callable`（可信度 1.00，未解析）
 - `src/project_knowledge/provider.py::<module>` 导入 `urllib.parse.urlparse`（可信度 1.00，未解析）
 - `src/project_knowledge/provider.py::<module>` 导入 `schemas.EVIDENCE_PACK_SCHEMA`（可信度 1.00，未解析）
-- `src/project_knowledge/schemas.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `src/project_knowledge/schemas.py::<module>` 导入 `re`（可信度 1.00，未解析）
-- `src/project_knowledge/schemas.py::<module>` 导入 `typing.Any`（可信度 1.00，未解析）
 - `src/project_knowledge/semantic.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
 - `src/project_knowledge/semantic.py::<module>` 导入 `json`（可信度 1.00，未解析）
 - `src/project_knowledge/semantic.py::<module>` 导入 `collections.defaultdict`（可信度 1.00，未解析）
@@ -422,17 +405,6 @@
 - `src/project_knowledge/semantic.py::<module>` 导入 `typing.Any`（可信度 1.00，未解析）
 - `src/project_knowledge/semantic.py::<module>` 导入 `typing.Iterable`（可信度 1.00，未解析）
 - `src/project_knowledge/semantic.py::<module>` 导入 `schemas.FEATURE_GUIDE_DRAFT_SCHEMA`（可信度 1.00，未解析）
-- `src/project_knowledge/service.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `src/project_knowledge/service.py::<module>` 导入 `json`（可信度 1.00，未解析）
-- `src/project_knowledge/service.py::<module>` 导入 `os`（可信度 1.00，未解析）
-- `src/project_knowledge/service.py::<module>` 导入 `shutil`（可信度 1.00，未解析）
-- `src/project_knowledge/service.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
-- `src/project_knowledge/service.py::<module>` 导入 `time`（可信度 1.00，未解析）
-- `src/project_knowledge/service.py::<module>` 导入 `collections.Counter`（可信度 1.00，未解析）
-- `src/project_knowledge/service.py::<module>` 导入 `concurrent.futures.ThreadPoolExecutor`（可信度 1.00，未解析）
-- `src/project_knowledge/service.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
-- `src/project_knowledge/service.py::<module>` 导入 `typing.Any`（可信度 1.00，未解析）
-- `src/project_knowledge/service.py::<module>` 导入 `schemas.CHANGE_SET_SCHEMA`（可信度 1.00，未解析）
 - `src/project_knowledge/store.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
 - `src/project_knowledge/store.py::<module>` 导入 `json`（可信度 1.00，未解析）
 - `src/project_knowledge/store.py::<module>` 导入 `sqlite3`（可信度 1.00，未解析）
@@ -467,17 +439,6 @@
 - `src/project_knowledge/retrieval.py::<module>` 导入 `time`（可信度 1.00，未解析）
 - `src/project_knowledge/retrieval.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
 - `src/project_knowledge/retrieval.py::<module>` 导入 `typing.Any`（可信度 1.00，未解析）
-- `src/project_knowledge/engine.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `src/project_knowledge/engine.py::<module>` 导入 `ast`（可信度 1.00，未解析）
-- `src/project_knowledge/engine.py::<module>` 导入 `fnmatch`（可信度 1.00，未解析）
-- `src/project_knowledge/engine.py::<module>` 导入 `os`（可信度 1.00，未解析）
-- `src/project_knowledge/engine.py::<module>` 导入 `re`（可信度 1.00，未解析）
-- `src/project_knowledge/engine.py::<module>` 导入 `collections.deque`（可信度 1.00，未解析）
-- `src/project_knowledge/engine.py::<module>` 导入 `abc.ABC`（可信度 1.00，未解析）
-- `src/project_knowledge/engine.py::<module>` 导入 `abc.abstractmethod`（可信度 1.00，未解析）
-- `src/project_knowledge/engine.py::<module>` 导入 `dataclasses.dataclass`（可信度 1.00，未解析）
-- `src/project_knowledge/engine.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
-- `src/project_knowledge/engine.py::<module>` 导入 `typing.Iterable`（可信度 1.00，未解析）
 - `src/project_knowledge/real_project.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
 - `src/project_knowledge/real_project.py::<module>` 导入 `fnmatch`（可信度 1.00，未解析）
 - `src/project_knowledge/real_project.py::<module>` 导入 `os`（可信度 1.00，未解析）
@@ -485,3 +446,46 @@
 - `src/project_knowledge/real_project.py::<module>` 导入 `shutil`（可信度 1.00，未解析）
 - `src/project_knowledge/real_project.py::<module>` 导入 `subprocess`（可信度 1.00，未解析）
 - `src/project_knowledge/real_project.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
+- `src/project_knowledge/real_project.py::<module>` 导入 `time`（可信度 1.00，未解析）
+- `src/project_knowledge/real_project.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `src/project_knowledge/real_project.py::<module>` 导入 `typing.Any`（可信度 1.00，未解析）
+- `src/project_knowledge/real_project.py::<module>` 导入 `config.DEFAULT_EXCLUDES`（可信度 1.00，未解析）
+- `src/project_knowledge/knowledge.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `src/project_knowledge/knowledge.py::<module>` 导入 `json`（可信度 1.00，未解析）
+- `src/project_knowledge/knowledge.py::<module>` 导入 `re`（可信度 1.00，未解析）
+- `src/project_knowledge/knowledge.py::<module>` 导入 `collections.defaultdict`（可信度 1.00，未解析）
+- `src/project_knowledge/knowledge.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `src/project_knowledge/knowledge.py::<module>` 导入 `typing.Iterable`（可信度 1.00，未解析）
+- `src/project_knowledge/knowledge.py::<module>` 导入 `schemas.KNOWLEDGE_RECORD_SCHEMA`（可信度 1.00，未解析）
+- `src/project_knowledge/evaluate.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `src/project_knowledge/evaluate.py::<module>` 导入 `json`（可信度 1.00，未解析）
+- `src/project_knowledge/evaluate.py::<module>` 导入 `os`（可信度 1.00，未解析）
+- `src/project_knowledge/evaluate.py::<module>` 导入 `platform`（可信度 1.00，未解析）
+- `src/project_knowledge/evaluate.py::<module>` 导入 `re`（可信度 1.00，未解析）
+- `src/project_knowledge/evaluate.py::<module>` 导入 `statistics`（可信度 1.00，未解析）
+- `src/project_knowledge/evaluate.py::<module>` 导入 `time`（可信度 1.00，未解析）
+- `src/project_knowledge/evaluate.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `src/project_knowledge/evaluate.py::<module>` 导入 `typing.Any`（可信度 1.00，未解析）
+- `src/project_knowledge/evaluate.py::<module>` 导入 `typing.Iterable`（可信度 1.00，未解析）
+- `src/project_knowledge/codegraph.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `src/project_knowledge/codegraph.py::<module>` 导入 `json`（可信度 1.00，未解析）
+- `src/project_knowledge/codegraph.py::<module>` 导入 `os`（可信度 1.00，未解析）
+- `src/project_knowledge/codegraph.py::<module>` 导入 `shlex`（可信度 1.00，未解析）
+- `src/project_knowledge/codegraph.py::<module>` 导入 `shutil`（可信度 1.00，未解析）
+- `src/project_knowledge/codegraph.py::<module>` 导入 `subprocess`（可信度 1.00，未解析）
+- `src/project_knowledge/codegraph.py::<module>` 导入 `dataclasses.dataclass`（可信度 1.00，未解析）
+- `src/project_knowledge/codegraph.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `src/project_knowledge/codegraph.py::<module>` 导入 `typing.Any`（可信度 1.00，未解析）
+- `src/project_knowledge/codegraph.py::<module>` 导入 `typing.Sequence`（可信度 1.00，未解析）
+- `src/project_knowledge/config.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `src/project_knowledge/config.py::<module>` 导入 `json`（可信度 1.00，未解析）
+- `src/project_knowledge/config.py::<module>` 导入 `dataclasses.dataclass`（可信度 1.00，未解析）
+- `src/project_knowledge/config.py::<module>` 导入 `dataclasses.field`（可信度 1.00，未解析）
+- `src/project_knowledge/config.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `src/project_knowledge/config.py::<module>` 导入 `typing.Any`（可信度 1.00，未解析）
+- `src/project_knowledge/config.py::<module>` 导入 `schemas.CONFIG_SCHEMA`（可信度 1.00，未解析）
+- `src/project_knowledge/engine.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `src/project_knowledge/engine.py::<module>` 导入 `ast`（可信度 1.00，未解析）
+- `src/project_knowledge/engine.py::<module>` 导入 `fnmatch`（可信度 1.00，未解析）
+- `src/project_knowledge/engine.py::<module>` 导入 `os`（可信度 1.00，未解析）
+- `src/project_knowledge/engine.py::<module>` 导入 `re`（可信度 1.00，未解析）

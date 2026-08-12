@@ -16,7 +16,7 @@
 - `scripts/bump_version.py::<module>` 导入 `sys`（可信度 1.00，未解析）
 - `scripts/bump_version.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
 - `scripts/bump_version.py::<module>` 导入 `project_knowledge.versioning.main`（可信度 1.00，未解析）
-- `scripts/bump_version.py::<module>` 调用 `resolve`（可信度 0.80，未解析）
+- `scripts/bump_version.py::<module>` 调用 `src/project_knowledge/codegraph.py::CodeGraphCommandResolver.resolve`（可信度 0.80，已解析）
 - `scripts/bump_version.py::<module>` 调用 `Path`（可信度 0.80，未解析）
 - `scripts/bump_version.py::<module>` 调用 `sys.path.insert`（可信度 0.80，未解析）
 - `scripts/bump_version.py::<module>` 调用 `str`（可信度 0.80，未解析）
