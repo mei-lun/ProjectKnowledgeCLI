@@ -7,7 +7,7 @@
 | `tests/__init__.py` | tests | 0 |
 | `tests/test_codegraph.py` | tests | 5 |
 | `tests/test_config.py` | tests | 7 |
-| `tests/test_documentation_roadmap.py` | tests | 6 |
+| `tests/test_documentation_roadmap.py` | tests | 7 |
 | `tests/test_engine.py` | tests | 9 |
 | `tests/test_engine_wp01_wp02.py` | tests | 5 |
 | `tests/test_evaluate.py` | tests | 12 |

@@ -42,9 +42,10 @@
 - `tests/test_documentation_roadmap.py::DocumentationRoadmapTests`：类，位于 `tests/test_documentation_roadmap.py:7`（可信度 1.00）
 - `tests/test_documentation_roadmap.py::DocumentationRoadmapTests.setUpClass`：方法，位于 `tests/test_documentation_roadmap.py:9`（可信度 1.00）
 - `tests/test_documentation_roadmap.py::DocumentationRoadmapTests.test_readme_reports_current_release_and_codegraph_state`：方法，位于 `tests/test_documentation_roadmap.py:13`（可信度 1.00）
-- `tests/test_documentation_roadmap.py::DocumentationRoadmapTests.test_readme_links_current_next_and_future_documents`：方法，位于 `tests/test_documentation_roadmap.py:21`（可信度 1.00）
-- `tests/test_documentation_roadmap.py::DocumentationRoadmapTests.test_next_version_plan_is_scoped_and_testable`：方法，位于 `tests/test_documentation_roadmap.py:26`（可信度 1.00）
-- `tests/test_documentation_roadmap.py::DocumentationRoadmapTests.test_future_features_distinguishes_candidates_from_commitments`：方法，位于 `tests/test_documentation_roadmap.py:35`（可信度 1.00）
+- `tests/test_documentation_roadmap.py::DocumentationRoadmapTests.test_quick_start_does_not_recommend_legacy_watcher`：方法，位于 `tests/test_documentation_roadmap.py:21`（可信度 1.00）
+- `tests/test_documentation_roadmap.py::DocumentationRoadmapTests.test_readme_links_current_next_and_future_documents`：方法，位于 `tests/test_documentation_roadmap.py:28`（可信度 1.00）
+- `tests/test_documentation_roadmap.py::DocumentationRoadmapTests.test_next_version_plan_is_scoped_and_testable`：方法，位于 `tests/test_documentation_roadmap.py:33`（可信度 1.00）
+- `tests/test_documentation_roadmap.py::DocumentationRoadmapTests.test_future_features_distinguishes_candidates_from_commitments`：方法，位于 `tests/test_documentation_roadmap.py:42`（可信度 1.00）
 - `tests/test_engine.py::EngineTests`：类，位于 `tests/test_engine.py:12`（可信度 1.00）
 - `tests/test_engine.py::EngineTests.test_python_ast_extracts_symbols_calls_inheritance_and_routes`：方法，位于 `tests/test_engine.py:13`（可信度 1.00）
 - `tests/test_engine.py::EngineTests.test_invalid_python_reports_parse_error`：方法，位于 `tests/test_engine.py:34`（可信度 1.00）
@@ -173,7 +174,7 @@
 
 ## 结构关系
 
-> 关系内容已截断：共 1619 条，当前页面仅展示前 150 条；请使用 knowledge_impact 获取完整的任务相关子图。
+> 关系内容已截断：共 1625 条，当前页面仅展示前 150 条；请使用 knowledge_impact 获取完整的任务相关子图。
 
 - `tests/test_engine_wp01_wp02.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
 - `tests/test_engine_wp01_wp02.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
