@@ -134,6 +134,40 @@ class GuidanceStoreTests(unittest.TestCase):
                 GUIDANCE_DRAFT_SCHEMA,
             )
 
+    def test_version_requires_real_boolean_current_flag(self) -> None:
+        payload = {**self._version("version-1", 1, True).to_dict(), "is_current": "false"}
+        with self.assertRaises(ValueError):
+            GuidanceVersion(**payload)
+        with self.assertRaises(ValueError):
+            GuidanceVersion.from_dict(payload)
+
+    def test_optional_foreign_ids_are_none_or_non_empty(self) -> None:
+        draft_payload = {**self._draft().to_dict(), "category_id": ""}
+        version_payload = {
+            **self._version("version-1", 1, True).to_dict(),
+            "draft_id": "",
+        }
+        with self.assertRaises(ValueError):
+            GuidanceDraft.from_dict(draft_payload)
+        with self.assertRaises(ValueError):
+            GuidanceVersion.from_dict(version_payload)
+        with self.assertRaises(SchemaValidationError):
+            validate_instance(draft_payload, GUIDANCE_DRAFT_SCHEMA)
+        with self.assertRaises(SchemaValidationError):
+            validate_instance(version_payload, GUIDANCE_VERSION_SCHEMA)
+
+    def test_optional_review_times_must_be_iso_8601(self) -> None:
+        draft_payload = {**self._draft().to_dict(), "confirmed_at": "not-a-time"}
+        change_payload = {**self._change().to_dict(), "processed_at": "not-a-time"}
+        with self.assertRaises(ValueError):
+            GuidanceDraft.from_dict(draft_payload)
+        with self.assertRaises(ValueError):
+            GuidanceChange.from_dict(change_payload)
+        with self.assertRaises(SchemaValidationError):
+            validate_instance(draft_payload, GUIDANCE_DRAFT_SCHEMA)
+        with self.assertRaises(SchemaValidationError):
+            validate_instance(change_payload, GUIDANCE_CHANGE_SCHEMA)
+
     def test_batch_upsert_is_idempotent(self) -> None:
         with self._open_guidance_store() as guidance:
             guidance.create_run(self._run())

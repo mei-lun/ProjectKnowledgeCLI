@@ -27,6 +27,11 @@ def _require_id(name: str, value: str) -> None:
         raise ValueError(f"{name} 必须是非空字符串")
 
 
+def _require_optional_id(name: str, value: str | None) -> None:
+    if value is not None:
+        _require_id(name, value)
+
+
 def _require_iso_time(name: str, value: str | None) -> None:
     if value is None:
         return
@@ -195,6 +200,7 @@ class GuidanceDraft:
         _require_id("snapshot_id", self.snapshot_id)
         _require_choice("kind", self.kind, self._KINDS)
         _require_choice("status", self.status, self._STATUSES)
+        _require_optional_id("category_id", self.category_id)
         _require_iso_time("created_at", self.created_at)
         _require_iso_time("updated_at", self.updated_at)
         _require_iso_time("confirmed_at", self.confirmed_at)
@@ -232,7 +238,10 @@ class GuidanceVersion:
         _require_id("version_id", self.version_id)
         _require_id("category_id", self.category_id)
         _require_id("snapshot_id", self.snapshot_id)
+        _require_optional_id("draft_id", self.draft_id)
         _require_iso_time("created_at", self.created_at)
+        if not isinstance(self.is_current, bool):
+            raise ValueError("is_current 必须是布尔值")
         if self.version < 1:
             raise ValueError("version 必须大于零")
 
@@ -246,7 +255,7 @@ class GuidanceVersion:
             version=int(value["version"]), title=value["title"], content=value["content"],
             content_hash=value["content_hash"], snapshot_id=value["snapshot_id"],
             evidence=[dict(item) for item in value.get("evidence", [])],
-            is_current=bool(value["is_current"]), created_at=value["created_at"],
+            is_current=value["is_current"], created_at=value["created_at"],
             draft_id=value.get("draft_id"),
         )
 

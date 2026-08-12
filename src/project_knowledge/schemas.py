@@ -361,6 +361,10 @@ ISO_TIME_SCHEMA: dict[str, Any] = {
     "type": "string",
     "pattern": r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$",
 }
+OPTIONAL_ISO_TIME_SCHEMA: dict[str, Any] = {
+    **ISO_TIME_SCHEMA,
+    "type": ["string", "null"],
+}
 
 GUIDANCE_RUN_SCHEMA: dict[str, Any] = {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -453,9 +457,9 @@ GUIDANCE_DRAFT_SCHEMA: dict[str, Any] = {
         "content_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
         "snapshot_id": {"type": "string", "minLength": 1},
         "payload": {"type": "object"},
-        "category_id": {"type": ["string", "null"]},
+        "category_id": {"type": ["string", "null"], "minLength": 1},
         "rejection_reason": {"type": ["string", "null"]},
-        "confirmed_at": {"type": ["string", "null"]},
+        "confirmed_at": OPTIONAL_ISO_TIME_SCHEMA,
         "created_at": ISO_TIME_SCHEMA,
         "updated_at": ISO_TIME_SCHEMA,
     },
@@ -482,7 +486,7 @@ GUIDANCE_VERSION_SCHEMA: dict[str, Any] = {
         "evidence": {"type": "array", "items": {"type": "object"}},
         "is_current": {"type": "boolean"},
         "created_at": ISO_TIME_SCHEMA,
-        "draft_id": {"type": ["string", "null"]},
+        "draft_id": {"type": ["string", "null"], "minLength": 1},
     },
     "additionalProperties": False,
 }
@@ -504,7 +508,7 @@ GUIDANCE_CHANGE_SCHEMA: dict[str, Any] = {
         "affected_categories": {"type": "array", "items": {"type": "string", "minLength": 1}},
         "payload": {"type": "object"},
         "created_at": ISO_TIME_SCHEMA,
-        "processed_at": {"type": ["string", "null"]},
+        "processed_at": OPTIONAL_ISO_TIME_SCHEMA,
     },
     "additionalProperties": False,
 }
