@@ -10,7 +10,7 @@ from .engine import IndexedFile
 from .models import KnowledgeRecord, ParseResult, SourceReference
 
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 
 class KnowledgeStore:
@@ -123,6 +123,96 @@ class KnowledgeStore:
                 output_tokens INTEGER NOT NULL,
                 duration_ms INTEGER NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS guidance_runs (
+                run_id TEXT PRIMARY KEY,
+                project_root TEXT NOT NULL,
+                snapshot_id TEXT NOT NULL,
+                status TEXT NOT NULL,
+                total_files INTEGER NOT NULL,
+                covered_files INTEGER NOT NULL,
+                uncovered_files_json TEXT NOT NULL,
+                error TEXT,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS guidance_batches (
+                batch_id TEXT PRIMARY KEY,
+                run_id TEXT NOT NULL REFERENCES guidance_runs(run_id) ON DELETE CASCADE,
+                ordinal INTEGER NOT NULL,
+                status TEXT NOT NULL,
+                files_json TEXT NOT NULL,
+                snapshot_id TEXT NOT NULL,
+                result_json TEXT,
+                error TEXT,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL,
+                UNIQUE(run_id, ordinal)
+            );
+            CREATE INDEX IF NOT EXISTS idx_guidance_batches_pending
+                ON guidance_batches(run_id, status, ordinal);
+            CREATE TABLE IF NOT EXISTS guidance_categories (
+                category_id TEXT PRIMARY KEY,
+                run_id TEXT NOT NULL REFERENCES guidance_runs(run_id) ON DELETE CASCADE,
+                name TEXT NOT NULL,
+                purpose TEXT NOT NULL,
+                applies_to_json TEXT NOT NULL,
+                excludes_json TEXT NOT NULL,
+                samples_json TEXT NOT NULL,
+                evidence_json TEXT NOT NULL,
+                confidence REAL NOT NULL,
+                unknowns_json TEXT NOT NULL,
+                relations_json TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            );
+            CREATE INDEX IF NOT EXISTS idx_guidance_categories_run
+                ON guidance_categories(run_id, category_id);
+            CREATE TABLE IF NOT EXISTS guidance_drafts (
+                draft_id TEXT PRIMARY KEY,
+                run_id TEXT NOT NULL REFERENCES guidance_runs(run_id) ON DELETE CASCADE,
+                category_id TEXT REFERENCES guidance_categories(category_id) ON DELETE SET NULL,
+                kind TEXT NOT NULL,
+                status TEXT NOT NULL,
+                path TEXT NOT NULL,
+                content_hash TEXT NOT NULL,
+                snapshot_id TEXT NOT NULL,
+                payload_json TEXT NOT NULL,
+                rejection_reason TEXT,
+                confirmed_at TEXT,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            );
+            CREATE INDEX IF NOT EXISTS idx_guidance_drafts_pending
+                ON guidance_drafts(status, run_id, category_id);
+            CREATE TABLE IF NOT EXISTS guidance_versions (
+                version_id TEXT PRIMARY KEY,
+                category_id TEXT NOT NULL REFERENCES guidance_categories(category_id) ON DELETE CASCADE,
+                draft_id TEXT REFERENCES guidance_drafts(draft_id) ON DELETE SET NULL,
+                version INTEGER NOT NULL,
+                title TEXT NOT NULL,
+                content TEXT NOT NULL,
+                content_hash TEXT NOT NULL,
+                snapshot_id TEXT NOT NULL,
+                evidence_json TEXT NOT NULL,
+                is_current INTEGER NOT NULL DEFAULT 0,
+                created_at TEXT NOT NULL,
+                UNIQUE(category_id, version)
+            );
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_guidance_versions_current
+                ON guidance_versions(category_id) WHERE is_current = 1;
+            CREATE TABLE IF NOT EXISTS guidance_changes (
+                change_id TEXT PRIMARY KEY,
+                base_snapshot_id TEXT NOT NULL,
+                head_snapshot_id TEXT NOT NULL,
+                update_level TEXT NOT NULL,
+                changed_files_json TEXT NOT NULL,
+                affected_categories_json TEXT NOT NULL,
+                payload_json TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                processed_at TEXT
+            );
+            CREATE INDEX IF NOT EXISTS idx_guidance_changes_pending
+                ON guidance_changes(processed_at, created_at);
             """
         )
         try:

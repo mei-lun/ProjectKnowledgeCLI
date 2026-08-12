@@ -347,6 +347,169 @@ FEATURE_GUIDE_DRAFT_SCHEMA: dict[str, Any] = {
 }
 
 
+RUN_STATUS_VALUES = [
+    "scanning", "category_review", "categories_confirmed",
+    "guidance_generation", "guidance_review", "complete", "failed",
+]
+BATCH_STATUS_VALUES = ["pending", "completed", "failed"]
+DRAFT_KIND_VALUES = ["category_catalog", "guidance"]
+DRAFT_STATUS_VALUES = [
+    "incomplete", "awaiting_confirmation", "confirmed", "rejected",
+]
+UPDATE_LEVEL_VALUES = ["fact", "guidance", "category"]
+ISO_TIME_SCHEMA: dict[str, Any] = {
+    "type": "string",
+    "pattern": r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$",
+}
+
+GUIDANCE_RUN_SCHEMA: dict[str, Any] = {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://project-kb.local/schema/guidance-run-v2.json",
+    "type": "object",
+    "required": [
+        "run_id", "project_root", "snapshot_id", "status", "total_files",
+        "covered_files", "created_at", "updated_at", "uncovered_files", "error",
+    ],
+    "properties": {
+        "run_id": {"type": "string", "minLength": 1},
+        "project_root": {"type": "string", "minLength": 1},
+        "snapshot_id": {"type": "string", "minLength": 1},
+        "status": {"enum": RUN_STATUS_VALUES},
+        "total_files": {"type": "integer", "minimum": 0},
+        "covered_files": {"type": "integer", "minimum": 0},
+        "uncovered_files": {"type": "array", "items": {"type": "string"}},
+        "error": {"type": ["string", "null"]},
+        "created_at": ISO_TIME_SCHEMA,
+        "updated_at": ISO_TIME_SCHEMA,
+    },
+    "additionalProperties": False,
+}
+
+GUIDANCE_BATCH_SCHEMA: dict[str, Any] = {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://project-kb.local/schema/guidance-batch-v2.json",
+    "type": "object",
+    "required": [
+        "batch_id", "run_id", "ordinal", "status", "files", "snapshot_id",
+        "created_at", "updated_at", "result", "error",
+    ],
+    "properties": {
+        "batch_id": {"type": "string", "minLength": 1},
+        "run_id": {"type": "string", "minLength": 1},
+        "ordinal": {"type": "integer", "minimum": 0},
+        "status": {"enum": BATCH_STATUS_VALUES},
+        "files": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "snapshot_id": {"type": "string", "minLength": 1},
+        "result": {"type": ["object", "null"]},
+        "error": {"type": ["string", "null"]},
+        "created_at": ISO_TIME_SCHEMA,
+        "updated_at": ISO_TIME_SCHEMA,
+    },
+    "additionalProperties": False,
+}
+
+GUIDANCE_CATEGORY_SCHEMA: dict[str, Any] = {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://project-kb.local/schema/guidance-category-v2.json",
+    "type": "object",
+    "required": [
+        "category_id", "run_id", "name", "purpose", "applies_to", "excludes",
+        "samples", "evidence", "confidence", "unknowns", "created_at",
+        "updated_at", "relations",
+    ],
+    "properties": {
+        "category_id": {"type": "string", "minLength": 1},
+        "run_id": {"type": "string", "minLength": 1},
+        "name": {"type": "string", "minLength": 1},
+        "purpose": {"type": "string"},
+        "applies_to": {"type": "array", "items": {"type": "string"}},
+        "excludes": {"type": "array", "items": {"type": "string"}},
+        "samples": {"type": "array", "items": {"type": "string"}},
+        "evidence": {"type": "array", "items": {"type": "object"}},
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "unknowns": {"type": "array"},
+        "relations": {"type": "array", "items": {"type": "object"}},
+        "created_at": ISO_TIME_SCHEMA,
+        "updated_at": ISO_TIME_SCHEMA,
+    },
+    "additionalProperties": False,
+}
+
+GUIDANCE_DRAFT_SCHEMA: dict[str, Any] = {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://project-kb.local/schema/guidance-draft-v2.json",
+    "type": "object",
+    "required": [
+        "draft_id", "run_id", "kind", "status", "path", "content_hash",
+        "snapshot_id", "payload", "created_at", "updated_at", "category_id",
+        "rejection_reason", "confirmed_at",
+    ],
+    "properties": {
+        "draft_id": {"type": "string", "minLength": 1},
+        "run_id": {"type": "string", "minLength": 1},
+        "kind": {"enum": DRAFT_KIND_VALUES},
+        "status": {"enum": DRAFT_STATUS_VALUES},
+        "path": {"type": "string", "minLength": 1},
+        "content_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "snapshot_id": {"type": "string", "minLength": 1},
+        "payload": {"type": "object"},
+        "category_id": {"type": ["string", "null"]},
+        "rejection_reason": {"type": ["string", "null"]},
+        "confirmed_at": {"type": ["string", "null"]},
+        "created_at": ISO_TIME_SCHEMA,
+        "updated_at": ISO_TIME_SCHEMA,
+    },
+    "additionalProperties": False,
+}
+
+GUIDANCE_VERSION_SCHEMA: dict[str, Any] = {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://project-kb.local/schema/guidance-version-v2.json",
+    "type": "object",
+    "required": [
+        "version_id", "category_id", "version", "title", "content",
+        "content_hash", "snapshot_id", "evidence", "is_current", "created_at",
+        "draft_id",
+    ],
+    "properties": {
+        "version_id": {"type": "string", "minLength": 1},
+        "category_id": {"type": "string", "minLength": 1},
+        "version": {"type": "integer", "minimum": 1},
+        "title": {"type": "string", "minLength": 1},
+        "content": {"type": "string"},
+        "content_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "snapshot_id": {"type": "string", "minLength": 1},
+        "evidence": {"type": "array", "items": {"type": "object"}},
+        "is_current": {"type": "boolean"},
+        "created_at": ISO_TIME_SCHEMA,
+        "draft_id": {"type": ["string", "null"]},
+    },
+    "additionalProperties": False,
+}
+
+GUIDANCE_CHANGE_SCHEMA: dict[str, Any] = {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://project-kb.local/schema/guidance-change-v2.json",
+    "type": "object",
+    "required": [
+        "change_id", "base_snapshot_id", "head_snapshot_id", "update_level",
+        "changed_files", "affected_categories", "payload", "created_at", "processed_at",
+    ],
+    "properties": {
+        "change_id": {"type": "string", "minLength": 1},
+        "base_snapshot_id": {"type": "string", "minLength": 1},
+        "head_snapshot_id": {"type": "string", "minLength": 1},
+        "update_level": {"enum": UPDATE_LEVEL_VALUES},
+        "changed_files": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "affected_categories": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "payload": {"type": "object"},
+        "created_at": ISO_TIME_SCHEMA,
+        "processed_at": {"type": ["string", "null"]},
+    },
+    "additionalProperties": False,
+}
+
+
 CONFIG_SCHEMA: dict[str, Any] = {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://project-kb.local/schema/config-v1.json",
@@ -392,4 +555,10 @@ def all_schemas() -> dict[str, dict[str, Any]]:
         "workflow-v1.json": WORKFLOW_SCHEMA,
         "recipe-v1.json": RECIPE_SCHEMA,
         "feature-guide-draft-v1.json": FEATURE_GUIDE_DRAFT_SCHEMA,
+        "guidance-run-v2.json": GUIDANCE_RUN_SCHEMA,
+        "guidance-batch-v2.json": GUIDANCE_BATCH_SCHEMA,
+        "guidance-category-v2.json": GUIDANCE_CATEGORY_SCHEMA,
+        "guidance-draft-v2.json": GUIDANCE_DRAFT_SCHEMA,
+        "guidance-version-v2.json": GUIDANCE_VERSION_SCHEMA,
+        "guidance-change-v2.json": GUIDANCE_CHANGE_SCHEMA,
     }
