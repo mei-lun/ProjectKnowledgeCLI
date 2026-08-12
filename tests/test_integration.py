@@ -7,6 +7,15 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from project_knowledge.guidance_models import (
+    GuidanceBatch,
+    GuidanceCategory,
+    GuidanceChange,
+    GuidanceDraft,
+    GuidanceRun,
+    GuidanceVersion,
+)
+from project_knowledge.guidance_store import GuidanceStore
 from project_knowledge.mcp import MCPServer
 from project_knowledge.retrieval import KnowledgeAPI
 from project_knowledge.service import ProjectService
@@ -140,6 +149,68 @@ class IntegrationTests(unittest.TestCase):
             "params": {"name": "knowledge_status", "arguments": {}},
         })
         self.assertFalse(called["result"]["isError"])
+
+    def test_rebuild_preserves_complete_guidance_graph(self) -> None:
+        service = ProjectService(self.root)
+        service.initialize()
+        now = "2026-08-13T09:00:00+08:00"
+        run = GuidanceRun(
+            run_id="run-rebuild", project_root=str(self.root), snapshot_id="snapshot-r",
+            status="guidance_review", total_files=2, covered_files=2,
+            created_at=now, updated_at=now,
+        )
+        batch = GuidanceBatch(
+            batch_id="batch-rebuild", run_id=run.run_id, ordinal=0,
+            status="completed", files=["src/app.py"], snapshot_id=run.snapshot_id,
+            result={"category_ids": ["category-rebuild"]}, created_at=now, updated_at=now,
+        )
+        category = GuidanceCategory(
+            category_id="category-rebuild", run_id=run.run_id, name="通用功能",
+            purpose="验证重建", applies_to=["功能"], excludes=[], samples=["src/app.py"],
+            evidence=[{"path": "src/app.py"}], confidence=0.9, unknowns=[],
+            created_at=now, updated_at=now,
+        )
+        draft = GuidanceDraft(
+            draft_id="draft-rebuild", run_id=run.run_id, category_id=category.category_id,
+            kind="guidance", status="confirmed",
+            path=str(self.root / ".project-kb" / "通用功能-开发指导.md"),
+            content_hash="sha256:" + "d" * 64, snapshot_id=run.snapshot_id,
+            payload={"title": "通用功能"}, created_at=now, updated_at=now,
+            confirmed_at=now,
+        )
+        version = GuidanceVersion(
+            version_id="version-rebuild", category_id=category.category_id,
+            draft_id=draft.draft_id, version=1, title="通用功能开发指导", content="正文",
+            content_hash="sha256:" + "e" * 64, snapshot_id=run.snapshot_id,
+            evidence=[{"path": "src/app.py"}], is_current=True, created_at=now,
+        )
+        change = GuidanceChange(
+            change_id="change-rebuild", project_root=str(self.root),
+            base_snapshot_id="snapshot-old", head_snapshot_id=run.snapshot_id,
+            update_level="guidance", changed_files=["src/app.py"],
+            affected_categories=[category.category_id], payload={"handled": True},
+            created_at=now, processed_at=now,
+        )
+        with KnowledgeStore(service.db_path) as store:
+            guidance = GuidanceStore(store)
+            with store.transaction():
+                guidance.create_run(run)
+                guidance.save_batch(batch)
+                guidance.save_category(category)
+                guidance.save_draft(draft)
+                guidance.save_version(version)
+                guidance.save_change(change)
+            before = store.export_guidance_graph()
+
+        service.rebuild()
+
+        with KnowledgeStore(service.db_path, readonly=True) as store:
+            after = store.export_guidance_graph()
+            self.assertEqual(after, before)
+            current = GuidanceStore(store).current_version(category.category_id)
+            self.assertIsNotNone(current)
+            self.assertEqual(current.version_id, version.version_id)
+            self.assertTrue(current.is_current)
 
     def test_dry_run_and_deleted_file_sync(self) -> None:
         service = ProjectService(self.root)

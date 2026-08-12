@@ -49,13 +49,60 @@ class KnowledgeStore:
             raise
 
     def initialize(self) -> None:
-        self.connection.executescript(
-            """
-            CREATE TABLE IF NOT EXISTS metadata (
+        existing_version = self._existing_schema_version()
+        if existing_version > SCHEMA_VERSION:
+            raise RuntimeError(
+                f"数据库 Schema v{existing_version} 高于当前支持的 v{SCHEMA_VERSION}"
+            )
+        if existing_version not in {0, 1, SCHEMA_VERSION}:
+            raise RuntimeError(f"不支持从 Schema v{existing_version} 迁移")
+
+        self.connection.commit()
+        try:
+            self.connection.execute("BEGIN IMMEDIATE")
+            self._create_base_schema()
+            self._upgrade_early_guidance_schema()
+            self._create_guidance_schema()
+            try:
+                self.connection.execute(
+                    "CREATE VIRTUAL TABLE IF NOT EXISTS knowledge_fts "
+                    "USING fts5(id UNINDEXED, title, content, tags)"
+                )
+                self.set_meta("fts", "enabled")
+            except sqlite3.OperationalError:
+                self.set_meta("fts", "disabled")
+            self.set_meta("schema_version", str(SCHEMA_VERSION))
+            self.connection.commit()
+        except BaseException:
+            self.connection.rollback()
+            raise
+
+    def _existing_schema_version(self) -> int:
+        metadata = self.connection.execute(
+            "SELECT 1 FROM sqlite_master WHERE type='table' AND name='metadata'"
+        ).fetchone()
+        if metadata is None:
+            return 0
+        row = self.connection.execute(
+            "SELECT value FROM metadata WHERE key='schema_version'"
+        ).fetchone()
+        if row is None:
+            return 0
+        try:
+            version = int(row[0])
+        except (TypeError, ValueError) as error:
+            raise RuntimeError("数据库 schema_version 无效") from error
+        if version < 0:
+            raise RuntimeError("数据库 schema_version 无效")
+        return version
+
+    def _create_base_schema(self) -> None:
+        statements = [
+            """CREATE TABLE IF NOT EXISTS metadata (
                 key TEXT PRIMARY KEY,
                 value TEXT NOT NULL
-            );
-            CREATE TABLE IF NOT EXISTS files (
+            )""",
+            """CREATE TABLE IF NOT EXISTS files (
                 path TEXT PRIMARY KEY,
                 language TEXT NOT NULL,
                 module TEXT NOT NULL,
@@ -64,8 +111,8 @@ class KnowledgeStore:
                 hash TEXT NOT NULL,
                 parser TEXT NOT NULL,
                 parse_error TEXT
-            );
-            CREATE TABLE IF NOT EXISTS symbols (
+            )""",
+            """CREATE TABLE IF NOT EXISTS symbols (
                 id TEXT PRIMARY KEY,
                 name TEXT NOT NULL,
                 kind TEXT NOT NULL,
@@ -75,10 +122,10 @@ class KnowledgeStore:
                 signature TEXT NOT NULL,
                 hash TEXT NOT NULL,
                 confidence REAL NOT NULL
-            );
-            CREATE INDEX IF NOT EXISTS idx_symbols_name ON symbols(name);
-            CREATE INDEX IF NOT EXISTS idx_symbols_path ON symbols(path);
-            CREATE TABLE IF NOT EXISTS relations (
+            )""",
+            "CREATE INDEX IF NOT EXISTS idx_symbols_name ON symbols(name)",
+            "CREATE INDEX IF NOT EXISTS idx_symbols_path ON symbols(path)",
+            """CREATE TABLE IF NOT EXISTS relations (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 source TEXT NOT NULL,
                 target TEXT NOT NULL,
@@ -87,18 +134,18 @@ class KnowledgeStore:
                 line INTEGER,
                 confidence REAL NOT NULL,
                 resolved INTEGER NOT NULL DEFAULT 0
-            );
-            CREATE INDEX IF NOT EXISTS idx_relations_source ON relations(source);
-            CREATE INDEX IF NOT EXISTS idx_relations_target ON relations(target);
-            CREATE TABLE IF NOT EXISTS routes (
+            )""",
+            "CREATE INDEX IF NOT EXISTS idx_relations_source ON relations(source)",
+            "CREATE INDEX IF NOT EXISTS idx_relations_target ON relations(target)",
+            """CREATE TABLE IF NOT EXISTS routes (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 method TEXT NOT NULL,
                 route TEXT NOT NULL,
                 handler TEXT NOT NULL,
                 path TEXT NOT NULL REFERENCES files(path) ON DELETE CASCADE,
                 line INTEGER NOT NULL
-            );
-            CREATE TABLE IF NOT EXISTS knowledge (
+            )""",
+            """CREATE TABLE IF NOT EXISTS knowledge (
                 id TEXT PRIMARY KEY,
                 kind TEXT NOT NULL,
                 title TEXT NOT NULL,
@@ -114,116 +161,198 @@ class KnowledgeStore:
                 supersedes_json TEXT NOT NULL,
                 last_generated_at TEXT,
                 last_verified_at TEXT
-            );
-            CREATE TABLE IF NOT EXISTS query_stats (
+            )""",
+            """CREATE TABLE IF NOT EXISTS query_stats (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 created_at TEXT NOT NULL,
                 tool TEXT NOT NULL,
                 input_size INTEGER NOT NULL,
                 output_tokens INTEGER NOT NULL,
                 duration_ms INTEGER NOT NULL
-            );
-            CREATE TABLE IF NOT EXISTS guidance_runs (
-                run_id TEXT PRIMARY KEY,
-                project_root TEXT NOT NULL,
-                snapshot_id TEXT NOT NULL,
-                status TEXT NOT NULL,
-                total_files INTEGER NOT NULL,
-                covered_files INTEGER NOT NULL,
+            )""",
+        ]
+        for statement in statements:
+            self.connection.execute(statement)
+
+    def _upgrade_early_guidance_schema(self) -> None:
+        existing_tables = {
+            row["name"]: row["sql"] or ""
+            for row in self.connection.execute(
+                "SELECT name, sql FROM sqlite_master WHERE type='table' AND name LIKE 'guidance_%'"
+            )
+        }
+        if not existing_tables:
+            return
+        expected = set(self._guidance_tables())
+        if set(existing_tables) != expected:
+            raise RuntimeError("Guidance Schema 不完整，无法安全迁移")
+        change_columns = {
+            row["name"] for row in self.connection.execute("PRAGMA table_info(guidance_changes)")
+        }
+        if "project_root" in change_columns and all(
+            "CHECK" in existing_tables[table].upper() for table in expected
+        ):
+            return
+
+        graph = self.export_guidance_graph()
+        project_roots = {
+            row["project_root"] for row in graph["guidance_runs"] if row.get("project_root")
+        }
+        if len(project_roots) > 1:
+            raise RuntimeError("Guidance 运行包含多个项目根，无法推断变化集归属")
+        project_root = next(iter(project_roots), str(self.path.parent.parent.resolve()))
+        for row in graph["guidance_changes"]:
+            row.setdefault("project_root", project_root)
+
+        for table in (
+            "guidance_versions", "guidance_drafts", "guidance_batches",
+            "guidance_categories", "guidance_changes", "guidance_runs",
+        ):
+            self.connection.execute(f"DROP TABLE {table}")
+        self._create_guidance_schema()
+        self.import_guidance_graph(graph)
+
+    def _create_guidance_schema(self) -> None:
+        statements = [
+            """CREATE TABLE IF NOT EXISTS guidance_runs (
+                run_id TEXT PRIMARY KEY CHECK(length(run_id) > 0),
+                project_root TEXT NOT NULL CHECK(length(project_root) > 0),
+                snapshot_id TEXT NOT NULL CHECK(length(snapshot_id) > 0),
+                status TEXT NOT NULL CHECK(status IN (
+                    'scanning', 'category_review', 'categories_confirmed',
+                    'guidance_generation', 'guidance_review', 'complete', 'failed'
+                )),
+                total_files INTEGER NOT NULL CHECK(
+                    typeof(total_files) = 'integer' AND total_files >= 0
+                ),
+                covered_files INTEGER NOT NULL CHECK(
+                    typeof(covered_files) = 'integer' AND covered_files >= 0
+                    AND covered_files <= total_files
+                ),
                 uncovered_files_json TEXT NOT NULL,
                 error TEXT,
                 created_at TEXT NOT NULL,
                 updated_at TEXT NOT NULL
-            );
-            CREATE TABLE IF NOT EXISTS guidance_batches (
-                batch_id TEXT PRIMARY KEY,
-                run_id TEXT NOT NULL REFERENCES guidance_runs(run_id) ON DELETE CASCADE,
-                ordinal INTEGER NOT NULL,
-                status TEXT NOT NULL,
+            )""",
+            """CREATE TABLE IF NOT EXISTS guidance_batches (
+                batch_id TEXT PRIMARY KEY CHECK(length(batch_id) > 0),
+                run_id TEXT NOT NULL REFERENCES guidance_runs(run_id) ON DELETE CASCADE
+                    CHECK(length(run_id) > 0),
+                ordinal INTEGER NOT NULL CHECK(typeof(ordinal) = 'integer' AND ordinal >= 0),
+                status TEXT NOT NULL CHECK(status IN ('pending', 'completed', 'failed')),
                 files_json TEXT NOT NULL,
-                snapshot_id TEXT NOT NULL,
+                snapshot_id TEXT NOT NULL CHECK(length(snapshot_id) > 0),
                 result_json TEXT,
                 error TEXT,
                 created_at TEXT NOT NULL,
                 updated_at TEXT NOT NULL,
                 UNIQUE(run_id, ordinal)
-            );
-            CREATE INDEX IF NOT EXISTS idx_guidance_batches_pending
-                ON guidance_batches(run_id, status, ordinal);
-            CREATE TABLE IF NOT EXISTS guidance_categories (
-                category_id TEXT PRIMARY KEY,
-                run_id TEXT NOT NULL REFERENCES guidance_runs(run_id) ON DELETE CASCADE,
-                name TEXT NOT NULL,
+            )""",
+            """CREATE INDEX IF NOT EXISTS idx_guidance_batches_pending
+                ON guidance_batches(run_id, status, ordinal)""",
+            """CREATE TABLE IF NOT EXISTS guidance_categories (
+                category_id TEXT PRIMARY KEY CHECK(length(category_id) > 0),
+                run_id TEXT NOT NULL REFERENCES guidance_runs(run_id) ON DELETE CASCADE
+                    CHECK(length(run_id) > 0),
+                name TEXT NOT NULL CHECK(length(name) > 0),
                 purpose TEXT NOT NULL,
                 applies_to_json TEXT NOT NULL,
                 excludes_json TEXT NOT NULL,
                 samples_json TEXT NOT NULL,
                 evidence_json TEXT NOT NULL,
-                confidence REAL NOT NULL,
+                confidence REAL NOT NULL CHECK(
+                    typeof(confidence) IN ('real', 'integer')
+                    AND confidence >= 0 AND confidence <= 1
+                ),
                 unknowns_json TEXT NOT NULL,
                 relations_json TEXT NOT NULL,
                 created_at TEXT NOT NULL,
                 updated_at TEXT NOT NULL
-            );
-            CREATE INDEX IF NOT EXISTS idx_guidance_categories_run
-                ON guidance_categories(run_id, category_id);
-            CREATE TABLE IF NOT EXISTS guidance_drafts (
-                draft_id TEXT PRIMARY KEY,
-                run_id TEXT NOT NULL REFERENCES guidance_runs(run_id) ON DELETE CASCADE,
-                category_id TEXT REFERENCES guidance_categories(category_id) ON DELETE SET NULL,
-                kind TEXT NOT NULL,
-                status TEXT NOT NULL,
-                path TEXT NOT NULL,
-                content_hash TEXT NOT NULL,
-                snapshot_id TEXT NOT NULL,
+            )""",
+            """CREATE INDEX IF NOT EXISTS idx_guidance_categories_run
+                ON guidance_categories(run_id, category_id)""",
+            """CREATE TABLE IF NOT EXISTS guidance_drafts (
+                draft_id TEXT PRIMARY KEY CHECK(length(draft_id) > 0),
+                run_id TEXT NOT NULL REFERENCES guidance_runs(run_id) ON DELETE CASCADE
+                    CHECK(length(run_id) > 0),
+                category_id TEXT REFERENCES guidance_categories(category_id) ON DELETE SET NULL
+                    CHECK(category_id IS NULL OR length(category_id) > 0),
+                kind TEXT NOT NULL CHECK(kind IN ('category_catalog', 'guidance')),
+                status TEXT NOT NULL CHECK(status IN (
+                    'incomplete', 'awaiting_confirmation', 'confirmed', 'rejected'
+                )),
+                path TEXT NOT NULL CHECK(length(path) > 0),
+                content_hash TEXT NOT NULL CHECK(length(content_hash) > 0),
+                snapshot_id TEXT NOT NULL CHECK(length(snapshot_id) > 0),
                 payload_json TEXT NOT NULL,
                 rejection_reason TEXT,
                 confirmed_at TEXT,
                 created_at TEXT NOT NULL,
                 updated_at TEXT NOT NULL
-            );
-            CREATE INDEX IF NOT EXISTS idx_guidance_drafts_pending
-                ON guidance_drafts(status, run_id, category_id);
-            CREATE TABLE IF NOT EXISTS guidance_versions (
-                version_id TEXT PRIMARY KEY,
-                category_id TEXT NOT NULL REFERENCES guidance_categories(category_id) ON DELETE CASCADE,
-                draft_id TEXT REFERENCES guidance_drafts(draft_id) ON DELETE SET NULL,
-                version INTEGER NOT NULL,
-                title TEXT NOT NULL,
+            )""",
+            """CREATE INDEX IF NOT EXISTS idx_guidance_drafts_pending
+                ON guidance_drafts(status, run_id, category_id)""",
+            """CREATE TABLE IF NOT EXISTS guidance_versions (
+                version_id TEXT PRIMARY KEY CHECK(length(version_id) > 0),
+                category_id TEXT NOT NULL REFERENCES guidance_categories(category_id) ON DELETE CASCADE
+                    CHECK(length(category_id) > 0),
+                draft_id TEXT REFERENCES guidance_drafts(draft_id) ON DELETE SET NULL
+                    CHECK(draft_id IS NULL OR length(draft_id) > 0),
+                version INTEGER NOT NULL CHECK(typeof(version) = 'integer' AND version > 0),
+                title TEXT NOT NULL CHECK(length(title) > 0),
                 content TEXT NOT NULL,
-                content_hash TEXT NOT NULL,
-                snapshot_id TEXT NOT NULL,
+                content_hash TEXT NOT NULL CHECK(length(content_hash) > 0),
+                snapshot_id TEXT NOT NULL CHECK(length(snapshot_id) > 0),
                 evidence_json TEXT NOT NULL,
-                is_current INTEGER NOT NULL DEFAULT 0,
+                is_current INTEGER NOT NULL DEFAULT 0 CHECK(is_current IN (0, 1)),
                 created_at TEXT NOT NULL,
                 UNIQUE(category_id, version)
-            );
-            CREATE UNIQUE INDEX IF NOT EXISTS idx_guidance_versions_current
-                ON guidance_versions(category_id) WHERE is_current = 1;
-            CREATE TABLE IF NOT EXISTS guidance_changes (
-                change_id TEXT PRIMARY KEY,
-                base_snapshot_id TEXT NOT NULL,
-                head_snapshot_id TEXT NOT NULL,
-                update_level TEXT NOT NULL,
+            )""",
+            """CREATE UNIQUE INDEX IF NOT EXISTS idx_guidance_versions_current
+                ON guidance_versions(category_id) WHERE is_current = 1""",
+            """CREATE TABLE IF NOT EXISTS guidance_changes (
+                change_id TEXT PRIMARY KEY CHECK(length(change_id) > 0),
+                project_root TEXT NOT NULL CHECK(length(project_root) > 0),
+                base_snapshot_id TEXT NOT NULL CHECK(length(base_snapshot_id) > 0),
+                head_snapshot_id TEXT NOT NULL CHECK(length(head_snapshot_id) > 0),
+                update_level TEXT NOT NULL CHECK(update_level IN ('fact', 'guidance', 'category')),
                 changed_files_json TEXT NOT NULL,
                 affected_categories_json TEXT NOT NULL,
                 payload_json TEXT NOT NULL,
                 created_at TEXT NOT NULL,
                 processed_at TEXT
-            );
-            CREATE INDEX IF NOT EXISTS idx_guidance_changes_pending
-                ON guidance_changes(processed_at, created_at);
-            """
+            )""",
+            """CREATE INDEX IF NOT EXISTS idx_guidance_changes_pending
+                ON guidance_changes(processed_at, created_at)""",
+        ]
+        for statement in statements:
+            self.connection.execute(statement)
+
+    def export_guidance_graph(self) -> dict[str, list[dict[str, Any]]]:
+        graph: dict[str, list[dict[str, Any]]] = {}
+        for table in self._guidance_tables():
+            exists = self.connection.execute(
+                "SELECT 1 FROM sqlite_master WHERE type='table' AND name=?", (table,)
+            ).fetchone()
+            graph[table] = self.rows(f"SELECT * FROM {table}") if exists else []
+        return graph
+
+    def import_guidance_graph(self, graph: dict[str, list[dict[str, Any]]]) -> None:
+        for table in self._guidance_tables():
+            for row in graph.get(table, []):
+                columns = list(row)
+                placeholders = ", ".join("?" for _ in columns)
+                self.connection.execute(
+                    f"INSERT INTO {table} ({', '.join(columns)}) VALUES ({placeholders})",
+                    [row[column] for column in columns],
+                )
+
+    @staticmethod
+    def _guidance_tables() -> tuple[str, ...]:
+        return (
+            "guidance_runs", "guidance_batches", "guidance_categories",
+            "guidance_drafts", "guidance_versions", "guidance_changes",
         )
-        try:
-            self.connection.execute(
-                "CREATE VIRTUAL TABLE IF NOT EXISTS knowledge_fts USING fts5(id UNINDEXED, title, content, tags)"
-            )
-            self.set_meta("fts", "enabled")
-        except sqlite3.OperationalError:
-            self.set_meta("fts", "disabled")
-        self.set_meta("schema_version", str(SCHEMA_VERSION))
-        self.connection.commit()
 
     def set_meta(self, key: str, value: str) -> None:
         self.connection.execute(

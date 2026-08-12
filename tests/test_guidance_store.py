@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import math
 import sqlite3
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 from project_knowledge.guidance_models import (
@@ -167,6 +169,197 @@ class GuidanceStoreTests(unittest.TestCase):
             validate_instance(draft_payload, GUIDANCE_DRAFT_SCHEMA)
         with self.assertRaises(SchemaValidationError):
             validate_instance(change_payload, GUIDANCE_CHANGE_SCHEMA)
+
+    def test_numeric_fields_reject_coercion_bool_and_non_finite_values(self) -> None:
+        cases = [
+            (GuidanceRun, self._run().to_dict(), "total_files", ["2", True]),
+            (GuidanceRun, self._run().to_dict(), "covered_files", ["0", False]),
+            (GuidanceBatch, self._batch().to_dict(), "ordinal", ["0", False]),
+            (GuidanceCategory, self._category().to_dict(), "confidence", ["0.9", True, math.nan, math.inf]),
+            (GuidanceVersion, self._version("version-1", 1, True).to_dict(), "version", ["1", True]),
+        ]
+        for model_type, payload, field_name, invalid_values in cases:
+            for invalid in invalid_values:
+                with self.subTest(model=model_type.__name__, field=field_name, invalid=invalid):
+                    with self.assertRaises(ValueError):
+                        model_type.from_dict({**payload, field_name: invalid})
+                    with self.assertRaises(ValueError):
+                        model_type(**{**payload, field_name: invalid})
+        with self.assertRaises(SchemaValidationError):
+            validate_instance(
+                {**self._category().to_dict(), "confidence": math.nan},
+                GUIDANCE_CATEGORY_SCHEMA,
+            )
+
+    def test_json_storage_rejects_non_finite_numbers(self) -> None:
+        with self._open_guidance_store() as guidance:
+            guidance.create_run(self._run())
+            invalid = GuidanceBatch(
+                **{**self._batch().to_dict(), "result": {"confidence": math.nan}}
+            )
+            with self.assertRaises(ValueError):
+                guidance.save_batch(invalid)
+
+    def test_initialize_upgrades_early_v2_guidance_tables_without_data_loss(self) -> None:
+        with KnowledgeStore(self.db_path) as store:
+            store.initialize()
+            guidance = GuidanceStore(store)
+            with store.transaction():
+                guidance.create_run(self._run())
+                guidance.save_batch(self._batch())
+                guidance.save_category(self._category())
+                guidance.save_draft(self._draft())
+                guidance.save_version(self._version("version-1", 1, True))
+                guidance.save_change(self._change())
+            expected = store.export_guidance_graph()
+            store.connection.execute("PRAGMA foreign_keys = OFF")
+            store.connection.execute("ALTER TABLE guidance_changes RENAME TO guidance_changes_current")
+            store.connection.execute(
+                """CREATE TABLE guidance_changes (
+                    change_id TEXT PRIMARY KEY,
+                    base_snapshot_id TEXT NOT NULL,
+                    head_snapshot_id TEXT NOT NULL,
+                    update_level TEXT NOT NULL,
+                    changed_files_json TEXT NOT NULL,
+                    affected_categories_json TEXT NOT NULL,
+                    payload_json TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    processed_at TEXT
+                )"""
+            )
+            store.connection.execute(
+                """INSERT INTO guidance_changes(
+                    change_id, base_snapshot_id, head_snapshot_id, update_level,
+                    changed_files_json, affected_categories_json, payload_json,
+                    created_at, processed_at
+                ) SELECT change_id, base_snapshot_id, head_snapshot_id, update_level,
+                    changed_files_json, affected_categories_json, payload_json,
+                    created_at, processed_at FROM guidance_changes_current"""
+            )
+            store.connection.execute("DROP TABLE guidance_changes_current")
+            store.connection.execute("PRAGMA foreign_keys = ON")
+            store.connection.commit()
+
+            store.initialize()
+            actual = store.export_guidance_graph()
+            self.assertEqual(actual["guidance_runs"], expected["guidance_runs"])
+            self.assertEqual(actual["guidance_batches"], expected["guidance_batches"])
+            self.assertEqual(actual["guidance_categories"], expected["guidance_categories"])
+            self.assertEqual(actual["guidance_drafts"], expected["guidance_drafts"])
+            self.assertEqual(actual["guidance_versions"], expected["guidance_versions"])
+            self.assertEqual(
+                actual["guidance_changes"][0]["project_root"],
+                self._run().project_root,
+            )
+            self.assertEqual(actual["guidance_changes"][0]["change_id"], "change-stable")
+            self.assertTrue(GuidanceStore(store).current_version("category-stable").is_current)
+
+    def test_initialize_rejects_future_schema_without_relabeling(self) -> None:
+        connection = sqlite3.connect(self.db_path)
+        connection.executescript(
+            "CREATE TABLE metadata(key TEXT PRIMARY KEY, value TEXT NOT NULL);"
+            "INSERT INTO metadata VALUES('schema_version', '3');"
+        )
+        connection.close()
+        with KnowledgeStore(self.db_path) as store:
+            with self.assertRaises(RuntimeError):
+                store.initialize()
+            self.assertEqual(store.get_meta("schema_version"), "3")
+
+    def test_failed_migration_rolls_back_schema_and_version(self) -> None:
+        connection = sqlite3.connect(self.db_path)
+        connection.executescript(
+            "CREATE TABLE metadata(key TEXT PRIMARY KEY, value TEXT NOT NULL);"
+            "INSERT INTO metadata VALUES('schema_version', '1');"
+        )
+        connection.close()
+        with KnowledgeStore(self.db_path) as store:
+            def fail_after_partial_schema() -> None:
+                store.connection.execute("CREATE TABLE guidance_partial(id TEXT)")
+                raise sqlite3.OperationalError("migration failed")
+
+            with mock.patch.object(store, "_create_guidance_schema", side_effect=fail_after_partial_schema):
+                with self.assertRaises(sqlite3.OperationalError):
+                    store.initialize()
+            self.assertEqual(store.get_meta("schema_version"), "1")
+            self.assertIsNone(store.connection.execute(
+                "SELECT name FROM sqlite_master WHERE name='guidance_partial'"
+            ).fetchone())
+
+    def test_database_checks_reject_invalid_direct_sql(self) -> None:
+        with KnowledgeStore(self.db_path) as store:
+            store.initialize()
+            guidance = GuidanceStore(store)
+            guidance.create_run(self._run())
+            guidance.save_category(self._category())
+            invalid_statements = [
+                ("UPDATE guidance_runs SET status='bad' WHERE run_id='run-stable'", ()),
+                ("UPDATE guidance_runs SET total_files=-1 WHERE run_id='run-stable'", ()),
+                ("UPDATE guidance_runs SET covered_files=3 WHERE run_id='run-stable'", ()),
+                ("INSERT INTO guidance_batches(batch_id,run_id,ordinal,status,files_json,snapshot_id,created_at,updated_at) VALUES('bad-batch','run-stable',-1,'pending','[]','snapshot-1',?,?)", (NOW, NOW)),
+                ("UPDATE guidance_categories SET confidence=2 WHERE category_id='category-stable'", ()),
+                ("INSERT INTO guidance_drafts(draft_id,run_id,kind,status,path,content_hash,snapshot_id,payload_json,created_at,updated_at) VALUES('bad-draft','run-stable','bad','bad','/tmp/draft','sha256:' || printf('%064d',0),'snapshot-1','{}',?,?)", (NOW, NOW)),
+                ("INSERT INTO guidance_versions(version_id,category_id,version,title,content,content_hash,snapshot_id,evidence_json,is_current,created_at) VALUES('bad-version','category-stable',0,'t','c','sha256:' || printf('%064d',0),'snapshot-1','[]',2,?)", (NOW,)),
+                ("INSERT INTO guidance_changes(change_id,project_root,base_snapshot_id,head_snapshot_id,update_level,changed_files_json,affected_categories_json,payload_json,created_at) VALUES('','/repo','a','b','bad','[]','[]','{}',?)", (NOW,)),
+            ]
+            for sql, parameters in invalid_statements:
+                with self.subTest(sql=sql):
+                    with self.assertRaises(sqlite3.IntegrityError):
+                        store.connection.execute(sql, parameters)
+
+    def test_upserts_reject_stable_identity_changes_and_invalid_relations(self) -> None:
+        with self._open_guidance_store() as guidance:
+            guidance.create_run(self._run())
+            guidance.create_run(GuidanceRun(**{**self._run().to_dict(), "run_id": "run-other", "snapshot_id": "snapshot-2"}))
+            guidance.save_category(self._category())
+            guidance.save_draft(self._draft())
+            guidance.save_change(self._change())
+            invalid_operations = [
+                lambda: guidance.create_run(GuidanceRun(**{**self._run().to_dict(), "project_root": "/other"})),
+                lambda: guidance.create_run(GuidanceRun(**{**self._run().to_dict(), "snapshot_id": "snapshot-2"})),
+                lambda: guidance.save_batch(GuidanceBatch(**{**self._batch().to_dict(), "snapshot_id": "snapshot-2"})),
+                lambda: guidance.save_category(GuidanceCategory(**{**self._category().to_dict(), "run_id": "run-other"})),
+                lambda: guidance.save_draft(GuidanceDraft(**{**self._draft().to_dict(), "run_id": "run-other"})),
+                lambda: guidance.save_draft(GuidanceDraft(**{**self._draft().to_dict(), "category_id": "missing"})),
+                lambda: guidance.save_draft(GuidanceDraft(**{**self._draft().to_dict(), "kind": "guidance"})),
+                lambda: guidance.save_change(GuidanceChange(**{**self._change().to_dict(), "project_root": "/other"})),
+                lambda: guidance.save_change(GuidanceChange(**{**self._change().to_dict(), "base_snapshot_id": "snapshot-0"})),
+                lambda: guidance.save_change(GuidanceChange(**{**self._change().to_dict(), "head_snapshot_id": "snapshot-3"})),
+                lambda: guidance.save_change(GuidanceChange(**{**self._change().to_dict(), "update_level": "category"})),
+            ]
+            for operation in invalid_operations:
+                with self.subTest(operation=operation):
+                    with self.assertRaises((ValueError, KeyError, sqlite3.IntegrityError)):
+                        operation()
+
+    def test_draft_kind_category_and_version_snapshot_relations_are_consistent(self) -> None:
+        with self._open_guidance_store() as guidance:
+            guidance.create_run(self._run())
+            guidance.save_category(self._category())
+            invalid_drafts = [
+                GuidanceDraft(**{**self._draft().to_dict(), "kind": "guidance"}),
+                GuidanceDraft(**{**self._draft().to_dict(), "category_id": "category-stable"}),
+            ]
+            for draft in invalid_drafts:
+                with self.subTest(draft=draft):
+                    with self.assertRaises(ValueError):
+                        guidance.save_draft(draft)
+            with self.assertRaises(ValueError):
+                guidance.save_version(GuidanceVersion(**{
+                    **self._version("version-wrong-snapshot", 1, True).to_dict(),
+                    "snapshot_id": "snapshot-2",
+                }))
+
+    def test_replaying_old_version_after_promotion_is_idempotent(self) -> None:
+        with self._open_guidance_store() as guidance:
+            guidance.create_run(self._run())
+            guidance.save_category(self._category())
+            old = self._version("version-1", 1, True)
+            guidance.save_version(old)
+            guidance.save_version(self._version("version-2", 2, True))
+            replayed = guidance.save_version(old)
+            self.assertFalse(replayed.is_current)
+            self.assertEqual(guidance.current_version("category-stable").version_id, "version-2")
 
     def test_batch_upsert_is_idempotent(self) -> None:
         with self._open_guidance_store() as guidance:
@@ -375,6 +568,7 @@ class GuidanceStoreTests(unittest.TestCase):
     def _change() -> GuidanceChange:
         return GuidanceChange(
             change_id="change-stable",
+            project_root="/repo",
             base_snapshot_id="snapshot-1",
             head_snapshot_id="snapshot-2",
             update_level="guidance",

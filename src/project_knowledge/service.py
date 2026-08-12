@@ -130,12 +130,15 @@ class ProjectService:
         started = time.monotonic()
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         preserved_knowledge = []
+        preserved_guidance: dict[str, list[dict[str, Any]]] = {}
         if self.db_path.exists():
-            with KnowledgeStore(self.db_path, readonly=True) as current_store:
+            with KnowledgeStore(self.db_path) as current_store:
+                current_store.initialize()
                 preserved_knowledge = [
                     record for record in current_store.all_knowledge()
                     if record.ownership in {"draft", "curated", "decision"}
                 ]
+                preserved_guidance = current_store.export_guidance_graph()
         descriptor, temporary_name = tempfile.mkstemp(prefix="index.", suffix=".db", dir=self.db_path.parent)
         os.close(descriptor)
         temporary = Path(temporary_name)
@@ -145,6 +148,7 @@ class ProjectService:
                 with store.transaction():
                     for record in preserved_knowledge:
                         store.upsert_knowledge(record)
+                    store.import_guidance_graph(preserved_guidance)
                     for item in discovered:
                         parsed, stable_item = self._parse_stable(item)
                         store.replace_file(stable_item, parsed)

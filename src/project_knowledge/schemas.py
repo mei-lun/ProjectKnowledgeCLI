@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 import re
 from typing import Any
 
@@ -52,6 +53,8 @@ def validate_instance(value: Any, schema: dict[str, Any], path: str = "$") -> No
             raise SchemaValidationError(f"{path}: 不匹配模式 {pattern!r}")
 
     if isinstance(value, (int, float)) and not isinstance(value, bool):
+        if not math.isfinite(value):
+            raise SchemaValidationError(f"{path}: 数字必须是有限值")
         if "minimum" in schema and value < schema["minimum"]:
             raise SchemaValidationError(f"{path}: 小于最小值 {schema['minimum']}")
         if "maximum" in schema and value > schema["maximum"]:
@@ -496,11 +499,12 @@ GUIDANCE_CHANGE_SCHEMA: dict[str, Any] = {
     "$id": "https://project-kb.local/schema/guidance-change-v2.json",
     "type": "object",
     "required": [
-        "change_id", "base_snapshot_id", "head_snapshot_id", "update_level",
+        "change_id", "project_root", "base_snapshot_id", "head_snapshot_id", "update_level",
         "changed_files", "affected_categories", "payload", "created_at", "processed_at",
     ],
     "properties": {
         "change_id": {"type": "string", "minLength": 1},
+        "project_root": {"type": "string", "minLength": 1},
         "base_snapshot_id": {"type": "string", "minLength": 1},
         "head_snapshot_id": {"type": "string", "minLength": 1},
         "update_level": {"enum": UPDATE_LEVEL_VALUES},

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
+import math
 from typing import Any, ClassVar, Literal
 
 
@@ -45,6 +46,21 @@ def _require_iso_time(name: str, value: str | None) -> None:
         raise ValueError(f"{name} 必须包含时区")
 
 
+def _require_int(name: str, value: object, minimum: int = 0) -> None:
+    if not isinstance(value, int) or isinstance(value, bool) or value < minimum:
+        raise ValueError(f"{name} 必须是大于等于 {minimum} 的整数")
+
+
+def _require_number(name: str, value: object, minimum: float, maximum: float) -> None:
+    if (
+        not isinstance(value, (int, float))
+        or isinstance(value, bool)
+        or not math.isfinite(value)
+        or not minimum <= value <= maximum
+    ):
+        raise ValueError(f"{name} 必须是 {minimum} 到 {maximum} 之间的有限数字")
+
+
 def _require_choice(name: str, value: str, choices: set[str]) -> None:
     if value not in choices:
         raise ValueError(f"{name} 的值 {value!r} 无效")
@@ -74,8 +90,10 @@ class GuidanceRun:
         _require_choice("status", self.status, self._STATUSES)
         _require_iso_time("created_at", self.created_at)
         _require_iso_time("updated_at", self.updated_at)
-        if self.total_files < 0 or not 0 <= self.covered_files <= self.total_files:
-            raise ValueError("文件覆盖数量无效")
+        _require_int("total_files", self.total_files)
+        _require_int("covered_files", self.covered_files)
+        if self.covered_files > self.total_files:
+            raise ValueError("covered_files 不能大于 total_files")
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -85,7 +103,7 @@ class GuidanceRun:
         return cls(
             run_id=value["run_id"], project_root=value["project_root"],
             snapshot_id=value["snapshot_id"], status=value["status"],
-            total_files=int(value["total_files"]), covered_files=int(value["covered_files"]),
+            total_files=value["total_files"], covered_files=value["covered_files"],
             created_at=value["created_at"], updated_at=value["updated_at"],
             uncovered_files=list(value.get("uncovered_files", [])), error=value.get("error"),
         )
@@ -113,8 +131,7 @@ class GuidanceBatch:
         _require_choice("status", self.status, self._STATUSES)
         _require_iso_time("created_at", self.created_at)
         _require_iso_time("updated_at", self.updated_at)
-        if self.ordinal < 0:
-            raise ValueError("ordinal 不能小于零")
+        _require_int("ordinal", self.ordinal)
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -123,7 +140,7 @@ class GuidanceBatch:
     def from_dict(cls, value: dict[str, Any]) -> "GuidanceBatch":
         return cls(
             batch_id=value["batch_id"], run_id=value["run_id"],
-            ordinal=int(value["ordinal"]), status=value["status"],
+            ordinal=value["ordinal"], status=value["status"],
             files=list(value.get("files", [])), snapshot_id=value["snapshot_id"],
             created_at=value["created_at"], updated_at=value["updated_at"],
             result=dict(value["result"]) if value.get("result") is not None else None,
@@ -152,8 +169,7 @@ class GuidanceCategory:
         _require_id("run_id", self.run_id)
         if not self.name.strip():
             raise ValueError("name 不能为空")
-        if not 0 <= self.confidence <= 1:
-            raise ValueError("confidence 必须在 0 到 1 之间")
+        _require_number("confidence", self.confidence, 0, 1)
         _require_iso_time("created_at", self.created_at)
         _require_iso_time("updated_at", self.updated_at)
 
@@ -167,7 +183,7 @@ class GuidanceCategory:
             purpose=value["purpose"], applies_to=list(value.get("applies_to", [])),
             excludes=list(value.get("excludes", [])), samples=list(value.get("samples", [])),
             evidence=[dict(item) for item in value.get("evidence", [])],
-            confidence=float(value["confidence"]), unknowns=list(value.get("unknowns", [])),
+            confidence=value["confidence"], unknowns=list(value.get("unknowns", [])),
             created_at=value["created_at"], updated_at=value["updated_at"],
             relations=[dict(item) for item in value.get("relations", [])],
         )
@@ -242,8 +258,7 @@ class GuidanceVersion:
         _require_iso_time("created_at", self.created_at)
         if not isinstance(self.is_current, bool):
             raise ValueError("is_current 必须是布尔值")
-        if self.version < 1:
-            raise ValueError("version 必须大于零")
+        _require_int("version", self.version, minimum=1)
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -252,7 +267,7 @@ class GuidanceVersion:
     def from_dict(cls, value: dict[str, Any]) -> "GuidanceVersion":
         return cls(
             version_id=value["version_id"], category_id=value["category_id"],
-            version=int(value["version"]), title=value["title"], content=value["content"],
+            version=value["version"], title=value["title"], content=value["content"],
             content_hash=value["content_hash"], snapshot_id=value["snapshot_id"],
             evidence=[dict(item) for item in value.get("evidence", [])],
             is_current=value["is_current"], created_at=value["created_at"],
@@ -263,6 +278,7 @@ class GuidanceVersion:
 @dataclass(slots=True)
 class GuidanceChange:
     change_id: str
+    project_root: str
     base_snapshot_id: str
     head_snapshot_id: str
     update_level: UpdateLevel
@@ -276,6 +292,7 @@ class GuidanceChange:
 
     def __post_init__(self) -> None:
         _require_id("change_id", self.change_id)
+        _require_id("project_root", self.project_root)
         _require_id("base_snapshot_id", self.base_snapshot_id)
         _require_id("head_snapshot_id", self.head_snapshot_id)
         _require_choice("update_level", self.update_level, self._LEVELS)
@@ -288,7 +305,8 @@ class GuidanceChange:
     @classmethod
     def from_dict(cls, value: dict[str, Any]) -> "GuidanceChange":
         return cls(
-            change_id=value["change_id"], base_snapshot_id=value["base_snapshot_id"],
+            change_id=value["change_id"], project_root=value["project_root"],
+            base_snapshot_id=value["base_snapshot_id"],
             head_snapshot_id=value["head_snapshot_id"], update_level=value["update_level"],
             changed_files=list(value.get("changed_files", [])),
             affected_categories=list(value.get("affected_categories", [])),

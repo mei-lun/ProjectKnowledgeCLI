@@ -11,11 +11,11 @@ from .guidance_models import (
     GuidanceRun,
     GuidanceVersion,
 )
-from .store import KnowledgeStore
+from .store import SCHEMA_VERSION, KnowledgeStore
 
 
 def _json(value: object) -> str:
-    return json.dumps(value, ensure_ascii=False, sort_keys=True)
+    return json.dumps(value, ensure_ascii=False, sort_keys=True, allow_nan=False)
 
 
 class GuidanceStore:
@@ -25,24 +25,28 @@ class GuidanceStore:
         self.store = store
         self.connection = store.connection
         try:
-            if store.get_meta("schema_version") != "2":
-                raise RuntimeError("KnowledgeStore 尚未初始化为 Schema v2")
+            if store.get_meta("schema_version") != str(SCHEMA_VERSION):
+                raise RuntimeError(
+                    f"KnowledgeStore 尚未初始化为 Schema v{SCHEMA_VERSION}"
+                )
         except sqlite3.OperationalError as error:
             raise RuntimeError("KnowledgeStore 尚未初始化") from error
 
     def create_run(self, run: GuidanceRun) -> GuidanceRun:
-        self.connection.execute(
+        cursor = self.connection.execute(
             """
             INSERT INTO guidance_runs(
                 run_id, project_root, snapshot_id, status, total_files, covered_files,
                 uncovered_files_json, error, created_at, updated_at
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(run_id) DO UPDATE SET
-                project_root=excluded.project_root, snapshot_id=excluded.snapshot_id,
                 status=excluded.status, total_files=excluded.total_files,
                 covered_files=excluded.covered_files,
                 uncovered_files_json=excluded.uncovered_files_json,
                 error=excluded.error, updated_at=excluded.updated_at
+            WHERE guidance_runs.project_root=excluded.project_root
+              AND guidance_runs.snapshot_id=excluded.snapshot_id
+              AND guidance_runs.created_at=excluded.created_at
             """,
             (
                 run.run_id, run.project_root, run.snapshot_id, run.status,
@@ -50,6 +54,7 @@ class GuidanceStore:
                 run.error, run.created_at, run.updated_at,
             ),
         )
+        self._require_upsert(cursor, "run_id 已绑定到其他项目或快照")
         return run
 
     def get_run(self, run_id: str) -> GuidanceRun | None:
@@ -69,24 +74,32 @@ class GuidanceStore:
 
     def save_batch(self, batch: GuidanceBatch) -> GuidanceBatch:
         existing = self.connection.execute(
-            "SELECT run_id, ordinal FROM guidance_batches WHERE batch_id = ?",
+            "SELECT run_id, ordinal, snapshot_id FROM guidance_batches WHERE batch_id = ?",
             (batch.batch_id,),
         ).fetchone()
         if existing is not None and (
-            existing["run_id"] != batch.run_id or existing["ordinal"] != batch.ordinal
+            existing["run_id"] != batch.run_id
+            or existing["ordinal"] != batch.ordinal
+            or existing["snapshot_id"] != batch.snapshot_id
         ):
-            raise ValueError("batch_id 已绑定到其他运行或序号")
-        self.connection.execute(
+            raise ValueError("batch_id 已绑定到其他运行、序号或快照")
+        run = self._require_run(batch.run_id)
+        if run.snapshot_id != batch.snapshot_id:
+            raise ValueError("批次快照与运行快照不一致")
+        cursor = self.connection.execute(
             """
             INSERT INTO guidance_batches(
                 batch_id, run_id, ordinal, status, files_json, snapshot_id,
                 result_json, error, created_at, updated_at
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(batch_id) DO UPDATE SET
-                run_id=excluded.run_id, ordinal=excluded.ordinal,
-                status=excluded.status, files_json=excluded.files_json,
-                snapshot_id=excluded.snapshot_id, result_json=excluded.result_json,
+                status=excluded.status, result_json=excluded.result_json,
                 error=excluded.error, updated_at=excluded.updated_at
+            WHERE guidance_batches.run_id=excluded.run_id
+              AND guidance_batches.ordinal=excluded.ordinal
+              AND guidance_batches.files_json=excluded.files_json
+              AND guidance_batches.snapshot_id=excluded.snapshot_id
+              AND guidance_batches.created_at=excluded.created_at
             """,
             (
                 batch.batch_id, batch.run_id, batch.ordinal, batch.status,
@@ -95,6 +108,7 @@ class GuidanceStore:
                 batch.error, batch.created_at, batch.updated_at,
             ),
         )
+        self._require_upsert(cursor, "batch_id 已绑定到其他运行、序号或快照")
         return batch
 
     def next_pending_batch(self, run_id: str) -> GuidanceBatch | None:
@@ -116,7 +130,8 @@ class GuidanceStore:
         return [self._batch(row) for row in rows]
 
     def save_category(self, category: GuidanceCategory) -> GuidanceCategory:
-        self.connection.execute(
+        self._require_run(category.run_id)
+        cursor = self.connection.execute(
             """
             INSERT INTO guidance_categories(
                 category_id, run_id, name, purpose, applies_to_json, excludes_json,
@@ -124,11 +139,13 @@ class GuidanceStore:
                 relations_json, created_at, updated_at
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(category_id) DO UPDATE SET
-                run_id=excluded.run_id, name=excluded.name, purpose=excluded.purpose,
+                name=excluded.name, purpose=excluded.purpose,
                 applies_to_json=excluded.applies_to_json, excludes_json=excluded.excludes_json,
                 samples_json=excluded.samples_json, evidence_json=excluded.evidence_json,
                 confidence=excluded.confidence, unknowns_json=excluded.unknowns_json,
                 relations_json=excluded.relations_json, updated_at=excluded.updated_at
+            WHERE guidance_categories.run_id=excluded.run_id
+              AND guidance_categories.created_at=excluded.created_at
             """,
             (
                 category.category_id, category.run_id, category.name, category.purpose,
@@ -137,6 +154,7 @@ class GuidanceStore:
                 _json(category.relations), category.created_at, category.updated_at,
             ),
         )
+        self._require_upsert(cursor, "category_id 已绑定到其他运行")
         return category
 
     def list_categories(self, run_id: str | None = None) -> list[GuidanceCategory]:
@@ -152,7 +170,18 @@ class GuidanceStore:
         return [self._category(row) for row in rows]
 
     def save_draft(self, draft: GuidanceDraft) -> GuidanceDraft:
-        self.connection.execute(
+        run = self._require_run(draft.run_id)
+        if run.snapshot_id != draft.snapshot_id:
+            raise ValueError("草稿快照与运行快照不一致")
+        if draft.kind == "guidance" and draft.category_id is None:
+            raise ValueError("指导草稿必须关联类别")
+        if draft.kind == "category_catalog" and draft.category_id is not None:
+            raise ValueError("分类目录草稿不能关联单一类别")
+        if draft.category_id is not None:
+            category = self._require_category(draft.category_id)
+            if category.run_id != draft.run_id:
+                raise ValueError("草稿类别与运行不一致")
+        cursor = self.connection.execute(
             """
             INSERT INTO guidance_drafts(
                 draft_id, run_id, category_id, kind, status, path, content_hash,
@@ -160,12 +189,15 @@ class GuidanceStore:
                 created_at, updated_at
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(draft_id) DO UPDATE SET
-                run_id=excluded.run_id, category_id=excluded.category_id,
-                kind=excluded.kind, status=excluded.status, path=excluded.path,
-                content_hash=excluded.content_hash, snapshot_id=excluded.snapshot_id,
-                payload_json=excluded.payload_json,
+                status=excluded.status, path=excluded.path,
+                content_hash=excluded.content_hash, payload_json=excluded.payload_json,
                 rejection_reason=excluded.rejection_reason,
                 confirmed_at=excluded.confirmed_at, updated_at=excluded.updated_at
+            WHERE guidance_drafts.run_id=excluded.run_id
+              AND guidance_drafts.category_id IS excluded.category_id
+              AND guidance_drafts.kind=excluded.kind
+              AND guidance_drafts.snapshot_id=excluded.snapshot_id
+              AND guidance_drafts.created_at=excluded.created_at
             """,
             (
                 draft.draft_id, draft.run_id, draft.category_id, draft.kind,
@@ -174,6 +206,7 @@ class GuidanceStore:
                 draft.created_at, draft.updated_at,
             ),
         )
+        self._require_upsert(cursor, "draft_id 已绑定到其他运行、类别、类型或快照")
         return draft
 
     def get_draft(self, draft_id: str) -> GuidanceDraft | None:
@@ -200,13 +233,23 @@ class GuidanceStore:
         return [self._draft(row) for row in rows]
 
     def save_version(self, version: GuidanceVersion) -> GuidanceVersion:
+        category = self._require_category(version.category_id)
+        run = self._require_run(category.run_id)
+        if version.snapshot_id != run.snapshot_id:
+            raise ValueError("版本快照与类别运行快照不一致")
+        if version.draft_id is not None:
+            draft = self.get_draft(version.draft_id)
+            if draft is None:
+                raise KeyError(f"草稿不存在：{version.draft_id}")
+            if draft.category_id != version.category_id:
+                raise ValueError("版本草稿与类别不一致")
         existing = self.connection.execute(
             "SELECT * FROM guidance_versions WHERE version_id = ?",
             (version.version_id,),
         ).fetchone()
         if existing is not None:
             stored = self._version(existing)
-            if stored != version:
+            if self._version_identity(stored) != self._version_identity(version):
                 raise ValueError("正式指导版本不可修改")
             return stored
 
@@ -259,28 +302,31 @@ class GuidanceStore:
         return [self._version(row) for row in rows]
 
     def save_change(self, change: GuidanceChange) -> GuidanceChange:
-        self.connection.execute(
+        cursor = self.connection.execute(
             """
             INSERT INTO guidance_changes(
-                change_id, base_snapshot_id, head_snapshot_id, update_level,
+                change_id, project_root, base_snapshot_id, head_snapshot_id, update_level,
                 changed_files_json, affected_categories_json, payload_json,
                 created_at, processed_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(change_id) DO UPDATE SET
-                base_snapshot_id=excluded.base_snapshot_id,
-                head_snapshot_id=excluded.head_snapshot_id,
-                update_level=excluded.update_level,
                 changed_files_json=excluded.changed_files_json,
                 affected_categories_json=excluded.affected_categories_json,
                 payload_json=excluded.payload_json, processed_at=excluded.processed_at
+            WHERE guidance_changes.project_root=excluded.project_root
+              AND guidance_changes.base_snapshot_id=excluded.base_snapshot_id
+              AND guidance_changes.head_snapshot_id=excluded.head_snapshot_id
+              AND guidance_changes.update_level=excluded.update_level
+              AND guidance_changes.created_at=excluded.created_at
             """,
             (
-                change.change_id, change.base_snapshot_id, change.head_snapshot_id,
-                change.update_level, _json(change.changed_files),
+                change.change_id, change.project_root, change.base_snapshot_id,
+                change.head_snapshot_id, change.update_level, _json(change.changed_files),
                 _json(change.affected_categories), _json(change.payload),
                 change.created_at, change.processed_at,
             ),
         )
+        self._require_upsert(cursor, "change_id 已绑定到其他项目、快照或更新级别")
         return change
 
     def pending_changes(self) -> list[GuidanceChange]:
@@ -295,6 +341,7 @@ class GuidanceStore:
     def mark_change_processed(self, change_id: str, processed_at: str) -> None:
         GuidanceChange.from_dict({
             "change_id": change_id,
+            "project_root": "validation",
             "base_snapshot_id": "validation",
             "head_snapshot_id": "validation",
             "update_level": "fact",
@@ -310,6 +357,33 @@ class GuidanceStore:
         )
         if cursor.rowcount == 0:
             raise KeyError(f"变化集不存在：{change_id}")
+
+    def _require_run(self, run_id: str) -> GuidanceRun:
+        run = self.get_run(run_id)
+        if run is None:
+            raise KeyError(f"运行不存在：{run_id}")
+        return run
+
+    def _require_category(self, category_id: str) -> GuidanceCategory:
+        row = self.connection.execute(
+            "SELECT * FROM guidance_categories WHERE category_id = ?", (category_id,)
+        ).fetchone()
+        if row is None:
+            raise KeyError(f"类别不存在：{category_id}")
+        return self._category(row)
+
+    @staticmethod
+    def _require_upsert(cursor: sqlite3.Cursor, message: str) -> None:
+        if cursor.rowcount == 0:
+            raise ValueError(message)
+
+    @staticmethod
+    def _version_identity(version: GuidanceVersion) -> tuple[object, ...]:
+        return (
+            version.version_id, version.category_id, version.draft_id, version.version,
+            version.title, version.content, version.content_hash, version.snapshot_id,
+            _json(version.evidence), version.created_at,
+        )
 
     @staticmethod
     def _batch(row: sqlite3.Row) -> GuidanceBatch:
@@ -363,7 +437,7 @@ class GuidanceStore:
     @staticmethod
     def _change(row: sqlite3.Row) -> GuidanceChange:
         return GuidanceChange.from_dict({
-            "change_id": row["change_id"],
+            "change_id": row["change_id"], "project_root": row["project_root"],
             "base_snapshot_id": row["base_snapshot_id"],
             "head_snapshot_id": row["head_snapshot_id"],
             "update_level": row["update_level"],
