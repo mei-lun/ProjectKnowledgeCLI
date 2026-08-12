@@ -179,8 +179,9 @@ class GuidanceStore:
             raise ValueError("分类目录草稿不能关联单一类别")
         if draft.category_id is not None:
             category = self._require_category(draft.category_id)
-            if category.run_id != draft.run_id:
-                raise ValueError("草稿类别与运行不一致")
+            category_run = self._require_run(category.run_id)
+            if category_run.project_root != run.project_root:
+                raise ValueError("草稿类别与运行不属于同一项目")
         cursor = self.connection.execute(
             """
             INSERT INTO guidance_drafts(
@@ -235,8 +236,12 @@ class GuidanceStore:
     def save_version(self, version: GuidanceVersion) -> GuidanceVersion:
         category = self._require_category(version.category_id)
         run = self._require_run(category.run_id)
-        if version.snapshot_id != run.snapshot_id:
-            raise ValueError("版本快照与类别运行快照不一致")
+        snapshot_run = self.connection.execute(
+            "SELECT 1 FROM guidance_runs WHERE project_root=? AND snapshot_id=? LIMIT 1",
+            (run.project_root, version.snapshot_id),
+        ).fetchone()
+        if snapshot_run is None:
+            raise ValueError("版本快照不属于类别所在项目的已知运行")
         if version.draft_id is not None:
             draft = self.get_draft(version.draft_id)
             if draft is None:

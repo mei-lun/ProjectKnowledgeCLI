@@ -143,7 +143,7 @@ class IntegrationTests(unittest.TestCase):
         })
         self.assertEqual(initialized["result"]["protocolVersion"], "2025-06-18")
         tools = server.handle({"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}})
-        self.assertEqual(len(tools["result"]["tools"]), 5)
+        self.assertEqual(len(tools["result"]["tools"]), 12)
         called = server.handle({
             "jsonrpc": "2.0", "id": 3, "method": "tools/call",
             "params": {"name": "knowledge_status", "arguments": {}},

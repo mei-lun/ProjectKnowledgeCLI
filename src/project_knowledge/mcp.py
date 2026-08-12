@@ -69,6 +69,119 @@ TOOLS: list[dict[str, Any]] = [
 ]
 
 
+WORKFLOW_TOOLS: list[dict[str, Any]] = [
+    {
+        "name": "knowledge_initialization_start",
+        "title": "开始开发指导初始化",
+        "description": "基于 CodeGraph 当前快照建立或恢复稳定分批初始化。",
+        "inputSchema": {
+            "type": "object",
+            "properties": {"projectPath": {"type": "string", "minLength": 1}},
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": False, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
+    },
+    {
+        "name": "knowledge_initialization_next",
+        "title": "读取下一个初始化批次",
+        "description": "返回下一个待分析批次、代码事实和按需源码提示。",
+        "inputSchema": {
+            "type": "object",
+            "properties": {"projectPath": {"type": "string", "minLength": 1}, "runId": {"type": "string", "minLength": 1}},
+            "required": ["runId"], "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
+    },
+    {
+        "name": "knowledge_initialization_submit",
+        "title": "提交初始化批次分析",
+        "description": "提交 AI 客户端对一个稳定批次归纳的候选类别。",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "projectPath": {"type": "string", "minLength": 1},
+                "runId": {"type": "string", "minLength": 1},
+                "batchId": {"type": "string", "minLength": 1},
+                "snapshotId": {"type": "string", "minLength": 1},
+                "candidates": {"type": "array", "items": {"type": "object"}},
+                "error": {"type": "string", "minLength": 1},
+            },
+            "required": ["runId", "batchId", "snapshotId", "candidates"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": False, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
+    },
+    {
+        "name": "knowledge_draft_save",
+        "title": "保存或拒绝开发指导草稿",
+        "description": "保存可见 Markdown 草稿，或记录用户拒绝及原因。",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "projectPath": {"type": "string", "minLength": 1},
+                "action": {"enum": ["save", "reject"]},
+                "kind": {"enum": ["category_catalog", "guidance"]},
+                "runId": {"type": "string", "minLength": 1},
+                "categoryId": {"type": "string", "minLength": 1},
+                "content": {"type": "object"},
+                "draftId": {"type": "string", "minLength": 1},
+                "reviewer": {"type": "string", "minLength": 1},
+                "reviewReason": {"type": "string", "minLength": 1},
+            },
+            "required": ["action"], "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": False, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
+    },
+    {
+        "name": "knowledge_draft_confirm",
+        "title": "确认开发指导草稿",
+        "description": "按草稿 ID 和正文哈希确认分类目录或开发指导。",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "projectPath": {"type": "string", "minLength": 1},
+                "draftId": {"type": "string", "minLength": 1},
+                "contentHash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+                "reviewer": {"type": "string", "minLength": 1},
+            },
+            "required": ["draftId", "contentHash", "reviewer"], "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": False, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
+    },
+    {
+        "name": "knowledge_changes",
+        "title": "读取开发指导变化事实包",
+        "description": "比较已处理基线与 CodeGraph 当前快照，返回变化范围和相关指导。",
+        "inputSchema": {
+            "type": "object",
+            "properties": {"projectPath": {"type": "string", "minLength": 1}},
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
+    },
+    {
+        "name": "knowledge_update_submit",
+        "title": "提交开发指导增量更新",
+        "description": "提交事实、指导或分类级更新；需要审核的更新只生成草稿。",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "projectPath": {"type": "string", "minLength": 1},
+                "changeId": {"type": "string", "minLength": 1},
+                "level": {"enum": ["fact", "guidance", "category"]},
+                "categoryId": {"type": "string", "minLength": 1},
+                "content": {"type": "object"},
+                "evidence": {"type": "array", "items": {"type": "object"}},
+            },
+            "required": ["changeId", "level"], "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": False, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
+    },
+]
+
+TOOLS.extend(WORKFLOW_TOOLS)
+
+
 class MCPServer:
     def __init__(self, project: str | Path = ".", input_stream: TextIO | None = None, output_stream: TextIO | None = None):
         self.project = Path(project)
@@ -135,7 +248,8 @@ class MCPServer:
 
     def _call(self, name: str, arguments: dict[str, Any]) -> dict[str, Any]:
         project_path = arguments.get("projectPath")
-        api = KnowledgeAPI(project_path) if project_path else self.api
+        project = Path(project_path).resolve() if project_path else self.project.resolve()
+        api = KnowledgeAPI(project) if project_path else self.api
         if name == "knowledge_context":
             return api.context(str(arguments["task"]), arguments.get("maxTokens"))
         if name == "knowledge_search":
@@ -146,6 +260,57 @@ class MCPServer:
             return api.impact(arguments.get("files"), arguments.get("symbols"))
         if name == "knowledge_status":
             return api.status()
+        if name == "knowledge_initialization_start":
+            from .initialization import InitializationWorkflow
+            return InitializationWorkflow(project).start()
+        if name == "knowledge_initialization_next":
+            from .initialization import InitializationWorkflow
+            return InitializationWorkflow(project).next_batch(str(arguments["runId"]))
+        if name == "knowledge_initialization_submit":
+            from .initialization import InitializationWorkflow
+            return InitializationWorkflow(project).submit_batch(
+                str(arguments["runId"]), str(arguments["batchId"]),
+                str(arguments["snapshotId"]), list(arguments["candidates"]),
+                error=arguments.get("error"),
+            )
+        if name == "knowledge_draft_save":
+            from .guidance_workflow import GuidanceWorkflow
+            workflow = GuidanceWorkflow(project)
+            action = arguments["action"]
+            if action == "save":
+                for field in ("kind", "runId", "content"):
+                    if field not in arguments:
+                        raise ValueError(f"action=save 缺少字段：{field}")
+                return workflow.save_draft(
+                    str(arguments["kind"]), str(arguments["runId"]),
+                    dict(arguments["content"]), arguments.get("categoryId"),
+                )
+            if action == "reject":
+                for field in ("draftId", "reviewer", "reviewReason"):
+                    if field not in arguments:
+                        raise ValueError(f"action=reject 缺少字段：{field}")
+                return workflow.reject_draft(
+                    str(arguments["draftId"]), str(arguments["reviewer"]),
+                    str(arguments["reviewReason"]),
+                )
+            raise ValueError(f"不支持的 action：{action}")
+        if name == "knowledge_draft_confirm":
+            from .guidance_workflow import GuidanceWorkflow
+            return GuidanceWorkflow(project).confirm_draft(
+                str(arguments["draftId"]), str(arguments["contentHash"]),
+                str(arguments["reviewer"]),
+            )
+        if name == "knowledge_changes":
+            from .incremental import IncrementalWorkflow
+            return IncrementalWorkflow(project).changes()
+        if name == "knowledge_update_submit":
+            from .incremental import IncrementalWorkflow
+            return IncrementalWorkflow(project).submit_update(
+                str(arguments["changeId"]), str(arguments["level"]),
+                category_id=arguments.get("categoryId"),
+                content=dict(arguments.get("content", {})),
+                evidence=list(arguments.get("evidence", [])),
+            )
         raise KeyError(f"unknown tool: {name}")
 
     @staticmethod

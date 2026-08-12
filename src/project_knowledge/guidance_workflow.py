@@ -46,9 +46,12 @@ class GuidanceWorkflow:
             elif kind == "guidance":
                 if not category_id:
                     raise ValueError("指导草稿必须指定 category_id")
-                category = next((item for item in guidance.list_categories(run_id) if item.category_id == category_id), None)
+                category = next((item for item in guidance.list_categories() if item.category_id == category_id), None)
                 if category is None:
                     raise KeyError(f"类别不存在：{category_id}")
+                category_run = guidance.get_run(category.run_id)
+                if category_run is None or category_run.project_root != run.project_root:
+                    raise ValueError("类别不属于当前项目")
                 complete = self._validate_guide(content, run.snapshot_id)
                 filename = f"{self._safe_name(category.name)}-开发指导-待审核.md"
             else:
@@ -105,14 +108,20 @@ class GuidanceWorkflow:
             if draft.kind == "category_catalog":
                 formal = self.root / ".project-kb" / "功能分类目录.md"
                 with store.transaction():
+                    existing_categories = {item.category_id: item for item in guidance.list_categories()}
                     for item in draft.payload["categories"]:
-                        guidance.save_category(self._category_from(item, draft.run_id, now))
+                        category = self._category_from(item, draft.run_id, now)
+                        existing = existing_categories.get(category.category_id)
+                        if existing is not None:
+                            category.run_id = existing.run_id
+                            category.created_at = existing.created_at
+                        guidance.save_category(category)
                     draft.status = "confirmed"
                     draft.payload["_formal_path"] = str(formal.resolve())
                     draft.confirmed_at = now
                     draft.updated_at = now
                     guidance.save_draft(draft)
-                    run.status = "categories_confirmed"
+                    run.status = "guidance_generation" if draft.payload.get("_change_id") else "categories_confirmed"
                     run.updated_at = now
                     guidance.create_run(run)
                     atomic_write(formal, disk_body)
@@ -138,7 +147,7 @@ class GuidanceWorkflow:
     def _confirm_guide(self, store: KnowledgeStore, guidance: GuidanceStore, draft: GuidanceDraft,
                        run: Any, body: str, now: str) -> dict[str, Any]:
         assert draft.category_id
-        category = next(item for item in guidance.list_categories(draft.run_id) if item.category_id == draft.category_id)
+        category = next(item for item in guidance.list_categories() if item.category_id == draft.category_id)
         number = max((item.version for item in guidance.list_versions(category.category_id)), default=0) + 1
         version_id = f"guide-{category.category_id}-v{number}"
         version = GuidanceVersion(
@@ -173,6 +182,7 @@ class GuidanceWorkflow:
                 run.status = "guidance_review" if remaining else "complete"
                 run.updated_at = now
                 guidance.create_run(run)
+                self._complete_linked_change(store, guidance, draft, now)
                 atomic_write(formal, body)
         except BaseException:
             if previous is None:
@@ -183,11 +193,27 @@ class GuidanceWorkflow:
         Path(draft.path).unlink(missing_ok=True)
         return {"status": "confirmed", "draft_id": draft.draft_id, "content_hash": draft.content_hash, "path": str(formal.resolve()), "version_id": version_id, "next_actions": ["通过 knowledge_get 或 knowledge_search 查询正式指导"]}
 
+    @staticmethod
+    def _complete_linked_change(store: KnowledgeStore, guidance: GuidanceStore,
+                                draft: GuidanceDraft, now: str) -> None:
+        change_id = draft.payload.get("_change_id")
+        if not change_id:
+            return
+        files = draft.payload.get("_snapshot_files")
+        head = draft.payload.get("_head_snapshot_id")
+        if not isinstance(files, dict) or not head:
+            raise ValueError("增量草稿缺少快照基线")
+        store.set_meta("guidance_snapshot", json.dumps({
+            "snapshot_id": head, "files": files,
+        }, ensure_ascii=False, sort_keys=True))
+        guidance.mark_change_processed(str(change_id), now)
+
     def _validate_categories(self, run_id: str, snapshot_id: str, categories: list[dict[str, Any]], guidance: GuidanceStore) -> bool:
         batches = guidance.list_batches(run_id)
-        covered = {path for batch in batches if batch.status == "completed" for path in batch.files}
-        complete = bool(not batches or all(batch.status == "completed" for batch in batches))
         hashes = self._snapshot_hashes(snapshot_id)
+        covered = {path for batch in batches if batch.status == "completed" for path in batch.files}
+        covered.update(hashes)
+        complete = bool(not batches or all(batch.status == "completed" for batch in batches))
         for item in categories:
             for key in ("category_id", "name", "purpose", "applies_to", "excludes", "samples", "evidence", "confidence", "unknowns"):
                 if key not in item:
