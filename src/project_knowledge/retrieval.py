@@ -70,8 +70,14 @@ class KnowledgeAPI:
                 result.pop("content", None)
                 result["status"] = "potentially_stale"
                 result["withheld"] = f"Content depends on pending source: {', '.join(pending_sources)}"
+            pending_draft = self._pending_guidance_draft(store, record)
+            if pending_draft:
+                result["status"] = "potentially_stale"
+                result["freshness"] = "potentially_stale"
+                result["draft_id"] = pending_draft["draft_id"]
+                result["draft_path"] = pending_draft["path"]
             result["requires_live_source"] = (
-                bool(pending_sources) or record.status != "fresh"
+                bool(pending_sources) or bool(pending_draft) or record.status != "fresh"
                 or record.confidence == "inferred" or record.ownership == "draft"
             )
             return result
@@ -83,7 +89,7 @@ class KnowledgeAPI:
             matches = store.search_knowledge(query, max(1, min(limit * 2, 100)), kinds, module)
             seen_ids = {record.id for record, _ in matches}
             for record in store.all_knowledge():
-                if record.id in seen_ids or record.kind != "feature-guide":
+                if record.id in seen_ids or record.kind not in {"feature-guide", "development-guide"}:
                     continue
                 if kinds and record.kind not in kinds:
                     continue
@@ -98,7 +104,7 @@ class KnowledgeAPI:
                 score = text_score + CONFIDENCE_WEIGHT.get(record.confidence, 0) + FRESHNESS_WEIGHT.get(record.status, -1)
                 if module and module in record.tags:
                     score += 0.5
-                if record.kind == "feature-guide":
+                if record.kind in {"feature-guide", "development-guide"}:
                     score += 2.0
                 ranked.append((record, score, text_score))
             ranked.sort(key=lambda item: (-item[1], item[0].id))
@@ -110,16 +116,18 @@ class KnowledgeAPI:
                     if pending_sources else self._summary(record.content)
                 )
                 breakdown = self._score_breakdown(record, text_score, module)
+                pending_draft = self._pending_guidance_draft(store, record)
                 items.append({
                     "id": record.id, "title": record.title, "kind": record.kind, "path": record.path,
                     "ownership": record.ownership, "confidence": record.confidence,
-                    "freshness": "potentially_stale" if pending_sources else record.status,
+                    "freshness": "potentially_stale" if pending_sources or pending_draft else record.status,
+                    **({"draft_id": pending_draft["draft_id"], "draft_path": pending_draft["path"]} if pending_draft else {}),
                     "score": round(score, 4), "summary": summary,
                     "text_match": round(text_score, 4), "score_breakdown": breakdown,
                     "why_selected": self._why_selected(record, breakdown),
                     "sources": [source.to_dict() for source in record.sources],
                     "requires_live_source": (
-                        bool(pending_sources) or record.status != "fresh"
+                        bool(pending_sources) or bool(pending_draft) or record.status != "fresh"
                         or record.confidence == "inferred" or record.ownership == "draft"
                     ),
                 })
@@ -377,6 +385,20 @@ class KnowledgeAPI:
         return trim_to_tokens(excerpt, budget)
 
     @staticmethod
+    def _pending_guidance_draft(store: KnowledgeStore, record: KnowledgeRecord) -> dict[str, str] | None:
+        if record.kind != "development-guide" or not record.id.startswith("guide."):
+            return None
+        category_id = record.id.split(".", 1)[1]
+        rows = store.rows(
+            "SELECT draft_id, path FROM guidance_drafts "
+            "WHERE category_id=? AND kind='guidance' "
+            "AND status IN ('incomplete', 'awaiting_confirmation') "
+            "ORDER BY updated_at DESC, draft_id DESC LIMIT 1",
+            [category_id],
+        )
+        return rows[0] if rows else None
+
+    @staticmethod
     def _summary(content: str, limit: int = 480) -> str:
         clean = re.sub(r"<!--.*?-->", "", content, flags=re.DOTALL)
         clean = re.sub(r"\s+", " ", clean).strip()
@@ -386,14 +408,14 @@ class KnowledgeAPI:
     def _score_breakdown(record: KnowledgeRecord, text_score: float, module: str | None) -> dict[str, float]:
         confidence = CONFIDENCE_WEIGHT.get(record.confidence, 0)
         freshness = FRESHNESS_WEIGHT.get(record.status, -1)
-        kind_boost = 2.0 if record.kind == "feature-guide" else 0.0
+        kind_boost = 2.0 if record.kind in {"feature-guide", "development-guide"} else 0.0
         module_boost = 0.5 if module and module in record.tags else 0.0
         return {"text_match": round(text_score, 4), "confidence": confidence, "freshness": freshness, "kind_boost": kind_boost, "module_boost": module_boost, "total": round(text_score + confidence + freshness + kind_boost + module_boost, 4)}
 
     @staticmethod
     def _why_selected(record: KnowledgeRecord, breakdown: dict[str, float]) -> str:
         reasons = [f"文本匹配 {breakdown['text_match']:.2f}", f"可信度 {record.confidence}"]
-        if record.kind == "feature-guide": reasons.append("Feature Guide 优先")
+        if record.kind in {"feature-guide", "development-guide"}: reasons.append("Feature Guide 优先")
         if record.status != "fresh": reasons.append(f"知识状态 {record.status}，需复核")
         return "；".join(reasons) + "。"
 
