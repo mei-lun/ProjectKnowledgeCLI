@@ -4,7 +4,7 @@ PKS 是本地优先的项目级知识库：复用 CodeGraph 获取代码事实�
 
 | 项目 | 当前状态 |
 | --- | --- |
-| 版本 | `0.1.20` |
+| 版本 | `0.1.21` |
 | 环境 | Python 3.11+；默认本地、禁网、无遥测 |
 | 代码事实 | CodeGraph 1.5 公共 CLI/API，不读私有数据库 |
 | 知识目录 | PKS 产物统一在 `.project-kb/` |
@@ -115,7 +115,7 @@ project-kb status /path/to/repository
 project-kb mcp --project /path/to/repository
 ```
 
-0.1.21 计划中的“CodeGraph 更新事实，MCP AI 客户端自动发现类别、生成可审核指导并确认入库”尚未实现，不能把上述命令理解为新开发指导工作流已经可用。`watch` 仍为旧兼容命令，但不再是推荐流程，也不属于下一版本架构。
+0.1.22 计划中的“CodeGraph 更新事实，MCP AI 客户端自动发现类别、生成可审核指导并确认入库”尚未实现，不能把上述命令理解为新开发指导工作流已经可用。`watch` 仍为旧兼容命令，但不再是推荐流程，也不属于下一版本架构。
 
 ## 常用入口
 
@@ -132,9 +132,9 @@ project-kb mcp --project /path/to/repository
 
 | 限制 | 后续 |
 | --- | --- |
-| 三类指导尚未注册为 KnowledgeRecord，MCP 召回未验收 | `0.1.21` P0 |
-| 指导刷新目前只对 gardenserver 启用 | `0.1.21` P0 |
-| 第二层仍偏事实罗列，步骤/不变量/测试/回滚不足 | `0.1.21` P0 |
+| 三类指导尚未注册为 KnowledgeRecord，MCP 召回未验收 | `0.1.22` P0 |
+| 指导刷新目前只对 gardenserver 启用 | `0.1.22` P0 |
+| 第二层仍偏事实罗列，步骤/不变量/测试/回滚不足 | `0.1.22` P0 |
 | `watch` 属于旧兼容流程，不是下一版本的自动更新方案 | 由 CodeGraph 更新事实，AI 客户端在 MCP 参与时增量处理 |
 | CodeGraph 必须使用独立 `.codegraph/` | 上游 1.5 限制 |
 | Lua 动态调用可能漏边 | 未来运行时证据 |
@@ -151,7 +151,7 @@ python3 scripts/bump_version.py "本次变更的中文说明"
 
 | 文档 | 用途 |
 | --- | --- |
-| [下一版本计划](docs/next-version-plan.md) | `0.1.21` 确定范围和验收 |
+| [下一版本计划](docs/next-version-plan.md) | `0.1.22` 确定范围和验收 |
 | [通用指导设计规格](docs/superpowers/specs/2026-08-12-ai-client-development-guidance-design.md) | MCP AI 客户端、两阶段审核与增量分级设计 |
 | [未来特性](docs/future-features.md) | 非承诺候选能力和前置条件 |
 | [需求审计](docs/project-knowledge-system-audit.md) | 当前复核与历史追踪 |

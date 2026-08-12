@@ -1,6 +1,6 @@
-# 下一功能版本计划：0.1.21
+# 下一功能版本计划：0.1.22
 
-> 当前文档与版本为 0.1.20；0.1.21 实现已经逐节确认的 MCP AI 客户端驱动通用开发指导闭环。完整设计见[设计规格](superpowers/specs/2026-08-12-ai-client-development-guidance-design.md)。
+> 当前文档与版本为 0.1.21；0.1.22 实现已经逐节确认的 MCP AI 客户端驱动通用开发指导闭环。完整设计见[设计规格](superpowers/specs/2026-08-12-ai-client-development-guidance-design.md)。
 
 ## 版本目标
 
@@ -53,7 +53,7 @@
 
 每项先补正负测试或评测样本，再实现行为。字段、配置、空接口或静态样例不能作为完成证据。
 
-## 明确不进入 0.1.21
+## 明确不进入 0.1.22
 
 - PKS 自建 watcher、代码图或索引；
 - 内置或联网 ModelProvider；
