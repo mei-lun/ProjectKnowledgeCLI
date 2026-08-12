@@ -11,7 +11,7 @@ class DocumentationRoadmapTests(unittest.TestCase):
         cls.readme = (cls.root / "README.md").read_text(encoding="utf-8")
 
     def test_readme_reports_current_release_and_codegraph_state(self) -> None:
-        self.assertIn("0.1.17", self.readme)
+        self.assertIn("0.1.18", self.readme)
         self.assertIn("CodeGraph", self.readme)
         self.assertIn("已完成", self.readme)
         self.assertIn(".project-kb/generated", self.readme)
@@ -26,7 +26,7 @@ class DocumentationRoadmapTests(unittest.TestCase):
     def test_next_version_plan_is_scoped_and_testable(self) -> None:
         path = self.root / "docs" / "next-version-plan.md"
         text = path.read_text(encoding="utf-8")
-        self.assertIn("0.1.18", text)
+        self.assertIn("0.1.19", text)
         for requirement in ("NV-KNOW-001", "NV-SYNC-001", "NV-ADAPTER-001", "NV-GUIDE-001"):
             self.assertIn(requirement, text)
         self.assertIn("验收标准", text)

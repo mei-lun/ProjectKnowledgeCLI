@@ -1,0 +1,33 @@
+{
+  "affected_knowledge": [
+    "curated.conventions",
+    "generated.module.plugins",
+    "generated.module.project_knowledge",
+    "generated.module.tests",
+    "generated.project-map",
+    "generated.test-map"
+  ],
+  "base_commit": "bd07f2f7df16f1beadb7bb977b41eec0fbf5e129",
+  "changed_files": [
+    "plugins/project-knowledge/.codex-plugin/plugin.json",
+    "src/project_knowledge/__init__.py",
+    "tests/test_documentation_roadmap.py"
+  ],
+  "changed_symbols": [
+    "src/project_knowledge/__init__.py::<module>",
+    "tests/test_documentation_roadmap.py::<module>",
+    "tests/test_documentation_roadmap.py::DocumentationRoadmapTests",
+    "tests/test_documentation_roadmap.py::DocumentationRoadmapTests.setUpClass",
+    "tests/test_documentation_roadmap.py::DocumentationRoadmapTests.test_readme_reports_current_release_and_codegraph_state",
+    "tests/test_documentation_roadmap.py::DocumentationRoadmapTests.test_readme_links_current_next_and_future_documents",
+    "tests/test_documentation_roadmap.py::DocumentationRoadmapTests.test_next_version_plan_is_scoped_and_testable",
+    "tests/test_documentation_roadmap.py::DocumentationRoadmapTests.test_future_features_distinguishes_candidates_from_commitments"
+  ],
+  "changeset_id": "change-20260812-161349",
+  "created_at": "2026-08-12T16:13:49+08:00",
+  "head_commit": "9a0f84be7e4e44018a8845ae25db9810986644c6",
+  "queue_id": "sq-5784a60a7be24d5b",
+  "schema_version": 1,
+  "status": "awaiting_semantic_generation",
+  "task_summary": "manual synchronization"
+}
