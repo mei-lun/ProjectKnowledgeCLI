@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import shlex
@@ -148,6 +149,40 @@ class CodeGraphClient:
     def files(self) -> list[dict[str, Any]]:
         value = self._run("files", ["-p", _host_path(self.project)], json_output=True)
         return value if isinstance(value, list) else list(value.get("files", [])) if isinstance(value, dict) else []
+
+    def snapshot(self) -> dict[str, Any]:
+        """Return a deterministic snapshot using only CodeGraph public output."""
+        normalized: list[dict[str, Any]] = []
+        for item in self.files():
+            path = str(item.get("path", "")).replace("\\", "/").lstrip("./")
+            if not path:
+                continue
+            language = str(item.get("language", "unknown")).strip().lower() or "unknown"
+            content_hash = str(item.get("contentHash", item.get("hash", ""))).strip()
+            if not content_hash:
+                source = (self.project / path).resolve()
+                try:
+                    source.relative_to(self.project)
+                except ValueError as error:
+                    raise CodeGraphError(f"CodeGraph 文件路径越界：{path}") from error
+                try:
+                    content_hash = "sha256:" + hashlib.sha256(source.read_bytes()).hexdigest()
+                except OSError as error:
+                    raise CodeGraphError(f"无法计算文件哈希：{path}") from error
+            normalized.append({
+                "path": path,
+                "language": language,
+                "content_hash": content_hash,
+                "module": str(item.get("module", "")).strip(),
+                "symbols": list(item.get("symbols", [])) if isinstance(item.get("symbols", []), list) else [],
+            })
+        normalized.sort(key=lambda value: (value["path"], value["language"]))
+        identity = [
+            {"path": item["path"], "language": item["language"], "content_hash": item["content_hash"]}
+            for item in normalized
+        ]
+        encoded = json.dumps(identity, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        return {"snapshot_id": hashlib.sha256(encoded).hexdigest(), "files": normalized}
 
     def query(self, search: str, *, limit: int = 20, kind: str | None = None) -> list[dict[str, Any]]:
         args = [search, "-p", _host_path(self.project), "-l", str(limit)]
