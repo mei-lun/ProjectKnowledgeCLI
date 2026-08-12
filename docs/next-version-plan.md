@@ -1,98 +1,73 @@
-# 下一版本计划：0.1.19
+# 下一功能版本计划：0.1.20
 
-> 本文件是下一版本唯一有效的近期实施清单。当前发布版本为 `0.1.18`。
+> 当前文档与版本为 0.1.19；0.1.20 实现已经逐节确认的 MCP AI 客户端驱动通用开发指导闭环。完整设计见[设计规格](superpowers/specs/2026-08-12-ai-client-development-guidance-design.md)。
 
 ## 版本目标
 
-将三类开发指导从“已生成 Markdown”升级为“可由 MCP 稳定检索、随代码变化更新、可由不同项目适配器生成的知识记录”。
+由接入 MCP 的 AI 客户端基于 CodeGraph 事实自动发现功能类别，通过可点击中文 Markdown 与用户完成两阶段审核，将确认后的两层开发指导写入 KnowledgeStore；代码变化后仅处理变化代码及必要影响范围。
 
-| 项目 | 约束 |
-| --- | --- |
-| 事实来源 | CodeGraph 公共 CLI/API 和实时源码 |
-| 首个验收 | gardenserver 隔离 fixture，不修改真实业务源码 |
-| 默认语言 | 中文 |
-| 版本策略 | 全部完成后只递增一次补丁版本 |
+## 需求清单
 
-## 计划需求
-
-| ID | 优先级 | 功能 | 验收标准 | 估算 |
+| ID | 优先级 | 功能 | 核心验收 | 估算 |
 | --- | --- | --- | --- | ---: |
-| NV-KNOW-001 | P0 | 指导注册到 KnowledgeStore | search/get/context 能返回三类指导及来源、新鲜度和层级 | 1～2 人日 |
-| NV-SYNC-001 | P0 | 真实增量闭环 | fixture 修改/新增/删除后，CodeGraph 和对应指导正确更新 | 1～2 人日 |
-| NV-ADAPTER-001 | P1 | 项目适配器注册 | Service 不再判断项目名；generic/gardenserver/unknown 路径明确 | 2～3 人日 |
-| NV-GUIDE-001 | P1 | 结构化指导增强 | 输出入口、步骤、不变量、扩展点、配置、测试、回滚和 unknowns | 3～5 人日 |
+| NV-MODEL-001 | P0 | 通用类别、指导和审核状态模型 | 无项目名和三类示例硬编码；正式状态与历史进入 KnowledgeStore | 1～2 人日 |
+| NV-INIT-001 | P0 | 首次全项目分批初始化 | 全项目覆盖、分批分析、简单断点继续、覆盖率可见 | 2～3 人日 |
+| NV-MCP-001 | P0 | MCP AI 客户端工作流 | 分析、提交、草稿、哈希确认和查询闭环 | 2～3 人日 |
+| NV-INCR-001 | P0 | CodeGraph 增量与三级更新 | 后续不重扫源码；一级自动、二级指导审核、三级分类审核 | 2～3 人日 |
+| NV-VERIFY-001 | P0 | 通用测试与真实项目验收 | 临时项目集成测试和 gardenserver 真实审核通过 | 2～3 人日 |
 
-预计总工作量：`7～12 人日`。P0 可独立交付，P1 不得破坏本地建库和同步。
+预计总工作量：9～14 人日。
 
-## 验收标准
+## 验收标准与核心约束
 
-### NV-KNOW-001
-
-| 类型 | 验收 |
+| 项目 | 已确认规则 |
 | --- | --- |
-| 正向 | `knowledge_search("普通活动开发")` 返回活动指导 |
-| 正向 | `knowledge_context("开发周年活动")` 优先返回活动方法论和项目适配 |
-| 正向 | `knowledge_get` 返回两层内容、来源和新鲜度 |
-| 负向 | 来源变化但未同步时不得返回 fresh/verified |
-| 兼容 | `.project-kb/generated` 不反向污染 CodeGraph |
+| AI 位置 | 分析和沟通由 MCP AI 客户端负责，PKS 不调用内置 ModelProvider |
+| 事实来源 | CodeGraph 公共 CLI/API；PKS 不重写 CodeGraph |
+| 首次初始化 | 全项目覆盖、分层分批、简单断点继续 |
+| 审核顺序 | 先确认分类目录，再逐份确认两层指导 |
+| 审核载体 | 必须生成可点击中文 Markdown，不能只在聊天中描述 |
+| 正式来源 | KnowledgeStore 唯一正式；Markdown 是审核和阅读投影 |
+| 生成位置 | 新文件全部直接位于目标项目 .project-kb 根目录 |
+| 自动更新 | CodeGraph 更新事实；下次 MCP AI 客户端参与时处理变化 |
+| 增量范围 | 可比较全项目元数据，但只分析变化代码和必要上下文 |
+| 更新分级 | 一级自动；二级指导和三级分类必须审核 |
+| 确认安全 | 草稿 ID + 正文哈希；入库正文等于用户审核正文 |
+| 失败安全 | 不覆盖正式指导、不推进快照、不丢失变化 |
 
-### NV-SYNC-001
+## MCP 接口
 
-| 场景 | 验收 |
-| --- | --- |
-| 修改 | 修改登录/活动/玩家样本后刷新受影响类别 |
-| 新增 | 新 Lua 样本进入证据和指导 |
-| 删除 | 旧引用消失或标记 stale |
-| 恢复 | fixture 恢复后 pending 为 0、知识 fresh |
-| 失败 | CodeGraph/渲染失败时保留上一份有效指导并记日志 |
+新增 knowledge_initialization_start、knowledge_initialization_next、knowledge_initialization_submit、knowledge_draft_save、knowledge_draft_confirm、knowledge_changes、knowledge_update_submit。
 
-### NV-ADAPTER-001
-
-| 类型 | 验收 |
-| --- | --- |
-| 配置 | `.project-kb.yml` 可声明适配器 ID，默认 generic |
-| 注册 | gardenserver 规则通过注册表加载 |
-| 降级 | generic 仍生成基础事实，不生成项目伪事实 |
-| 失败 | 未知适配器明确报错 |
-| 测试 | generic、gardenserver、unknown 均有正负测试 |
-
-### NV-GUIDE-001
-
-| 区块 | 最低要求 |
-| --- | --- |
-| 第一层 | 适用范围、开发步骤、检查项、通用不变量 |
-| 第二层 | 入口、位置、调用流程、数据/配置、扩展点 |
-| 验证 | 测试、观测点和失败表现 |
-| 发布 | 兼容性、开关和回滚 |
-| 证据 | 确定性陈述关联文件、符号或行号 |
-| 边界 | 未知内容进入 unknowns |
+扩展现有 knowledge_status/context/search/get/impact，返回覆盖率、待处理变化、正式指导新鲜度和待审核文件路径。
 
 ## 实施顺序
 
 | 顺序 | 需求 | 完成标志 |
 | ---: | --- | --- |
-| 1 | NV-KNOW-001 | 三类指导通过 MCP 可检索 |
-| 2 | NV-SYNC-001 | fixture 增量端到端测试通过 |
-| 3 | NV-ADAPTER-001 | 移除 Service 中项目名判断 |
-| 4 | NV-GUIDE-001 | 三类指导满足统一结构 |
+| 1 | NV-MODEL-001 | Schema、状态流转、KnowledgeStore 和哈希规则测试通过 |
+| 2 | NV-INIT-001 | 临时项目可分批扫描、恢复并生成分类草稿 |
+| 3 | NV-MCP-001 | AI 客户端可完成两阶段审核并精确入库 |
+| 4 | NV-INCR-001 | 增删改代码触发正确等级且不重扫源码 |
+| 5 | NV-VERIFY-001 | gardenserver 可见草稿和真实增量验收通过 |
+
+每项先补正负测试或评测样本，再实现行为。字段、配置、空接口或静态样例不能作为完成证据。
+
+## 明确不进入 0.1.20
+
+- PKS 自建 watcher、代码图或索引；
+- 内置或联网 ModelProvider；
+- 并行扫描、后台队列、复杂自动重试；
+- Web 审核界面和自动确认；
+- 跨项目知识中心、向量检索、Lua 运行时跟踪；
+- 旧 .project-kb 子目录的全面迁移或删除。
 
 ## 完成定义
 
-- 正向、负向和全量回归测试通过；
-- 不修改 gardenserver 真实业务源码；
-- README、审计、CHANGELOG、版本和 generated knowledge 同步；
-- curated/ADR 是否需要人工审核有结论；
-- 不用配置占位符、空接口或静态样例宣称完成。
-
-## 明确不进入 0.1.19
-
-| 功能 | 原因 |
-| --- | --- |
-| 共享 daemon、开机自启 | 复杂度高，不影响当前闭环 |
-| 向量检索 | 先保证指导召回和来源正确 |
-| 生产云模型 | 需要独立授权、隐私和成本决策 |
-| PR 多人治理 | 当前本地审核足够 |
-| Lua 运行时跟踪 | 需要运行环境和采集协议 |
-| 跨仓库知识中心、UI | 单项目指导 Schema 尚未稳定 |
+- 设计规格第 12 节全部满足；
+- 全量自动化测试通过；
+- gardenserver 只用于验证，不修改业务源码；
+- README、审计、CHANGELOG、版本和知识同步；
+- 明确报告 generated knowledge 是否同步以及 curated/ADR 是否需要复核。
 
 长期候选见[未来特性](future-features.md)，不得直接从候选清单开始开发。

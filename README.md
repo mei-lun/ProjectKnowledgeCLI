@@ -4,7 +4,7 @@ PKS 是本地优先的项目级知识库：复用 CodeGraph 获取代码事实�
 
 | 项目 | 当前状态 |
 | --- | --- |
-| 版本 | `0.1.18` |
+| 版本 | `0.1.19` |
 | 环境 | Python 3.11+；默认本地、禁网、无遥测 |
 | 代码事实 | CodeGraph 1.5 公共 CLI/API，不读私有数据库 |
 | 知识目录 | PKS 产物统一在 `.project-kb/` |
@@ -128,9 +128,9 @@ project-kb mcp --project /path/to/repository
 
 | 限制 | 后续 |
 | --- | --- |
-| 三类指导尚未注册为 KnowledgeRecord，MCP 召回未验收 | `0.1.19` P0 |
-| 指导刷新目前只对 gardenserver 启用 | `0.1.19` P1 |
-| 第二层仍偏事实罗列，步骤/不变量/测试/回滚不足 | `0.1.19` P1 |
+| 三类指导尚未注册为 KnowledgeRecord，MCP 召回未验收 | `0.1.20` P0 |
+| 指导刷新目前只对 gardenserver 启用 | `0.1.20` P0 |
+| 第二层仍偏事实罗列，步骤/不变量/测试/回滚不足 | `0.1.20` P0 |
 | watcher 大项目轮询较慢 | 未来性能候选 |
 | CodeGraph 必须使用独立 `.codegraph/` | 上游 1.5 限制 |
 | Lua 动态调用可能漏边 | 未来运行时证据 |
@@ -147,7 +147,8 @@ python3 scripts/bump_version.py "本次变更的中文说明"
 
 | 文档 | 用途 |
 | --- | --- |
-| [下一版本计划](docs/next-version-plan.md) | `0.1.19` 确定范围和验收 |
+| [下一版本计划](docs/next-version-plan.md) | `0.1.20` 确定范围和验收 |
+| [通用指导设计规格](docs/superpowers/specs/2026-08-12-ai-client-development-guidance-design.md) | MCP AI 客户端、两阶段审核与增量分级设计 |
 | [未来特性](docs/future-features.md) | 非承诺候选能力和前置条件 |
 | [需求审计](docs/project-knowledge-system-audit.md) | 当前复核与历史追踪 |
 | [系统设计](docs/project-knowledge-system-design.md) | 架构和生命周期 |
