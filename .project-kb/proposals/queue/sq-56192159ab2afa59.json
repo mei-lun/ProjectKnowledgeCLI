@@ -9,7 +9,7 @@
     "generated.project-map",
     "generated.test-map"
   ],
-  "base_commit": "a8bc6b87bf872364b337eb4393b2a6b83d1c25db",
+  "base_commit": "f6f4a167878974e84abe51e77034852717d6048a",
   "changed_files": [
     "plugins/project-knowledge/.codex-plugin/plugin.json",
     "src/project_knowledge/__init__.py",
@@ -60,10 +60,10 @@
     "tests/test_integration.py::IntegrationTests.test_large_module_reports_symbol_and_relation_truncation",
     "tests/test_integration.py::IntegrationTests.test_doctor_and_check_report_unwired_configuration"
   ],
-  "changeset_id": "change-20260814-035007",
-  "created_at": "2026-08-14T03:50:07+08:00",
-  "head_commit": "f6f4a167878974e84abe51e77034852717d6048a",
-  "queue_id": "sq-624067cee9c019af",
+  "changeset_id": "change-20260814-035549",
+  "created_at": "2026-08-14T03:55:49+08:00",
+  "head_commit": "9fb6ca94f55fe44ef49b2738102b791fc6292dcb",
+  "queue_id": "sq-56192159ab2afa59",
   "schema_version": 1,
   "status": "awaiting_semantic_generation",
   "task_summary": "manual synchronization"
