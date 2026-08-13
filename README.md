@@ -1,156 +1,133 @@
 # Project Knowledge CLI
 
-PKS 是本地优先的项目级知识库：复用 CodeGraph 获取代码事实，维护可重建索引，并生成带来源的中文项目知识与类别级开发指导。
+Project Knowledge CLI（PKS）是本地优先的项目知识工具。它从代码索引中获取事实，维护带来源和新鲜度状态的知识记录，并通过 MCP 为 AI 客户端提供项目上下文、影响分析和可审核的开发指导。
 
-| 项目 | 当前状态 |
-| --- | --- |
-| 版本 | `0.1.22` |
-| 环境 | Python 3.11+；默认本地、禁网、无遥测 |
-| 代码事实 | CodeGraph 1.5 公共 CLI/API，不读私有数据库 |
-| 知识目录 | PKS 产物统一在 `.project-kb/` |
-| 验证项目 | gardenserver：1,295 文件，0 解析错误 |
+## 核心能力
 
-## 已完成能力
+- 初始化、增量同步和原子重建项目知识索引。
+- 查询项目上下文、知识记录、代码影响范围和健康状态。
+- 标记知识来源、可信度、新鲜度以及需要回查源码的内容。
+- 基于 CodeGraph 公共 CLI/API 获取文件、符号、调用关系和影响事实。
+- 通过 MCP 完成功能分类、轻量方法论和项目事实指导的生成与审核。
+- 将方法论和项目事实指导作为独立资产审核、版本化和查询。
+- 在代码变化后只处理变化文件及必要的影响范围。
 
-| 能力 | 状态 | 说明 |
-| --- | --- | --- |
-| 初始化、重建 | 已完成 | `init/rebuild` 建库并原子替换索引 |
-| 增量和自动同步 | 已完成基础版 | `sync/watch` 处理修改、新增和删除 |
-| 健康与新鲜度 | 已完成 | pending、stale、提交对齐、watcher 健康 |
-| CodeGraph Adapter | 已完成 | init、sync、查询、调用链、影响和测试影响接口 |
-| Lua/Skynet/zn 证据 | 已完成首版 | require、启动、RPC、消息、Avatar、配置规则 |
-| 两层开发指导 | 已完成实现 | 轻量方法论与项目事实指导分离，分别审核、版本化和渲染 |
-| 中文指导 | 已完成 | 普通活动、普通玩家功能、登录模块 |
-| MCP | 已完成 | context、search、get、impact、status，以及指导初始化、草稿审核和增量提交 |
-| 来源追踪 | 已完成基础版 | 文件、符号、行号和哈希，新鲜度可见 |
-| 语义草案与审核 | 已完成基础版 | EvidencePack、Feature Guide、Proposal、ADR 草案 |
-| 版本控制 | 已完成 | 单一版本源、补丁版本和中文 CHANGELOG |
+## 环境要求
 
-## 名称由来
+- Python 3.11 或更高版本。
+- Git，用于识别仓库、分支和提交状态。
+- 如启用 CodeGraph 引擎，需要可调用的 CodeGraph 公共 CLI。
+- 默认本地运行，不要求联网，不发送遥测。
 
-| 名称 | 含义 | 说明 |
-| --- | --- | --- |
-| PKS | Project Knowledge System | 项目知识系统的产品简称 |
-| `project-kb` | Project Knowledge Base | CLI 命令名；`kb` 是 Knowledge Base（知识库）的缩写 |
-| `.project-kb.yml` | Project Knowledge Base configuration | 项目根目录的配置文件 |
-| `.project-kb/` | Project Knowledge Base data | PKS 在项目中的本地数据与知识目录；前导点表示工具管理目录 |
+## 安装
 
-## 目录结构与用途
-
-### 项目根目录
-
-| 路径 | 用途 | 所有权/维护建议 |
-| --- | --- | --- |
-| `.project-kb.yml` | 项目名、索引引擎、扫描范围、知识路径、更新和 Provider 策略 | 用户配置；PKS 初始化创建，后续可人工维护 |
-| `.project-kb/` | 集中存放 PKS 的索引、状态、证据和知识产物 | PKS 主目录；不要整体手工删除，重建前先备份人工知识 |
-| `.codegraph/` | CodeGraph 1.5 的数据库和运行时文件 | CodeGraph 管理；不是 PKS 私有数据库，PKS 只调用公开 CLI |
-
-### `.project-kb/` 根文件
-
-| 路径 | 用途 | 所有权/维护建议 |
-| --- | --- | --- |
-| `index.db` | 文件、符号、关系和 KnowledgeRecord 的 SQLite 兼容索引 | PKS 自动重建，不手工编辑 |
-| `manifest.json` | 文件、知识、来源哈希、新鲜度和生成元数据清单 | PKS 自动更新，不手工编辑 |
-| `index.md` | 自动、草案、人工和决策知识的中文索引 | PKS 自动生成 |
-| `mcp.json` | 当前项目的 MCP 启动配置 | PKS 安装/初始化维护 |
-| `state.json` | watcher 状态、PID、heartbeat、错误和协调信息 | PKS 运行时维护 |
-
-### `.project-kb/` 子目录
-
-| 路径 | 用途 | 所有权/维护建议 |
-| --- | --- | --- |
-| `generated/` | 项目地图、入口、测试地图和审核后的中文指导 | PKS 自动覆盖，不手工修改 |
-| `evidence/` | CodeGraph 和源码规则采集的结构化事实证据 | PKS 自动生成；排查指导来源时读取 |
-| `methodology/` | 轻量、可迁移的方法论草稿与正式版本 | 独立审核；由用户沟通后逐步完善 |
-| `guides/` | 第二层当前项目事实指导 | 随代码证据增量更新；引用方法论但不嵌入方法论正文 |
-| `drafts/` | 模型或工具生成、尚未人工确认的语义草案 | PKS 写入；审核后通过 Proposal 提升 |
-| `curated/` | 人工维护和已审核的项目知识 | 用户/团队维护；PKS 不静默覆盖人工正文 |
-| `decisions/` | ADR 等架构决策文档 | 用户/团队审核；PKS 只允许受控追加草案 |
-| `events/` | 每次同步产生的 ChangeSet 事件 | PKS 自动写入，用于追踪代码和知识影响 |
-| `proposals/` | 可审核的知识更新提案及状态 | PKS 创建，人工 apply/reject |
-| `proposals/queue/` | 代码变化触发的语义更新等待队列 | PKS 自动维护，等待生成或关联 Proposal |
-| `logs/` | watcher、指导刷新和服务错误日志 | PKS 自动追加，故障排查使用 |
-| `schemas/` | KnowledgeRecord、ChangeSet、Proposal 等 JSON Schema | PKS 随版本生成，不手工编辑 |
-| `state/` | 锁、租约或后续运行状态辅助文件的目录 | PKS 运行时使用；当前主要为预留与兼容 |
-| `codegraph/` | PKS 为 CodeGraph 适配预留的兼容目录 | 当前 CodeGraph 1.5 实际仍使用项目根 `.codegraph/` |
-
-### 目录维护约定
-
-> 当前采用人工维护方案。新增、删除、改名目录，或改变目录职责时，必须在同一批变更中同步更新本节、版本号和 CHANGELOG。现阶段没有自动检查 README 是否遗漏新目录。
-
-| 变更 | 必须同步处理 |
-| --- | --- |
-| 新增目录或根文件 | 在对应表格新增路径、用途和所有权 |
-| 删除或改名 | 更新表格、配置示例、测试和迁移说明 |
-| 职责变化 | 更新用途、允许人工修改范围和失败恢复建议 |
-| CodeGraph 目录规则变化 | 同时更新 `.codegraph/` 与 `.project-kb/codegraph/` 说明 |
-
-## 生成内容
-
-| 路径 | 内容 |
-| --- | --- |
-| `.project-kb/index.db` | PKS 兼容索引和知识记录 |
-| `.project-kb/manifest.json` | 来源、新鲜度和知识清单 |
-| `.project-kb/generated/项目地图.md` | 项目结构概览 |
-| `.project-kb/generated/开发指导索引.md` | 指导入口 |
-| `.project-kb/generated/<类别>-方法论.md` | 审核后的轻量可迁移方法论 |
-| `.project-kb/generated/<类别>-项目事实指导.md` | 审核后的当前项目事实指导 |
-| `.codegraph/` | CodeGraph 1.5 要求的运行时索引 |
-
-## gardenserver 实测
-
-| PKS 文件/符号/关系 | 解析错误 | CodeGraph 文件/节点/边 | 待同步 |
-| ---: | ---: | ---: | ---: |
-| 1,295 / 11,101 / 54,857 | 0 | 1,296 / 17,550 / 44,169 | 0 |
-
-## 快速开始
-
-当前版本提供本地索引兼容流程，以及 MCP 驱动的类别发现、草稿审核和指导查询：
+在源码目录执行：
 
 ```bash
 python -m pip install -e .
+```
+
+安装后应能执行：
+
+```bash
+project-kb --version
+```
+
+如果终端找不到 `project-kb`，请将 Python 的 Scripts 目录加入 `PATH`；也可以使用 `python -m project_knowledge` 代替 `project-kb`。
+
+## 快速开始
+
+初始化项目并检查状态：
+
+```bash
 project-kb init /path/to/repository
 project-kb status /path/to/repository
+project-kb check /path/to/repository
+```
+
+启动 MCP 服务：
+
+```bash
 project-kb mcp --project /path/to/repository
 ```
 
-指导草稿通过 MCP 分析 CodeGraph 事实后生成；用户先确认分类目录，再分别审核方法论和项目事实指导。两类资产独立确认、独立版本化，项目代码变化只触发事实指导更新。`watch` 仍保留为旧兼容命令。
+接入 MCP 的 AI 客户端先读取状态和任务上下文，再基于 CodeGraph 事实分析功能分类。用户先审核分类目录，然后分别审核方法论和项目事实指导；两类资产不会相互隐式确认。
 
 ## 常用入口
 
-| 命令 | 当前用途 |
+| 命令 | 用途 |
 | --- | --- |
-| `init / sync / rebuild` | 旧版兼容的本地索引建库与显式同步 |
-| `status / check / doctor` | 查看当前索引与知识状态 |
-| `mcp` | 启动知识查询、指导分析、草稿提交/确认和增量状态工具 |
-| `watch` | 旧版 PKS 文件监听兼容命令；新架构不使用 |
-| `generate / feature-candidates` | 旧版语义草案和候选域流程 |
-| `propose / apply / reject` | 旧版受控知识提案流程 |
+| `init` | 初始化配置、索引、知识目录和 MCP 配置 |
+| `sync` | 同步修改、新增、删除及知识变化 |
+| `rebuild` | 原子重建本地索引并保留受控知识 |
+| `status` | 查看索引、知识新鲜度、覆盖率和待处理事项 |
+| `check` | 执行适合 CI 的健康检查 |
+| `doctor` | 检查 Python、SQLite、Git、引擎和项目配置 |
+| `install` / `uninstall` | 安装或移除工具拥有的客户端集成标记 |
+| `mcp` | 启动知识查询与开发指导工作流的 stdio MCP 服务 |
+| `evaluate` | 对检索数据集执行质量评测 |
 
-## 当前限制
+完整参数以命令帮助为准：
 
-| 限制 | 后续 |
-| --- | --- |
-| gardenserver 的 5 个业务类别仍有待用户确认的独立草稿 | 本批交付前置审核 |
-| 方法论初版保持轻量，需用户二次沟通后逐步完善 | 持续治理 |
-| `watch` 属于旧兼容流程，不是下一版本的自动更新方案 | 由 CodeGraph 更新事实，AI 客户端在 MCP 参与时增量处理 |
-| CodeGraph 必须使用独立 `.codegraph/` | 上游 1.5 限制 |
-| Lua 动态调用可能漏边 | 未来运行时证据 |
+```bash
+project-kb --help
+project-kb <command> --help
+```
+
+## MCP 工作流
+
+MCP 同时提供只读查询和受控写入工具：
+
+- 查询：`knowledge_status`、`knowledge_context`、`knowledge_search`、`knowledge_get`、`knowledge_impact`。
+- 初始化：分批读取稳定代码快照、提交候选分类并生成分类目录草稿。
+- 审核：保存、拒绝或通过“草稿 ID + 正文哈希”确认 Markdown 草稿。
+- 增量：比较已处理快照与当前 CodeGraph 快照，按事实、指导或分类级别提交更新。
+
+KnowledgeStore 是正式知识来源；Markdown 是可阅读、可审核的投影。未经用户确认的草稿不会覆盖正式版本，也不会推进已处理快照。
+
+## 项目文件
+
+| 路径 | 用途 | 维护方式 |
+| --- | --- | --- |
+| `.project-kb.yml` | 项目、引擎、扫描范围和知识路径配置 | 用户配置 |
+| `.project-kb/index.db` | 代码索引、KnowledgeRecord 和指导版本 | PKS 管理 |
+| `.project-kb/manifest.json` | 文件、来源、新鲜度和生成元数据 | PKS 管理 |
+| `.project-kb/mcp.json` | 项目 MCP 启动配置 | PKS 管理 |
+| `.project-kb/generated/` | 项目地图、入口、测试地图等生成知识 | PKS 覆盖 |
+| `.project-kb/curated/` | 人工维护并审核的项目知识 | 用户维护 |
+| `.project-kb/decisions/` | 架构决策记录 | 用户审核 |
+| `.project-kb/schemas/` | 运行时 JSON Schema | PKS 管理 |
+| `.codegraph/` | CodeGraph 自身的运行时索引 | CodeGraph 管理 |
+
+指导审核文件直接位于 `.project-kb/`：
+
+- `<类别>-方法论-待审核.md` / `<类别>-方法论.md`
+- `<类别>-项目事实指导-待审核.md` / `<类别>-项目事实指导.md`
+
+## 安全与一致性
+
+- PKS 只通过 CodeGraph 公共 CLI/API 获取代码事实，不读取其私有数据库。
+- 正式知识写入使用 Schema 校验、来源哈希和事务。
+- 人工维护的正文不会被生成流程静默覆盖。
+- 动态调用、反射和运行时依赖注入可能无法由静态索引完整识别，相关结论需要回查源码或运行时证据。
+- `.project-kb/` 与 `.codegraph/` 职责独立，不应手工混合或整体删除。
 
 ## 版本管理
 
-唯一版本源为 `src/project_knowledge/__init__.py`；同一批修改只递增一次：
+唯一版本源是 `src/project_knowledge/__init__.py`。每批修改在交付前执行一次：
 
 ```bash
-python3 scripts/bump_version.py "本次变更的中文说明"
+python scripts/bump_version.py "中文变更说明"
+python -m project_knowledge --version
 ```
 
-## 后续开发依据
+变更记录写入 [CHANGELOG.md](CHANGELOG.md)。
+
+## 参考文档
 
 | 文档 | 用途 |
 | --- | --- |
-| [下一版本计划](docs/next-version-plan.md) | `0.1.22` 确定范围和验收 |
-| [通用指导设计规格](docs/superpowers/specs/2026-08-12-ai-client-development-guidance-design.md) | MCP AI 客户端、两阶段审核与增量分级设计 |
-| [未来特性](docs/future-features.md) | 非承诺候选能力和前置条件 |
-| [需求审计](docs/project-knowledge-system-audit.md) | 当前复核与历史追踪 |
-| [系统设计](docs/project-knowledge-system-design.md) | 架构和生命周期 |
+| [兼容性矩阵](docs/compatibility-matrix.md) | 运行环境、配置、客户端和引擎兼容范围 |
+| [系统设计](docs/project-knowledge-system-design.md) | 架构、存储和知识生命周期 |
+| [需求审计](docs/project-knowledge-system-audit.md) | 需求、验收证据和历史复核记录 |
+| [评测指南](docs/evaluation-guide.md) | 检索质量数据集与评测方法 |

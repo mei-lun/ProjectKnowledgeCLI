@@ -38,10 +38,11 @@
 - `tests/test_codegraph.py::CodeGraphTests`：类，位于 `tests/test_codegraph.py:15`（可信度 1.00）
 - `tests/test_codegraph.py::CodeGraphTests._client`：方法，位于 `tests/test_codegraph.py:16`（可信度 1.00）
 - `tests/test_codegraph.py::CodeGraphTests.test_query_status_files_and_impact_parse_public_json`：方法，位于 `tests/test_codegraph.py:22`（可信度 1.00）
-- `tests/test_codegraph.py::CodeGraphTests.test_nonzero_and_invalid_json_are_visible`：方法，位于 `tests/test_codegraph.py:40`（可信度 1.00）
-- `tests/test_codegraph.py::CodeGraphTests.test_codegraph_engine_is_selectable`：方法，位于 `tests/test_codegraph.py:48`（可信度 1.00）
-- `tests/test_codegraph.py::CodeGraphTests.test_snapshot_preserves_dotfile_names_and_rejects_paths_outside_project`：方法，位于 `tests/test_codegraph.py:52`（可信度 1.00）
-- `tests/test_codegraph.py::CodeGraphTests.test_snapshot_hashes_only_files_inside_configured_scope`：方法，位于 `tests/test_codegraph.py:70`（可信度 1.00）
+- `tests/test_codegraph.py::CodeGraphTests.test_non_utf8_codegraph_output_does_not_crash_windows_cli`：方法，位于 `tests/test_codegraph.py:42`（可信度 1.00）
+- `tests/test_codegraph.py::CodeGraphTests.test_nonzero_and_invalid_json_are_visible`：方法，位于 `tests/test_codegraph.py:46`（可信度 1.00）
+- `tests/test_codegraph.py::CodeGraphTests.test_codegraph_engine_is_selectable`：方法，位于 `tests/test_codegraph.py:54`（可信度 1.00）
+- `tests/test_codegraph.py::CodeGraphTests.test_snapshot_preserves_dotfile_names_and_rejects_paths_outside_project`：方法，位于 `tests/test_codegraph.py:58`（可信度 1.00）
+- `tests/test_codegraph.py::CodeGraphTests.test_snapshot_hashes_only_files_inside_configured_scope`：方法，位于 `tests/test_codegraph.py:76`（可信度 1.00）
 - `tests/test_config.py::ConfigTests`：类，位于 `tests/test_config.py:11`（可信度 1.00）
 - `tests/test_config.py::ConfigTests.test_config_round_trip`：方法，位于 `tests/test_config.py:12`（可信度 1.00）
 - `tests/test_config.py::ConfigTests.test_default_excludes_keep_evaluation_outputs_out_of_the_test_index`：方法，位于 `tests/test_config.py:29`（可信度 1.00）
@@ -50,11 +51,11 @@
 - `tests/test_config.py::ConfigTests.test_capability_warnings_name_every_unwired_setting`：方法，位于 `tests/test_config.py:50`（可信度 1.00）
 - `tests/test_documentation_roadmap.py::DocumentationRoadmapTests`：类，位于 `tests/test_documentation_roadmap.py:7`（可信度 1.00）
 - `tests/test_documentation_roadmap.py::DocumentationRoadmapTests.setUpClass`：方法，位于 `tests/test_documentation_roadmap.py:9`（可信度 1.00）
-- `tests/test_documentation_roadmap.py::DocumentationRoadmapTests.test_readme_reports_current_release_and_codegraph_state`：方法，位于 `tests/test_documentation_roadmap.py:13`（可信度 1.00）
-- `tests/test_documentation_roadmap.py::DocumentationRoadmapTests.test_quick_start_does_not_recommend_legacy_watcher`：方法，位于 `tests/test_documentation_roadmap.py:21`（可信度 1.00）
-- `tests/test_documentation_roadmap.py::DocumentationRoadmapTests.test_readme_links_current_next_and_future_documents`：方法，位于 `tests/test_documentation_roadmap.py:28`（可信度 1.00）
-- `tests/test_documentation_roadmap.py::DocumentationRoadmapTests.test_next_version_plan_is_scoped_and_testable`：方法，位于 `tests/test_documentation_roadmap.py:33`（可信度 1.00）
-- `tests/test_documentation_roadmap.py::DocumentationRoadmapTests.test_future_features_distinguishes_candidates_from_commitments`：方法，位于 `tests/test_documentation_roadmap.py:42`（可信度 1.00）
+- `tests/test_documentation_roadmap.py::DocumentationRoadmapTests.test_readme_is_project_neutral_and_only_describes_current_workflows`：方法，位于 `tests/test_documentation_roadmap.py:13`（可信度 1.00）
+- `tests/test_documentation_roadmap.py::DocumentationRoadmapTests.test_quick_start_does_not_recommend_legacy_watcher`：方法，位于 `tests/test_documentation_roadmap.py:22`（可信度 1.00）
+- `tests/test_documentation_roadmap.py::DocumentationRoadmapTests.test_readme_links_stable_reference_documents`：方法，位于 `tests/test_documentation_roadmap.py:29`（可信度 1.00）
+- `tests/test_documentation_roadmap.py::DocumentationRoadmapTests.test_next_version_plan_is_scoped_and_testable`：方法，位于 `tests/test_documentation_roadmap.py:36`（可信度 1.00）
+- `tests/test_documentation_roadmap.py::DocumentationRoadmapTests.test_future_features_distinguishes_candidates_from_commitments`：方法，位于 `tests/test_documentation_roadmap.py:45`（可信度 1.00）
 - `tests/test_engine.py::EngineTests`：类，位于 `tests/test_engine.py:12`（可信度 1.00）
 - `tests/test_engine.py::EngineTests.test_python_ast_extracts_symbols_calls_inheritance_and_routes`：方法，位于 `tests/test_engine.py:13`（可信度 1.00）
 - `tests/test_engine.py::EngineTests.test_invalid_python_reports_parse_error`：方法，位于 `tests/test_engine.py:34`（可信度 1.00）
@@ -286,30 +287,54 @@
 
 ## 结构关系
 
-> 关系内容已截断：共 2605 条，当前页面仅展示前 150 条；请使用 knowledge_impact 获取完整的任务相关子图。
+> 关系内容已截断：共 2609 条，当前页面仅展示前 150 条；请使用 knowledge_impact 获取完整的任务相关子图。
 
-- `tests/test_codegraph.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `tests/test_codegraph.py::<module>` 导入 `json`（可信度 1.00，未解析）
-- `tests/test_codegraph.py::<module>` 导入 `subprocess`（可信度 1.00，未解析）
-- `tests/test_codegraph.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
-- `tests/test_codegraph.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
-- `tests/test_codegraph.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
-- `tests/test_codegraph.py::<module>` 导入 `unittest.mock.Mock`（可信度 1.00，未解析）
-- `tests/test_config.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `tests/test_config.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
-- `tests/test_config.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
-- `tests/test_config.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
-- `tests/test_documentation_roadmap.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `tests/test_documentation_roadmap.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
-- `tests/test_documentation_roadmap.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
-- `tests/test_engine.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `tests/test_engine.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
-- `tests/test_engine.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
-- `tests/test_engine.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
 - `tests/test_engine_wp01_wp02.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
 - `tests/test_engine_wp01_wp02.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
 - `tests/test_engine_wp01_wp02.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
 - `tests/test_engine_wp01_wp02.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `tests/test_provider.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `tests/test_provider.py::<module>` 导入 `io`（可信度 1.00，未解析）
+- `tests/test_provider.py::<module>` 导入 `json`（可信度 1.00，未解析）
+- `tests/test_provider.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
+- `tests/test_provider.py::<module>` 导入 `threading`（可信度 1.00，未解析）
+- `tests/test_provider.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
+- `tests/test_provider.py::<module>` 导入 `contextlib.redirect_stdout`（可信度 1.00，未解析）
+- `tests/test_provider.py::<module>` 导入 `http.server.BaseHTTPRequestHandler`（可信度 1.00，未解析）
+- `tests/test_provider.py::<module>` 导入 `http.server.ThreadingHTTPServer`（可信度 1.00，未解析）
+- `tests/test_provider.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `tests/test_provider.py::<module>` 导入 `project_knowledge.cli.main`（可信度 1.00，未解析）
+- `tests/test_provider.py::<module>` 导入 `project_knowledge.provider.CLOUD_AUTHORIZATION`（可信度 1.00，未解析）
+- `tests/test_provider.py::<module>` 导入 `project_knowledge.schemas.EVIDENCE_PACK_SCHEMA`（可信度 1.00，未解析）
+- `tests/test_versioning.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `tests/test_versioning.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
+- `tests/test_versioning.py::<module>` 导入 `tomllib`（可信度 1.00，未解析）
+- `tests/test_versioning.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
+- `tests/test_versioning.py::<module>` 导入 `datetime.date`（可信度 1.00，未解析）
+- `tests/test_versioning.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `tests/test_versioning.py::<module>` 导入 `project_knowledge.__version__`（可信度 1.00，未解析）
+- `tests/test_wp08.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `tests/test_wp08.py::<module>` 导入 `json`（可信度 1.00，未解析）
+- `tests/test_wp08.py::<module>` 导入 `subprocess`（可信度 1.00，未解析）
+- `tests/test_wp08.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
+- `tests/test_wp08.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
+- `tests/test_wp08.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `tests/test_wp08.py::<module>` 导入 `project_knowledge.schemas.CONFIG_SCHEMA`（可信度 1.00，未解析）
+- `tests/test_wp08.py::ConfigMigrationAndClientTests.test_plugin_manifest_version_matches_core_version` 导入 `project_knowledge`（可信度 1.00，未解析）
+- `tests/test_wp02_evidence.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `tests/test_wp02_evidence.py::<module>` 导入 `io`（可信度 1.00，未解析）
+- `tests/test_wp02_evidence.py::<module>` 导入 `json`（可信度 1.00，未解析）
+- `tests/test_wp02_evidence.py::<module>` 导入 `sys`（可信度 1.00，未解析）
+- `tests/test_wp02_evidence.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
+- `tests/test_wp02_evidence.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
+- `tests/test_wp02_evidence.py::<module>` 导入 `unittest.mock`（可信度 1.00，未解析）
+- `tests/test_wp02_evidence.py::<module>` 导入 `contextlib.redirect_stdout`（可信度 1.00，未解析）
+- `tests/test_wp02_evidence.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `tests/test_wp02_evidence.py::<module>` 导入 `evaluation.real_project_harness.main`（可信度 1.00，未解析）
+- `tests/test_wp02_knowledge.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `tests/test_wp02_knowledge.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
+- `tests/test_wp02_knowledge.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
+- `tests/test_wp02_knowledge.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
 - `tests/test_evaluate.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
 - `tests/test_evaluate.py::<module>` 导入 `io`（可信度 1.00，未解析）
 - `tests/test_evaluate.py::<module>` 导入 `json`（可信度 1.00，未解析）
@@ -319,6 +344,22 @@
 - `tests/test_evaluate.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
 - `tests/test_evaluate.py::<module>` 导入 `project_knowledge.cli.main`（可信度 1.00，未解析）
 - `tests/test_evaluate.py::<module>` 导入 `project_knowledge.evaluate.evaluate`（可信度 1.00，未解析）
+- `tests/test_watch_wp07.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `tests/test_watch_wp07.py::<module>` 导入 `json`（可信度 1.00，未解析）
+- `tests/test_watch_wp07.py::<module>` 导入 `os`（可信度 1.00，未解析）
+- `tests/test_watch_wp07.py::<module>` 导入 `subprocess`（可信度 1.00，未解析）
+- `tests/test_watch_wp07.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
+- `tests/test_watch_wp07.py::<module>` 导入 `time`（可信度 1.00，未解析）
+- `tests/test_watch_wp07.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
+- `tests/test_watch_wp07.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `tests/test_config.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `tests/test_config.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
+- `tests/test_config.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
+- `tests/test_config.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `tests/test_engine.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `tests/test_engine.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
+- `tests/test_engine.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
+- `tests/test_engine.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
 - `tests/test_gardenserver_rules.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
 - `tests/test_gardenserver_rules.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
 - `tests/test_gardenserver_rules.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
@@ -328,6 +369,49 @@
 - `tests/test_guidance.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
 - `tests/test_guidance.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
 - `tests/test_guidance.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `tests/test_proposal.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `tests/test_proposal.py::<module>` 导入 `contextlib`（可信度 1.00，未解析）
+- `tests/test_proposal.py::<module>` 导入 `io`（可信度 1.00，未解析）
+- `tests/test_proposal.py::<module>` 导入 `json`（可信度 1.00，未解析）
+- `tests/test_proposal.py::<module>` 导入 `subprocess`（可信度 1.00，未解析）
+- `tests/test_proposal.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
+- `tests/test_proposal.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
+- `tests/test_proposal.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `tests/test_proposal.py::<module>` 导入 `project_knowledge.cli.main`（可信度 1.00，未解析）
+- `tests/test_retrieval_wp06.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `tests/test_retrieval_wp06.py::<module>` 导入 `subprocess`（可信度 1.00，未解析）
+- `tests/test_retrieval_wp06.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
+- `tests/test_retrieval_wp06.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
+- `tests/test_retrieval_wp06.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `tests/test_schemas.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `tests/test_schemas.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
+- `tests/test_schemas.py::<module>` 导入 `project_knowledge.schemas.EVIDENCE_PACK_SCHEMA`（可信度 1.00，未解析）
+- `tests/test_schemas.py::<module>` 导入 `project_knowledge.schemas.KNOWLEDGE_RECORD_SCHEMA`（可信度 1.00，未解析）
+- `tests/test_schemas.py::<module>` 导入 `project_knowledge.schemas.PROPOSAL_SCHEMA`（可信度 1.00，未解析）
+- `tests/test_semantic.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `tests/test_semantic.py::<module>` 导入 `json`（可信度 1.00，未解析）
+- `tests/test_semantic.py::<module>` 导入 `subprocess`（可信度 1.00，未解析）
+- `tests/test_semantic.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
+- `tests/test_semantic.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
+- `tests/test_semantic.py::<module>` 导入 `contextlib.redirect_stdout`（可信度 1.00，未解析）
+- `tests/test_semantic.py::<module>` 导入 `io`（可信度 1.00，未解析）
+- `tests/test_semantic.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `tests/test_semantic.py::<module>` 导入 `project_knowledge.cli.main`（可信度 1.00，未解析）
+- `tests/test_semantic.py::<module>` 导入 `project_knowledge.schemas.FEATURE_GUIDE_DRAFT_SCHEMA`（可信度 1.00，未解析）
+- `tests/test_single_directory.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `tests/test_single_directory.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
+- `tests/test_single_directory.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
+- `tests/test_single_directory.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `tests/test_codegraph.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `tests/test_codegraph.py::<module>` 导入 `json`（可信度 1.00，未解析）
+- `tests/test_codegraph.py::<module>` 导入 `subprocess`（可信度 1.00，未解析）
+- `tests/test_codegraph.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
+- `tests/test_codegraph.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
+- `tests/test_codegraph.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `tests/test_codegraph.py::<module>` 导入 `unittest.mock.Mock`（可信度 1.00，未解析）
+- `tests/test_documentation_roadmap.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `tests/test_documentation_roadmap.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
+- `tests/test_documentation_roadmap.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
 - `tests/test_guidance_e2e.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
 - `tests/test_guidance_e2e.py::<module>` 导入 `hashlib`（可信度 1.00，未解析）
 - `tests/test_guidance_e2e.py::<module>` 导入 `json`（可信度 1.00，未解析）
@@ -355,86 +439,3 @@
 - `tests/test_guidance_store.py::<module>` 导入 `sqlite3`（可信度 1.00，未解析）
 - `tests/test_guidance_store.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
 - `tests/test_guidance_store.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
-- `tests/test_guidance_store.py::<module>` 导入 `unittest.mock`（可信度 1.00，未解析）
-- `tests/test_guidance_store.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
-- `tests/test_guidance_store.py::<module>` 导入 `project_knowledge.schemas.GUIDANCE_BATCH_SCHEMA`（可信度 1.00，未解析）
-- `tests/test_guidance_store.py::<module>` 导入 `project_knowledge.schemas.GUIDANCE_CATEGORY_SCHEMA`（可信度 1.00，未解析）
-- `tests/test_guidance_store.py::<module>` 导入 `project_knowledge.schemas.GUIDANCE_CHANGE_SCHEMA`（可信度 1.00，未解析）
-- `tests/test_guidance_store.py::<module>` 导入 `project_knowledge.schemas.GUIDANCE_DRAFT_SCHEMA`（可信度 1.00，未解析）
-- `tests/test_guidance_store.py::<module>` 导入 `project_knowledge.schemas.GUIDANCE_RUN_SCHEMA`（可信度 1.00，未解析）
-- `tests/test_guidance_store.py::<module>` 导入 `project_knowledge.schemas.GUIDANCE_VERSION_SCHEMA`（可信度 1.00，未解析）
-- `tests/test_guidance_workflow.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `tests/test_guidance_workflow.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
-- `tests/test_guidance_workflow.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
-- `tests/test_guidance_workflow.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
-- `tests/test_initialization_workflow.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `tests/test_initialization_workflow.py::<module>` 导入 `hashlib`（可信度 1.00，未解析）
-- `tests/test_initialization_workflow.py::<module>` 导入 `json`（可信度 1.00，未解析）
-- `tests/test_initialization_workflow.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
-- `tests/test_initialization_workflow.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
-- `tests/test_initialization_workflow.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
-- `tests/test_integration.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `tests/test_integration.py::<module>` 导入 `io`（可信度 1.00，未解析）
-- `tests/test_integration.py::<module>` 导入 `json`（可信度 1.00，未解析）
-- `tests/test_integration.py::<module>` 导入 `subprocess`（可信度 1.00，未解析）
-- `tests/test_integration.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
-- `tests/test_integration.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
-- `tests/test_integration.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
-- `tests/test_proposal.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `tests/test_proposal.py::<module>` 导入 `contextlib`（可信度 1.00，未解析）
-- `tests/test_proposal.py::<module>` 导入 `io`（可信度 1.00，未解析）
-- `tests/test_proposal.py::<module>` 导入 `json`（可信度 1.00，未解析）
-- `tests/test_proposal.py::<module>` 导入 `subprocess`（可信度 1.00，未解析）
-- `tests/test_proposal.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
-- `tests/test_proposal.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
-- `tests/test_proposal.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
-- `tests/test_proposal.py::<module>` 导入 `project_knowledge.cli.main`（可信度 1.00，未解析）
-- `tests/test_provider.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `tests/test_provider.py::<module>` 导入 `io`（可信度 1.00，未解析）
-- `tests/test_provider.py::<module>` 导入 `json`（可信度 1.00，未解析）
-- `tests/test_provider.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
-- `tests/test_provider.py::<module>` 导入 `threading`（可信度 1.00，未解析）
-- `tests/test_provider.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
-- `tests/test_provider.py::<module>` 导入 `contextlib.redirect_stdout`（可信度 1.00，未解析）
-- `tests/test_provider.py::<module>` 导入 `http.server.BaseHTTPRequestHandler`（可信度 1.00，未解析）
-- `tests/test_provider.py::<module>` 导入 `http.server.ThreadingHTTPServer`（可信度 1.00，未解析）
-- `tests/test_provider.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
-- `tests/test_provider.py::<module>` 导入 `project_knowledge.cli.main`（可信度 1.00，未解析）
-- `tests/test_provider.py::<module>` 导入 `project_knowledge.provider.CLOUD_AUTHORIZATION`（可信度 1.00，未解析）
-- `tests/test_provider.py::<module>` 导入 `project_knowledge.schemas.EVIDENCE_PACK_SCHEMA`（可信度 1.00，未解析）
-- `tests/test_retrieval_wp06.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `tests/test_retrieval_wp06.py::<module>` 导入 `subprocess`（可信度 1.00，未解析）
-- `tests/test_retrieval_wp06.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
-- `tests/test_retrieval_wp06.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
-- `tests/test_retrieval_wp06.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
-- `tests/test_schemas.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `tests/test_schemas.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
-- `tests/test_schemas.py::<module>` 导入 `project_knowledge.schemas.EVIDENCE_PACK_SCHEMA`（可信度 1.00，未解析）
-- `tests/test_schemas.py::<module>` 导入 `project_knowledge.schemas.KNOWLEDGE_RECORD_SCHEMA`（可信度 1.00，未解析）
-- `tests/test_schemas.py::<module>` 导入 `project_knowledge.schemas.PROPOSAL_SCHEMA`（可信度 1.00，未解析）
-- `tests/test_semantic.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `tests/test_semantic.py::<module>` 导入 `json`（可信度 1.00，未解析）
-- `tests/test_semantic.py::<module>` 导入 `subprocess`（可信度 1.00，未解析）
-- `tests/test_semantic.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
-- `tests/test_semantic.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
-- `tests/test_semantic.py::<module>` 导入 `contextlib.redirect_stdout`（可信度 1.00，未解析）
-- `tests/test_semantic.py::<module>` 导入 `io`（可信度 1.00，未解析）
-- `tests/test_semantic.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
-- `tests/test_semantic.py::<module>` 导入 `project_knowledge.cli.main`（可信度 1.00，未解析）
-- `tests/test_semantic.py::<module>` 导入 `project_knowledge.schemas.FEATURE_GUIDE_DRAFT_SCHEMA`（可信度 1.00，未解析）
-- `tests/test_single_directory.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `tests/test_single_directory.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
-- `tests/test_single_directory.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
-- `tests/test_single_directory.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
-- `tests/test_versioning.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `tests/test_versioning.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
-- `tests/test_versioning.py::<module>` 导入 `tomllib`（可信度 1.00，未解析）
-- `tests/test_versioning.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
-- `tests/test_versioning.py::<module>` 导入 `datetime.date`（可信度 1.00，未解析）
-- `tests/test_versioning.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
-- `tests/test_versioning.py::<module>` 导入 `project_knowledge.__version__`（可信度 1.00，未解析）
-- `tests/test_watch_wp07.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `tests/test_watch_wp07.py::<module>` 导入 `json`（可信度 1.00，未解析）
-- `tests/test_watch_wp07.py::<module>` 导入 `os`（可信度 1.00，未解析）
-- `tests/test_watch_wp07.py::<module>` 导入 `subprocess`（可信度 1.00，未解析）
-- `tests/test_watch_wp07.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）

@@ -5,7 +5,7 @@
 | 测试文件 | 模块 | 测试类符号数 |
 | --- | --- | ---: |
 | `tests/__init__.py` | tests | 0 |
-| `tests/test_codegraph.py` | tests | 7 |
+| `tests/test_codegraph.py` | tests | 8 |
 | `tests/test_config.py` | tests | 7 |
 | `tests/test_documentation_roadmap.py` | tests | 7 |
 | `tests/test_engine.py` | tests | 9 |
