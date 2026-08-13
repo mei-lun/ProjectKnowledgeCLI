@@ -187,7 +187,11 @@ class MCPServer:
         self.project = Path(project)
         self.input = input_stream or sys.stdin
         self.output = output_stream or sys.stdout
-        self.api = KnowledgeAPI(self.project)
+        self.api: KnowledgeAPI | None = None
+        try:
+            self.api = KnowledgeAPI(self.project)
+        except RuntimeError:
+            pass
 
     def serve(self) -> None:
         for line in self.input:
@@ -249,7 +253,10 @@ class MCPServer:
     def _call(self, name: str, arguments: dict[str, Any]) -> dict[str, Any]:
         project_path = arguments.get("projectPath")
         project = Path(project_path).resolve() if project_path else self.project.resolve()
-        api = KnowledgeAPI(project) if project_path else self.api
+        read_tools = {"knowledge_context", "knowledge_search", "knowledge_get", "knowledge_impact", "knowledge_status"}
+        api = None
+        if name in read_tools:
+            api = KnowledgeAPI(project) if project_path or self.api is None else self.api
         if name == "knowledge_context":
             return api.context(str(arguments["task"]), arguments.get("maxTokens"))
         if name == "knowledge_search":

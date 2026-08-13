@@ -27,6 +27,18 @@ class GuidanceMCPTests(unittest.TestCase):
             tool = next(item for item in TOOLS if item["name"] == name)
             self.assertFalse(tool["annotations"]["readOnlyHint"])
 
+    def test_server_can_start_before_project_initialization(self):
+        with tempfile.TemporaryDirectory() as directory:
+            server = MCPServer(directory, StringIO(), StringIO())
+            self.assertIsNone(server.api)
+            with patch("project_knowledge.initialization.InitializationWorkflow") as workflow:
+                workflow.return_value.start.return_value = {"status": "scanning"}
+                response = server.handle({
+                    "jsonrpc": "2.0", "id": 1, "method": "tools/call",
+                    "params": {"name": "knowledge_initialization_start", "arguments": {}},
+                })
+                self.assertFalse(response["result"]["isError"])
+
     def test_initialization_and_draft_routes_are_explicit(self):
         server = object.__new__(MCPServer)
         server.project = Path("/tmp/project")
