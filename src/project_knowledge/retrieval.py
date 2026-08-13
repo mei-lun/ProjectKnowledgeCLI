@@ -10,8 +10,8 @@ from .config import ProjectConfig
 from .guidance_store import GuidanceStore
 from .models import KnowledgeRecord
 from .service import ProjectService
-from .store import KnowledgeStore
-from .util import approx_tokens, trim_to_tokens, utc_now
+from .store import SCHEMA_VERSION, KnowledgeStore
+from .util import approx_tokens, project_lock, trim_to_tokens, utc_now
 
 
 CONFIDENCE_WEIGHT = {"verified": 1.0, "generated": 0.8, "inferred": 0.3}
@@ -41,6 +41,14 @@ class KnowledgeAPI:
         self.config = ProjectConfig.load(self.root)
         if not self.service.db_path.exists():
             raise RuntimeError(f"{self.root} is not initialized")
+        self._ensure_current_schema()
+
+    def _ensure_current_schema(self) -> None:
+        with KnowledgeStore(self.service.db_path, readonly=True) as store:
+            if store.get_meta("schema_version") == str(SCHEMA_VERSION):
+                return
+        with project_lock(self.root), KnowledgeStore(self.service.db_path) as store:
+            store.initialize()
 
     def status(self) -> dict[str, Any]:
         status = self.service.status()

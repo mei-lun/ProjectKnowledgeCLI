@@ -196,13 +196,14 @@
 - `tests/test_integration.py::IntegrationTests.setUp`：方法，位于 `tests/test_integration.py:54`（可信度 1.00）
 - `tests/test_integration.py::IntegrationTests.tearDown`：方法，位于 `tests/test_integration.py:67`（可信度 1.00）
 - `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp`：方法，位于 `tests/test_integration.py:70`（可信度 1.00）
-- `tests/test_integration.py::IntegrationTests.test_rebuild_preserves_complete_guidance_graph`：方法，位于 `tests/test_integration.py:153`（可信度 1.00）
-- `tests/test_integration.py::IntegrationTests.test_dry_run_and_deleted_file_sync`：方法，位于 `tests/test_integration.py:215`（可信度 1.00）
-- `tests/test_integration.py::IntegrationTests.test_install_and_uninstall_only_remove_owned_integration`：方法，位于 `tests/test_integration.py:228`（可信度 1.00）
-- `tests/test_integration.py::IntegrationTests.test_template_is_inferred_until_human_content_replaces_marker`：方法，位于 `tests/test_integration.py:240`（可信度 1.00）
-- `tests/test_integration.py::IntegrationTests.test_commit_alignment_is_distinct_from_content_freshness`：方法，位于 `tests/test_integration.py:253`（可信度 1.00）
-- `tests/test_integration.py::IntegrationTests.test_large_module_reports_symbol_and_relation_truncation`：方法，位于 `tests/test_integration.py:274`（可信度 1.00）
-- `tests/test_integration.py::IntegrationTests.test_doctor_and_check_report_unwired_configuration`：方法，位于 `tests/test_integration.py:283`（可信度 1.00）
+- `tests/test_integration.py::IntegrationTests.test_mcp_read_tools_upgrade_legacy_schema_before_querying_guidance`：方法，位于 `tests/test_integration.py:153`（可信度 1.00）
+- `tests/test_integration.py::IntegrationTests.test_rebuild_preserves_complete_guidance_graph`：方法，位于 `tests/test_integration.py:179`（可信度 1.00）
+- `tests/test_integration.py::IntegrationTests.test_dry_run_and_deleted_file_sync`：方法，位于 `tests/test_integration.py:241`（可信度 1.00）
+- `tests/test_integration.py::IntegrationTests.test_install_and_uninstall_only_remove_owned_integration`：方法，位于 `tests/test_integration.py:254`（可信度 1.00）
+- `tests/test_integration.py::IntegrationTests.test_template_is_inferred_until_human_content_replaces_marker`：方法，位于 `tests/test_integration.py:266`（可信度 1.00）
+- `tests/test_integration.py::IntegrationTests.test_commit_alignment_is_distinct_from_content_freshness`：方法，位于 `tests/test_integration.py:279`（可信度 1.00）
+- `tests/test_integration.py::IntegrationTests.test_large_module_reports_symbol_and_relation_truncation`：方法，位于 `tests/test_integration.py:300`（可信度 1.00）
+- `tests/test_integration.py::IntegrationTests.test_doctor_and_check_report_unwired_configuration`：方法，位于 `tests/test_integration.py:309`（可信度 1.00）
 - `tests/test_proposal.py::ProposalTests`：类，位于 `tests/test_proposal.py:17`（可信度 1.00）
 - `tests/test_proposal.py::ProposalTests.setUp`：方法，位于 `tests/test_proposal.py:18`（可信度 1.00）
 - `tests/test_proposal.py::ProposalTests.tearDown`：方法，位于 `tests/test_proposal.py:34`（可信度 1.00）
@@ -287,7 +288,7 @@
 
 ## 结构关系
 
-> 关系内容已截断：共 2609 条，当前页面仅展示前 150 条；请使用 knowledge_impact 获取完整的任务相关子图。
+> 关系内容已截断：共 2626 条，当前页面仅展示前 150 条；请使用 knowledge_impact 获取完整的任务相关子图。
 
 - `tests/test_engine_wp01_wp02.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
 - `tests/test_engine_wp01_wp02.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）

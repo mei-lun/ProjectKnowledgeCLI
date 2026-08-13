@@ -37,7 +37,7 @@
 
 ## 符号
 
-> 符号内容已截断：共 510 个，当前页面仅展示前 300 个；请使用 knowledge_context 或 knowledge_search 获取精确范围。
+> 符号内容已截断：共 511 个，当前页面仅展示前 300 个；请使用 knowledge_context 或 knowledge_search 获取精确范围。
 
 - `src/project_knowledge/cli.py::_common`：函数，位于 `src/project_knowledge/cli.py:23`（可信度 1.00）
 - `src/project_knowledge/cli.py::build_parser`：函数，位于 `src/project_knowledge/cli.py:32`（可信度 1.00）
@@ -342,7 +342,7 @@
 
 ## 结构关系
 
-> 关系内容已截断：共 4666 条，当前页面仅展示前 150 条；请使用 knowledge_impact 获取完整的任务相关子图。
+> 关系内容已截断：共 4675 条，当前页面仅展示前 150 条；请使用 knowledge_impact 获取完整的任务相关子图。
 
 - `src/project_knowledge/__main__.py::<module>` 导入 `cli.main`（可信度 1.00，未解析）
 - `src/project_knowledge/evidence.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）

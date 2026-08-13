@@ -150,6 +150,32 @@ class IntegrationTests(unittest.TestCase):
         })
         self.assertFalse(called["result"]["isError"])
 
+    def test_mcp_read_tools_upgrade_legacy_schema_before_querying_guidance(self) -> None:
+        service = ProjectService(self.root)
+        service.initialize()
+        with KnowledgeStore(service.db_path) as store:
+            existing_knowledge = store.counts()["knowledge"]
+            store.set_meta("schema_version", "1")
+            store.connection.commit()
+
+        server = MCPServer(self.root, io.StringIO(), io.StringIO())
+        for request_id, name, arguments in (
+            (1, "knowledge_status", {}),
+            (2, "knowledge_context", {"task": "扩展保存流程", "maxTokens": 1200}),
+        ):
+            response = server.handle({
+                "jsonrpc": "2.0",
+                "id": request_id,
+                "method": "tools/call",
+                "params": {"name": name, "arguments": arguments},
+            })
+            self.assertFalse(response["result"]["isError"], response)
+            self.assertIn("guidance_workflow", response["result"]["structuredContent"])
+
+        with KnowledgeStore(service.db_path, readonly=True) as store:
+            self.assertEqual(store.get_meta("schema_version"), "3")
+            self.assertEqual(store.counts()["knowledge"], existing_knowledge)
+
     def test_rebuild_preserves_complete_guidance_graph(self) -> None:
         service = ProjectService(self.root)
         service.initialize()

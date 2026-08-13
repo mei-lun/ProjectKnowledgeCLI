@@ -20,7 +20,7 @@
 | `tests/test_guidance_store.py` | tests | 24 |
 | `tests/test_guidance_workflow.py` | tests | 8 |
 | `tests/test_initialization_workflow.py` | tests | 6 |
-| `tests/test_integration.py` | tests | 10 |
+| `tests/test_integration.py` | tests | 11 |
 | `tests/test_proposal.py` | tests | 9 |
 | `tests/test_provider.py` | tests | 12 |
 | `tests/test_retrieval_wp06.py` | tests | 6 |
