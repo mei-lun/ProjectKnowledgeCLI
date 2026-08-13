@@ -56,7 +56,7 @@ def build_parser() -> argparse.ArgumentParser:
     _common(watch, dry_run=True)
     watch.add_argument("--once", action="store_true", help="perform one polling cycle and exit")
 
-    mcp = commands.add_parser("mcp", help="run the read-only stdio MCP server")
+    mcp = commands.add_parser("mcp", help="run the stdio MCP server and guidance workflow")
     mcp.add_argument("--project", default=".", help="initialized project path")
 
     evaluation = commands.add_parser("evaluate", help="evaluate retrieval against a JSONL dataset")

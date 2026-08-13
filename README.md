@@ -21,7 +21,7 @@ PKS 是本地优先的项目级知识库：复用 CodeGraph 获取代码事实�
 | Lua/Skynet/zn 证据 | 已完成首版 | require、启动、RPC、消息、Avatar、配置规则 |
 | 两层开发指导 | 已完成实现 | 轻量方法论与项目事实指导分离，分别审核、版本化和渲染 |
 | 中文指导 | 已完成 | 普通活动、普通玩家功能、登录模块 |
-| MCP | 已完成基础版 | context、search、get、impact、status |
+| MCP | 已完成 | context、search、get、impact、status，以及指导初始化、草稿审核和增量提交 |
 | 来源追踪 | 已完成基础版 | 文件、符号、行号和哈希，新鲜度可见 |
 | 语义草案与审核 | 已完成基础版 | EvidencePack、Feature Guide、Proposal、ADR 草案 |
 | 版本控制 | 已完成 | 单一版本源、补丁版本和中文 CHANGELOG |
@@ -52,7 +52,7 @@ PKS 是本地优先的项目级知识库：复用 CodeGraph 获取代码事实�
 | `index.db` | 文件、符号、关系和 KnowledgeRecord 的 SQLite 兼容索引 | PKS 自动重建，不手工编辑 |
 | `manifest.json` | 文件、知识、来源哈希、新鲜度和生成元数据清单 | PKS 自动更新，不手工编辑 |
 | `index.md` | 自动、草案、人工和决策知识的中文索引 | PKS 自动生成 |
-| `mcp.json` | 当前项目的只读 MCP 启动配置 | PKS 安装/初始化维护 |
+| `mcp.json` | 当前项目的 MCP 启动配置 | PKS 安装/初始化维护 |
 | `state.json` | watcher 状态、PID、heartbeat、错误和协调信息 | PKS 运行时维护 |
 
 ### `.project-kb/` 子目录

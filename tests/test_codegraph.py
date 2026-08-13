@@ -36,6 +36,12 @@ class CodeGraphTests(unittest.TestCase):
         self.assertIn("--json", " ".join(status_call))
         status_kwargs = runner.call_args_list[0].kwargs
         self.assertEqual(status_kwargs["env"]["CODEGRAPH_DIR"], ".codegraph")
+        self.assertEqual(status_kwargs["encoding"], "utf-8")
+        self.assertEqual(status_kwargs["errors"], "replace")
+
+    def test_non_utf8_codegraph_output_does_not_crash_windows_cli(self) -> None:
+        client, _ = self._client([(0, "{\"initialized\": true}", b"\\x80")])
+        self.assertTrue(client.status()["initialized"])
 
     def test_nonzero_and_invalid_json_are_visible(self) -> None:
         client, _ = self._client([(1, "", "not initialized")])
