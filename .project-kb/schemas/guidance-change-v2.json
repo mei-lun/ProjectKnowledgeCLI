@@ -1,0 +1,71 @@
+{
+  "$id": "https://project-kb.local/schema/guidance-change-v2.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "affected_categories": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "base_snapshot_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "change_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "changed_files": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "created_at": {
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$",
+      "type": "string"
+    },
+    "head_snapshot_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "payload": {
+      "type": "object"
+    },
+    "processed_at": {
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "project_root": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "update_level": {
+      "enum": [
+        "fact",
+        "guidance",
+        "category"
+      ]
+    }
+  },
+  "required": [
+    "change_id",
+    "project_root",
+    "base_snapshot_id",
+    "head_snapshot_id",
+    "update_level",
+    "changed_files",
+    "affected_categories",
+    "payload",
+    "created_at",
+    "processed_at"
+  ],
+  "type": "object"
+}

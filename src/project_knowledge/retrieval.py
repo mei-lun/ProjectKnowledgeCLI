@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from .config import ProjectConfig
+from .guidance_store import GuidanceStore
 from .models import KnowledgeRecord
 from .service import ProjectService
 from .store import KnowledgeStore
@@ -42,7 +43,10 @@ class KnowledgeAPI:
             raise RuntimeError(f"{self.root} is not initialized")
 
     def status(self) -> dict[str, Any]:
-        return self.service.status()
+        status = self.service.status()
+        with KnowledgeStore(self.service.db_path) as store:
+            status["guidance_workflow"] = self._guidance_workflow_status(store)
+        return status
 
     @staticmethod
     def classify_task(task: str) -> dict[str, Any]:
@@ -216,7 +220,7 @@ class KnowledgeAPI:
     def context(self, task: str, max_tokens: int | None = None) -> dict[str, Any]:
         started = time.monotonic()
         budget = max(256, min(max_tokens or self.config.max_tokens, 50_000))
-        status = self.service.status()
+        status = self.status()
         intent = self.classify_task(task)
         search = self.search(task, limit=10)
         broad_project_requested = any(
@@ -313,10 +317,60 @@ class KnowledgeAPI:
                 "gaps": gaps,
                 "token_budget": budget,
                 "estimated_tokens": 0,
+                "guidance_workflow": status.get("guidance_workflow", {}),
             }
             self._fit_context(result, budget)
             self._record_query(store, "knowledge_context", len(task), result, started)
             return result
+
+    @staticmethod
+    def _guidance_workflow_status(store: KnowledgeStore) -> dict[str, Any]:
+        guidance = GuidanceStore(store)
+        row = store.connection.execute(
+            "SELECT run_id FROM guidance_runs ORDER BY updated_at DESC, created_at DESC, run_id DESC LIMIT 1"
+        ).fetchone()
+        run = guidance.get_run(str(row["run_id"])) if row else None
+        drafts = guidance.list_pending_drafts()
+        changes = guidance.pending_changes()
+        categories = guidance.list_categories()
+        formal_guides = sum(1 for category in categories if guidance.current_version(category.category_id))
+        formal_methodologies = sum(
+            1 for category in categories
+            if guidance.current_version(category.category_id, "methodology")
+        )
+        return {
+            "available": run is not None,
+            "run": run.to_dict() if run else None,
+            "coverage": {
+                "covered_files": run.covered_files if run else 0,
+                "total_files": run.total_files if run else 0,
+                "uncovered_files": list(run.uncovered_files) if run else [],
+                "complete": bool(run and run.covered_files == run.total_files and not run.uncovered_files),
+            },
+            "categories": {
+                "total": len(categories),
+                "with_formal_guidance": formal_guides,
+                "with_formal_methodology": formal_methodologies,
+            },
+            "pending_drafts": [
+                {
+                    "draft_id": draft.draft_id, "kind": draft.kind,
+                    "category_id": draft.category_id, "status": draft.status,
+                    "path": draft.path, "content_hash": draft.content_hash,
+                }
+                for draft in drafts
+            ],
+            "pending_changes": [
+                {
+                    "change_id": change.change_id, "level": change.update_level,
+                    "changed_files": list(change.changed_files),
+                    "affected_categories": list(change.affected_categories),
+                    "base_snapshot_id": change.base_snapshot_id,
+                    "head_snapshot_id": change.head_snapshot_id,
+                }
+                for change in changes
+            ],
+        }
 
     @staticmethod
     def _symbol_terms(task: str) -> list[str]:

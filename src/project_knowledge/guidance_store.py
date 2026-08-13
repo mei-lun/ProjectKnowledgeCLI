@@ -173,8 +173,8 @@ class GuidanceStore:
         run = self._require_run(draft.run_id)
         if run.snapshot_id != draft.snapshot_id:
             raise ValueError("草稿快照与运行快照不一致")
-        if draft.kind == "guidance" and draft.category_id is None:
-            raise ValueError("指导草稿必须关联类别")
+        if draft.kind in {"methodology", "guidance"} and draft.category_id is None:
+            raise ValueError("方法论或项目指导草稿必须关联类别")
         if draft.kind == "category_catalog" and draft.category_id is not None:
             raise ValueError("分类目录草稿不能关联单一类别")
         if draft.category_id is not None:
@@ -248,6 +248,9 @@ class GuidanceStore:
                 raise KeyError(f"草稿不存在：{version.draft_id}")
             if draft.category_id != version.category_id:
                 raise ValueError("版本草稿与类别不一致")
+            expected_kind = "methodology" if version.asset_type == "methodology" else "guidance"
+            if draft.kind != expected_kind:
+                raise ValueError("版本资产类型与草稿类型不一致")
         existing = self.connection.execute(
             "SELECT * FROM guidance_versions WHERE version_id = ?",
             (version.version_id,),
@@ -262,21 +265,21 @@ class GuidanceStore:
         try:
             if version.is_current:
                 self.connection.execute(
-                    "UPDATE guidance_versions SET is_current = 0 WHERE category_id = ?",
-                    (version.category_id,),
+                    "UPDATE guidance_versions SET is_current = 0 WHERE category_id = ? AND asset_type = ?",
+                    (version.category_id, version.asset_type),
                 )
             self.connection.execute(
                 """
                 INSERT INTO guidance_versions(
                     version_id, category_id, draft_id, version, title, content,
-                    content_hash, snapshot_id, evidence_json, is_current, created_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    content_hash, snapshot_id, evidence_json, is_current, created_at, asset_type
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     version.version_id, version.category_id, version.draft_id,
                     version.version, version.title, version.content, version.content_hash,
                     version.snapshot_id, _json(version.evidence), int(version.is_current),
-                    version.created_at,
+                    version.created_at, version.asset_type,
                 ),
             )
         except BaseException:
@@ -286,23 +289,27 @@ class GuidanceStore:
         self.connection.execute("RELEASE save_guidance_version")
         return version
 
-    def current_version(self, category_id: str) -> GuidanceVersion | None:
+    def current_version(
+        self, category_id: str, asset_type: str = "project_guidance"
+    ) -> GuidanceVersion | None:
         row = self.connection.execute(
             """
             SELECT * FROM guidance_versions
-            WHERE category_id = ? AND is_current = 1
+            WHERE category_id = ? AND asset_type = ? AND is_current = 1
             """,
-            (category_id,),
+            (category_id, asset_type),
         ).fetchone()
         return self._version(row) if row else None
 
-    def list_versions(self, category_id: str) -> list[GuidanceVersion]:
+    def list_versions(
+        self, category_id: str, asset_type: str = "project_guidance"
+    ) -> list[GuidanceVersion]:
         rows = self.connection.execute(
             """
             SELECT * FROM guidance_versions
-            WHERE category_id = ? ORDER BY version, version_id
+            WHERE category_id = ? AND asset_type = ? ORDER BY version, version_id
             """,
-            (category_id,),
+            (category_id, asset_type),
         )
         return [self._version(row) for row in rows]
 
@@ -387,7 +394,7 @@ class GuidanceStore:
         return (
             version.version_id, version.category_id, version.draft_id, version.version,
             version.title, version.content, version.content_hash, version.snapshot_id,
-            _json(version.evidence), version.created_at,
+            _json(version.evidence), version.created_at, version.asset_type,
         )
 
     @staticmethod
@@ -437,6 +444,7 @@ class GuidanceStore:
             "content_hash": row["content_hash"], "snapshot_id": row["snapshot_id"],
             "evidence": json.loads(row["evidence_json"]),
             "is_current": bool(row["is_current"]), "created_at": row["created_at"],
+            "asset_type": row["asset_type"],
         })
 
     @staticmethod

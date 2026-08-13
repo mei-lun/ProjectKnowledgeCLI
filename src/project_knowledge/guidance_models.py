@@ -16,7 +16,7 @@ RunStatus = Literal[
     "failed",
 ]
 BatchStatus = Literal["pending", "completed", "failed"]
-DraftKind = Literal["category_catalog", "guidance"]
+DraftKind = Literal["category_catalog", "methodology", "guidance"]
 DraftStatus = Literal[
     "incomplete", "awaiting_confirmation", "confirmed", "rejected"
 ]
@@ -205,7 +205,7 @@ class GuidanceDraft:
     rejection_reason: str | None = None
     confirmed_at: str | None = None
 
-    _KINDS: ClassVar[set[str]] = {"category_catalog", "guidance"}
+    _KINDS: ClassVar[set[str]] = {"category_catalog", "methodology", "guidance"}
     _STATUSES: ClassVar[set[str]] = {
         "incomplete", "awaiting_confirmation", "confirmed", "rejected",
     }
@@ -249,12 +249,14 @@ class GuidanceVersion:
     is_current: bool
     created_at: str
     draft_id: str | None = None
+    asset_type: Literal["methodology", "project_guidance"] = "project_guidance"
 
     def __post_init__(self) -> None:
         _require_id("version_id", self.version_id)
         _require_id("category_id", self.category_id)
         _require_id("snapshot_id", self.snapshot_id)
         _require_optional_id("draft_id", self.draft_id)
+        _require_choice("asset_type", self.asset_type, {"methodology", "project_guidance"})
         _require_iso_time("created_at", self.created_at)
         if not isinstance(self.is_current, bool):
             raise ValueError("is_current 必须是布尔值")
@@ -271,7 +273,7 @@ class GuidanceVersion:
             content_hash=value["content_hash"], snapshot_id=value["snapshot_id"],
             evidence=[dict(item) for item in value.get("evidence", [])],
             is_current=value["is_current"], created_at=value["created_at"],
-            draft_id=value.get("draft_id"),
+            draft_id=value.get("draft_id"), asset_type=value.get("asset_type", "project_guidance"),
         )
 
 

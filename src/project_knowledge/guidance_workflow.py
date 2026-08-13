@@ -18,6 +18,10 @@ from .util import atomic_write, hash_text, utc_now
 class GuidanceWorkflow:
     MACHINE_START = "<!-- project-kb:guidance-state:start -->"
     MACHINE_END = "<!-- project-kb:guidance-state:end -->"
+    PROJECT_LEAKAGE_TERMS = (
+        "src/", "appsrv", "appmod", "avatar_def", "component", "system",
+        "skynet", "zn.", "magent", "worksheet", ".lua", "gardenserver",
+    )
 
     def __init__(self, project: str | Path, *, client: CodeGraphClient | None = None):
         self.root = Path(project).resolve()
@@ -43,21 +47,31 @@ class GuidanceWorkflow:
                     raise ValueError("分类目录必须包含 categories")
                 complete = self._validate_categories(run_id, run.snapshot_id, categories, guidance)
                 filename = "功能分类目录-待审核.md"
-            elif kind == "guidance":
+            elif kind in {"methodology", "guidance"}:
                 if not category_id:
-                    raise ValueError("指导草稿必须指定 category_id")
+                    raise ValueError("方法论或项目指导草稿必须指定 category_id")
                 category = next((item for item in guidance.list_categories() if item.category_id == category_id), None)
                 if category is None:
                     raise KeyError(f"类别不存在：{category_id}")
                 category_run = guidance.get_run(category.run_id)
                 if category_run is None or category_run.project_root != run.project_root:
                     raise ValueError("类别不属于当前项目")
-                complete = self._validate_guide(content, run.snapshot_id)
-                filename = f"{self._safe_name(category.name)}-开发指导-待审核.md"
+                if kind == "methodology":
+                    complete = self._validate_methodology(content)
+                    filename = f"{self._safe_name(category.name)}-方法论-待审核.md"
+                else:
+                    complete = self._validate_guide(content, run.snapshot_id)
+                    filename = f"{self._safe_name(category.name)}-项目事实指导-待审核.md"
             else:
                 raise ValueError(f"不支持的草稿类型：{kind}")
             now = utc_now()
-            body = self._render_catalog(content, run) if kind == "category_catalog" else self._render_guide(content)
+            body = (
+                self._render_catalog(content, run)
+                if kind == "category_catalog"
+                else self._render_methodology(content)
+                if kind == "methodology"
+                else self._render_guide(content)
+            )
             content_hash = hash_text(body)
             draft_id = "draft-" + hashlib.sha256(
                 json.dumps([run_id, kind, category_id, run.snapshot_id, content_hash], ensure_ascii=False).encode()
@@ -127,7 +141,7 @@ class GuidanceWorkflow:
                     atomic_write(formal, disk_body)
                 path.unlink(missing_ok=True)
                 return {"status": "confirmed", "draft_id": draft_id, "content_hash": content_hash, "path": str(formal.resolve()), "next_actions": ["逐类别生成开发指导草稿"]}
-            return self._confirm_guide(store, guidance, draft, run, disk_body, now)
+            return self._confirm_asset(store, guidance, draft, run, disk_body, now)
 
     def reject_draft(self, draft_id: str, reviewer: str, reason: str) -> dict[str, Any]:
         if not reviewer.strip() or not reason.strip():
@@ -144,29 +158,37 @@ class GuidanceWorkflow:
                 guidance.save_draft(draft)
             return {"status": "rejected", "draft_id": draft_id, "path": draft.path, "next_actions": ["修改后重新保存草稿"]}
 
-    def _confirm_guide(self, store: KnowledgeStore, guidance: GuidanceStore, draft: GuidanceDraft,
+    def _confirm_asset(self, store: KnowledgeStore, guidance: GuidanceStore, draft: GuidanceDraft,
                        run: Any, body: str, now: str) -> dict[str, Any]:
         assert draft.category_id
         category = next(item for item in guidance.list_categories() if item.category_id == draft.category_id)
-        number = max((item.version for item in guidance.list_versions(category.category_id)), default=0) + 1
-        version_id = f"guide-{category.category_id}-v{number}"
+        asset_type = "methodology" if draft.kind == "methodology" else "project_guidance"
+        number = max((item.version for item in guidance.list_versions(category.category_id, asset_type)), default=0) + 1
+        prefix = "methodology" if asset_type == "methodology" else "guide"
+        version_id = f"{prefix}-{category.category_id}-v{number}"
+        title_suffix = "轻量方法论" if asset_type == "methodology" else "项目事实指导"
         version = GuidanceVersion(
-            version_id, category.category_id, number, f"{category.name}开发指导",
+            version_id, category.category_id, number, f"{category.name}{title_suffix}",
             body, draft.content_hash, draft.snapshot_id,
-            list(draft.payload.get("evidence", [])), True, now, draft.draft_id,
+            list(draft.payload.get("evidence", [])), True, now, draft.draft_id, asset_type,
         )
-        formal = self.root / ".project-kb" / f"{self._safe_name(category.name)}-开发指导.md"
+        formal = self.root / ".project-kb" / (
+            f"{self._safe_name(category.name)}-方法论.md"
+            if asset_type == "methodology"
+            else f"{self._safe_name(category.name)}-项目事实指导.md"
+        )
         sources = [
             SourceReference(type="file", path=item["path"], hash=item.get("hash"))
             for item in draft.payload.get("evidence", []) if isinstance(item, dict) and item.get("path")
         ]
         record = KnowledgeRecord(
-            id=f"guide.{category.category_id}", kind="development-guide",
-            title=f"{category.name}开发指导", path=str(formal.relative_to(self.root).as_posix()),
-            ownership="curated", confidence="verified", status="fresh",
+            id=f"{prefix}.{category.category_id}",
+            kind="development-methodology" if asset_type == "methodology" else "development-guide",
+            title=f"{category.name}{title_suffix}", path=str(formal.relative_to(self.root).as_posix()),
+            ownership="curated", confidence="generated" if asset_type == "methodology" else "verified", status="fresh",
             sources=sources, source_hashes={item.path: item.hash for item in sources if item.path and item.hash},
             last_generated_at=now, last_verified_at=now,
-            tags=[category.category_id, category.name, "开发指导"], content=body,
+            tags=[category.category_id, category.name, title_suffix], content=body,
         )
         previous = formal.read_text(encoding="utf-8") if formal.exists() else None
         try:
@@ -178,7 +200,11 @@ class GuidanceWorkflow:
                 draft.confirmed_at = now
                 draft.updated_at = now
                 guidance.save_draft(draft)
-                remaining = [item for item in guidance.list_pending_drafts(run.run_id) if item.kind == "guidance" and item.draft_id != draft.draft_id]
+                remaining = [
+                    item for item in guidance.list_pending_drafts(run.run_id)
+                    if item.kind in {"methodology", "guidance"}
+                    and item.draft_id != draft.draft_id
+                ]
                 run.status = "guidance_review" if remaining else "complete"
                 run.updated_at = now
                 guidance.create_run(run)
@@ -228,13 +254,23 @@ class GuidanceWorkflow:
                 self._validate_evidence(evidence, covered, hashes)
         return complete
 
-    def _validate_guide(self, content: dict[str, Any], snapshot_id: str) -> bool:
-        for key in ("basic", "methodology", "project_adaptation", "variants", "evidence", "unknowns"):
+    def _validate_methodology(self, content: dict[str, Any]) -> bool:
+        for key in ("basic", "scope", "questions", "starter_checks", "unknowns"):
             if key not in content:
-                raise ValueError(f"指导缺少字段：{key}")
-        methodology = content["methodology"]
+                raise ValueError(f"方法论缺少字段：{key}")
+        complete = all(content.get(key) for key in ("basic", "scope", "questions", "starter_checks"))
+        methodology_text = json.dumps(content, ensure_ascii=False).lower()
+        return complete and not any(term in methodology_text for term in self.PROJECT_LEAKAGE_TERMS)
+
+    def _validate_guide(self, content: dict[str, Any], snapshot_id: str) -> bool:
+        for key in ("basic", "methodology_ref", "project_adaptation", "variants", "evidence", "unknowns"):
+            if key not in content:
+                raise ValueError(f"项目事实指导缺少字段：{key}")
+        if "methodology" in content:
+            return False
+        reference = content["methodology_ref"]
         adaptation = content["project_adaptation"]
-        complete = all(methodology.get(key) for key in ("analysis", "steps", "invariants", "testing", "pitfalls"))
+        complete = isinstance(reference, dict) and all(reference.get(key) for key in ("id", "title"))
         complete = complete and all(adaptation.get(key) for key in (
             "entrypoints", "locations", "call_flow", "registration", "data_and_config",
             "steps", "invariants", "testing", "release", "rollback",
@@ -301,10 +337,12 @@ class GuidanceWorkflow:
     @staticmethod
     def _render_guide(content: dict[str, Any]) -> str:
         title = content["basic"].get("title", "开发指导") if isinstance(content["basic"], dict) else str(content["basic"])
-        lines = [f"# {title}", "", "## 第一层：可迁移方法论", ""]
-        for key, label in (("analysis", "分析方法"), ("steps", "实施步骤"), ("invariants", "不变量"), ("testing", "测试策略"), ("pitfalls", "常见陷阱")):
-            lines.extend([f"### {label}", GuidanceWorkflow._markdown(content["methodology"].get(key)), ""])
-        lines.extend(["## 第二层：当前项目适配", ""])
+        reference = content["methodology_ref"]
+        lines = [
+            f"# {title}", "", "## 方法论引用", "",
+            f"- {reference['title']}（知识 ID：`{reference['id']}`）", "",
+            "## 当前项目事实指导", "",
+        ]
         labels = {
             "entrypoints": "入口", "locations": "代码位置", "call_flow": "调用流程",
             "registration": "注册方式", "data_and_config": "数据与配置", "steps": "项目实施步骤",
@@ -315,6 +353,15 @@ class GuidanceWorkflow:
         lines.extend(["## 变体", GuidanceWorkflow._markdown(content["variants"]) or "- 无", "", "## 证据"])
         lines.extend([f"- {item['path']}（{item.get('hash', '')}）" for item in content["evidence"]])
         lines.extend(["", "## 未确认事项", GuidanceWorkflow._markdown(content["unknowns"]) or "- 无", ""])
+        return "\n".join(lines).rstrip() + "\n"
+
+    @staticmethod
+    def _render_methodology(content: dict[str, Any]) -> str:
+        title = content["basic"].get("title", "轻量方法论") if isinstance(content["basic"], dict) else str(content["basic"])
+        lines = [f"# {title}", "", "## 当前范围", GuidanceWorkflow._markdown(content["scope"]), ""]
+        lines.extend(["## 首次对齐问题", GuidanceWorkflow._markdown(content["questions"]), ""])
+        lines.extend(["## 起步检查", GuidanceWorkflow._markdown(content["starter_checks"]), ""])
+        lines.extend(["## 待用户二次对齐", GuidanceWorkflow._markdown(content["unknowns"]) or "- 无", ""])
         return "\n".join(lines).rstrip() + "\n"
 
     @staticmethod

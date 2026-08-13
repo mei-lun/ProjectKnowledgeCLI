@@ -57,10 +57,7 @@ class GuidanceWorkflowTests(unittest.TestCase):
     def guide(self):
         return {
             "basic": {"title": "登录类功能开发指导"},
-            "methodology": {
-                "analysis": ["识别身份边界"], "steps": ["定义输入", "建立会话"],
-                "invariants": ["鉴权前不进入业务"], "testing": ["覆盖失败登录"], "pitfalls": ["不要信任客户端"],
-            },
+            "methodology_ref": {"id": "methodology.login", "title": "登录类功能轻量方法论"},
             "project_adaptation": {
                 "entrypoints": ["src/login.lua"], "locations": ["src"], "call_flow": ["请求到会话"],
                 "registration": ["注册协议"], "data_and_config": ["账号配置"], "steps": ["扩展处理器"],
@@ -68,6 +65,15 @@ class GuidanceWorkflowTests(unittest.TestCase):
                 "rollback": ["恢复旧处理器"],
             },
             "variants": [], "evidence": [{"path": "src/login.lua", "hash": "sha256:h"}], "unknowns": [],
+        }
+
+    def methodology(self):
+        return {
+            "basic": {"title": "登录类功能轻量方法论"},
+            "scope": ["用于开始身份建立类功能的首次设计对齐"],
+            "questions": ["谁拥有身份事实？", "成功和失败分别如何观察？"],
+            "starter_checks": ["明确入口和状态所有者", "明确失败与重复请求行为"],
+            "unknowns": ["具体状态机由熟悉业务的用户在二次对齐后补充"],
         }
 
     def confirm_catalog(self):
@@ -100,6 +106,41 @@ class GuidanceWorkflowTests(unittest.TestCase):
             self.assertEqual(record.kind, "development-guide")
             self.assertEqual(record.content, reviewed_body)
 
+    def test_methodology_and_project_guidance_are_separate_reviewable_assets(self):
+        self.confirm_catalog()
+        methodology = self.workflow.save_draft("methodology", "run-1", self.methodology(), "login")
+        guide = self.workflow.save_draft("guidance", "run-1", self.guide(), "login")
+        methodology_path = Path(methodology["path"])
+        guide_path = Path(guide["path"])
+        self.assertNotEqual(methodology_path, guide_path)
+        self.assertIn("轻量方法论", methodology_path.read_text(encoding="utf-8"))
+        guide_body = guide_path.read_text(encoding="utf-8")
+        self.assertIn("方法论引用", guide_body)
+        self.assertIn("当前项目事实指导", guide_body)
+        self.assertNotIn("谁拥有身份事实", guide_body)
+
+        confirmed = self.workflow.confirm_draft(
+            guide["draft_id"], guide["content_hash"], "tester",
+        )
+        self.assertTrue(Path(confirmed["path"]).is_file())
+        self.assertTrue(methodology_path.is_file())
+        with KnowledgeStore(self.db) as store:
+            guidance = GuidanceStore(store)
+            self.assertIsNone(guidance.current_version("login", "methodology"))
+            self.assertEqual(guidance.current_version("login", "project_guidance").version, 1)
+            self.assertEqual(guidance.get_run("run-1").status, "guidance_review")
+
+        method_result = self.workflow.confirm_draft(
+            methodology["draft_id"], methodology["content_hash"], "tester",
+        )
+        with KnowledgeStore(self.db) as store:
+            guidance = GuidanceStore(store)
+            self.assertEqual(guidance.current_version("login", "methodology").version, 1)
+            record = store.get_knowledge("methodology.login")
+            self.assertEqual(record.kind, "development-methodology")
+            self.assertEqual(Path(method_result["path"]).read_text(encoding="utf-8"), record.content)
+            self.assertEqual(guidance.get_run("run-1").status, "complete")
+
     def test_incomplete_guide_cannot_be_confirmed(self):
         self.confirm_catalog()
         content = self.guide()
@@ -109,12 +150,24 @@ class GuidanceWorkflowTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "不完整"):
             self.workflow.confirm_draft(draft["draft_id"], draft["content_hash"], "tester")
 
+    def test_lightweight_methodology_rejects_project_leakage_and_guide_rejects_embedded_layer(self):
+        self.confirm_catalog()
+        leaked = self.methodology()
+        leaked["starter_checks"] = ["修改 src/login.lua", "注册 avatar_def"]
+        draft = self.workflow.save_draft("methodology", "run-1", leaked, "login")
+        self.assertEqual(draft["status"], "incomplete")
+
+        mixed = self.guide()
+        mixed["methodology"] = self.methodology()
+        draft = self.workflow.save_draft("guidance", "run-1", mixed, "login")
+        self.assertEqual(draft["status"], "incomplete")
+
     def test_reject_keeps_current_version(self):
         self.confirm_catalog()
         first = self.workflow.save_draft("guidance", "run-1", self.guide(), "login")
         self.workflow.confirm_draft(first["draft_id"], first["content_hash"], "tester")
         revised = self.guide()
-        revised["methodology"]["steps"].append("修订")
+        revised["project_adaptation"]["steps"].append("修订项目实施顺序")
         second = self.workflow.save_draft("guidance", "run-1", revised, "login")
         self.workflow.reject_draft(second["draft_id"], "tester", "需要补充")
         with KnowledgeStore(self.db) as store:

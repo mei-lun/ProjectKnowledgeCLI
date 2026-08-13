@@ -6,7 +6,10 @@ from pathlib import Path
 from typing import Any, TextIO
 
 from . import __version__
+from .codegraph import CodeGraphClient
+from .config import ProjectConfig
 from .retrieval import KnowledgeAPI
+from .schemas import validate_instance
 
 
 CURRENT_PROTOCOL = "2026-07-28"
@@ -20,8 +23,9 @@ TOOLS: list[dict[str, Any]] = [
         "description": "Return compact, source-traceable project context for a development task.",
         "inputSchema": {
             "type": "object",
-            "properties": {"task": {"type": "string"}, "projectPath": {"type": "string"}, "maxTokens": {"type": "integer", "minimum": 256}},
+            "properties": {"task": {"type": "string", "minLength": 1}, "projectPath": {"type": "string", "minLength": 1}, "maxTokens": {"type": "integer", "minimum": 256}},
             "required": ["task"],
+            "additionalProperties": False,
         },
         "annotations": {"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
     },
@@ -32,10 +36,12 @@ TOOLS: list[dict[str, Any]] = [
         "inputSchema": {
             "type": "object",
             "properties": {
-                "query": {"type": "string"}, "kinds": {"type": "array", "items": {"type": "string"}},
+                "query": {"type": "string", "minLength": 1}, "kinds": {"type": "array", "items": {"type": "string"}},
                 "module": {"type": "string"}, "limit": {"type": "integer", "minimum": 1, "maximum": 100},
+                "projectPath": {"type": "string", "minLength": 1},
             },
             "required": ["query"],
+            "additionalProperties": False,
         },
         "annotations": {"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
     },
@@ -43,7 +49,7 @@ TOOLS: list[dict[str, Any]] = [
         "name": "knowledge_get",
         "title": "Get a knowledge record",
         "description": "Read one stable knowledge record with content, sources, confidence, and freshness.",
-        "inputSchema": {"type": "object", "properties": {"id": {"type": "string"}}, "required": ["id"]},
+        "inputSchema": {"type": "object", "properties": {"id": {"type": "string", "minLength": 1}, "projectPath": {"type": "string", "minLength": 1}}, "required": ["id"], "additionalProperties": False},
         "annotations": {"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
     },
     {
@@ -55,7 +61,11 @@ TOOLS: list[dict[str, Any]] = [
             "properties": {
                 "files": {"type": "array", "items": {"type": "string"}},
                 "symbols": {"type": "array", "items": {"type": "string"}},
+                "maxHops": {"type": "integer", "minimum": 0, "maximum": 5},
+                "maxRelations": {"type": "integer", "minimum": 1, "maximum": 5000},
+                "projectPath": {"type": "string", "minLength": 1},
             },
+            "additionalProperties": False,
         },
         "annotations": {"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
     },
@@ -63,7 +73,7 @@ TOOLS: list[dict[str, Any]] = [
         "name": "knowledge_status",
         "title": "Project knowledge status",
         "description": "Return index health, pending files, stale knowledge, conflicts, and watcher state.",
-        "inputSchema": {"type": "object", "properties": {}},
+        "inputSchema": {"type": "object", "properties": {"projectPath": {"type": "string", "minLength": 1}}, "additionalProperties": False},
         "annotations": {"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
     },
 ]
@@ -120,7 +130,7 @@ WORKFLOW_TOOLS: list[dict[str, Any]] = [
             "properties": {
                 "projectPath": {"type": "string", "minLength": 1},
                 "action": {"enum": ["save", "reject"]},
-                "kind": {"enum": ["category_catalog", "guidance"]},
+                "kind": {"enum": ["category_catalog", "methodology", "guidance"]},
                 "runId": {"type": "string", "minLength": 1},
                 "categoryId": {"type": "string", "minLength": 1},
                 "content": {"type": "object"},
@@ -238,6 +248,12 @@ class MCPServer:
             name = params.get("name")
             arguments = params.get("arguments") or {}
             try:
+                tool = next((item for item in TOOLS if item["name"] == name), None)
+                if tool is None:
+                    raise KeyError(f"unknown tool: {name}")
+                if not isinstance(arguments, dict):
+                    raise ValueError("tools/call arguments 必须是对象")
+                validate_instance(arguments, tool["inputSchema"], "$.arguments")
                 value = self._call(name, arguments)
             except (KeyError, ValueError, RuntimeError) as error:
                 result = {"content": [{"type": "text", "text": str(error)}], "isError": True}
@@ -264,7 +280,10 @@ class MCPServer:
         if name == "knowledge_get":
             return api.get(str(arguments["id"]))
         if name == "knowledge_impact":
-            return api.impact(arguments.get("files"), arguments.get("symbols"))
+            return api.impact(
+                arguments.get("files"), arguments.get("symbols"),
+                arguments.get("maxHops", 1), arguments.get("maxRelations", 500),
+            )
         if name == "knowledge_status":
             return api.status()
         if name == "knowledge_initialization_start":
@@ -282,7 +301,7 @@ class MCPServer:
             )
         if name == "knowledge_draft_save":
             from .guidance_workflow import GuidanceWorkflow
-            workflow = GuidanceWorkflow(project)
+            workflow = GuidanceWorkflow(project, client=CodeGraphClient(project, ProjectConfig.load(project)))
             action = arguments["action"]
             if action == "save":
                 for field in ("kind", "runId", "content"):
@@ -303,7 +322,9 @@ class MCPServer:
             raise ValueError(f"不支持的 action：{action}")
         if name == "knowledge_draft_confirm":
             from .guidance_workflow import GuidanceWorkflow
-            return GuidanceWorkflow(project).confirm_draft(
+            return GuidanceWorkflow(
+                project, client=CodeGraphClient(project, ProjectConfig.load(project))
+            ).confirm_draft(
                 str(arguments["draftId"]), str(arguments["contentHash"]),
                 str(arguments["reviewer"]),
             )

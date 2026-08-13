@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import fnmatch
 import json
 import os
 import shlex
@@ -154,8 +155,14 @@ class CodeGraphClient:
         """Return a deterministic snapshot using only CodeGraph public output."""
         normalized: list[dict[str, Any]] = []
         for item in self.files():
-            path = str(item.get("path", "")).replace("\\", "/").lstrip("./")
+            raw_path = str(item.get("path", "")).replace("\\", "/")
+            path = raw_path[2:] if raw_path.startswith("./") else raw_path
             if not path:
+                continue
+            candidate = Path(path)
+            if candidate.is_absolute() or ".." in candidate.parts:
+                raise CodeGraphError(f"CodeGraph 文件路径越界：{path}")
+            if not self._in_scope(path):
                 continue
             language = str(item.get("language", "unknown")).strip().lower() or "unknown"
             content_hash = str(item.get("contentHash", item.get("hash", ""))).strip()
@@ -183,6 +190,20 @@ class CodeGraphClient:
         ]
         encoded = json.dumps(identity, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
         return {"snapshot_id": hashlib.sha256(encoded).hexdigest(), "files": normalized}
+
+    def _in_scope(self, path: str) -> bool:
+        def matches(pattern: str) -> bool:
+            return (
+                fnmatch.fnmatch(path, pattern)
+                or fnmatch.fnmatch("/" + path, pattern)
+                or (pattern.startswith("**/") and fnmatch.fnmatch(path, pattern[3:]))
+            )
+
+        includes = list(getattr(self.config, "include", ["**/*"]))
+        excludes = list(getattr(self.config, "exclude", []))
+        return (not includes or any(matches(pattern) for pattern in includes)) and not any(
+            matches(pattern) for pattern in excludes
+        )
 
     def query(self, search: str, *, limit: int = 20, kind: str | None = None) -> list[dict[str, Any]]:
         args = [search, "-p", _host_path(self.project), "-l", str(limit)]

@@ -10,7 +10,7 @@ from .engine import IndexedFile
 from .models import KnowledgeRecord, ParseResult, SourceReference
 
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 
 
 class KnowledgeStore:
@@ -54,7 +54,7 @@ class KnowledgeStore:
             raise RuntimeError(
                 f"数据库 Schema v{existing_version} 高于当前支持的 v{SCHEMA_VERSION}"
             )
-        if existing_version not in {0, 1, SCHEMA_VERSION}:
+        if existing_version not in {0, 1, 2, SCHEMA_VERSION}:
             raise RuntimeError(f"不支持从 Schema v{existing_version} 迁移")
 
         self.connection.commit()
@@ -63,6 +63,7 @@ class KnowledgeStore:
             self._create_base_schema()
             self._upgrade_early_guidance_schema()
             self._create_guidance_schema()
+            self._upgrade_guidance_asset_schema()
             try:
                 self.connection.execute(
                     "CREATE VIRTUAL TABLE IF NOT EXISTS knowledge_fts "
@@ -212,6 +213,32 @@ class KnowledgeStore:
         self._create_guidance_schema()
         self.import_guidance_graph(graph)
 
+    def _upgrade_guidance_asset_schema(self) -> None:
+        draft_sql = self.connection.execute(
+            "SELECT sql FROM sqlite_master WHERE type='table' AND name='guidance_drafts'"
+        ).fetchone()
+        version_columns = {
+            row["name"] for row in self.connection.execute("PRAGMA table_info(guidance_versions)")
+        }
+        needs_upgrade = bool(
+            draft_sql and (
+                "'methodology'" not in (draft_sql["sql"] or "")
+                or "asset_type" not in version_columns
+            )
+        )
+        if not needs_upgrade:
+            return
+        graph = self.export_guidance_graph()
+        for row in graph["guidance_versions"]:
+            row.setdefault("asset_type", "project_guidance")
+        for table in (
+            "guidance_versions", "guidance_drafts", "guidance_batches",
+            "guidance_categories", "guidance_changes", "guidance_runs",
+        ):
+            self.connection.execute(f"DROP TABLE {table}")
+        self._create_guidance_schema()
+        self.import_guidance_graph(graph)
+
     def _create_guidance_schema(self) -> None:
         statements = [
             """CREATE TABLE IF NOT EXISTS guidance_runs (
@@ -277,7 +304,7 @@ class KnowledgeStore:
                     CHECK(length(run_id) > 0),
                 category_id TEXT REFERENCES guidance_categories(category_id) ON DELETE SET NULL
                     CHECK(category_id IS NULL OR length(category_id) > 0),
-                kind TEXT NOT NULL CHECK(kind IN ('category_catalog', 'guidance')),
+                kind TEXT NOT NULL CHECK(kind IN ('category_catalog', 'methodology', 'guidance')),
                 status TEXT NOT NULL CHECK(status IN (
                     'incomplete', 'awaiting_confirmation', 'confirmed', 'rejected'
                 )),
@@ -305,11 +332,13 @@ class KnowledgeStore:
                 snapshot_id TEXT NOT NULL CHECK(length(snapshot_id) > 0),
                 evidence_json TEXT NOT NULL,
                 is_current INTEGER NOT NULL DEFAULT 0 CHECK(is_current IN (0, 1)),
+                asset_type TEXT NOT NULL DEFAULT 'project_guidance'
+                    CHECK(asset_type IN ('methodology', 'project_guidance')),
                 created_at TEXT NOT NULL,
-                UNIQUE(category_id, version)
+                UNIQUE(category_id, asset_type, version)
             )""",
             """CREATE UNIQUE INDEX IF NOT EXISTS idx_guidance_versions_current
-                ON guidance_versions(category_id) WHERE is_current = 1""",
+                ON guidance_versions(category_id, asset_type) WHERE is_current = 1""",
             """CREATE TABLE IF NOT EXISTS guidance_changes (
                 change_id TEXT PRIMARY KEY CHECK(length(change_id) > 0),
                 project_root TEXT NOT NULL CHECK(length(project_root) > 0),

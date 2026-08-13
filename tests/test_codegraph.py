@@ -49,6 +49,39 @@ class CodeGraphTests(unittest.TestCase):
         engine = create_engine(ProjectConfig(engine="codegraph", codegraph_command="/usr/bin/codegraph"))
         self.assertIsInstance(engine, CodeGraphEngine)
 
+    def test_snapshot_preserves_dotfile_names_and_rejects_paths_outside_project(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / ".project-kb.yml").write_text("version: 1\n", encoding="utf-8")
+            runner = Mock(return_value=subprocess.CompletedProcess(
+                [], 0, json.dumps([{"path": ".project-kb.yml", "language": "yaml"}]), ""
+            ))
+            client = CodeGraphClient(root, ProjectConfig(codegraph_command="/usr/bin/codegraph"), runner=runner)
+            snapshot = client.snapshot()
+            self.assertEqual(snapshot["files"][0]["path"], ".project-kb.yml")
+            self.assertTrue(snapshot["files"][0]["content_hash"].startswith("sha256:"))
+
+            runner.return_value = subprocess.CompletedProcess(
+                [], 0, json.dumps([{"path": "../outside.lua", "language": "lua"}]), ""
+            )
+            with self.assertRaisesRegex(CodeGraphError, "越界"):
+                client.snapshot()
+
+    def test_snapshot_hashes_only_files_inside_configured_scope(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "src").mkdir()
+            (root / "src" / "app.lua").write_text("return true\n", encoding="utf-8")
+            runner = Mock(return_value=subprocess.CompletedProcess([], 0, json.dumps([
+                {"path": "src/app.lua", "language": "lua"},
+                {"path": "tools/missing.py", "language": "python"},
+            ]), ""))
+            config = ProjectConfig(
+                codegraph_command="/usr/bin/codegraph", include=["src/**"], exclude=["tools/**"]
+            )
+            snapshot = CodeGraphClient(root, config, runner=runner).snapshot()
+            self.assertEqual([item["path"] for item in snapshot["files"]], ["src/app.lua"])
+
 
 if __name__ == "__main__":
     unittest.main()

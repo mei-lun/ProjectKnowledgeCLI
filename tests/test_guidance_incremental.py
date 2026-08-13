@@ -72,10 +72,7 @@ class GuidanceIncrementalTests(unittest.TestCase):
     def guide_content(self):
         return {
             "basic": {"title": "登录类功能开发指导"},
-            "methodology": {
-                "analysis": ["识别身份边界"], "steps": ["扩展流程"], "invariants": ["鉴权不变量"],
-                "testing": ["失败登录"], "pitfalls": ["不信任客户端"],
-            },
+            "methodology_ref": {"id": "methodology.login", "title": "登录类功能轻量方法论"},
             "project_adaptation": {
                 "entrypoints": ["src/login.lua"], "locations": ["src"], "call_flow": ["请求到会话"],
                 "registration": ["协议注册"], "data_and_config": ["账号配置"], "steps": ["修改处理器"],

@@ -18,6 +18,11 @@ class GuidanceMCPTests(unittest.TestCase):
             "knowledge_initialization_submit", "knowledge_draft_save",
             "knowledge_draft_confirm", "knowledge_changes", "knowledge_update_submit",
         }.issubset(names))
+        draft_tool = next(item for item in TOOLS if item["name"] == "knowledge_draft_save")
+        self.assertEqual(
+            set(draft_tool["inputSchema"]["properties"]["kind"]["enum"]),
+            {"category_catalog", "methodology", "guidance"},
+        )
         for item in TOOLS[5:]:
             self.assertFalse(item["annotations"]["destructiveHint"])
         for name in {
@@ -39,6 +44,36 @@ class GuidanceMCPTests(unittest.TestCase):
                 })
                 self.assertFalse(response["result"]["isError"])
 
+    def test_runtime_validates_published_input_schema(self):
+        server = object.__new__(MCPServer)
+        server.project = Path("/tmp/project")
+        server.api = None
+        for arguments in (
+            {"changeId": "c1", "level": "unknown"},
+            {"changeId": "c1", "level": "fact", "outputPath": "/tmp/result.md"},
+        ):
+            response = server.handle({
+                "jsonrpc": "2.0", "id": 1, "method": "tools/call",
+                "params": {"name": "knowledge_update_submit", "arguments": arguments},
+            })
+            self.assertTrue(response["result"]["isError"])
+
+    def test_read_tools_publish_cross_project_and_impact_limits(self):
+        schemas = {item["name"]: item["inputSchema"] for item in TOOLS}
+        for name in {"knowledge_context", "knowledge_search", "knowledge_get", "knowledge_impact", "knowledge_status"}:
+            self.assertIn("projectPath", schemas[name]["properties"])
+            self.assertFalse(schemas[name]["additionalProperties"])
+        server = object.__new__(MCPServer)
+        server.project = Path("/tmp/project")
+        server.api = None
+        with patch("project_knowledge.mcp.KnowledgeAPI") as api:
+            api.return_value.impact.return_value = {"status": "current"}
+            server._call("knowledge_impact", {
+                "projectPath": "/tmp/other", "files": ["a.lua"],
+                "maxHops": 2, "maxRelations": 40,
+            })
+            api.return_value.impact.assert_called_once_with(["a.lua"], None, 2, 40)
+
     def test_initialization_and_draft_routes_are_explicit(self):
         server = object.__new__(MCPServer)
         server.project = Path("/tmp/project")
@@ -54,6 +89,20 @@ class GuidanceMCPTests(unittest.TestCase):
             })
             self.assertEqual(result["status"], "confirmed")
             workflow.return_value.confirm_draft.assert_called_once_with("d1", "sha256:" + "0" * 64, "mei")
+
+    def test_draft_routes_validate_against_the_live_codegraph_client(self):
+        server = object.__new__(MCPServer)
+        server.project = Path("/tmp/project")
+        server.api = None
+        with patch("project_knowledge.mcp.CodeGraphClient") as client, patch(
+            "project_knowledge.mcp.ProjectConfig.load"
+        ) as load, patch("project_knowledge.guidance_workflow.GuidanceWorkflow") as workflow:
+            workflow.return_value.save_draft.return_value = {"status": "awaiting_confirmation"}
+            server._call("knowledge_draft_save", {
+                "action": "save", "kind": "category_catalog", "runId": "run-1", "content": {"categories": []},
+            })
+            workflow.assert_called_once_with(Path("/tmp/project").resolve(), client=client.return_value)
+            load.assert_called_once_with(Path("/tmp/project").resolve())
 
     def test_save_and_reject_require_conditional_fields(self):
         server = object.__new__(MCPServer)

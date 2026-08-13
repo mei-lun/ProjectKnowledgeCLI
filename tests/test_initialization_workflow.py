@@ -88,6 +88,11 @@ class InitializationWorkflowTests(unittest.TestCase):
                 "category_id": "x", "name": "x", "purpose": "x", "confidence": .5,
                 "evidence": [{"path": "other.lua", "hash": "h"}],
             }])
+        with self.assertRaisesRegex(ValueError, "hash"):
+            workflow.submit_batch(result["run_id"], batch["batch_id"], result["snapshot_id"], [{
+                "category_id": "x", "name": "x", "purpose": "x", "confidence": .5,
+                "evidence": [{"path": "a.lua", "hash": "old"}],
+            }])
 
 
 if __name__ == "__main__":

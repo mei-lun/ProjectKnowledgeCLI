@@ -10,6 +10,7 @@ dist/
 .project-kb/index.db-*
 .project-kb/state.json
 .project-kb/write.lock
+.project-kb/watcher.lock
 .project-kb/events/
 .project-kb/logs/
 <!-- project-kb:gitignore:end -->

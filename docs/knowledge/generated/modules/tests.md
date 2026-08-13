@@ -13,6 +13,13 @@
 - `tests/test_evaluate.py`（Python）
 - `tests/test_gardenserver_rules.py`（Python）
 - `tests/test_guidance.py`（Python）
+- `tests/test_guidance_e2e.py`（Python）
+- `tests/test_guidance_incremental.py`（Python）
+- `tests/test_guidance_mcp.py`（Python）
+- `tests/test_guidance_retrieval.py`（Python）
+- `tests/test_guidance_store.py`（Python）
+- `tests/test_guidance_workflow.py`（Python）
+- `tests/test_initialization_workflow.py`（Python）
 - `tests/test_integration.py`（Python）
 - `tests/test_proposal.py`（Python）
 - `tests/test_provider.py`（Python）
@@ -33,6 +40,8 @@
 - `tests/test_codegraph.py::CodeGraphTests.test_query_status_files_and_impact_parse_public_json`：方法，位于 `tests/test_codegraph.py:22`（可信度 1.00）
 - `tests/test_codegraph.py::CodeGraphTests.test_nonzero_and_invalid_json_are_visible`：方法，位于 `tests/test_codegraph.py:40`（可信度 1.00）
 - `tests/test_codegraph.py::CodeGraphTests.test_codegraph_engine_is_selectable`：方法，位于 `tests/test_codegraph.py:48`（可信度 1.00）
+- `tests/test_codegraph.py::CodeGraphTests.test_snapshot_preserves_dotfile_names_and_rejects_paths_outside_project`：方法，位于 `tests/test_codegraph.py:52`（可信度 1.00）
+- `tests/test_codegraph.py::CodeGraphTests.test_snapshot_hashes_only_files_inside_configured_scope`：方法，位于 `tests/test_codegraph.py:70`（可信度 1.00）
 - `tests/test_config.py::ConfigTests`：类，位于 `tests/test_config.py:11`（可信度 1.00）
 - `tests/test_config.py::ConfigTests.test_config_round_trip`：方法，位于 `tests/test_config.py:12`（可信度 1.00）
 - `tests/test_config.py::ConfigTests.test_default_excludes_keep_evaluation_outputs_out_of_the_test_index`：方法，位于 `tests/test_config.py:29`（可信度 1.00）
@@ -80,16 +89,119 @@
 - `tests/test_guidance.py::GuidanceTests._root`：方法，位于 `tests/test_guidance.py:12`（可信度 1.00）
 - `tests/test_guidance.py::GuidanceTests.test_generates_three_chinese_two_layer_guides_under_project_kb`：方法，位于 `tests/test_guidance.py:23`（可信度 1.00）
 - `tests/test_guidance.py::GuidanceTests.test_manifest_records_guidance_root_and_evidence`：方法，位于 `tests/test_guidance.py:42`（可信度 1.00）
-- `tests/test_integration.py::IntegrationTests`：类，位于 `tests/test_integration.py:44`（可信度 1.00）
-- `tests/test_integration.py::IntegrationTests.setUp`：方法，位于 `tests/test_integration.py:45`（可信度 1.00）
-- `tests/test_integration.py::IntegrationTests.tearDown`：方法，位于 `tests/test_integration.py:58`（可信度 1.00）
-- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp`：方法，位于 `tests/test_integration.py:61`（可信度 1.00）
-- `tests/test_integration.py::IntegrationTests.test_dry_run_and_deleted_file_sync`：方法，位于 `tests/test_integration.py:144`（可信度 1.00）
-- `tests/test_integration.py::IntegrationTests.test_install_and_uninstall_only_remove_owned_integration`：方法，位于 `tests/test_integration.py:157`（可信度 1.00）
-- `tests/test_integration.py::IntegrationTests.test_template_is_inferred_until_human_content_replaces_marker`：方法，位于 `tests/test_integration.py:169`（可信度 1.00）
-- `tests/test_integration.py::IntegrationTests.test_commit_alignment_is_distinct_from_content_freshness`：方法，位于 `tests/test_integration.py:182`（可信度 1.00）
-- `tests/test_integration.py::IntegrationTests.test_large_module_reports_symbol_and_relation_truncation`：方法，位于 `tests/test_integration.py:203`（可信度 1.00）
-- `tests/test_integration.py::IntegrationTests.test_doctor_and_check_report_unwired_configuration`：方法，位于 `tests/test_integration.py:212`（可信度 1.00）
+- `tests/test_guidance_e2e.py::FakeCodeGraph`：类，位于 `tests/test_guidance_e2e.py:13`（可信度 1.00）
+- `tests/test_guidance_e2e.py::FakeCodeGraph.__init__`：方法，位于 `tests/test_guidance_e2e.py:16`（可信度 1.00）
+- `tests/test_guidance_e2e.py::FakeCodeGraph.snapshot`：方法，位于 `tests/test_guidance_e2e.py:20`（可信度 1.00）
+- `tests/test_guidance_e2e.py::FakeCodeGraph.source`：方法，位于 `tests/test_guidance_e2e.py:40`（可信度 1.00）
+- `tests/test_guidance_e2e.py::FakeCodeGraph.impact`：方法，位于 `tests/test_guidance_e2e.py:43`（可信度 1.00）
+- `tests/test_guidance_e2e.py::GuidanceEndToEndTests`：类，位于 `tests/test_guidance_e2e.py:47`（可信度 1.00）
+- `tests/test_guidance_e2e.py::GuidanceEndToEndTests.setUp`：方法，位于 `tests/test_guidance_e2e.py:48`（可信度 1.00）
+- `tests/test_guidance_e2e.py::GuidanceEndToEndTests.tearDown`：方法，位于 `tests/test_guidance_e2e.py:53`（可信度 1.00）
+- `tests/test_guidance_e2e.py::GuidanceEndToEndTests.call`：方法，位于 `tests/test_guidance_e2e.py:57`（可信度 1.00）
+- `tests/test_guidance_e2e.py::GuidanceEndToEndTests.run_project`：方法，位于 `tests/test_guidance_e2e.py:66`（可信度 1.00）
+- `tests/test_guidance_e2e.py::GuidanceEndToEndTests.test_two_different_project_names_follow_the_same_complete_workflow`：方法，位于 `tests/test_guidance_e2e.py:138`（可信度 1.00）
+- `tests/test_guidance_incremental.py::FakeCodeGraph`：类，位于 `tests/test_guidance_incremental.py:16`（可信度 1.00）
+- `tests/test_guidance_incremental.py::FakeCodeGraph.__init__`：方法，位于 `tests/test_guidance_incremental.py:17`（可信度 1.00）
+- `tests/test_guidance_incremental.py::FakeCodeGraph.snapshot`：方法，位于 `tests/test_guidance_incremental.py:25`（可信度 1.00）
+- `tests/test_guidance_incremental.py::FakeCodeGraph.source`：方法，位于 `tests/test_guidance_incremental.py:30`（可信度 1.00）
+- `tests/test_guidance_incremental.py::FakeCodeGraph.impact`：方法，位于 `tests/test_guidance_incremental.py:34`（可信度 1.00）
+- `tests/test_guidance_incremental.py::GuidanceIncrementalTests`：类，位于 `tests/test_guidance_incremental.py:39`（可信度 1.00）
+- `tests/test_guidance_incremental.py::GuidanceIncrementalTests.setUp`：方法，位于 `tests/test_guidance_incremental.py:40`（可信度 1.00）
+- `tests/test_guidance_incremental.py::GuidanceIncrementalTests.tearDown`：方法，位于 `tests/test_guidance_incremental.py:69`（可信度 1.00）
+- `tests/test_guidance_incremental.py::GuidanceIncrementalTests.guide_content`：方法，位于 `tests/test_guidance_incremental.py:72`（可信度 1.00）
+- `tests/test_guidance_incremental.py::GuidanceIncrementalTests.test_changes_reads_only_changed_source_and_depth_two_impact`：方法，位于 `tests/test_guidance_incremental.py:84`（可信度 1.00）
+- `tests/test_guidance_incremental.py::GuidanceIncrementalTests.test_fact_update_keeps_body_and_advances_baseline`：方法，位于 `tests/test_guidance_incremental.py:91`（可信度 1.00）
+- `tests/test_guidance_incremental.py::GuidanceIncrementalTests.test_invalid_fact_does_not_advance`：方法，位于 `tests/test_guidance_incremental.py:106`（可信度 1.00）
+- `tests/test_guidance_incremental.py::GuidanceIncrementalTests.test_guidance_confirmation_advances_change`：方法，位于 `tests/test_guidance_incremental.py:116`（可信度 1.00）
+- `tests/test_guidance_incremental.py::GuidanceIncrementalTests.test_category_confirmation_waits_for_guidance_regeneration`：方法，位于 `tests/test_guidance_incremental.py:128`（可信度 1.00）
+- `tests/test_guidance_incremental.py::GuidanceIncrementalTests.test_guidance_update_creates_reviewable_draft`：方法，位于 `tests/test_guidance_incremental.py:149`（可信度 1.00）
+- `tests/test_guidance_mcp.py::GuidanceMCPTests`：类，位于 `tests/test_guidance_mcp.py:12`（可信度 1.00）
+- `tests/test_guidance_mcp.py::GuidanceMCPTests.test_lists_seven_workflow_tools`：方法，位于 `tests/test_guidance_mcp.py:13`（可信度 1.00）
+- `tests/test_guidance_mcp.py::GuidanceMCPTests.test_server_can_start_before_project_initialization`：方法，位于 `tests/test_guidance_mcp.py:35`（可信度 1.00）
+- `tests/test_guidance_mcp.py::GuidanceMCPTests.test_runtime_validates_published_input_schema`：方法，位于 `tests/test_guidance_mcp.py:47`（可信度 1.00）
+- `tests/test_guidance_mcp.py::GuidanceMCPTests.test_read_tools_publish_cross_project_and_impact_limits`：方法，位于 `tests/test_guidance_mcp.py:61`（可信度 1.00）
+- `tests/test_guidance_mcp.py::GuidanceMCPTests.test_initialization_and_draft_routes_are_explicit`：方法，位于 `tests/test_guidance_mcp.py:77`（可信度 1.00）
+- `tests/test_guidance_mcp.py::GuidanceMCPTests.test_draft_routes_validate_against_the_live_codegraph_client`：方法，位于 `tests/test_guidance_mcp.py:93`（可信度 1.00）
+- `tests/test_guidance_mcp.py::GuidanceMCPTests.test_save_and_reject_require_conditional_fields`：方法，位于 `tests/test_guidance_mcp.py:107`（可信度 1.00）
+- `tests/test_guidance_mcp.py::GuidanceMCPTests.test_incremental_routes_are_explicit`：方法，位于 `tests/test_guidance_mcp.py:117`（可信度 1.00）
+- `tests/test_guidance_mcp.py::GuidanceMCPTests.test_tool_failure_is_error_and_server_keeps_responding`：方法，位于 `tests/test_guidance_mcp.py:137`（可信度 1.00）
+- `tests/test_guidance_retrieval.py::GuidanceRetrievalTests`：类，位于 `tests/test_guidance_retrieval.py:9`（可信度 1.00）
+- `tests/test_guidance_retrieval.py::GuidanceRetrievalTests.test_formal_guide_is_prioritized_and_pending_body_is_not_exposed`：方法，位于 `tests/test_guidance_retrieval.py:10`（可信度 1.00）
+- `tests/test_guidance_store.py::GuidanceStoreTests`：类，位于 `tests/test_guidance_store.py:36`（可信度 1.00）
+- `tests/test_guidance_store.py::GuidanceStoreTests.setUp`：方法，位于 `tests/test_guidance_store.py:37`（可信度 1.00）
+- `tests/test_guidance_store.py::GuidanceStoreTests.tearDown`：方法，位于 `tests/test_guidance_store.py:41`（可信度 1.00）
+- `tests/test_guidance_store.py::GuidanceStoreTests.test_initialize_migrates_v1_without_losing_knowledge`：方法，位于 `tests/test_guidance_store.py:44`（可信度 1.00）
+- `tests/test_guidance_store.py::GuidanceStoreTests.test_models_round_trip_and_reject_invalid_statuses`：方法，位于 `tests/test_guidance_store.py:111`（可信度 1.00）
+- `tests/test_guidance_store.py::GuidanceStoreTests.test_version_requires_real_boolean_current_flag`：方法，位于 `tests/test_guidance_store.py:139`（可信度 1.00）
+- `tests/test_guidance_store.py::GuidanceStoreTests.test_optional_foreign_ids_are_none_or_non_empty`：方法，位于 `tests/test_guidance_store.py:146`（可信度 1.00）
+- `tests/test_guidance_store.py::GuidanceStoreTests.test_optional_review_times_must_be_iso_8601`：方法，位于 `tests/test_guidance_store.py:161`（可信度 1.00）
+- `tests/test_guidance_store.py::GuidanceStoreTests.test_numeric_fields_reject_coercion_bool_and_non_finite_values`：方法，位于 `tests/test_guidance_store.py:173`（可信度 1.00）
+- `tests/test_guidance_store.py::GuidanceStoreTests.test_json_storage_rejects_non_finite_numbers`：方法，位于 `tests/test_guidance_store.py:194`（可信度 1.00）
+- `tests/test_guidance_store.py::GuidanceStoreTests.test_initialize_upgrades_early_v2_guidance_tables_without_data_loss`：方法，位于 `tests/test_guidance_store.py:203`（可信度 1.00）
+- `tests/test_guidance_store.py::GuidanceStoreTests.test_initialize_migrates_schema_v2_assets_to_project_guidance`：方法，位于 `tests/test_guidance_store.py:257`（可信度 1.00）
+- `tests/test_guidance_store.py::GuidanceStoreTests.test_initialize_rejects_future_schema_without_relabeling`：方法，位于 `tests/test_guidance_store.py:294`（可信度 1.00）
+- `tests/test_guidance_store.py::GuidanceStoreTests.test_failed_migration_rolls_back_schema_and_version`：方法，位于 `tests/test_guidance_store.py:306`（可信度 1.00）
+- `tests/test_guidance_store.py::GuidanceStoreTests.test_failed_migration_rolls_back_schema_and_version.fail_after_partial_schema`：方法，位于 `tests/test_guidance_store.py:314`（可信度 1.00）
+- `tests/test_guidance_store.py::GuidanceStoreTests.test_database_checks_reject_invalid_direct_sql`：方法，位于 `tests/test_guidance_store.py:326`（可信度 1.00）
+- `tests/test_guidance_store.py::GuidanceStoreTests.test_upserts_reject_stable_identity_changes_and_invalid_relations`：方法，位于 `tests/test_guidance_store.py:347`（可信度 1.00）
+- `tests/test_guidance_store.py::GuidanceStoreTests.test_draft_kind_category_and_version_snapshot_relations_are_consistent`：方法，位于 `tests/test_guidance_store.py:372`（可信度 1.00）
+- `tests/test_guidance_store.py::GuidanceStoreTests.test_replaying_old_version_after_promotion_is_idempotent`：方法，位于 `tests/test_guidance_store.py:390`（可信度 1.00）
+- `tests/test_guidance_store.py::GuidanceStoreTests.test_batch_upsert_is_idempotent`：方法，位于 `tests/test_guidance_store.py:401`（可信度 1.00）
+- `tests/test_guidance_store.py::GuidanceStoreTests.test_batch_id_cannot_move_to_another_run_or_ordinal`：方法，位于 `tests/test_guidance_store.py:421`（可信度 1.00）
+- `tests/test_guidance_store.py::GuidanceStoreTests.test_existing_version_is_immutable`：方法，位于 `tests/test_guidance_store.py:436`（可信度 1.00）
+- `tests/test_guidance_store.py::GuidanceStoreTests.test_category_rename_keeps_category_id`：方法，位于 `tests/test_guidance_store.py:451`（可信度 1.00）
+- `tests/test_guidance_store.py::GuidanceStoreTests.test_only_one_current_version_per_category`：方法，位于 `tests/test_guidance_store.py:465`（可信度 1.00）
+- `tests/test_guidance_store.py::GuidanceStoreTests.test_drafts_and_changes_filter_pending_records`：方法，位于 `tests/test_guidance_store.py:478`（可信度 1.00）
+- `tests/test_guidance_store.py::GuidanceStoreTests.test_transaction_rolls_back_cross_table_writes`：方法，位于 `tests/test_guidance_store.py:504`（可信度 1.00）
+- `tests/test_guidance_store.py::GuidanceStoreTests._open_guidance_store`：方法，位于 `tests/test_guidance_store.py:516`（可信度 1.00）
+- `tests/test_guidance_store.py::GuidanceStoreTests._knowledge`：方法，位于 `tests/test_guidance_store.py:520`（可信度 1.00）
+- `tests/test_guidance_store.py::GuidanceStoreTests._run`：方法，位于 `tests/test_guidance_store.py:532`（可信度 1.00）
+- `tests/test_guidance_store.py::GuidanceStoreTests._batch`：方法，位于 `tests/test_guidance_store.py:545`（可信度 1.00）
+- `tests/test_guidance_store.py::GuidanceStoreTests._category`：方法，位于 `tests/test_guidance_store.py:558`（可信度 1.00）
+- `tests/test_guidance_store.py::GuidanceStoreTests._draft`：方法，位于 `tests/test_guidance_store.py:575`（可信度 1.00）
+- `tests/test_guidance_store.py::GuidanceStoreTests._version`：方法，位于 `tests/test_guidance_store.py:590`（可信度 1.00）
+- `tests/test_guidance_store.py::GuidanceStoreTests._change`：方法，位于 `tests/test_guidance_store.py:605`（可信度 1.00）
+- `tests/test_guidance_store.py::GuidanceStoreContext`：类，位于 `tests/test_guidance_store.py:619`（可信度 1.00）
+- `tests/test_guidance_store.py::GuidanceStoreContext.__init__`：方法，位于 `tests/test_guidance_store.py:620`（可信度 1.00）
+- `tests/test_guidance_store.py::GuidanceStoreContext.__enter__`：方法，位于 `tests/test_guidance_store.py:623`（可信度 1.00）
+- `tests/test_guidance_store.py::GuidanceStoreContext.__exit__`：方法，位于 `tests/test_guidance_store.py:627`（可信度 1.00）
+- `tests/test_guidance_workflow.py::FakeClient`：类，位于 `tests/test_guidance_workflow.py:14`（可信度 1.00）
+- `tests/test_guidance_workflow.py::FakeClient.__init__`：方法，位于 `tests/test_guidance_workflow.py:15`（可信度 1.00）
+- `tests/test_guidance_workflow.py::FakeClient.snapshot`：方法，位于 `tests/test_guidance_workflow.py:18`（可信度 1.00）
+- `tests/test_guidance_workflow.py::GuidanceWorkflowTests`：类，位于 `tests/test_guidance_workflow.py:22`（可信度 1.00）
+- `tests/test_guidance_workflow.py::GuidanceWorkflowTests.setUp`：方法，位于 `tests/test_guidance_workflow.py:23`（可信度 1.00）
+- `tests/test_guidance_workflow.py::GuidanceWorkflowTests.tearDown`：方法，位于 `tests/test_guidance_workflow.py:45`（可信度 1.00）
+- `tests/test_guidance_workflow.py::GuidanceWorkflowTests.catalog`：方法，位于 `tests/test_guidance_workflow.py:49`（可信度 1.00）
+- `tests/test_guidance_workflow.py::GuidanceWorkflowTests.guide`：方法，位于 `tests/test_guidance_workflow.py:57`（可信度 1.00）
+- `tests/test_guidance_workflow.py::GuidanceWorkflowTests.methodology`：方法，位于 `tests/test_guidance_workflow.py:70`（可信度 1.00）
+- `tests/test_guidance_workflow.py::GuidanceWorkflowTests.confirm_catalog`：方法，位于 `tests/test_guidance_workflow.py:79`（可信度 1.00）
+- `tests/test_guidance_workflow.py::GuidanceWorkflowTests.test_category_catalog_requires_visible_markdown_and_hash`：方法，位于 `tests/test_guidance_workflow.py:83`（可信度 1.00）
+- `tests/test_guidance_workflow.py::GuidanceWorkflowTests.test_catalog_confirmation_and_exact_reviewed_guide`：方法，位于 `tests/test_guidance_workflow.py:91`（可信度 1.00）
+- `tests/test_guidance_workflow.py::GuidanceWorkflowTests.test_methodology_and_project_guidance_are_separate_reviewable_assets`：方法，位于 `tests/test_guidance_workflow.py:109`（可信度 1.00）
+- `tests/test_guidance_workflow.py::GuidanceWorkflowTests.test_incomplete_guide_cannot_be_confirmed`：方法，位于 `tests/test_guidance_workflow.py:144`（可信度 1.00）
+- `tests/test_guidance_workflow.py::GuidanceWorkflowTests.test_lightweight_methodology_rejects_project_leakage_and_guide_rejects_embedded_layer`：方法，位于 `tests/test_guidance_workflow.py:153`（可信度 1.00）
+- `tests/test_guidance_workflow.py::GuidanceWorkflowTests.test_reject_keeps_current_version`：方法，位于 `tests/test_guidance_workflow.py:165`（可信度 1.00）
+- `tests/test_initialization_workflow.py::FakeCodeGraph`：类，位于 `tests/test_initialization_workflow.py:12`（可信度 1.00）
+- `tests/test_initialization_workflow.py::FakeCodeGraph.__init__`：方法，位于 `tests/test_initialization_workflow.py:13`（可信度 1.00）
+- `tests/test_initialization_workflow.py::FakeCodeGraph.snapshot`：方法，位于 `tests/test_initialization_workflow.py:16`（可信度 1.00）
+- `tests/test_initialization_workflow.py::InitializationWorkflowTests`：类，位于 `tests/test_initialization_workflow.py:26`（可信度 1.00）
+- `tests/test_initialization_workflow.py::InitializationWorkflowTests.setUp`：方法，位于 `tests/test_initialization_workflow.py:27`（可信度 1.00）
+- `tests/test_initialization_workflow.py::InitializationWorkflowTests.tearDown`：方法，位于 `tests/test_initialization_workflow.py:31`（可信度 1.00）
+- `tests/test_initialization_workflow.py::InitializationWorkflowTests.test_stable_batches_resume_and_submit`：方法，位于 `tests/test_initialization_workflow.py:34`（可信度 1.00）
+- `tests/test_initialization_workflow.py::InitializationWorkflowTests.test_empty_project_is_ready`：方法，位于 `tests/test_initialization_workflow.py:54`（可信度 1.00）
+- `tests/test_initialization_workflow.py::InitializationWorkflowTests.test_new_snapshot_reuses_only_unchanged_batches`：方法，位于 `tests/test_initialization_workflow.py:59`（可信度 1.00）
+- `tests/test_initialization_workflow.py::InitializationWorkflowTests.test_rejects_wrong_snapshot_and_evidence`：方法，位于 `tests/test_initialization_workflow.py:79`（可信度 1.00）
+- `tests/test_integration.py::IntegrationTests`：类，位于 `tests/test_integration.py:53`（可信度 1.00）
+- `tests/test_integration.py::IntegrationTests.setUp`：方法，位于 `tests/test_integration.py:54`（可信度 1.00）
+- `tests/test_integration.py::IntegrationTests.tearDown`：方法，位于 `tests/test_integration.py:67`（可信度 1.00）
+- `tests/test_integration.py::IntegrationTests.test_init_sync_freshness_retrieval_and_mcp`：方法，位于 `tests/test_integration.py:70`（可信度 1.00）
+- `tests/test_integration.py::IntegrationTests.test_rebuild_preserves_complete_guidance_graph`：方法，位于 `tests/test_integration.py:153`（可信度 1.00）
+- `tests/test_integration.py::IntegrationTests.test_dry_run_and_deleted_file_sync`：方法，位于 `tests/test_integration.py:215`（可信度 1.00）
+- `tests/test_integration.py::IntegrationTests.test_install_and_uninstall_only_remove_owned_integration`：方法，位于 `tests/test_integration.py:228`（可信度 1.00）
+- `tests/test_integration.py::IntegrationTests.test_template_is_inferred_until_human_content_replaces_marker`：方法，位于 `tests/test_integration.py:240`（可信度 1.00）
+- `tests/test_integration.py::IntegrationTests.test_commit_alignment_is_distinct_from_content_freshness`：方法，位于 `tests/test_integration.py:253`（可信度 1.00）
+- `tests/test_integration.py::IntegrationTests.test_large_module_reports_symbol_and_relation_truncation`：方法，位于 `tests/test_integration.py:274`（可信度 1.00）
+- `tests/test_integration.py::IntegrationTests.test_doctor_and_check_report_unwired_configuration`：方法，位于 `tests/test_integration.py:283`（可信度 1.00）
 - `tests/test_proposal.py::ProposalTests`：类，位于 `tests/test_proposal.py:17`（可信度 1.00）
 - `tests/test_proposal.py::ProposalTests.setUp`：方法，位于 `tests/test_proposal.py:18`（可信度 1.00）
 - `tests/test_proposal.py::ProposalTests.tearDown`：方法，位于 `tests/test_proposal.py:34`（可信度 1.00）
@@ -174,71 +286,8 @@
 
 ## 结构关系
 
-> 关系内容已截断：共 1625 条，当前页面仅展示前 150 条；请使用 knowledge_impact 获取完整的任务相关子图。
+> 关系内容已截断：共 2605 条，当前页面仅展示前 150 条；请使用 knowledge_impact 获取完整的任务相关子图。
 
-- `tests/test_engine_wp01_wp02.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `tests/test_engine_wp01_wp02.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
-- `tests/test_engine_wp01_wp02.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
-- `tests/test_engine_wp01_wp02.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
-- `tests/test_provider.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `tests/test_provider.py::<module>` 导入 `io`（可信度 1.00，未解析）
-- `tests/test_provider.py::<module>` 导入 `json`（可信度 1.00，未解析）
-- `tests/test_provider.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
-- `tests/test_provider.py::<module>` 导入 `threading`（可信度 1.00，未解析）
-- `tests/test_provider.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
-- `tests/test_provider.py::<module>` 导入 `contextlib.redirect_stdout`（可信度 1.00，未解析）
-- `tests/test_provider.py::<module>` 导入 `http.server.BaseHTTPRequestHandler`（可信度 1.00，未解析）
-- `tests/test_provider.py::<module>` 导入 `http.server.ThreadingHTTPServer`（可信度 1.00，未解析）
-- `tests/test_provider.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
-- `tests/test_provider.py::<module>` 导入 `project_knowledge.cli.main`（可信度 1.00，未解析）
-- `tests/test_provider.py::<module>` 导入 `project_knowledge.provider.CLOUD_AUTHORIZATION`（可信度 1.00，未解析）
-- `tests/test_provider.py::<module>` 导入 `project_knowledge.schemas.EVIDENCE_PACK_SCHEMA`（可信度 1.00，未解析）
-- `tests/test_versioning.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `tests/test_versioning.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
-- `tests/test_versioning.py::<module>` 导入 `tomllib`（可信度 1.00，未解析）
-- `tests/test_versioning.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
-- `tests/test_versioning.py::<module>` 导入 `datetime.date`（可信度 1.00，未解析）
-- `tests/test_versioning.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
-- `tests/test_versioning.py::<module>` 导入 `project_knowledge.__version__`（可信度 1.00，未解析）
-- `tests/test_wp08.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `tests/test_wp08.py::<module>` 导入 `json`（可信度 1.00，未解析）
-- `tests/test_wp08.py::<module>` 导入 `subprocess`（可信度 1.00，未解析）
-- `tests/test_wp08.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
-- `tests/test_wp08.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
-- `tests/test_wp08.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
-- `tests/test_wp08.py::<module>` 导入 `project_knowledge.schemas.CONFIG_SCHEMA`（可信度 1.00，未解析）
-- `tests/test_wp08.py::ConfigMigrationAndClientTests.test_plugin_manifest_version_matches_core_version` 导入 `project_knowledge`（可信度 1.00，未解析）
-- `tests/test_wp02_evidence.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `tests/test_wp02_evidence.py::<module>` 导入 `io`（可信度 1.00，未解析）
-- `tests/test_wp02_evidence.py::<module>` 导入 `json`（可信度 1.00，未解析）
-- `tests/test_wp02_evidence.py::<module>` 导入 `sys`（可信度 1.00，未解析）
-- `tests/test_wp02_evidence.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
-- `tests/test_wp02_evidence.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
-- `tests/test_wp02_evidence.py::<module>` 导入 `unittest.mock`（可信度 1.00，未解析）
-- `tests/test_wp02_evidence.py::<module>` 导入 `contextlib.redirect_stdout`（可信度 1.00，未解析）
-- `tests/test_wp02_evidence.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
-- `tests/test_wp02_evidence.py::<module>` 导入 `evaluation.real_project_harness.main`（可信度 1.00，未解析）
-- `tests/test_wp02_knowledge.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `tests/test_wp02_knowledge.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
-- `tests/test_wp02_knowledge.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
-- `tests/test_wp02_knowledge.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
-- `tests/test_evaluate.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `tests/test_evaluate.py::<module>` 导入 `io`（可信度 1.00，未解析）
-- `tests/test_evaluate.py::<module>` 导入 `json`（可信度 1.00，未解析）
-- `tests/test_evaluate.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
-- `tests/test_evaluate.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
-- `tests/test_evaluate.py::<module>` 导入 `contextlib.redirect_stdout`（可信度 1.00，未解析）
-- `tests/test_evaluate.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
-- `tests/test_evaluate.py::<module>` 导入 `project_knowledge.cli.main`（可信度 1.00，未解析）
-- `tests/test_evaluate.py::<module>` 导入 `project_knowledge.evaluate.evaluate`（可信度 1.00，未解析）
-- `tests/test_watch_wp07.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `tests/test_watch_wp07.py::<module>` 导入 `json`（可信度 1.00，未解析）
-- `tests/test_watch_wp07.py::<module>` 导入 `os`（可信度 1.00，未解析）
-- `tests/test_watch_wp07.py::<module>` 导入 `subprocess`（可信度 1.00，未解析）
-- `tests/test_watch_wp07.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
-- `tests/test_watch_wp07.py::<module>` 导入 `time`（可信度 1.00，未解析）
-- `tests/test_watch_wp07.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
-- `tests/test_watch_wp07.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
 - `tests/test_codegraph.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
 - `tests/test_codegraph.py::<module>` 导入 `json`（可信度 1.00，未解析）
 - `tests/test_codegraph.py::<module>` 导入 `subprocess`（可信度 1.00，未解析）
@@ -250,10 +299,26 @@
 - `tests/test_config.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
 - `tests/test_config.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
 - `tests/test_config.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `tests/test_documentation_roadmap.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `tests/test_documentation_roadmap.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
+- `tests/test_documentation_roadmap.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
 - `tests/test_engine.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
 - `tests/test_engine.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
 - `tests/test_engine.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
 - `tests/test_engine.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `tests/test_engine_wp01_wp02.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `tests/test_engine_wp01_wp02.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
+- `tests/test_engine_wp01_wp02.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
+- `tests/test_engine_wp01_wp02.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `tests/test_evaluate.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `tests/test_evaluate.py::<module>` 导入 `io`（可信度 1.00，未解析）
+- `tests/test_evaluate.py::<module>` 导入 `json`（可信度 1.00，未解析）
+- `tests/test_evaluate.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
+- `tests/test_evaluate.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
+- `tests/test_evaluate.py::<module>` 导入 `contextlib.redirect_stdout`（可信度 1.00，未解析）
+- `tests/test_evaluate.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `tests/test_evaluate.py::<module>` 导入 `project_knowledge.cli.main`（可信度 1.00，未解析）
+- `tests/test_evaluate.py::<module>` 导入 `project_knowledge.evaluate.evaluate`（可信度 1.00，未解析）
 - `tests/test_gardenserver_rules.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
 - `tests/test_gardenserver_rules.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
 - `tests/test_gardenserver_rules.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
@@ -263,6 +328,51 @@
 - `tests/test_guidance.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
 - `tests/test_guidance.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
 - `tests/test_guidance.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `tests/test_guidance_e2e.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `tests/test_guidance_e2e.py::<module>` 导入 `hashlib`（可信度 1.00，未解析）
+- `tests/test_guidance_e2e.py::<module>` 导入 `json`（可信度 1.00，未解析）
+- `tests/test_guidance_e2e.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
+- `tests/test_guidance_e2e.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
+- `tests/test_guidance_e2e.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `tests/test_guidance_e2e.py::<module>` 导入 `unittest.mock.patch`（可信度 1.00，未解析）
+- `tests/test_guidance_incremental.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `tests/test_guidance_incremental.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
+- `tests/test_guidance_incremental.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
+- `tests/test_guidance_incremental.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `tests/test_guidance_incremental.py::FakeCodeGraph.snapshot` 导入 `hashlib`（可信度 1.00，未解析）
+- `tests/test_guidance_incremental.py::FakeCodeGraph.snapshot` 导入 `json`（可信度 1.00，未解析）
+- `tests/test_guidance_mcp.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `tests/test_guidance_mcp.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
+- `tests/test_guidance_mcp.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
+- `tests/test_guidance_mcp.py::<module>` 导入 `io.StringIO`（可信度 1.00，未解析）
+- `tests/test_guidance_mcp.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `tests/test_guidance_mcp.py::<module>` 导入 `unittest.mock.patch`（可信度 1.00，未解析）
+- `tests/test_guidance_mcp.py::<module>` 导入 `project_knowledge.mcp.TOOLS`（可信度 1.00，未解析）
+- `tests/test_guidance_retrieval.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `tests/test_guidance_retrieval.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
+- `tests/test_guidance_store.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `tests/test_guidance_store.py::<module>` 导入 `math`（可信度 1.00，未解析）
+- `tests/test_guidance_store.py::<module>` 导入 `sqlite3`（可信度 1.00，未解析）
+- `tests/test_guidance_store.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
+- `tests/test_guidance_store.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
+- `tests/test_guidance_store.py::<module>` 导入 `unittest.mock`（可信度 1.00，未解析）
+- `tests/test_guidance_store.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `tests/test_guidance_store.py::<module>` 导入 `project_knowledge.schemas.GUIDANCE_BATCH_SCHEMA`（可信度 1.00，未解析）
+- `tests/test_guidance_store.py::<module>` 导入 `project_knowledge.schemas.GUIDANCE_CATEGORY_SCHEMA`（可信度 1.00，未解析）
+- `tests/test_guidance_store.py::<module>` 导入 `project_knowledge.schemas.GUIDANCE_CHANGE_SCHEMA`（可信度 1.00，未解析）
+- `tests/test_guidance_store.py::<module>` 导入 `project_knowledge.schemas.GUIDANCE_DRAFT_SCHEMA`（可信度 1.00，未解析）
+- `tests/test_guidance_store.py::<module>` 导入 `project_knowledge.schemas.GUIDANCE_RUN_SCHEMA`（可信度 1.00，未解析）
+- `tests/test_guidance_store.py::<module>` 导入 `project_knowledge.schemas.GUIDANCE_VERSION_SCHEMA`（可信度 1.00，未解析）
+- `tests/test_guidance_workflow.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `tests/test_guidance_workflow.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
+- `tests/test_guidance_workflow.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
+- `tests/test_guidance_workflow.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `tests/test_initialization_workflow.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `tests/test_initialization_workflow.py::<module>` 导入 `hashlib`（可信度 1.00，未解析）
+- `tests/test_initialization_workflow.py::<module>` 导入 `json`（可信度 1.00，未解析）
+- `tests/test_initialization_workflow.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
+- `tests/test_initialization_workflow.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
+- `tests/test_initialization_workflow.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
 - `tests/test_integration.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
 - `tests/test_integration.py::<module>` 导入 `io`（可信度 1.00，未解析）
 - `tests/test_integration.py::<module>` 导入 `json`（可信度 1.00，未解析）
@@ -279,6 +389,19 @@
 - `tests/test_proposal.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
 - `tests/test_proposal.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
 - `tests/test_proposal.py::<module>` 导入 `project_knowledge.cli.main`（可信度 1.00，未解析）
+- `tests/test_provider.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `tests/test_provider.py::<module>` 导入 `io`（可信度 1.00，未解析）
+- `tests/test_provider.py::<module>` 导入 `json`（可信度 1.00，未解析）
+- `tests/test_provider.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
+- `tests/test_provider.py::<module>` 导入 `threading`（可信度 1.00，未解析）
+- `tests/test_provider.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
+- `tests/test_provider.py::<module>` 导入 `contextlib.redirect_stdout`（可信度 1.00，未解析）
+- `tests/test_provider.py::<module>` 导入 `http.server.BaseHTTPRequestHandler`（可信度 1.00，未解析）
+- `tests/test_provider.py::<module>` 导入 `http.server.ThreadingHTTPServer`（可信度 1.00，未解析）
+- `tests/test_provider.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `tests/test_provider.py::<module>` 导入 `project_knowledge.cli.main`（可信度 1.00，未解析）
+- `tests/test_provider.py::<module>` 导入 `project_knowledge.provider.CLOUD_AUTHORIZATION`（可信度 1.00，未解析）
+- `tests/test_provider.py::<module>` 导入 `project_knowledge.schemas.EVIDENCE_PACK_SCHEMA`（可信度 1.00，未解析）
 - `tests/test_retrieval_wp06.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
 - `tests/test_retrieval_wp06.py::<module>` 导入 `subprocess`（可信度 1.00，未解析）
 - `tests/test_retrieval_wp06.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
@@ -303,26 +426,15 @@
 - `tests/test_single_directory.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
 - `tests/test_single_directory.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
 - `tests/test_single_directory.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
-- `tests/test_documentation_roadmap.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `tests/test_documentation_roadmap.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
-- `tests/test_documentation_roadmap.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
-- `tests/test_engine_wp01_wp02.py::EngineContractAndLuaTests` 继承 `unittest.TestCase`（可信度 0.95，未解析）
-- `tests/test_provider.py::ProviderTests` 继承 `unittest.TestCase`（可信度 0.95，未解析）
-- `tests/test_provider.py::ProviderTests.test_default_http_transport_calls_explicitly_enabled_loopback_provider.Handler` 继承 `BaseHTTPRequestHandler`（可信度 0.95，未解析）
-- `tests/test_versioning.py::VersioningTests` 继承 `unittest.TestCase`（可信度 0.95，未解析）
-- `tests/test_wp08.py::ConfigMigrationAndClientTests` 继承 `unittest.TestCase`（可信度 0.95，未解析）
-- `tests/test_wp02_evidence.py::LuaSkynetEvidenceWP02Tests` 继承 `unittest.TestCase`（可信度 0.95，未解析）
-- `tests/test_wp02_knowledge.py::LuaEntrypointKnowledgeTests` 继承 `unittest.TestCase`（可信度 0.95，未解析）
-- `tests/test_evaluate.py::EvaluationTests` 继承 `unittest.TestCase`（可信度 0.95，未解析）
-- `tests/test_watch_wp07.py::WatchWP07Tests` 继承 `unittest.TestCase`（可信度 0.95，未解析）
-- `tests/test_codegraph.py::CodeGraphTests` 继承 `unittest.TestCase`（可信度 0.95，未解析）
-- `tests/test_config.py::ConfigTests` 继承 `unittest.TestCase`（可信度 0.95，未解析）
-- `tests/test_engine.py::EngineTests` 继承 `unittest.TestCase`（可信度 0.95，未解析）
-- `tests/test_gardenserver_rules.py::GardenserverRuleTests` 继承 `unittest.TestCase`（可信度 0.95，未解析）
-- `tests/test_guidance.py::GuidanceTests` 继承 `unittest.TestCase`（可信度 0.95，未解析）
-- `tests/test_integration.py::IntegrationTests` 继承 `unittest.TestCase`（可信度 0.95，未解析）
-- `tests/test_proposal.py::ProposalTests` 继承 `unittest.TestCase`（可信度 0.95，未解析）
-- `tests/test_retrieval_wp06.py::RetrievalWP06Tests` 继承 `unittest.TestCase`（可信度 0.95，未解析）
-- `tests/test_schemas.py::SchemaTests` 继承 `unittest.TestCase`（可信度 0.95，未解析）
-- `tests/test_semantic.py::SemanticKnowledgeTests` 继承 `unittest.TestCase`（可信度 0.95，未解析）
-- `tests/test_single_directory.py::SingleDirectoryTests` 继承 `unittest.TestCase`（可信度 0.95，未解析）
+- `tests/test_versioning.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `tests/test_versioning.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
+- `tests/test_versioning.py::<module>` 导入 `tomllib`（可信度 1.00，未解析）
+- `tests/test_versioning.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
+- `tests/test_versioning.py::<module>` 导入 `datetime.date`（可信度 1.00，未解析）
+- `tests/test_versioning.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `tests/test_versioning.py::<module>` 导入 `project_knowledge.__version__`（可信度 1.00，未解析）
+- `tests/test_watch_wp07.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `tests/test_watch_wp07.py::<module>` 导入 `json`（可信度 1.00，未解析）
+- `tests/test_watch_wp07.py::<module>` 导入 `os`（可信度 1.00，未解析）
+- `tests/test_watch_wp07.py::<module>` 导入 `subprocess`（可信度 1.00，未解析）
+- `tests/test_watch_wp07.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）

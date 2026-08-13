@@ -5,7 +5,7 @@
 | 测试文件 | 模块 | 测试类符号数 |
 | --- | --- | ---: |
 | `tests/__init__.py` | tests | 0 |
-| `tests/test_codegraph.py` | tests | 5 |
+| `tests/test_codegraph.py` | tests | 7 |
 | `tests/test_config.py` | tests | 7 |
 | `tests/test_documentation_roadmap.py` | tests | 7 |
 | `tests/test_engine.py` | tests | 9 |
@@ -13,7 +13,14 @@
 | `tests/test_evaluate.py` | tests | 12 |
 | `tests/test_gardenserver_rules.py` | tests | 4 |
 | `tests/test_guidance.py` | tests | 4 |
-| `tests/test_integration.py` | tests | 9 |
+| `tests/test_guidance_e2e.py` | tests | 3 |
+| `tests/test_guidance_incremental.py` | tests | 8 |
+| `tests/test_guidance_mcp.py` | tests | 11 |
+| `tests/test_guidance_retrieval.py` | tests | 3 |
+| `tests/test_guidance_store.py` | tests | 24 |
+| `tests/test_guidance_workflow.py` | tests | 8 |
+| `tests/test_initialization_workflow.py` | tests | 6 |
+| `tests/test_integration.py` | tests | 10 |
 | `tests/test_proposal.py` | tests | 9 |
 | `tests/test_provider.py` | tests | 12 |
 | `tests/test_retrieval_wp06.py` | tests | 6 |

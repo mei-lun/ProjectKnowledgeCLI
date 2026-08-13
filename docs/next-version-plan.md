@@ -1,6 +1,6 @@
 # 下一功能版本计划：0.1.22
 
-> 当前文档与版本为 0.1.21；0.1.22 实现已经逐节确认的 MCP AI 客户端驱动通用开发指导闭环。完整设计见[设计规格](superpowers/specs/2026-08-12-ai-client-development-guidance-design.md)。
+> 本文是 0.1.22 的实现与验收基线；实现代码已在 `codex/ai-guidance-workflow` 工作树完成，gardenserver 的独立草稿仍等待用户审核。完整设计见[设计规格](superpowers/specs/2026-08-12-ai-client-development-guidance-design.md)。
 
 ## 版本目标
 
@@ -25,7 +25,7 @@
 | AI 位置 | 分析和沟通由 MCP AI 客户端负责，PKS 不调用内置 ModelProvider |
 | 事实来源 | CodeGraph 公共 CLI/API；PKS 不重写 CodeGraph |
 | 首次初始化 | 全项目覆盖、分层分批、简单断点继续 |
-| 审核顺序 | 先确认分类目录，再逐份确认两层指导 |
+| 审核顺序 | 先确认分类目录，再分别审核轻量方法论与项目事实指导；两者互不隐式确认 |
 | 审核载体 | 必须生成可点击中文 Markdown，不能只在聊天中描述 |
 | 正式来源 | KnowledgeStore 唯一正式；Markdown 是审核和阅读投影 |
 | 生成位置 | 新文件全部直接位于目标项目 .project-kb 根目录 |
@@ -49,7 +49,7 @@
 | 2 | NV-INIT-001 | 临时项目可分批扫描、恢复并生成分类草稿 |
 | 3 | NV-MCP-001 | AI 客户端可完成两阶段审核并精确入库 |
 | 4 | NV-INCR-001 | 增删改代码触发正确等级且不重扫源码 |
-| 5 | NV-VERIFY-001 | gardenserver 可见草稿和真实增量验收通过 |
+| 5 | NV-VERIFY-001 | 临时项目与 gardenserver 真实增量验证通过；最终正式入库仍以用户审核为准 |
 
 每项先补正负测试或评测样本，再实现行为。字段、配置、空接口或静态样例不能作为完成证据。
 

@@ -5,10 +5,12 @@
 ## 文件
 
 - `scripts/bump_version.py`（Python）
+- `scripts/validate_gardenserver_guidance_workflow.py`（Python）
 
 ## 符号
 
-- 未检测到符号
+- `scripts/validate_gardenserver_guidance_workflow.py::business_fingerprint`：函数，位于 `scripts/validate_gardenserver_guidance_workflow.py:19`（可信度 1.00）
+- `scripts/validate_gardenserver_guidance_workflow.py::main`：函数，位于 `scripts/validate_gardenserver_guidance_workflow.py:33`（可信度 1.00）
 
 ## 结构关系
 
@@ -16,9 +18,87 @@
 - `scripts/bump_version.py::<module>` 导入 `sys`（可信度 1.00，未解析）
 - `scripts/bump_version.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
 - `scripts/bump_version.py::<module>` 导入 `project_knowledge.versioning.main`（可信度 1.00，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::<module>` 导入 `hashlib`（可信度 1.00，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::<module>` 导入 `json`（可信度 1.00，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::<module>` 导入 `os`（可信度 1.00，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::<module>` 导入 `sys`（可信度 1.00，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::<module>` 导入 `src/project_knowledge/codegraph.py::CodeGraphClient`（可信度 0.90，已解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::<module>` 导入 `src/project_knowledge/config.py::ProjectConfig`（可信度 0.90，已解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::<module>` 导入 `src/project_knowledge/guidance_store.py::GuidanceStore`（可信度 0.90，已解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::<module>` 导入 `src/project_knowledge/initialization.py::InitializationWorkflow`（可信度 0.90，已解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::<module>` 导入 `src/project_knowledge/store.py::KnowledgeStore`（可信度 0.90，已解析）
 - `scripts/bump_version.py::<module>` 调用 `src/project_knowledge/codegraph.py::CodeGraphCommandResolver.resolve`（可信度 0.80，已解析）
 - `scripts/bump_version.py::<module>` 调用 `Path`（可信度 0.80，未解析）
 - `scripts/bump_version.py::<module>` 调用 `sys.path.insert`（可信度 0.80，未解析）
 - `scripts/bump_version.py::<module>` 调用 `str`（可信度 0.80，未解析）
 - `scripts/bump_version.py::<module>` 调用 `SystemExit`（可信度 0.80，未解析）
 - `scripts/bump_version.py::<module>` 调用 `main`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::business_fingerprint` 调用 `hashlib.sha256`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::business_fingerprint` 调用 `sorted`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::business_fingerprint` 调用 `root.rglob`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::business_fingerprint` 调用 `path.is_file`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::business_fingerprint` 调用 `intersection`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::business_fingerprint` 调用 `set`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::business_fingerprint` 调用 `path.relative_to`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::business_fingerprint` 调用 `as_posix`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::business_fingerprint` 调用 `path.relative_to`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::business_fingerprint` 调用 `digest.update`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::business_fingerprint` 调用 `relative.encode`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::business_fingerprint` 调用 `digest.update`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::business_fingerprint` 调用 `digest.update`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::business_fingerprint` 调用 `digest`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::business_fingerprint` 调用 `hashlib.sha256`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::business_fingerprint` 调用 `path.read_bytes`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::business_fingerprint` 调用 `digest.hexdigest`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `strip`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `os.environ.get`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `print`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `src/project_knowledge/codegraph.py::CodeGraphCommandResolver.resolve`（可信度 0.80，已解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `Path`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `root.is_dir`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `print`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `scripts/validate_gardenserver_guidance_workflow.py::business_fingerprint`（可信度 0.80，已解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `src/project_knowledge/config.py::ProjectConfig.load`（可信度 0.80，已解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `src/project_knowledge/codegraph.py::CodeGraphClient`（可信度 0.80，已解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `client.status`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `client.snapshot`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `src/project_knowledge/initialization.py::InitializationWorkflow`（可信度 0.80，已解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `src/project_knowledge/initialization.py::InitializationWorkflow.start`（可信度 0.80，已解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `src/project_knowledge/initialization.py::InitializationWorkflow.next_batch`（可信度 0.80，已解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `src/project_knowledge/store.py::KnowledgeStore`（可信度 0.80，已解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `src/project_knowledge/guidance_store.py::GuidanceStore`（可信度 0.80，已解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `src/project_knowledge/guidance_store.py::GuidanceStore.list_pending_drafts`（可信度 0.80，已解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `scripts/validate_gardenserver_guidance_workflow.py::business_fingerprint`（可信度 0.80，已解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `RuntimeError`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `codegraph_status.get`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `RuntimeError`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `codegraph_status.get`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `RuntimeError`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `codegraph_status.get`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `RuntimeError`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `next_batch.get`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `next_batch.get`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `RuntimeError`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `Path`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `path.relative_to`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `path.is_file`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `RuntimeError`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `str`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `codegraph_status.get`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `codegraph_status.get`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `codegraph_status.get`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `codegraph_status.get`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `codegraph_status.get`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `len`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `len`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `next_batch.get`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `get`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `next_batch.get`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `len`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `next_batch.get`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `print`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `json.dumps`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::<module>` 调用 `SystemExit`（可信度 0.80，未解析）
+- `scripts/validate_gardenserver_guidance_workflow.py::<module>` 调用 `main`（可信度 0.80，未解析）

@@ -1,0 +1,75 @@
+{
+  "$id": "https://project-kb.local/schema/guidance-version-v2.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "asset_type": {
+      "enum": [
+        "methodology",
+        "project_guidance"
+      ]
+    },
+    "category_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "content": {
+      "type": "string"
+    },
+    "content_hash": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "created_at": {
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$",
+      "type": "string"
+    },
+    "draft_id": {
+      "minLength": 1,
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "evidence": {
+      "items": {
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "is_current": {
+      "type": "boolean"
+    },
+    "snapshot_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "title": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "version": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "version_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "version_id",
+    "category_id",
+    "version",
+    "title",
+    "content",
+    "content_hash",
+    "snapshot_id",
+    "evidence",
+    "is_current",
+    "created_at",
+    "draft_id",
+    "asset_type"
+  ],
+  "type": "object"
+}

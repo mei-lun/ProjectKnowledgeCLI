@@ -1,0 +1,82 @@
+{
+  "$id": "https://project-kb.local/schema/config-v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "index": {
+      "additionalProperties": true,
+      "properties": {
+        "codegraph_command": {
+          "type": "string"
+        },
+        "codegraph_dir": {
+          "pattern": "^[A-Za-z0-9._-]+$",
+          "type": "string"
+        },
+        "codegraph_timeout_seconds": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "engine": {
+          "enum": [
+            "builtin",
+            "codegraph"
+          ]
+        },
+        "exclude": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "include": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "knowledge": {
+      "additionalProperties": true,
+      "type": "object"
+    },
+    "privacy": {
+      "additionalProperties": true,
+      "type": "object"
+    },
+    "project": {
+      "additionalProperties": true,
+      "properties": {
+        "name": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "provider": {
+      "additionalProperties": true,
+      "type": "object"
+    },
+    "retrieval": {
+      "additionalProperties": true,
+      "type": "object"
+    },
+    "updates": {
+      "additionalProperties": true,
+      "type": "object"
+    },
+    "version": {
+      "enum": [
+        0,
+        1
+      ]
+    }
+  },
+  "required": [
+    "version"
+  ],
+  "type": "object"
+}

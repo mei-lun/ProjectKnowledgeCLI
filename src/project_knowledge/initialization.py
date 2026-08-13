@@ -123,12 +123,14 @@ class InitializationWorkflow:
                 raise KeyError(f"批次不存在：{batch_id}")
             if snapshot_id != run.snapshot_id or snapshot_id != batch.snapshot_id:
                 raise ValueError("提交快照与运行不一致")
+            snapshot = self.client.snapshot()
+            if snapshot["snapshot_id"] != run.snapshot_id:
+                raise ValueError("CodeGraph 快照已变化，请重新开始初始化")
+            hashes = {item["path"]: item["content_hash"] for item in snapshot["files"]}
             for candidate in candidates:
-                self._validate_candidate(candidate, set(batch.files))
+                self._validate_candidate(candidate, set(batch.files), hashes)
             now = utc_now()
             batch.status = "failed" if error else "completed"
-            snapshot = self.client.snapshot()
-            hashes = {item["path"]: item["content_hash"] for item in snapshot["files"]}
             batch.result = {
                 "candidates": candidates,
                 "file_hashes": {path: hashes[path] for path in batch.files if path in hashes},
@@ -171,7 +173,9 @@ class InitializationWorkflow:
         )
 
     @staticmethod
-    def _validate_candidate(candidate: dict[str, Any], batch_files: set[str]) -> None:
+    def _validate_candidate(
+        candidate: dict[str, Any], batch_files: set[str], snapshot_hashes: dict[str, str]
+    ) -> None:
         required = ("category_id", "name", "purpose", "evidence", "confidence")
         missing = [name for name in required if name not in candidate]
         if missing:
@@ -183,5 +187,8 @@ class InitializationWorkflow:
         if not isinstance(evidence, list) or not evidence:
             raise ValueError("候选类别必须包含证据")
         for item in evidence:
-            if not isinstance(item, dict) or item.get("path") not in batch_files or not item.get("hash"):
+            if not isinstance(item, dict) or item.get("path") not in batch_files:
                 raise ValueError("候选类别证据必须属于当前批次并包含 hash")
+            path = str(item["path"])
+            if item.get("hash") != snapshot_hashes.get(path):
+                raise ValueError(f"候选类别证据 hash 与当前 CodeGraph 快照不一致：{path}")

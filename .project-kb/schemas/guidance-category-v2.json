@@ -1,0 +1,84 @@
+{
+  "$id": "https://project-kb.local/schema/guidance-category-v2.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "applies_to": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "category_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "confidence": {
+      "maximum": 1,
+      "minimum": 0,
+      "type": "number"
+    },
+    "created_at": {
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$",
+      "type": "string"
+    },
+    "evidence": {
+      "items": {
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "excludes": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "name": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "purpose": {
+      "type": "string"
+    },
+    "relations": {
+      "items": {
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "run_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "samples": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "unknowns": {
+      "type": "array"
+    },
+    "updated_at": {
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "category_id",
+    "run_id",
+    "name",
+    "purpose",
+    "applies_to",
+    "excludes",
+    "samples",
+    "evidence",
+    "confidence",
+    "unknowns",
+    "created_at",
+    "updated_at",
+    "relations"
+  ],
+  "type": "object"
+}

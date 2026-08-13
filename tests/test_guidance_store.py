@@ -79,7 +79,7 @@ class GuidanceStoreTests(unittest.TestCase):
 
         with KnowledgeStore(self.db_path) as store:
             store.initialize()
-            self.assertEqual(store.get_meta("schema_version"), "2")
+            self.assertEqual(store.get_meta("schema_version"), "3")
             self.assertEqual(store.get_knowledge("existing.knowledge"), self._knowledge())
             tables = {
                 row[0]
@@ -254,17 +254,54 @@ class GuidanceStoreTests(unittest.TestCase):
             self.assertEqual(actual["guidance_changes"][0]["change_id"], "change-stable")
             self.assertTrue(GuidanceStore(store).current_version("category-stable").is_current)
 
+    def test_initialize_migrates_schema_v2_assets_to_project_guidance(self) -> None:
+        with KnowledgeStore(self.db_path) as store:
+            store.initialize()
+            guidance = GuidanceStore(store)
+            with store.transaction():
+                guidance.create_run(self._run())
+                guidance.save_category(self._category())
+                guidance.save_draft(self._draft())
+                guidance.save_version(self._version("version-1", 1, True))
+            graph = store.export_guidance_graph()
+            for row in graph["guidance_versions"]:
+                row.pop("asset_type", None)
+            store.connection.execute("PRAGMA foreign_keys = OFF")
+            for table in (
+                "guidance_versions", "guidance_drafts", "guidance_batches",
+                "guidance_categories", "guidance_changes", "guidance_runs",
+            ):
+                store.connection.execute(f"DROP TABLE {table}")
+            store.connection.executescript("""
+                CREATE TABLE guidance_runs (run_id TEXT PRIMARY KEY, project_root TEXT NOT NULL, snapshot_id TEXT NOT NULL, status TEXT NOT NULL, total_files INTEGER NOT NULL, covered_files INTEGER NOT NULL, uncovered_files_json TEXT NOT NULL, error TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
+                CREATE TABLE guidance_batches (batch_id TEXT PRIMARY KEY, run_id TEXT NOT NULL, ordinal INTEGER NOT NULL, status TEXT NOT NULL, files_json TEXT NOT NULL, snapshot_id TEXT NOT NULL, result_json TEXT, error TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
+                CREATE TABLE guidance_categories (category_id TEXT PRIMARY KEY, run_id TEXT NOT NULL, name TEXT NOT NULL, purpose TEXT NOT NULL, applies_to_json TEXT NOT NULL, excludes_json TEXT NOT NULL, samples_json TEXT NOT NULL, evidence_json TEXT NOT NULL, confidence REAL NOT NULL, unknowns_json TEXT NOT NULL, relations_json TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
+                CREATE TABLE guidance_drafts (draft_id TEXT PRIMARY KEY, run_id TEXT NOT NULL, category_id TEXT, kind TEXT NOT NULL CHECK(kind IN ('category_catalog', 'guidance')), status TEXT NOT NULL, path TEXT NOT NULL, content_hash TEXT NOT NULL, snapshot_id TEXT NOT NULL, payload_json TEXT NOT NULL, rejection_reason TEXT, confirmed_at TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
+                CREATE TABLE guidance_versions (version_id TEXT PRIMARY KEY, category_id TEXT NOT NULL, draft_id TEXT, version INTEGER NOT NULL, title TEXT NOT NULL, content TEXT NOT NULL, content_hash TEXT NOT NULL, snapshot_id TEXT NOT NULL, evidence_json TEXT NOT NULL, is_current INTEGER NOT NULL, created_at TEXT NOT NULL);
+                CREATE TABLE guidance_changes (change_id TEXT PRIMARY KEY, project_root TEXT NOT NULL, base_snapshot_id TEXT NOT NULL, head_snapshot_id TEXT NOT NULL, update_level TEXT NOT NULL, changed_files_json TEXT NOT NULL, affected_categories_json TEXT NOT NULL, payload_json TEXT NOT NULL, created_at TEXT NOT NULL, processed_at TEXT);
+            """)
+            store.import_guidance_graph(graph)
+            store.set_meta("schema_version", "2")
+            store.connection.execute("PRAGMA foreign_keys = ON")
+            store.connection.commit()
+
+            store.initialize()
+            migrated = GuidanceStore(store).current_version("category-stable")
+            self.assertEqual(migrated.version_id, "version-1")
+            self.assertEqual(migrated.asset_type, "project_guidance")
+            self.assertIsNone(GuidanceStore(store).current_version("category-stable", "methodology"))
+
     def test_initialize_rejects_future_schema_without_relabeling(self) -> None:
         connection = sqlite3.connect(self.db_path)
         connection.executescript(
             "CREATE TABLE metadata(key TEXT PRIMARY KEY, value TEXT NOT NULL);"
-            "INSERT INTO metadata VALUES('schema_version', '3');"
+            "INSERT INTO metadata VALUES('schema_version', '4');"
         )
         connection.close()
         with KnowledgeStore(self.db_path) as store:
             with self.assertRaises(RuntimeError):
                 store.initialize()
-            self.assertEqual(store.get_meta("schema_version"), "3")
+            self.assertEqual(store.get_meta("schema_version"), "4")
 
     def test_failed_migration_rolls_back_schema_and_version(self) -> None:
         connection = sqlite3.connect(self.db_path)

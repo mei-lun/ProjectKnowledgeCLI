@@ -355,7 +355,7 @@ RUN_STATUS_VALUES = [
     "guidance_generation", "guidance_review", "complete", "failed",
 ]
 BATCH_STATUS_VALUES = ["pending", "completed", "failed"]
-DRAFT_KIND_VALUES = ["category_catalog", "guidance"]
+DRAFT_KIND_VALUES = ["category_catalog", "methodology", "guidance"]
 DRAFT_STATUS_VALUES = [
     "incomplete", "awaiting_confirmation", "confirmed", "rejected",
 ]
@@ -476,7 +476,7 @@ GUIDANCE_VERSION_SCHEMA: dict[str, Any] = {
     "required": [
         "version_id", "category_id", "version", "title", "content",
         "content_hash", "snapshot_id", "evidence", "is_current", "created_at",
-        "draft_id",
+        "draft_id", "asset_type",
     ],
     "properties": {
         "version_id": {"type": "string", "minLength": 1},
@@ -490,6 +490,7 @@ GUIDANCE_VERSION_SCHEMA: dict[str, Any] = {
         "is_current": {"type": "boolean"},
         "created_at": ISO_TIME_SCHEMA,
         "draft_id": {"type": ["string", "null"], "minLength": 1},
+        "asset_type": {"enum": ["methodology", "project_guidance"]},
     },
     "additionalProperties": False,
 }

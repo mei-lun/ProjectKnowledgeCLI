@@ -4,7 +4,7 @@ PKS 是本地优先的项目级知识库：复用 CodeGraph 获取代码事实�
 
 | 项目 | 当前状态 |
 | --- | --- |
-| 版本 | `0.1.21` |
+| 版本 | `0.1.22` |
 | 环境 | Python 3.11+；默认本地、禁网、无遥测 |
 | 代码事实 | CodeGraph 1.5 公共 CLI/API，不读私有数据库 |
 | 知识目录 | PKS 产物统一在 `.project-kb/` |
@@ -19,7 +19,7 @@ PKS 是本地优先的项目级知识库：复用 CodeGraph 获取代码事实�
 | 健康与新鲜度 | 已完成 | pending、stale、提交对齐、watcher 健康 |
 | CodeGraph Adapter | 已完成 | init、sync、查询、调用链、影响和测试影响接口 |
 | Lua/Skynet/zn 证据 | 已完成首版 | require、启动、RPC、消息、Avatar、配置规则 |
-| 两层开发指导 | 已完成首版 | 可迁移方法论 + gardenserver 项目适配 |
+| 两层开发指导 | 已完成实现 | 轻量方法论与项目事实指导分离，分别审核、版本化和渲染 |
 | 中文指导 | 已完成 | 普通活动、普通玩家功能、登录模块 |
 | MCP | 已完成基础版 | context、search、get、impact、status |
 | 来源追踪 | 已完成基础版 | 文件、符号、行号和哈希，新鲜度可见 |
@@ -59,10 +59,10 @@ PKS 是本地优先的项目级知识库：复用 CodeGraph 获取代码事实�
 
 | 路径 | 用途 | 所有权/维护建议 |
 | --- | --- | --- |
-| `generated/` | 项目地图、入口、测试地图和三类中文开发指导 | PKS 自动覆盖，不手工修改 |
+| `generated/` | 项目地图、入口、测试地图和审核后的中文指导 | PKS 自动覆盖，不手工修改 |
 | `evidence/` | CodeGraph 和源码规则采集的结构化事实证据 | PKS 自动生成；排查指导来源时读取 |
-| `methodology/` | 第一层“可迁移方法论”的结构化 JSON | PKS 管理；未来需通过审核治理提升 |
-| `guides/` | 第二层“当前项目适配”的结构化 JSON | PKS 随代码同步更新 |
+| `methodology/` | 轻量、可迁移的方法论草稿与正式版本 | 独立审核；由用户沟通后逐步完善 |
+| `guides/` | 第二层当前项目事实指导 | 随代码证据增量更新；引用方法论但不嵌入方法论正文 |
 | `drafts/` | 模型或工具生成、尚未人工确认的语义草案 | PKS 写入；审核后通过 Proposal 提升 |
 | `curated/` | 人工维护和已审核的项目知识 | 用户/团队维护；PKS 不静默覆盖人工正文 |
 | `decisions/` | ADR 等架构决策文档 | 用户/团队审核；PKS 只允许受控追加草案 |
@@ -93,9 +93,8 @@ PKS 是本地优先的项目级知识库：复用 CodeGraph 获取代码事实�
 | `.project-kb/manifest.json` | 来源、新鲜度和知识清单 |
 | `.project-kb/generated/项目地图.md` | 项目结构概览 |
 | `.project-kb/generated/开发指导索引.md` | 指导入口 |
-| `.project-kb/generated/普通活动开发.md` | 活动类两层指导 |
-| `.project-kb/generated/普通玩家功能开发.md` | 玩家功能两层指导 |
-| `.project-kb/generated/登录模块开发.md` | 登录类两层指导 |
+| `.project-kb/generated/<类别>-方法论.md` | 审核后的轻量可迁移方法论 |
+| `.project-kb/generated/<类别>-项目事实指导.md` | 审核后的当前项目事实指导 |
 | `.codegraph/` | CodeGraph 1.5 要求的运行时索引 |
 
 ## gardenserver 实测
@@ -106,7 +105,7 @@ PKS 是本地优先的项目级知识库：复用 CodeGraph 获取代码事实�
 
 ## 快速开始
 
-当前版本只提供已有的本地索引兼容流程和五个只读知识工具：
+当前版本提供本地索引兼容流程，以及 MCP 驱动的类别发现、草稿审核和指导查询：
 
 ```bash
 python -m pip install -e .
@@ -115,7 +114,7 @@ project-kb status /path/to/repository
 project-kb mcp --project /path/to/repository
 ```
 
-0.1.22 计划中的“CodeGraph 更新事实，MCP AI 客户端自动发现类别、生成可审核指导并确认入库”尚未实现，不能把上述命令理解为新开发指导工作流已经可用。`watch` 仍为旧兼容命令，但不再是推荐流程，也不属于下一版本架构。
+指导草稿通过 MCP 分析 CodeGraph 事实后生成；用户先确认分类目录，再分别审核方法论和项目事实指导。两类资产独立确认、独立版本化，项目代码变化只触发事实指导更新。`watch` 仍保留为旧兼容命令。
 
 ## 常用入口
 
@@ -123,7 +122,7 @@ project-kb mcp --project /path/to/repository
 | --- | --- |
 | `init / sync / rebuild` | 旧版兼容的本地索引建库与显式同步 |
 | `status / check / doctor` | 查看当前索引与知识状态 |
-| `mcp` | 启动当前五个只读知识工具 |
+| `mcp` | 启动知识查询、指导分析、草稿提交/确认和增量状态工具 |
 | `watch` | 旧版 PKS 文件监听兼容命令；新架构不使用 |
 | `generate / feature-candidates` | 旧版语义草案和候选域流程 |
 | `propose / apply / reject` | 旧版受控知识提案流程 |
@@ -132,9 +131,8 @@ project-kb mcp --project /path/to/repository
 
 | 限制 | 后续 |
 | --- | --- |
-| 三类指导尚未注册为 KnowledgeRecord，MCP 召回未验收 | `0.1.22` P0 |
-| 指导刷新目前只对 gardenserver 启用 | `0.1.22` P0 |
-| 第二层仍偏事实罗列，步骤/不变量/测试/回滚不足 | `0.1.22` P0 |
+| gardenserver 的 5 个业务类别仍有待用户确认的独立草稿 | 本批交付前置审核 |
+| 方法论初版保持轻量，需用户二次沟通后逐步完善 | 持续治理 |
 | `watch` 属于旧兼容流程，不是下一版本的自动更新方案 | 由 CodeGraph 更新事实，AI 客户端在 MCP 参与时增量处理 |
 | CodeGraph 必须使用独立 `.codegraph/` | 上游 1.5 限制 |
 | Lua 动态调用可能漏边 | 未来运行时证据 |

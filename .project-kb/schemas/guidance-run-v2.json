@@ -1,0 +1,71 @@
+{
+  "$id": "https://project-kb.local/schema/guidance-run-v2.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "covered_files": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "created_at": {
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$",
+      "type": "string"
+    },
+    "error": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "project_root": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "run_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "snapshot_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "scanning",
+        "category_review",
+        "categories_confirmed",
+        "guidance_generation",
+        "guidance_review",
+        "complete",
+        "failed"
+      ]
+    },
+    "total_files": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "uncovered_files": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "updated_at": {
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "run_id",
+    "project_root",
+    "snapshot_id",
+    "status",
+    "total_files",
+    "covered_files",
+    "created_at",
+    "updated_at",
+    "uncovered_files",
+    "error"
+  ],
+  "type": "object"
+}

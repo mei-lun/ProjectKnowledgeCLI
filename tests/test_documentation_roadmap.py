@@ -11,7 +11,7 @@ class DocumentationRoadmapTests(unittest.TestCase):
         cls.readme = (cls.root / "README.md").read_text(encoding="utf-8")
 
     def test_readme_reports_current_release_and_codegraph_state(self) -> None:
-        self.assertIn("0.1.21", self.readme)
+        self.assertIn("0.1.22", self.readme)
         self.assertIn("CodeGraph", self.readme)
         self.assertIn("已完成", self.readme)
         self.assertIn(".project-kb/generated", self.readme)
@@ -21,9 +21,9 @@ class DocumentationRoadmapTests(unittest.TestCase):
     def test_quick_start_does_not_recommend_legacy_watcher(self) -> None:
         quick_start = self.readme.split("## 快速开始", 1)[1].split("## 常用入口", 1)[0]
         self.assertNotIn("project-kb watch /path/to/repository", quick_start)
-        self.assertIn("五个只读知识工具", quick_start)
-        self.assertIn("0.1.22", quick_start)
-        self.assertIn("尚未实现", quick_start)
+        self.assertIn("MCP", quick_start)
+        self.assertIn("分别审核方法论和项目事实指导", quick_start)
+        self.assertNotIn("尚未实现", quick_start)
 
     def test_readme_links_current_next_and_future_documents(self) -> None:
         self.assertIn("docs/next-version-plan.md", self.readme)
