@@ -551,7 +551,7 @@ def _retrieve(api: KnowledgeAPI, sample: dict[str, Any], strategy: str) -> dict[
             for path, record_id in _novel_ranked_paths(
                 ranked_paths,
                 set(selection_reasons),
-                limit=8,
+                limit=2,
             ):
                 select(path, "knowledge_source", record_id)
         call_path = set(symbols)

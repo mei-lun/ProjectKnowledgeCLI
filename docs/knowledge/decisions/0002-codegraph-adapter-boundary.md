@@ -18,7 +18,7 @@
 
 1. `CodeIndexEngine` 的公共契约固定为 `initialize`、`sync`、`search_symbols`、`get_source`、`trace`、`impact`、`affected_tests`、`capabilities` 与 `health`。
 2. `BuiltinCodeIndexEngine` 继续作为默认、离线、可复现的正式实现；它提供 Python AST、Lua/Skynet 专项证据以及保守的多语言启发式能力。
-3. `engine: codegraph` 只调用 CodeGraph 公共 CLI/API，不读取其私有数据库，也不回退到 builtin。CLI 不存在、项目未初始化或响应不满足契约时必须显式失败。
+3. `engine: codegraph` 只调用 CodeGraph 公共 CLI/API，不读取其私有数据库，也不回退到 builtin；不允许以 builtin 静默冒充已选择的外部引擎。CLI 不存在、项目未初始化或响应不满足契约时必须显式失败。
 4. CodeGraph 响应在 Adapter 边界内规范化。内部不透明符号 ID 不暴露给后续公共查询；追踪和影响查询优先使用 `name`/`qualifiedName` 等公共引用。受影响测试查询使用 CodeGraph 支持的公共过滤表达式。
 5. `KnowledgeAPI` 通过当前选择的引擎获得实时符号和关系事实。SQLite 是知识存储和兼容缓存，不能在 `engine=codegraph` 时成为结构事实的唯一来源。
 6. 业务开发指导必须把静态结构事实与运行时语义分开：动态分派、反射、依赖注入、Lua metatable 和协议运行时名称必须标为待验证，不得生成确定性结论。

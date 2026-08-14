@@ -52,6 +52,12 @@ class DocumentationRoadmapTests(unittest.TestCase):
     def test_readme_documents_release_finalization(self) -> None:
         self.assertIn("project-kb finalize", self.readme)
 
+    def test_codegraph_decision_preserves_evaluated_failure_reason(self) -> None:
+        decision = (
+            self.root / "docs" / "knowledge" / "decisions" / "0002-codegraph-adapter-boundary.md"
+        ).read_text(encoding="utf-8")
+        self.assertIn("不允许以 builtin 静默冒充已选择的外部引擎", decision)
+
     def test_future_features_distinguishes_candidates_from_commitments(self) -> None:
         path = self.root / "docs" / "future-features.md"
         text = path.read_text(encoding="utf-8")
