@@ -10,7 +10,7 @@
 <!-- project-kb:source file="src/project_knowledge/semantic.py" -->
 <!-- project-kb:source file="src/project_knowledge/schemas.py" -->
 
-Feature Guide 按功能独立写入 `docs/knowledge/drafts/features/`。`KnowledgeGenerator._draft_records` 将分片写入 Manifest 和全文索引，`ProjectService.sync` 在来源变化后重新计算草案新鲜度，`KnowledgeAPI.search`、`KnowledgeAPI.get` 和 `KnowledgeAPI.context` 负责检索、完整读取和任务上下文优先选择。上下文先选择知识页明确引用的路径和直接符号命中，再补充有界依赖文件；返回的 `selection_reasons` 用于说明每个证据为何入选。即使来源新鲜，draft 仍要求开发者读取实时源码，来源变更后标记为 `potentially_stale`。
+Feature Guide 按功能独立写入 `docs/knowledge/drafts/features/`。`KnowledgeGenerator._draft_records` 将分片写入 Manifest 和全文索引，`ProjectService.sync` 在来源变化后重新计算草案新鲜度，`KnowledgeAPI.search`、`KnowledgeAPI.get` 和 `KnowledgeAPI.context` 负责检索、完整读取和任务上下文优先选择。上下文先选择知识页明确引用的路径和直接符号命中，再补充有界依赖文件；返回的 `selection_reasons` 用于说明每个证据为何入选。评测扩展知识来源时只计算尚未入选的路径，并限制为两条，兼顾直接证据召回与文件精确率。即使来源新鲜，draft 仍要求开发者读取实时源码，来源变更后标记为 `potentially_stale`。
 
 <!-- project-kb:source file="src/project_knowledge/knowledge.py" -->
 <!-- project-kb:source file="src/project_knowledge/retrieval.py" -->

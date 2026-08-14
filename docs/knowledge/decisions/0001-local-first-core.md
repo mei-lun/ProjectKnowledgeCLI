@@ -55,3 +55,10 @@ CLI 可以立即离线运行且易于安装。在 MVP 中，Python 项目获得�
 ## WP-08 兼容性复核（2026-08-07）
 
 本地优先边界保持不变：config-v1 Schema 和 migrate 只负责本地配置演进；Claude、Cursor、Gemini 适配只写入受控标记，不拥有知识数据。版本工具以核心 __version__ 为来源，并同步 CHANGELOG 与 Codex 插件清单。wheel/sdist 0.1.10 已离线构建验证；Windows 原生生命周期仍需独立 CI。
+
+## WP-11 检索复核（2026-08-14）
+
+评测仍先执行冻结的绝对质量门。hybrid 的知识来源扩展只补充尚未入选的路径，并限制为两条；该约束用于避免重复来源占位和无关文件膨胀，不改变知识可信度、来源追踪或实时源码核验边界。
+
+<!-- project-kb:source file="src/project_knowledge/evaluate.py" -->
+<!-- project-kb:source file="evaluation/thresholds.json" -->
