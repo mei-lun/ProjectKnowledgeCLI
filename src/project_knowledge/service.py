@@ -349,8 +349,14 @@ class ProjectService:
                 language_rows = store.rows("SELECT language, COUNT(*) AS count FROM files GROUP BY language ORDER BY count DESC")
                 errors = store.rows("SELECT path, parse_error FROM files WHERE parse_error IS NOT NULL ORDER BY path LIMIT 50")
                 query = store.rows("SELECT COUNT(*) AS count, COALESCE(AVG(output_tokens), 0) AS avg_tokens FROM query_stats")
-            discovered = discovery_future.result()
+            try:
+                discovered = discovery_future.result()
+            except RuntimeError:
+                if self.engine.status().get("engine") != "codegraph":
+                    raise
+                discovered = []
             git = git_future.result()
+        engine_status = self.engine.diagnose(self.root)
         current = {item.path: item.content_hash for item in discovered}
         pending = sorted(path for path, value in current.items() if previous.get(path) != value)
         pending.extend(sorted(set(previous) - set(current)))
@@ -417,7 +423,7 @@ class ProjectService:
             "last_sync_duration_ms": int(metadata.get("last_sync_duration_ms", "0")),
             "query_stats": query[0] if query else {"count": 0, "avg_tokens": 0},
             "status_duration_ms": int((time.monotonic() - started) * 1000),
-            "engine": self.engine.status(),
+            "engine": engine_status,
             "configuration_warnings": self.config.capability_warnings(),
         }
 
@@ -542,6 +548,7 @@ class ProjectService:
 
     def doctor(self) -> dict[str, Any]:
         status = self.status() if self.db_path.exists() else {}
+        engine_status = self.engine.status() if status else self.engine.diagnose(self.root)
         return {
             "python": os.sys.version.split()[0],
             "sqlite": __import__("sqlite3").sqlite_version,
@@ -550,7 +557,7 @@ class ProjectService:
             "config": (self.root / ".project-kb.yml").exists(),
             "database": self.db_path.exists(),
             "writable": os.access(self.root, os.W_OK),
-            "engine": self.engine.status(),
+            "engine": engine_status,
             "watcher": status.get("watcher", "stopped"),
             "watcher_health": status.get("watcher_health", {"alive": False, "stale": False}),
             "branch_aligned": status.get("branch_aligned"),

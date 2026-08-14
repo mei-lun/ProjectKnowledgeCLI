@@ -79,6 +79,33 @@ def _host_path(project: Path) -> str:
     return CodeGraphCommandResolver._windows_path(project.resolve())
 
 
+def _node_identity(node: dict[str, Any]) -> str:
+    value = node.get("id") or node.get("qualifiedName") or node.get("name")
+    if not str(value or "").strip():
+        raise CodeGraphError("CodeGraph node missing identity")
+    return str(value).strip()
+
+
+def _validated_project_path(value: str, root: Path) -> str:
+    normalized = value.replace("\\", "/").strip()
+    if not normalized:
+        return ""
+    candidate = Path(normalized)
+    if ".." in candidate.parts:
+        raise CodeGraphError(f"CodeGraph path is outside project: {value}")
+    project = root.resolve()
+    resolved = candidate.resolve() if candidate.is_absolute() else (project / candidate).resolve()
+    try:
+        relative = resolved.relative_to(project)
+    except ValueError as error:
+        raise CodeGraphError(f"CodeGraph path is outside project: {value}") from error
+    return relative.as_posix()
+
+
+def _node_path(node: dict[str, Any], root: Path) -> str:
+    return _validated_project_path(str(node.get("filePath", node.get("path", ""))), root)
+
+
 class CodeGraphClient:
     def __init__(self, project: str | Path, config: ProjectConfig | None = None, *, runner=subprocess.run) -> None:
         self.project = Path(project).resolve()
@@ -238,6 +265,7 @@ class CodeGraphEngine:
         self.config = config
         self.client: CodeGraphClient | None = None
         self._builtin = None
+        self._diagnostic: dict[str, Any] | None = None
 
     def _client(self, root: Path) -> CodeGraphClient:
         if self.client is None or self.client.project != root.resolve():
@@ -283,9 +311,62 @@ class CodeGraphEngine:
         return self._client(root).sync()
 
     def status(self):
-        if self.client is None:
-            return {"engine": "codegraph", "available": False}
-        return {"engine": "codegraph", "available": True, "command": self.client.command_display, "codegraph": self.client.status()}
+        if self._diagnostic is not None:
+            return dict(self._diagnostic)
+        return self._diagnostic_result(False, "not_probed", details="CodeGraph has not been probed for this project")
+
+    def diagnose(self, root: Path) -> dict[str, Any]:
+        try:
+            client = self._client(root)
+        except CodeGraphError as error:
+            self._diagnostic = self._diagnostic_result(False, "cli_missing", details=str(error))
+            return dict(self._diagnostic)
+        try:
+            payload = client.status()
+        except CodeGraphError as error:
+            self._diagnostic = self._diagnostic_result(
+                False, "command_failed", command=client.command_display, details=str(error)
+            )
+            return dict(self._diagnostic)
+        initialized = bool(payload.get("initialized")) if isinstance(payload, dict) else False
+        version = str(payload.get("version", "unknown")) if isinstance(payload, dict) else "unknown"
+        self._diagnostic = self._diagnostic_result(
+            initialized,
+            "available" if initialized else "project_not_initialized",
+            command=client.command_display,
+            adapter_version=version,
+            details="" if initialized else "CodeGraph is installed but this project is not initialized",
+        )
+        self._diagnostic["codegraph"] = payload
+        return dict(self._diagnostic)
+
+    @staticmethod
+    def _diagnostic_result(
+        available: bool,
+        reason_code: str,
+        *,
+        command: str = "",
+        adapter_version: str = "unknown",
+        details: str = "",
+    ) -> dict[str, Any]:
+        return {
+            "engine": "codegraph",
+            "adapter": "codegraph-public-cli",
+            "adapter_version": adapter_version,
+            "available": available,
+            "reason_code": reason_code,
+            "command": command,
+            "details": details,
+            "capabilities": [
+                "initialize", "sync", "symbols", "search_symbols", "get_source",
+                "trace", "impact", "affected_tests", "calls",
+            ],
+            "limitations": [
+                "requires an initialized CodeGraph project",
+                "uses only the public CodeGraph CLI contract",
+                "SQLite remains a compatibility cache for generated knowledge",
+            ],
+        }
 
     def search_symbols(self, root: Path, config: ProjectConfig, query: str, limit: int = 20):
         from .models import Symbol
@@ -293,9 +374,9 @@ class CodeGraphEngine:
         for item in self._client(root).query(query, limit=limit):
             node = item.get("node", item)
             symbols.append(Symbol(
-                id=str(node.get("id", node.get("qualifiedName", node.get("name", "")))),
+                id=_node_identity(node),
                 name=str(node.get("name", "")), kind=str(node.get("kind", "unknown")),
-                path=str(node.get("filePath", "")).replace("\\", "/"), line=int(node.get("startLine", 1) or 1),
+                path=_node_path(node, root), line=int(node.get("startLine", 1) or 1),
                 end_line=int(node.get("endLine", 0) or 0) or None, signature=str(node.get("signature", "") or ""),
                 source_hash="", confidence=1.0,
             ))
@@ -314,16 +395,70 @@ class CodeGraphEngine:
         for direction, payload_key in (("callers", "callers"), ("callees", "callees")):
             payload = self._client(root).callers(name, limit=limit) if direction == "callers" else self._client(root).callees(name, limit=limit)
             for item in payload.get(payload_key, []) if isinstance(payload, dict) else []:
-                source = str(item.get("id", item.get("qualifiedName", item.get("name", ""))))
-                target = symbol_id if direction == "callers" else source
-                if direction == "callers":
-                    source, target = source, symbol_id
-                result.append(Relation(source, target, "calls", str(item.get("filePath", "")).replace("\\", "/"), item.get("startLine"), 1.0, True))
+                node = item.get("node", item)
+                node_id = _node_identity(node)
+                source, target = (
+                    (node_id, symbol_id) if direction == "callers" else (symbol_id, node_id)
+                )
+                result.append(Relation(source, target, "calls", _node_path(node, root), node.get("startLine"), 1.0, True))
         return result[:limit]
 
     def impact(self, root: Path, config: ProjectConfig, files=None, symbols=None, max_hops=1, max_relations=500):
-        symbol = (symbols or [None])[0]
-        return self._client(root).impact(symbol, depth=max_hops) if symbol else {"affected": [], "depth": max_hops}
+        from .engine import _module_for
+
+        client = self._client(root)
+        affected_files = {_validated_project_path(path, root) for path in (files or [])}
+        affected_symbols: set[str] = set()
+        relations: list[dict[str, Any]] = []
+        relation_hops: dict[str, int] = {}
+        for anchor in symbols or []:
+            payload = client.impact(anchor, depth=max_hops)
+            nodes = payload.get("affected", []) if isinstance(payload, dict) else []
+            for item in nodes:
+                node = item.get("node", item) if isinstance(item, dict) else {}
+                target = _node_identity(node)
+                path = _node_path(node, root)
+                affected_symbols.add(target)
+                if path:
+                    affected_files.add(path)
+                relations.append({
+                    "source": anchor,
+                    "target": target,
+                    "kind": str(node.get("relation", node.get("kind", "affected"))),
+                    "path": path,
+                    "line": node.get("startLine"),
+                    "confidence": 1.0,
+                    "resolved": True,
+                })
+                if len(relations) >= max_relations:
+                    break
+            if nodes:
+                relation_hops[str(max_hops)] = relation_hops.get(str(max_hops), 0) + min(len(nodes), max_relations)
+            if len(relations) >= max_relations:
+                break
+        ordered_files = sorted(path for path in affected_files if path)
+        tests_payload = client.affected_tests(ordered_files) if ordered_files else {}
+        raw_tests = tests_payload.get("affectedTests", []) if isinstance(tests_payload, dict) else []
+        affected_test_paths: set[str] = set()
+        for item in raw_tests:
+            value = (
+                str(item.get("filePath", item.get("path", item.get("id", ""))))
+                if isinstance(item, dict)
+                else str(item)
+            )
+            path = _validated_project_path(value, root)
+            if path:
+                affected_test_paths.add(path)
+        return {
+            "affected_files": ordered_files,
+            "affected_symbols": sorted(affected_symbols),
+            "affected_modules": sorted({_module_for(path) for path in ordered_files}),
+            "affected_tests": sorted(affected_test_paths),
+            "relations": relations[:max_relations],
+            "relation_hops": relation_hops,
+            "max_hops": max_hops,
+            "max_relations": max_relations,
+        }
 
     def affected_tests(self, root: Path, config: ProjectConfig, files):
         payload = self._client(root).affected_tests(files)
