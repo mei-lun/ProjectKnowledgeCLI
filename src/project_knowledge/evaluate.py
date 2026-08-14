@@ -474,6 +474,21 @@ def _select_grep_files(
     return selected
 
 
+def _novel_ranked_paths(
+    ranked_paths: list[tuple[str, tuple[int, str]]],
+    selected_paths: set[str],
+    limit: int,
+) -> list[tuple[str, str]]:
+    novel: list[tuple[str, str]] = []
+    for path, (_, record_id) in ranked_paths:
+        if path in selected_paths:
+            continue
+        novel.append((path, record_id))
+        if len(novel) >= limit:
+            break
+    return novel
+
+
 def _retrieve(api: KnowledgeAPI, sample: dict[str, Any], strategy: str) -> dict[str, Any]:
     task = sample["task"]
     budget = sample.get("max_tokens", 4000)
@@ -533,7 +548,11 @@ def _retrieve(api: KnowledgeAPI, sample: dict[str, Any], strategy: str) -> dict[
                 knowledge_paths.items(),
                 key=lambda item: (-item[1][0], item[0], item[1][1]),
             )
-            for path, (_, record_id) in ranked_paths[:8]:
+            for path, record_id in _novel_ranked_paths(
+                ranked_paths,
+                set(selection_reasons),
+                limit=8,
+            ):
                 select(path, "knowledge_source", record_id)
         call_path = set(symbols)
         call_path.update(context["impact"].get("call_path", []))

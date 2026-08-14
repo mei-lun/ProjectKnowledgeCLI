@@ -15,6 +15,7 @@ from project_knowledge.evaluate import (
     evaluate,
     evaluate_quality_gate,
     evaluate_suite,
+    _novel_ranked_paths,
     _rank_markdown_source_paths,
     _retrieve,
     _select_grep_files,
@@ -223,6 +224,14 @@ class EvaluationTests(unittest.TestCase):
         self.assertLessEqual(len(result["files"]), 20)
         self.assertIn("src/app.py", result["files"])
         self.assertTrue(all(path in result["selection_reasons"] for path in result["files"]))
+
+    def test_hybrid_knowledge_limit_counts_only_new_paths(self) -> None:
+        ranked = [(f"existing-{index}", (20 - index, "record")) for index in range(8)]
+        ranked.extend([("new-changelog", (10, "record")), ("new-audit", (9, "record"))])
+
+        selected = _novel_ranked_paths(ranked, {path for path, _ in ranked[:8]}, limit=2)
+
+        self.assertEqual(selected, [("new-changelog", "record"), ("new-audit", "record")])
 
     def test_grep_selection_expands_only_for_a_strong_sixth_match(self) -> None:
         ranked = [(20 - index, f"file-{index}", "content") for index in range(7)]
