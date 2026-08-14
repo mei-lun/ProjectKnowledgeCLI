@@ -56,7 +56,8 @@ class DocumentationRoadmapTests(unittest.TestCase):
         decision = (
             self.root / "docs" / "knowledge" / "decisions" / "0002-codegraph-adapter-boundary.md"
         ).read_text(encoding="utf-8")
-        self.assertIn("不允许以 builtin 静默冒充已选择的外部引擎", decision)
+        background = decision.split("## 背景", 1)[1].split("## 决策", 1)[0]
+        self.assertIn("不允许以 builtin 静默冒充已选择的外部引擎", background)
 
     def test_future_features_distinguishes_candidates_from_commitments(self) -> None:
         path = self.root / "docs" / "future-features.md"

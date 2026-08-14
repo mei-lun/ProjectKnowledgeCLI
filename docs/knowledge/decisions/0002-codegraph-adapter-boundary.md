@@ -10,7 +10,7 @@
 
 ## 背景
 
-审计要求 CodeGraph 与内置索引引擎具有相同公共契约，同时禁止在 CodeGraph 不可用时用 builtin 结果冒充。0.1.8 建立边界时，仓库还没有可复现、可验证的真实 CodeGraph Adapter，因此当时只能明确返回 `adapter_unavailable`。
+审计要求 CodeGraph 与内置索引引擎具有相同公共契约；这条失败边界的原因始终是：不允许以 builtin 静默冒充已选择的外部引擎。0.1.8 建立边界时，仓库还没有可复现、可验证的真实 CodeGraph Adapter，因此当时只能明确返回 `adapter_unavailable`。
 
 0.1.27 已通过 CodeGraph 1.5 公共 CLI 完成真实适配，并用临时项目验证初始化、文件、符号、追踪、影响和受影响测试查询。历史上的“真实 Adapter 不可用”不再代表当前状态。
 
