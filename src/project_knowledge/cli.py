@@ -10,6 +10,7 @@ from . import __version__
 from .config import ProjectConfig
 from .evidence import EvidencePackBuilder
 from .evaluate import STRATEGIES, evaluate_suite, load_json_object
+from .finalization import FinalizationService
 from .mcp import serve
 from .models import PatchOperation
 from .proposal import ProposalService
@@ -55,6 +56,10 @@ def build_parser() -> argparse.ArgumentParser:
     watch = commands.add_parser("watch", help="watch for file changes and synchronize")
     _common(watch, dry_run=True)
     watch.add_argument("--once", action="store_true", help="perform one polling cycle and exit")
+
+    finalization = commands.add_parser("finalize", help="synchronize and verify release knowledge alignment")
+    _common(finalization, dry_run=False)
+    finalization.add_argument("--check", action="store_true", help="verify readiness without writing files")
 
     mcp = commands.add_parser("mcp", help="run the stdio MCP server and guidance workflow")
     mcp.add_argument("--project", default=".", help="initialized project path")
@@ -231,6 +236,9 @@ def main(argv: list[str] | None = None) -> int:
                 atomic_json(Path(args.output), result)
             gate = result["quality_gate"]
             exit_code = 2 if gate["evaluated"] and not gate["passed"] else 0
+        elif args.command == "finalize":
+            result, ready = FinalizationService(args.path).finalize(check_only=args.check)
+            exit_code = 0 if ready else 2
         else:
             service = ProjectService(args.path)
             if args.command == "init":
