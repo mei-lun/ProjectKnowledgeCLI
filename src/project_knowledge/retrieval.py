@@ -540,9 +540,10 @@ class KnowledgeAPI:
         ranked: list[tuple[int, int]] = []
         for index, line in enumerate(lines):
             lowered = line.lower()
-            score = sum(1 for term in terms if term in lowered)
+            term_matches = sum(1 for term in terms if term in lowered)
+            score = term_matches * 10
             if any(keyword in lowered for keyword in ("不变量", "必须", "不能", "不得", "回滚", "验证")):
-                score += 10
+                score += 3 if term_matches else 1
             if score:
                 ranked.append((score, index))
         if not ranked:

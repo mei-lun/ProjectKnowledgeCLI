@@ -98,6 +98,20 @@ class RetrievalWP06Tests(unittest.TestCase):
         returned = "\n".join(item["content"] for item in context["knowledge"])
         self.assertIn(invariant, returned)
 
+    def test_relevant_excerpt_does_not_let_generic_rules_hide_task_evidence(self) -> None:
+        invariant = "同一批修改或新增内容只递增一次补丁版本。"
+        generic_rules = "\n".join(
+            f"无关约束 {index}：发布前必须验证普通流程。" for index in range(80)
+        )
+
+        excerpt = KnowledgeAPI._relevant_excerpt(
+            generic_rules + "\n" + invariant,
+            "bump_patch_version 如何递增补丁版本？",
+            budget=120,
+        )
+
+        self.assertIn(invariant, excerpt)
+
     def test_search_exposes_score_breakdown_and_impact_supports_bounded_multihop(self) -> None:
         results = self.api.search("Repository persistence")
         self.assertTrue(results["results"])
