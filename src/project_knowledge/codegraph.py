@@ -60,6 +60,13 @@ class CodeGraphCommandResolver:
 
     def _from_value(self, value: str) -> list[CodeGraphCommand]:
         parts = shlex.split(value, posix=os.name != "nt")
+        if os.name == "nt":
+            parts = [
+                part[1:-1]
+                if len(part) >= 2 and part[0] == part[-1] and part[0] in {'"', "'"}
+                else part
+                for part in parts
+            ]
         if not parts:
             return []
         if len(parts) == 1 and parts[0].lower().endswith(".cmd") and os.name != "nt":
@@ -250,8 +257,16 @@ class CodeGraphClient:
     def impact(self, symbol: str, *, depth: int = 2) -> dict[str, Any]:
         return self._run("impact", [symbol, "-p", _host_path(self.project), "-d", str(depth)], json_output=True)
 
-    def affected_tests(self, files: Sequence[str], *, depth: int = 5) -> dict[str, Any]:
+    def affected_tests(
+        self,
+        files: Sequence[str],
+        *,
+        depth: int = 5,
+        test_filter: str | None = None,
+    ) -> dict[str, Any]:
         args = [*files, "-p", _host_path(self.project), "-d", str(depth)]
+        if test_filter:
+            args.extend(["-f", test_filter])
         return self._run("affected", args, json_output=True)
 
     def source(self, path: str, *, start_line: int = 1, limit: int = 200) -> str:
@@ -266,10 +281,12 @@ class CodeGraphEngine:
         self.client: CodeGraphClient | None = None
         self._builtin = None
         self._diagnostic: dict[str, Any] | None = None
+        self._symbol_references: dict[str, str] = {}
 
     def _client(self, root: Path) -> CodeGraphClient:
         if self.client is None or self.client.project != root.resolve():
             self.client = CodeGraphClient(root, self.config)
+            self._symbol_references.clear()
         return self.client
 
     def _builtin_engine(self):
@@ -373,8 +390,12 @@ class CodeGraphEngine:
         symbols = []
         for item in self._client(root).query(query, limit=limit):
             node = item.get("node", item)
+            identity = _node_identity(node)
+            self._symbol_references[identity] = str(
+                node.get("qualifiedName") or node.get("name") or identity
+            )
             symbols.append(Symbol(
-                id=_node_identity(node),
+                id=identity,
                 name=str(node.get("name", "")), kind=str(node.get("kind", "unknown")),
                 path=_node_path(node, root), line=int(node.get("startLine", 1) or 1),
                 end_line=int(node.get("endLine", 0) or 0) or None, signature=str(node.get("signature", "") or ""),
@@ -391,7 +412,9 @@ class CodeGraphEngine:
     def trace(self, root: Path, symbol_id: str, config: ProjectConfig, max_depth=1, limit=200):
         from .models import Relation
         result: list[Relation] = []
-        name = symbol_id.rsplit("::", 1)[-1].rsplit(".", 1)[-1]
+        name = self._symbol_references.get(
+            symbol_id, symbol_id.rsplit("::", 1)[-1].rsplit(".", 1)[-1]
+        )
         for direction, payload_key in (("callers", "callers"), ("callees", "callees")):
             payload = self._client(root).callers(name, limit=limit) if direction == "callers" else self._client(root).callees(name, limit=limit)
             for item in payload.get(payload_key, []) if isinstance(payload, dict) else []:
@@ -412,7 +435,10 @@ class CodeGraphEngine:
         relations: list[dict[str, Any]] = []
         relation_hops: dict[str, int] = {}
         for anchor in symbols or []:
-            payload = client.impact(anchor, depth=max_hops)
+            reference = self._symbol_references.get(
+                anchor, anchor.rsplit("::", 1)[-1].rsplit(".", 1)[-1]
+            )
+            payload = client.impact(reference, depth=max_hops)
             nodes = payload.get("affected", []) if isinstance(payload, dict) else []
             for item in nodes:
                 node = item.get("node", item) if isinstance(item, dict) else {}
@@ -437,8 +463,7 @@ class CodeGraphEngine:
             if len(relations) >= max_relations:
                 break
         ordered_files = sorted(path for path in affected_files if path)
-        tests_payload = client.affected_tests(ordered_files) if ordered_files else {}
-        raw_tests = tests_payload.get("affectedTests", []) if isinstance(tests_payload, dict) else []
+        raw_tests = self.affected_tests(root, config, ordered_files) if ordered_files else []
         affected_test_paths: set[str] = set()
         for item in raw_tests:
             value = (
@@ -461,8 +486,15 @@ class CodeGraphEngine:
         }
 
     def affected_tests(self, root: Path, config: ProjectConfig, files):
-        payload = self._client(root).affected_tests(files)
-        return list(payload.get("affectedTests", [])) if isinstance(payload, dict) else []
+        client = self._client(root)
+        tests: list[str] = []
+        for test_filter in (None, "tests/**", "**/*test*", "**/*spec*"):
+            payload = client.affected_tests(files, test_filter=test_filter)
+            if isinstance(payload, dict):
+                tests.extend(str(path) for path in payload.get("affectedTests", []))
+            if tests:
+                break
+        return sorted(set(tests))
 
     def entrypoints(self, root: Path, config: ProjectConfig, limit=200):
         return [{"source": item, "kind": "codegraph"} for item in self._client(root).query("main", limit=limit)]

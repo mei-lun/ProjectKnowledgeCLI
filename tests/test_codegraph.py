@@ -59,6 +59,14 @@ class CodeGraphTests(unittest.TestCase):
         with self.assertRaises(CodeGraphError):
             client.status()
 
+    def test_affected_tests_supports_a_public_test_glob(self) -> None:
+        client, runner = self._client([(0, json.dumps({"affectedTests": ["tests/test_app.py"]}), "")])
+
+        result = client.affected_tests(["src/app.py"], test_filter="tests/**")
+
+        self.assertEqual(result["affectedTests"], ["tests/test_app.py"])
+        self.assertIn("tests/**", runner.call_args.args[0])
+
     def test_codegraph_engine_is_selectable(self) -> None:
         engine = create_engine(ProjectConfig(engine="codegraph", codegraph_command="/usr/bin/codegraph"))
         self.assertIsInstance(engine, CodeGraphEngine)
@@ -203,6 +211,26 @@ class CodeGraphTests(unittest.TestCase):
                 ],
             )
             self.assertEqual([item.path for item in relations], ["src/router.lua", "src/db.lua"])
+
+    def test_trace_uses_public_symbol_name_for_opaque_codegraph_ids(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            client = Mock()
+            client.project = root.resolve()
+            client.query.return_value = [{"node": {
+                "id": "function:abc123", "name": "run", "qualifiedName": "run",
+                "kind": "function", "filePath": "src/app.py", "startLine": 1,
+            }}]
+            client.callers.return_value = {"callers": []}
+            client.callees.return_value = {"callees": []}
+            engine = CodeGraphEngine(ProjectConfig(engine="codegraph"))
+            engine.client = client
+
+            symbol = engine.search_symbols(root, engine.config, "run")[0]
+            engine.trace(root, symbol.id, engine.config)
+
+            client.callers.assert_called_once_with("run", limit=200)
+            client.callees.assert_called_once_with("run", limit=200)
 
 
 if __name__ == "__main__":

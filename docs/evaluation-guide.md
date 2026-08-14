@@ -12,6 +12,18 @@
 - `markdown`：仅使用知识检索与知识正文，不使用代码符号搜索。
 - `codegraph`：只允许真实 CodeGraph Adapter。Adapter 不存在时报告 `adapter_unavailable`，不得回退到 builtin 伪造结果。
 
+`markdown` 仍以知识检索和知识正文为答案来源；代码符号与依赖锚点只用于重排知识记录已经声明的来源路径，来源文件最多返回 8 个。这样不会把代码正文伪装成 Markdown 答案，同时避免一个模块记录把数十个无关来源全部展开。
+
+## CodeGraph 公开 CLI 验证
+
+运行以下命令会创建临时 Python/Lua 项目，并通过公开 CLI 验证 `init/files/query/trace/impact/affected`；验证结束后默认删除夹具，不会在当前源仓库创建 `.codegraph`：
+
+```bash
+python scripts/validate_codegraph_adapter.py --json
+```
+
+退出码仅在六项检查全部通过时为 `0`。报告包含 CLI 来源、Adapter 版本、各阶段耗时和归一化结果数量；排障时可加 `--keep-fixture`，检查完成后需手动删除报告中的临时目录。
+
 ## 指标
 
 报告按适用样本分别计算文件、符号、调用路径、扩展点、不变量和设计原因的召回率；结构锚点同时计算精确率。成本指标包括上下文 Token、工具调用次数、P50/P95/P99 延迟和最终成功率。报告还记录数据集哈希、项目提交、索引提交、引擎能力、Python、平台、处理器和 CPU 数。
@@ -25,7 +37,7 @@ project-kb evaluate evaluation/questions.jsonl \
   --project . \
   --strategy all \
   --thresholds evaluation/thresholds.json \
-  --baseline evaluation/baselines/self-repo-0.1.8.json \
+  --baseline evaluation/baselines/self-repo-0.1.26.json \
   --output evaluation/reports/latest.json \
   --json
 ```
