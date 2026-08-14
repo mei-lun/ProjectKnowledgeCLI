@@ -16,6 +16,7 @@ from project_knowledge.evaluate import (
     evaluate_quality_gate,
     evaluate_suite,
     _rank_markdown_source_paths,
+    _retrieve,
     _select_grep_files,
     _select_markdown_pages,
     load_dataset,
@@ -200,6 +201,28 @@ class EvaluationTests(unittest.TestCase):
         ]}]
         ranked = _rank_markdown_source_paths(api, results, "AccountService.login", limit=1)
         self.assertEqual(ranked, ["src/app.py"])
+
+    def test_markdown_source_paths_are_adaptively_bounded(self) -> None:
+        api = KnowledgeAPI(self.root)
+        sources = []
+        for index in range(12):
+            path = self.root / f"note-{index}.md"
+            path.write_text(f"AccountService login note {index}\n", encoding="utf-8")
+            sources.append({"path": path.name})
+
+        ranked = _rank_markdown_source_paths(api, [{"sources": sources}], "AccountService.login")
+
+        self.assertLessEqual(len(ranked), 8)
+
+    def test_hybrid_does_not_expand_knowledge_sources_twice(self) -> None:
+        api = KnowledgeAPI(self.root)
+        sample = load_dataset(self.dataset)[0]
+
+        result = _retrieve(api, sample, "hybrid")
+
+        self.assertLessEqual(len(result["files"]), 20)
+        self.assertIn("src/app.py", result["files"])
+        self.assertTrue(all(path in result["selection_reasons"] for path in result["files"]))
 
     def test_grep_selection_expands_only_for_a_strong_sixth_match(self) -> None:
         ranked = [(20 - index, f"file-{index}", "content") for index in range(7)]

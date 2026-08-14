@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "frozen_for_version": "0.1.8",
+  "frozen_for_version": "0.1.27",
   "dataset": "questions.jsonl",
   "minimum_samples": 40,
   "required_strategies": [
@@ -21,6 +21,7 @@
     "hybrid": {
       "minimum": {
         "file_recall": 0.94,
+        "file_precision": 0.12,
         "symbol_recall": 0.8,
         "call_path_recall": 1.0,
         "extension_point_recall": 0.5,
@@ -36,6 +37,7 @@
     "code": {
       "minimum": {
         "file_recall": 0.92,
+        "file_precision": 0.20,
         "symbol_recall": 0.8,
         "call_path_recall": 1.0,
         "success_rate": 0.4
@@ -58,7 +60,7 @@
     "markdown": {
       "minimum": {
         "file_recall": 0.9,
-        "file_precision": 0.085,
+        "file_precision": 0.12,
         "invariant_recall": 0.4,
         "design_reason_recall": 1.0
       },

@@ -192,6 +192,7 @@ class KnowledgeAPI:
                     ),
                     "truncated": len(engine_result.get("relations", [])) >= max_relations,
                     "fact_source": "codegraph",
+                    "dependency_files": sorted(affected_files),
                     "limitations": self.service.engine.status().get("limitations", []),
                 })
                 self._record_query(store, "knowledge_impact", len(json.dumps(engine_result["input"])), engine_result, started)
@@ -202,6 +203,7 @@ class KnowledgeAPI:
                 placeholders = ",".join("?" for _ in files)
                 symbol_ids.update(row["id"] for row in store.rows(f"SELECT id FROM symbols WHERE path IN ({placeholders})", files))
             expanded = set(symbol_ids)
+            dependency_symbols = set(symbol_ids)
             relations: list[dict[str, Any]] = []
             frontier = set(symbol_ids)
             relation_seen: set[tuple[str, str, str, int]] = set()
@@ -211,8 +213,16 @@ class KnowledgeAPI:
                 ordered_frontier = sorted(frontier)
                 placeholders = ",".join("?" for _ in ordered_frontier)
                 rows = store.rows(
-                    f"SELECT source, target, kind, path, line, confidence, resolved FROM relations WHERE source IN ({placeholders}) OR target IN ({placeholders}) ORDER BY confidence DESC, source, target LIMIT ?",
-                    [*ordered_frontier, *ordered_frontier, max_relations - len(relations)],
+                    f"SELECT source, target, kind, path, line, confidence, resolved "
+                    f"FROM relations WHERE source IN ({placeholders}) OR target IN ({placeholders}) "
+                    f"ORDER BY CASE WHEN source IN ({placeholders}) THEN 0 ELSE 1 END, "
+                    f"confidence DESC, source, target LIMIT ?",
+                    [
+                        *ordered_frontier,
+                        *ordered_frontier,
+                        *ordered_frontier,
+                        max_relations - len(relations),
+                    ],
                 )
                 next_frontier: set[str] = set()
                 for relation in rows:
@@ -225,13 +235,25 @@ class KnowledgeAPI:
                     expanded.add(relation["source"])
                     if relation["resolved"]:
                         expanded.add(relation["target"])
-                        if hop < max_hops:
+                        if relation["source"] in frontier:
+                            dependency_symbols.add(relation["target"])
+                        if hop < max_hops and relation["source"] in frontier:
                             next_frontier.add(relation["target"])
                 frontier = next_frontier
             impacted_paths = set(files)
+            dependency_paths = set(files)
             if expanded:
                 placeholders = ",".join("?" for _ in expanded)
                 impacted_paths.update(row["path"] for row in store.rows(f"SELECT DISTINCT path FROM symbols WHERE id IN ({placeholders})", expanded))
+            if dependency_symbols:
+                placeholders = ",".join("?" for _ in dependency_symbols)
+                dependency_paths.update(
+                    row["path"]
+                    for row in store.rows(
+                        f"SELECT DISTINCT path FROM symbols WHERE id IN ({placeholders})",
+                        dependency_symbols,
+                    )
+                )
             modules: list[str] = []
             tests: list[str] = []
             if impacted_paths:
@@ -255,6 +277,7 @@ class KnowledgeAPI:
                 "max_hops": max_hops,
                 "max_relations": max_relations,
                 "affected_files": sorted(impacted_paths),
+                "dependency_files": sorted(dependency_paths),
                 "affected_symbols": sorted(expanded),
                 "affected_modules": modules,
                 "affected_tests": tests,
@@ -286,7 +309,11 @@ class KnowledgeAPI:
         terms = self._symbol_terms(task)
         symbol_matches = self._task_symbol_matches(task, terms)
         with KnowledgeStore(self.service.db_path) as store:
-            impact = self.impact(symbols=[item["id"] for item in symbol_matches[:10]], max_hops=2 if intent["task_type"] in {"new_feature", "impact_analysis"} else 1, max_relations=200) if symbol_matches else {
+            impact = self.impact(
+                symbols=[item["id"] for item in symbol_matches[:10]],
+                max_hops=2,
+                max_relations=200,
+            ) if symbol_matches else {
                 "affected_modules": [], "affected_tests": [], "affected_files": [], "affected_knowledge": []
             }
             reference_implementations = self._reference_implementations(symbol_matches, selected_results)
@@ -342,7 +369,24 @@ class KnowledgeAPI:
                 "summary": self._context_summary(fragments, impact),
                 "knowledge": fragments,
                 "symbols": symbol_matches[:30],
-                "impact": {key: impact.get(key, [])[:limit] for key, limit in [("affected_modules", 12), ("affected_files", 12), ("affected_tests", 8), ("affected_knowledge", 8)]},
+                "impact": {
+                    **{
+                        key: impact.get(key, [])[:limit]
+                        for key, limit in [
+                            ("affected_modules", 12),
+                            ("affected_files", 12),
+                            ("dependency_files", 12),
+                            ("affected_tests", 8),
+                            ("affected_knowledge", 8),
+                        ]
+                    },
+                    "call_path": list(dict.fromkeys(
+                        endpoint
+                        for relation in impact.get("relations", [])
+                        for endpoint in (relation.get("source"), relation.get("target"))
+                        if endpoint and (relation.get("resolved") or endpoint == relation.get("source"))
+                    ))[:30],
+                },
                 "retrieval_explanation": retrieval_explanation,
                 "reference_implementations": reference_implementations,
                 "extension_points": extension_points,

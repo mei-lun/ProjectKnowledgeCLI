@@ -154,6 +154,28 @@ class RetrievalWP06Tests(unittest.TestCase):
         self.assertIn("src/router.lua", result["impact"]["affected_files"])
         self.assertEqual(result["fact_source"], "codegraph")
 
+    def test_impact_prioritizes_outgoing_dependencies_before_incoming_callers(self) -> None:
+        (self.root / "src" / "helper.py").write_text(
+            "def persist(value):\n    return value\n", encoding="utf-8"
+        )
+        (self.root / "src" / "app.py").write_text(
+            "from src.helper import persist\n\ndef create_item(value):\n    return persist(value)\n",
+            encoding="utf-8",
+        )
+        (self.root / "a.py").write_text(
+            "from src.app import create_item\n\ndef caller():\n    return create_item(1)\n",
+            encoding="utf-8",
+        )
+        ProjectService(self.root).sync()
+        api = KnowledgeAPI(self.root)
+
+        result = api.impact(
+            symbols=["src/app.py::create_item"], max_hops=1, max_relations=1
+        )
+
+        self.assertEqual(result["relations"][0]["source"], "src/app.py::create_item")
+        self.assertIn("src/helper.py", result["affected_files"])
+
 
 if __name__ == "__main__":
     unittest.main()
