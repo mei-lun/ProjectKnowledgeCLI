@@ -91,14 +91,28 @@ def evaluate(
 ) -> dict[str, Any]:
     if strategy not in STRATEGIES:
         raise ValueError(f"unknown evaluation strategy: {strategy}")
+    api = KnowledgeAPI(project)
     if strategy == "codegraph":
-        return {
-            "schema_version": SCHEMA_VERSION,
-            "strategy": strategy,
-            "available": False,
-            "reason_code": "adapter_unavailable",
-            "message": "真实 CodeGraph Adapter 尚未实现；评测不会用 builtin 伪造 codegraph 结果。",
-        }
+        if api.config.engine != "codegraph":
+            return {
+                "schema_version": SCHEMA_VERSION,
+                "strategy": strategy,
+                "available": False,
+                "reason_code": "adapter_unavailable",
+                "details": ["engine_not_selected"],
+                "message": "Select engine=codegraph to evaluate CodeGraph facts.",
+            }
+        diagnostic = api.service.engine.diagnose(api.root)
+        if not diagnostic.get("available"):
+            return {
+                "schema_version": SCHEMA_VERSION,
+                "strategy": strategy,
+                "available": False,
+                "reason_code": "adapter_unavailable",
+                "details": [diagnostic.get("reason_code", "command_failed"), diagnostic.get("details", "")],
+                "adapter": diagnostic,
+                "message": "CodeGraph adapter probe did not pass.",
+            }
 
     dataset_path = Path(dataset)
     samples = load_dataset(dataset_path)
@@ -106,7 +120,6 @@ def evaluate(
         if limit < 1:
             raise ValueError("evaluation limit must be at least 1")
         samples = samples[:limit]
-    api = KnowledgeAPI(project)
     results = [_evaluate_sample(api, sample, strategy) for sample in samples]
     status = api.status()
     source_snapshot = hash_text("\n".join(
@@ -428,7 +441,7 @@ def _select_grep_files(
 def _retrieve(api: KnowledgeAPI, sample: dict[str, Any], strategy: str) -> dict[str, Any]:
     task = sample["task"]
     budget = sample.get("max_tokens", 4000)
-    if strategy in {"hybrid", "code"}:
+    if strategy in {"hybrid", "code", "codegraph"}:
         context = api.context(task, budget)
         symbols = {item["id"] for item in context["symbols"]}
         files = {item["path"] for item in context["symbols"]}

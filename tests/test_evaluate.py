@@ -6,8 +6,11 @@ import tempfile
 import unittest
 from contextlib import redirect_stdout
 from pathlib import Path
+from unittest.mock import patch
 
 from project_knowledge.cli import main
+from project_knowledge.codegraph import CodeGraphClient, CodeGraphCommand, CodeGraphCommandResolver
+from project_knowledge.config import ProjectConfig
 from project_knowledge.evaluate import (
     evaluate,
     evaluate_quality_gate,
@@ -93,8 +96,38 @@ class EvaluationTests(unittest.TestCase):
         self.assertEqual(set(suite["strategies"]), {"hybrid", "grep_read", "code", "markdown", "codegraph"})
         self.assertFalse(suite["strategies"]["codegraph"]["available"])
         self.assertEqual(suite["strategies"]["codegraph"]["reason_code"], "adapter_unavailable")
+        self.assertIn("engine_not_selected", suite["strategies"]["codegraph"]["details"])
         self.assertTrue(suite["strategies"]["grep_read"]["available"])
         self.assertIn("src/app.py", suite["strategies"]["grep_read"]["results"][0]["returned_files"])
+
+    def test_codegraph_strategy_evaluates_when_adapter_is_available(self) -> None:
+        config = ProjectConfig.load(self.root)
+        config.engine = "codegraph"
+        config.write(self.root)
+        node = {
+            "id": "src/app.py::AccountService.login",
+            "name": "login",
+            "kind": "method",
+            "filePath": "src/app.py",
+            "startLine": 7,
+        }
+        with (
+            patch.object(
+                CodeGraphCommandResolver,
+                "resolve",
+                return_value=CodeGraphCommand(("codegraph",), "codegraph"),
+            ),
+            patch.object(CodeGraphClient, "status", return_value={"initialized": True, "version": "1.5.0"}),
+            patch.object(CodeGraphClient, "files", return_value=[{"path": "src/app.py", "language": "python"}]),
+            patch.object(CodeGraphClient, "query", return_value=[{"node": node}]),
+            patch.object(CodeGraphClient, "impact", return_value={"symbol": "login", "affected": [node]}),
+            patch.object(CodeGraphClient, "affected_tests", return_value={"affectedTests": []}),
+        ):
+            report = evaluate(self.root, self.dataset, strategy="codegraph")
+
+        self.assertTrue(report["available"])
+        self.assertEqual(report["strategy"], "codegraph")
+        self.assertEqual(report["reproducibility"]["engine"]["engine"], "codegraph")
 
     def test_quality_gate_checks_thresholds_and_baseline_regression(self) -> None:
         report = {
