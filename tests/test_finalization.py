@@ -82,6 +82,17 @@ class FinalizationTests(unittest.TestCase):
         self.assertEqual(result["status"], "source_commit_required")
         self.assertEqual(result["blocking_files"], ["src/app.py"])
 
+    def test_configured_knowledge_index_is_a_generated_output(self) -> None:
+        config_path = self.root / ".project-kb.yml"
+        config = config_path.read_text(encoding="utf-8")
+        config = config.replace("root: .project-kb", "root: docs/knowledge", 1)
+        config_path.write_text(config, encoding="utf-8")
+
+        service = ProjectService(self.root)
+
+        self.assertTrue(service._is_generated_output("docs/knowledge/index.md"))
+        self.assertFalse(service._is_generated_output("docs/knowledge/curated/architecture.md"))
+
     def test_finalize_check_cli_reports_sync_required(self) -> None:
         _commit_all(self.root, "source")
         output = io.StringIO()

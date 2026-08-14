@@ -599,11 +599,13 @@ class ProjectService:
         normalized = path.replace("\\", "/")
         if normalized.startswith("./"):
             normalized = normalized[2:]
+        knowledge_root = self.config.knowledge_root.replace("\\", "/").rstrip("/")
         generated_root = self.config.generated_root.replace("\\", "/").rstrip("/")
         return normalized in {
             ".project-kb/index.md",
             ".project-kb/manifest.json",
             ".project-kb/mcp.json",
+            f"{knowledge_root}/index.md",
         } or normalized.startswith(f"{generated_root}/") or normalized.startswith(
             ".project-kb/generated/"
         ) or normalized.startswith(".project-kb/schemas/") or normalized.startswith(
