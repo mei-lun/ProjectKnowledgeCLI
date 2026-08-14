@@ -274,9 +274,10 @@
 - `tests/test_retrieval_wp06.py::RetrievalWP06Tests.test_task_classification_context_explanation_and_reference_implementation`：方法，位于 `tests/test_retrieval_wp06.py:60`（可信度 1.00）
 - `tests/test_retrieval_wp06.py::RetrievalWP06Tests.test_chinese_identifier_phrases_recall_expected_exact_symbols`：方法，位于 `tests/test_retrieval_wp06.py:74`（可信度 1.00）
 - `tests/test_retrieval_wp06.py::RetrievalWP06Tests.test_context_extracts_task_relevant_invariant_from_end_of_long_knowledge`：方法，位于 `tests/test_retrieval_wp06.py:87`（可信度 1.00）
-- `tests/test_retrieval_wp06.py::RetrievalWP06Tests.test_search_exposes_score_breakdown_and_impact_supports_bounded_multihop`：方法，位于 `tests/test_retrieval_wp06.py:101`（可信度 1.00）
-- `tests/test_retrieval_wp06.py::RetrievalWP06Tests.test_codegraph_context_uses_engine_when_sqlite_symbols_are_empty`：方法，位于 `tests/test_retrieval_wp06.py:114`（可信度 1.00）
-- `tests/test_retrieval_wp06.py::RetrievalWP06Tests.test_impact_prioritizes_outgoing_dependencies_before_incoming_callers`：方法，位于 `tests/test_retrieval_wp06.py:157`（可信度 1.00）
+- `tests/test_retrieval_wp06.py::RetrievalWP06Tests.test_relevant_excerpt_does_not_let_generic_rules_hide_task_evidence`：方法，位于 `tests/test_retrieval_wp06.py:101`（可信度 1.00）
+- `tests/test_retrieval_wp06.py::RetrievalWP06Tests.test_search_exposes_score_breakdown_and_impact_supports_bounded_multihop`：方法，位于 `tests/test_retrieval_wp06.py:115`（可信度 1.00）
+- `tests/test_retrieval_wp06.py::RetrievalWP06Tests.test_codegraph_context_uses_engine_when_sqlite_symbols_are_empty`：方法，位于 `tests/test_retrieval_wp06.py:128`（可信度 1.00）
+- `tests/test_retrieval_wp06.py::RetrievalWP06Tests.test_impact_prioritizes_outgoing_dependencies_before_incoming_callers`：方法，位于 `tests/test_retrieval_wp06.py:171`（可信度 1.00）
 - `tests/test_schemas.py::SchemaTests`：类，位于 `tests/test_schemas.py:15`（可信度 1.00）
 - `tests/test_schemas.py::SchemaTests.test_required_empty_collections_are_preserved_and_validate`：方法，位于 `tests/test_schemas.py:16`（可信度 1.00）
 - `tests/test_schemas.py::SchemaTests.test_runtime_validator_rejects_invalid_record`：方法，位于 `tests/test_schemas.py:28`（可信度 1.00）
@@ -328,7 +329,7 @@
 
 ## 结构关系
 
-> 关系内容已截断：共 2992 条，当前页面仅展示前 150 条；请使用 knowledge_impact 获取完整的任务相关子图。
+> 关系内容已截断：共 2996 条，当前页面仅展示前 150 条；请使用 knowledge_impact 获取完整的任务相关子图。
 
 - `tests/test_config.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
 - `tests/test_config.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）

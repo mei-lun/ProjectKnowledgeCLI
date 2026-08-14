@@ -1,10 +1,10 @@
 {
   "dataset": "questions.jsonl",
   "dataset_sha256": "sha256:916b423531eef7beb820b2b8728d6435336c2abc9350e0613d0eac5401e4e833",
-  "generated_at": "2026-08-14T18:29:26+08:00",
-  "index_commit": "a321d49945d7f7c8107a345a2e39d90703403db3",
+  "generated_at": "2026-08-14T18:38:06+08:00",
+  "index_commit": "b0a6d3332873149889ded0ed934c4f721e8443a8",
   "package_version": "0.1.27",
-  "project_commit": "a321d49945d7f7c8107a345a2e39d90703403db3",
+  "project_commit": "b0a6d3332873149889ded0ed934c4f721e8443a8",
   "quality_gate": {
     "evaluated": true,
     "failures": [],
@@ -25,7 +25,7 @@
     ]
   },
   "schema_version": 1,
-  "source_snapshot_sha256": "sha256:0037b1a48f6371296e42b49332d4068d2ae86dd5796ab1c9a864c31d04110492",
+  "source_snapshot_sha256": "sha256:dd095c000b8b0ae5227336d21a56b7807536a179620ff0da987db8e743cdfd4b",
   "strategies": {
     "code": {
       "available": true,
@@ -111,7 +111,7 @@
         "symbol_recall": 40
       },
       "metrics": {
-        "average_context_tokens": 182.75,
+        "average_context_tokens": 182.7,
         "average_tool_calls": 3.0,
         "call_path_precision": 0.064516,
         "call_path_recall": 1.0,
@@ -122,9 +122,9 @@
         "file_recall": 0.93125,
         "generated_source_coverage": 0.909091,
         "invariant_recall": 0.0,
-        "p50_latency_ms": 174.4555,
-        "p95_latency_ms": 199.03705,
-        "p99_latency_ms": 217.81288,
+        "p50_latency_ms": 177.1865,
+        "p95_latency_ms": 193.1772,
+        "p99_latency_ms": 211.54799,
         "success_rate": 0.475,
         "symbol_precision": 0.349167,
         "symbol_recall": 0.825
@@ -182,16 +182,16 @@
             "Configuration"
           ]
         },
-        "generated_at": "2026-08-14T18:29:16+08:00",
-        "head_commit": "a321d49945d7f7c8107a345a2e39d90703403db3",
-        "index_commit": "a321d49945d7f7c8107a345a2e39d90703403db3",
+        "generated_at": "2026-08-14T18:37:56+08:00",
+        "head_commit": "b0a6d3332873149889ded0ed934c4f721e8443a8",
+        "index_commit": "b0a6d3332873149889ded0ed934c4f721e8443a8",
         "platform": "Windows-11-10.0.26200-SP0",
         "processor": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
         "project": "ProjectKnowledgeCLI",
         "project_files": 77,
-        "project_symbols": 918,
+        "project_symbols": 919,
         "python": "3.14.6",
-        "source_snapshot_sha256": "sha256:0037b1a48f6371296e42b49332d4068d2ae86dd5796ab1c9a864c31d04110492",
+        "source_snapshot_sha256": "sha256:dd095c000b8b0ae5227336d21a56b7807536a179620ff0da987db8e743cdfd4b",
         "working_tree": "dirty"
       },
       "results": [
@@ -203,7 +203,7 @@
             "symbol_recall"
           ],
           "id": "self-init-flow",
-          "latency_ms": 154.309,
+          "latency_ms": 184.57,
           "line": 1,
           "metrics": {
             "call_path_precision": 0.064516,
@@ -273,7 +273,7 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/config.py": {
-              "anchor": "src/project_knowledge/service.py::ProjectService.initialize",
+              "anchor": "src/project_knowledge/knowledge.py::KnowledgeGenerator",
               "stage": "impact"
             },
             "src/project_knowledge/engine.py": {
@@ -285,7 +285,7 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/proposal.py": {
-              "anchor": "src/project_knowledge/service.py::ProjectService.initialize",
+              "anchor": "src/project_knowledge/knowledge.py::KnowledgeGenerator",
               "stage": "impact"
             },
             "src/project_knowledge/service.py": {
@@ -293,11 +293,11 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/store.py": {
-              "anchor": "src/project_knowledge/service.py::ProjectService.initialize",
+              "anchor": "src/project_knowledge/knowledge.py::KnowledgeGenerator",
               "stage": "impact"
             },
             "src/project_knowledge/util.py": {
-              "anchor": "src/project_knowledge/service.py::ProjectService.initialize",
+              "anchor": "src/project_knowledge/knowledge.py::KnowledgeGenerator",
               "stage": "impact"
             },
             "tests/test_integration.py": {
@@ -326,7 +326,7 @@
             "symbol_recall"
           ],
           "id": "self-incremental-sync",
-          "latency_ms": 168.483,
+          "latency_ms": 171.529,
           "line": 2,
           "metrics": {
             "file_precision": 0.272727,
@@ -397,27 +397,27 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/guidance.py": {
-              "anchor": "src/project_knowledge/engine.py::CodeIndexEngine",
+              "anchor": "src/project_knowledge/engine.py::BuiltinCodeIndexEngine.sync",
               "stage": "impact"
             },
             "src/project_knowledge/knowledge.py": {
-              "anchor": "src/project_knowledge/engine.py::CodeIndexEngine",
+              "anchor": "src/project_knowledge/engine.py::BuiltinCodeIndexEngine.sync",
               "stage": "impact"
             },
             "src/project_knowledge/models.py": {
-              "anchor": "src/project_knowledge/engine.py::CodeIndexEngine",
+              "anchor": "src/project_knowledge/engine.py::BuiltinCodeIndexEngine.sync",
               "stage": "impact"
             },
             "src/project_knowledge/proposal.py": {
-              "anchor": "src/project_knowledge/engine.py::CodeIndexEngine",
+              "anchor": "src/project_knowledge/engine.py::BuiltinCodeIndexEngine.sync",
               "stage": "impact"
             },
             "src/project_knowledge/retrieval.py": {
-              "anchor": "src/project_knowledge/engine.py::CodeIndexEngine",
+              "anchor": "src/project_knowledge/engine.py::BuiltinCodeIndexEngine.sync",
               "stage": "impact"
             },
             "src/project_knowledge/schemas.py": {
-              "anchor": "src/project_knowledge/engine.py::CodeIndexEngine",
+              "anchor": "src/project_knowledge/engine.py::BuiltinCodeIndexEngine.sync",
               "stage": "impact"
             },
             "src/project_knowledge/service.py": {
@@ -425,11 +425,11 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/store.py": {
-              "anchor": "src/project_knowledge/engine.py::CodeIndexEngine",
+              "anchor": "src/project_knowledge/engine.py::BuiltinCodeIndexEngine.sync",
               "stage": "impact"
             },
             "src/project_knowledge/util.py": {
-              "anchor": "src/project_knowledge/engine.py::CodeIndexEngine",
+              "anchor": "src/project_knowledge/engine.py::BuiltinCodeIndexEngine.sync",
               "stage": "impact"
             }
           },
@@ -447,7 +447,7 @@
             "invariant_recall"
           ],
           "id": "self-atomic-rebuild",
-          "latency_ms": 173.089,
+          "latency_ms": 162.587,
           "line": 3,
           "metrics": {
             "file_precision": 0.181818,
@@ -565,7 +565,7 @@
             "invariant_recall"
           ],
           "id": "self-commit-alignment",
-          "latency_ms": 176.382,
+          "latency_ms": 159.391,
           "line": 4,
           "metrics": {
             "file_precision": 0.181818,
@@ -635,7 +635,7 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/config.py": {
-              "anchor": "tests/test_integration.py::IntegrationTests.test_commit_alignment_is_distinct_from_content_freshness",
+              "anchor": "src/project_knowledge/codegraph.py::CodeGraphClient.sync",
               "stage": "impact"
             },
             "src/project_knowledge/engine.py": {
@@ -647,7 +647,7 @@
               "stage": "fallback"
             },
             "src/project_knowledge/proposal.py": {
-              "anchor": "tests/test_integration.py::IntegrationTests.test_commit_alignment_is_distinct_from_content_freshness",
+              "anchor": "src/project_knowledge/codegraph.py::CodeGraphClient.sync",
               "stage": "impact"
             },
             "src/project_knowledge/service.py": {
@@ -655,11 +655,11 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/store.py": {
-              "anchor": "tests/test_integration.py::IntegrationTests.test_commit_alignment_is_distinct_from_content_freshness",
+              "anchor": "src/project_knowledge/codegraph.py::CodeGraphClient.sync",
               "stage": "impact"
             },
             "src/project_knowledge/util.py": {
-              "anchor": "tests/test_integration.py::IntegrationTests.test_commit_alignment_is_distinct_from_content_freshness",
+              "anchor": "src/project_knowledge/codegraph.py::CodeGraphClient.sync",
               "stage": "impact"
             },
             "tests/test_finalization.py": {
@@ -689,7 +689,7 @@
             "invariant_recall"
           ],
           "id": "self-template-confidence",
-          "latency_ms": 185.699,
+          "latency_ms": 190.214,
           "line": 5,
           "metrics": {
             "file_precision": 0.181818,
@@ -764,7 +764,7 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/engine.py": {
-              "anchor": "src/project_knowledge/config.py::ProjectConfig",
+              "anchor": "src/project_knowledge/guidance_templates.py::<module>",
               "stage": "impact"
             },
             "src/project_knowledge/guidance_templates.py": {
@@ -776,19 +776,19 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/models.py": {
-              "anchor": "src/project_knowledge/config.py::ProjectConfig",
+              "anchor": "src/project_knowledge/guidance_templates.py::<module>",
               "stage": "impact"
             },
             "src/project_knowledge/proposal.py": {
-              "anchor": "src/project_knowledge/config.py::ProjectConfig",
+              "anchor": "src/project_knowledge/guidance_templates.py::<module>",
               "stage": "impact"
             },
             "src/project_knowledge/retrieval.py": {
-              "anchor": "src/project_knowledge/config.py::ProjectConfig",
+              "anchor": "src/project_knowledge/guidance_templates.py::<module>",
               "stage": "impact"
             },
             "src/project_knowledge/service.py": {
-              "anchor": "src/project_knowledge/config.py::ProjectConfig",
+              "anchor": "src/project_knowledge/guidance_templates.py::<module>",
               "stage": "impact"
             },
             "src/project_knowledge/util.py": {
@@ -811,7 +811,7 @@
           "estimated_context_tokens": 58,
           "failed_metrics": [],
           "id": "self-module-truncation",
-          "latency_ms": 165.785,
+          "latency_ms": 153.179,
           "line": 6,
           "metrics": {
             "extension_point_precision": 1.0,
@@ -894,7 +894,7 @@
             "invariant_recall"
           ],
           "id": "self-runtime-schema",
-          "latency_ms": 197.546,
+          "latency_ms": 176.838,
           "line": 7,
           "metrics": {
             "file_precision": 0.272727,
@@ -978,7 +978,7 @@
               "stage": "fallback"
             },
             "src/project_knowledge/retrieval.py": {
-              "anchor": "src/project_knowledge/models.py::KnowledgeRecord",
+              "anchor": "src/project_knowledge/models.py::ChangeSet",
               "stage": "impact"
             },
             "src/project_knowledge/schemas.py": {
@@ -990,7 +990,7 @@
               "stage": "fallback"
             },
             "src/project_knowledge/store.py": {
-              "anchor": "src/project_knowledge/models.py::KnowledgeRecord",
+              "anchor": "src/project_knowledge/models.py::ChangeSet",
               "stage": "impact"
             },
             "tests/test_guidance_store.py": {
@@ -1013,7 +1013,7 @@
           "estimated_context_tokens": 173,
           "failed_metrics": [],
           "id": "self-config-capabilities",
-          "latency_ms": 178.538,
+          "latency_ms": 173.921,
           "line": 8,
           "metrics": {
             "file_precision": 0.181818,
@@ -1083,7 +1083,7 @@
               "stage": "fallback"
             },
             "src/project_knowledge/codegraph.py": {
-              "anchor": "scripts/validate_codegraph_adapter.py::validate_codegraph.check",
+              "anchor": "src/project_knowledge/service.py::ProjectService.check",
               "stage": "impact"
             },
             "src/project_knowledge/config.py": {
@@ -1099,7 +1099,7 @@
               "stage": "fallback"
             },
             "src/project_knowledge/proposal.py": {
-              "anchor": "scripts/validate_codegraph_adapter.py::validate_codegraph.check",
+              "anchor": "src/project_knowledge/service.py::ProjectService.check",
               "stage": "impact"
             },
             "src/project_knowledge/service.py": {
@@ -1134,7 +1134,7 @@
             "design_reason_recall"
           ],
           "id": "self-codegraph-failure",
-          "latency_ms": 170.403,
+          "latency_ms": 167.553,
           "line": 9,
           "metrics": {
             "design_reason_recall": 0.0,
@@ -1206,7 +1206,7 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/config.py": {
-              "anchor": "src/project_knowledge/engine.py::create_engine",
+              "anchor": "scripts/validate_codegraph_adapter.py::validate_codegraph.check",
               "stage": "impact"
             },
             "src/project_knowledge/engine.py": {
@@ -1222,15 +1222,15 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/models.py": {
-              "anchor": "src/project_knowledge/engine.py::create_engine",
+              "anchor": "scripts/validate_codegraph_adapter.py::validate_codegraph.check",
               "stage": "impact"
             },
             "src/project_knowledge/proposal.py": {
-              "anchor": "src/project_knowledge/engine.py::create_engine",
+              "anchor": "scripts/validate_codegraph_adapter.py::validate_codegraph.check",
               "stage": "impact"
             },
             "src/project_knowledge/util.py": {
-              "anchor": "src/project_knowledge/engine.py::create_engine",
+              "anchor": "scripts/validate_codegraph_adapter.py::validate_codegraph.check",
               "stage": "impact"
             },
             "tests/test_codegraph.py": {
@@ -1255,7 +1255,7 @@
             "symbol_recall"
           ],
           "id": "self-python-parser",
-          "latency_ms": 179.85,
+          "latency_ms": 182.235,
           "line": 10,
           "metrics": {
             "file_precision": 0.181818,
@@ -1340,7 +1340,7 @@
               "stage": "fallback"
             },
             "src/project_knowledge/models.py": {
-              "anchor": "src/project_knowledge/engine.py::PythonParser.visit_Call",
+              "anchor": "src/project_knowledge/engine.py::PythonParser._name",
               "stage": "impact"
             },
             "src/project_knowledge/real_project.py": {
@@ -1348,7 +1348,7 @@
               "stage": "fallback"
             },
             "src/project_knowledge/retrieval.py": {
-              "anchor": "src/project_knowledge/engine.py::PythonParser.visit_Call",
+              "anchor": "src/project_knowledge/engine.py::PythonParser._name",
               "stage": "impact"
             },
             "src/project_knowledge/service.py": {
@@ -1356,7 +1356,7 @@
               "stage": "fallback"
             },
             "src/project_knowledge/util.py": {
-              "anchor": "src/project_knowledge/engine.py::PythonParser.visit_Call",
+              "anchor": "src/project_knowledge/engine.py::PythonParser._name",
               "stage": "impact"
             },
             "tests/test_engine.py": {
@@ -1375,7 +1375,7 @@
           "estimated_context_tokens": 210,
           "failed_metrics": [],
           "id": "self-generic-parser",
-          "latency_ms": 227.059,
+          "latency_ms": 203.46,
           "line": 11,
           "metrics": {
             "extension_point_precision": 0.125,
@@ -1498,7 +1498,7 @@
           "estimated_context_tokens": 179,
           "failed_metrics": [],
           "id": "self-context-budget",
-          "latency_ms": 170.999,
+          "latency_ms": 183.943,
           "line": 12,
           "metrics": {
             "file_precision": 0.181818,
@@ -1613,13 +1613,13 @@
         {
           "answer_status": "verified",
           "category": "stale_detection",
-          "estimated_context_tokens": 157,
+          "estimated_context_tokens": 155,
           "failed_metrics": [
             "file_recall",
             "invariant_recall"
           ],
           "id": "self-stale-shield",
-          "latency_ms": 167.891,
+          "latency_ms": 189.231,
           "line": 13,
           "metrics": {
             "file_precision": 0.090909,
@@ -1665,12 +1665,12 @@
             "src/project_knowledge/mcp.py",
             "src/project_knowledge/performance.py",
             "src/project_knowledge/proposal.py",
-            "src/project_knowledge/real_project.py",
             "src/project_knowledge/retrieval.py",
             "src/project_knowledge/schemas.py",
             "src/project_knowledge/store.py",
             "src/project_knowledge/util.py",
             "tests/test_integration.py",
+            "tests/test_retrieval_wp06.py",
             "tests/test_semantic.py"
           ],
           "returned_symbols": [
@@ -1696,27 +1696,27 @@
               "anchor": "src/project_knowledge/proposal.py::ProposalService.get",
               "stage": "direct_symbol"
             },
-            "src/project_knowledge/real_project.py": {
-              "anchor": "KnowledgeAPI.get 和 _pending_sources 如何阻止返回依赖待同步来源的旧正文？",
-              "stage": "fallback"
-            },
             "src/project_knowledge/retrieval.py": {
               "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI.get",
               "stage": "direct_symbol"
             },
             "src/project_knowledge/schemas.py": {
-              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI.get",
+              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI._pending_sources",
               "stage": "impact"
             },
             "src/project_knowledge/store.py": {
-              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI.get",
+              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI._pending_sources",
               "stage": "impact"
             },
             "src/project_knowledge/util.py": {
-              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI.get",
+              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI._pending_sources",
               "stage": "impact"
             },
             "tests/test_integration.py": {
+              "anchor": "KnowledgeAPI.get 和 _pending_sources 如何阻止返回依赖待同步来源的旧正文？",
+              "stage": "fallback"
+            },
+            "tests/test_retrieval_wp06.py": {
               "anchor": "KnowledgeAPI.get 和 _pending_sources 如何阻止返回依赖待同步来源的旧正文？",
               "stage": "fallback"
             },
@@ -1736,7 +1736,7 @@
           "estimated_context_tokens": 173,
           "failed_metrics": [],
           "id": "self-impact-analysis",
-          "latency_ms": 155.041,
+          "latency_ms": 172.601,
           "line": 14,
           "metrics": {
             "file_precision": 0.181818,
@@ -1853,7 +1853,7 @@
           "estimated_context_tokens": 153,
           "failed_metrics": [],
           "id": "self-mcp-dispatch",
-          "latency_ms": 173.855,
+          "latency_ms": 172.726,
           "line": 15,
           "metrics": {
             "file_precision": 0.181818,
@@ -1914,23 +1914,23 @@
           ],
           "selection_reasons": {
             "src/project_knowledge/codegraph.py": {
-              "anchor": "src/project_knowledge/mcp.py::MCPServer",
+              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI",
               "stage": "impact"
             },
             "src/project_knowledge/config.py": {
-              "anchor": "src/project_knowledge/mcp.py::MCPServer",
+              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI",
               "stage": "impact"
             },
             "src/project_knowledge/guidance_workflow.py": {
-              "anchor": "src/project_knowledge/mcp.py::MCPServer",
+              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI",
               "stage": "impact"
             },
             "src/project_knowledge/incremental.py": {
-              "anchor": "src/project_knowledge/mcp.py::MCPServer",
+              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI",
               "stage": "impact"
             },
             "src/project_knowledge/initialization.py": {
-              "anchor": "src/project_knowledge/mcp.py::MCPServer",
+              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI",
               "stage": "impact"
             },
             "src/project_knowledge/mcp.py": {
@@ -1938,7 +1938,7 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/proposal.py": {
-              "anchor": "src/project_knowledge/mcp.py::MCPServer",
+              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI",
               "stage": "impact"
             },
             "src/project_knowledge/retrieval.py": {
@@ -1946,11 +1946,11 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/schemas.py": {
-              "anchor": "src/project_knowledge/mcp.py::MCPServer",
+              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI",
               "stage": "impact"
             },
             "src/project_knowledge/util.py": {
-              "anchor": "src/project_knowledge/mcp.py::MCPServer",
+              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI",
               "stage": "impact"
             },
             "tests/test_guidance_mcp.py": {
@@ -1971,7 +1971,7 @@
             "symbol_recall"
           ],
           "id": "self-manifest-publication",
-          "latency_ms": 192.066,
+          "latency_ms": 187.369,
           "line": 16,
           "metrics": {
             "file_precision": 0.272727,
@@ -2036,7 +2036,7 @@
           ],
           "selection_reasons": {
             "src/project_knowledge/guidance.py": {
-              "anchor": "tests/test_wp08.py::ConfigMigrationAndClientTests.test_plugin_manifest_version_matches_core_version",
+              "anchor": "src/project_knowledge/schemas.py::<module>",
               "stage": "impact"
             },
             "src/project_knowledge/knowledge.py": {
@@ -2048,7 +2048,7 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/retrieval.py": {
-              "anchor": "tests/test_wp08.py::ConfigMigrationAndClientTests.test_plugin_manifest_version_matches_core_version",
+              "anchor": "src/project_knowledge/schemas.py::<module>",
               "stage": "impact"
             },
             "src/project_knowledge/schemas.py": {
@@ -2064,7 +2064,7 @@
               "stage": "fallback"
             },
             "src/project_knowledge/util.py": {
-              "anchor": "tests/test_wp08.py::ConfigMigrationAndClientTests.test_plugin_manifest_version_matches_core_version",
+              "anchor": "src/project_knowledge/schemas.py::<module>",
               "stage": "impact"
             },
             "tests/test_guidance.py": {
@@ -2095,7 +2095,7 @@
             "invariant_recall"
           ],
           "id": "self-version-bump",
-          "latency_ms": 163.923,
+          "latency_ms": 169.09,
           "line": 17,
           "metrics": {
             "file_precision": 0.111111,
@@ -2205,7 +2205,7 @@
             "invariant_recall"
           ],
           "id": "self-owned-integration",
-          "latency_ms": 173.086,
+          "latency_ms": 180.624,
           "line": 18,
           "metrics": {
             "file_precision": 0.181818,
@@ -2271,11 +2271,11 @@
               "stage": "fallback"
             },
             "src/project_knowledge/config.py": {
-              "anchor": "src/project_knowledge/service.py::ProjectService.install",
+              "anchor": "src/project_knowledge/service.py::ProjectService",
               "stage": "impact"
             },
             "src/project_knowledge/retrieval.py": {
-              "anchor": "src/project_knowledge/service.py::ProjectService.install",
+              "anchor": "src/project_knowledge/service.py::ProjectService",
               "stage": "impact"
             },
             "src/project_knowledge/service.py": {
@@ -2283,7 +2283,7 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/store.py": {
-              "anchor": "src/project_knowledge/service.py::ProjectService.install",
+              "anchor": "src/project_knowledge/service.py::ProjectService",
               "stage": "impact"
             },
             "src/project_knowledge/util.py": {
@@ -2322,7 +2322,7 @@
           "estimated_context_tokens": 166,
           "failed_metrics": [],
           "id": "self-evaluation-gate",
-          "latency_ms": 178.817,
+          "latency_ms": 180.971,
           "line": 19,
           "metrics": {
             "file_precision": 0.181818,
@@ -2394,7 +2394,7 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/config.py": {
-              "anchor": "src/project_knowledge/evaluate.py::evaluate_quality_gate",
+              "anchor": "src/project_knowledge/cli.py::<module>",
               "stage": "impact"
             },
             "src/project_knowledge/evaluate.py": {
@@ -2402,31 +2402,31 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/evidence.py": {
-              "anchor": "src/project_knowledge/evaluate.py::evaluate_quality_gate",
+              "anchor": "src/project_knowledge/cli.py::<module>",
               "stage": "impact"
             },
             "src/project_knowledge/finalization.py": {
-              "anchor": "src/project_knowledge/evaluate.py::evaluate_quality_gate",
+              "anchor": "src/project_knowledge/cli.py::<module>",
               "stage": "impact"
             },
             "src/project_knowledge/models.py": {
-              "anchor": "src/project_knowledge/evaluate.py::evaluate_quality_gate",
+              "anchor": "src/project_knowledge/cli.py::<module>",
               "stage": "impact"
             },
             "src/project_knowledge/proposal.py": {
-              "anchor": "src/project_knowledge/evaluate.py::evaluate_quality_gate",
+              "anchor": "src/project_knowledge/cli.py::<module>",
               "stage": "impact"
             },
             "src/project_knowledge/provider.py": {
-              "anchor": "src/project_knowledge/evaluate.py::evaluate_quality_gate",
+              "anchor": "src/project_knowledge/cli.py::<module>",
               "stage": "impact"
             },
             "src/project_knowledge/semantic.py": {
-              "anchor": "src/project_knowledge/evaluate.py::evaluate_quality_gate",
+              "anchor": "src/project_knowledge/cli.py::<module>",
               "stage": "impact"
             },
             "src/project_knowledge/service.py": {
-              "anchor": "src/project_knowledge/evaluate.py::evaluate_quality_gate",
+              "anchor": "src/project_knowledge/cli.py::<module>",
               "stage": "impact"
             }
           },
@@ -2441,7 +2441,7 @@
           "estimated_context_tokens": 82,
           "failed_metrics": [],
           "id": "self-performance-harness",
-          "latency_ms": 150.875,
+          "latency_ms": 152.177,
           "line": 20,
           "metrics": {
             "file_precision": 0.285714,
@@ -2534,7 +2534,7 @@
           "estimated_context_tokens": 216,
           "failed_metrics": [],
           "id": "self-evidence-pack",
-          "latency_ms": 203.351,
+          "latency_ms": 181.738,
           "line": 21,
           "metrics": {
             "file_precision": 0.272727,
@@ -2654,7 +2654,7 @@
           "estimated_context_tokens": 186,
           "failed_metrics": [],
           "id": "self-provider-authorization",
-          "latency_ms": 185.388,
+          "latency_ms": 182.773,
           "line": 22,
           "metrics": {
             "file_precision": 0.181818,
@@ -2726,15 +2726,15 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/evidence.py": {
-              "anchor": "src/project_knowledge/provider.py::<module>",
+              "anchor": "src/project_knowledge/config.py::ProjectConfig",
               "stage": "impact"
             },
             "src/project_knowledge/models.py": {
-              "anchor": "src/project_knowledge/provider.py::<module>",
+              "anchor": "src/project_knowledge/config.py::ProjectConfig",
               "stage": "impact"
             },
             "src/project_knowledge/proposal.py": {
-              "anchor": "src/project_knowledge/provider.py::<module>",
+              "anchor": "src/project_knowledge/config.py::ProjectConfig",
               "stage": "impact"
             },
             "src/project_knowledge/provider.py": {
@@ -2742,15 +2742,15 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/retrieval.py": {
-              "anchor": "src/project_knowledge/provider.py::<module>",
+              "anchor": "src/project_knowledge/config.py::ProjectConfig",
               "stage": "impact"
             },
             "src/project_knowledge/schemas.py": {
-              "anchor": "src/project_knowledge/provider.py::<module>",
+              "anchor": "src/project_knowledge/config.py::ProjectConfig",
               "stage": "impact"
             },
             "src/project_knowledge/util.py": {
-              "anchor": "src/project_knowledge/provider.py::<module>",
+              "anchor": "src/project_knowledge/config.py::ProjectConfig",
               "stage": "impact"
             },
             "tests/test_config.py": {
@@ -2775,7 +2775,7 @@
             "symbol_recall"
           ],
           "id": "self-provider-runtime",
-          "latency_ms": 177.842,
+          "latency_ms": 178.676,
           "line": 23,
           "metrics": {
             "file_precision": 0.272727,
@@ -2842,11 +2842,11 @@
           ],
           "selection_reasons": {
             "src/project_knowledge/evidence.py": {
-              "anchor": "src/project_knowledge/provider.py::FakeProvider.generate_structured",
+              "anchor": "src/project_knowledge/provider.py::DisabledProvider.generate_structured",
               "stage": "impact"
             },
             "src/project_knowledge/gardenserver.py": {
-              "anchor": "src/project_knowledge/provider.py::FakeProvider.generate_structured",
+              "anchor": "src/project_knowledge/provider.py::DisabledProvider.generate_structured",
               "stage": "impact"
             },
             "src/project_knowledge/guidance.py": {
@@ -2858,7 +2858,7 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/proposal.py": {
-              "anchor": "src/project_knowledge/provider.py::FakeProvider.generate_structured",
+              "anchor": "src/project_knowledge/provider.py::DisabledProvider.generate_structured",
               "stage": "impact"
             },
             "src/project_knowledge/provider.py": {
@@ -2866,23 +2866,23 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/retrieval.py": {
-              "anchor": "src/project_knowledge/provider.py::FakeProvider.generate_structured",
+              "anchor": "src/project_knowledge/provider.py::DisabledProvider.generate_structured",
               "stage": "impact"
             },
             "src/project_knowledge/schemas.py": {
-              "anchor": "src/project_knowledge/provider.py::FakeProvider.generate_structured",
+              "anchor": "src/project_knowledge/provider.py::DisabledProvider.generate_structured",
               "stage": "impact"
             },
             "src/project_knowledge/store.py": {
-              "anchor": "src/project_knowledge/provider.py::FakeProvider.generate_structured",
+              "anchor": "src/project_knowledge/provider.py::DisabledProvider.generate_structured",
               "stage": "impact"
             },
             "src/project_knowledge/util.py": {
-              "anchor": "src/project_knowledge/provider.py::FakeProvider.generate_structured",
+              "anchor": "src/project_knowledge/provider.py::DisabledProvider.generate_structured",
               "stage": "impact"
             },
             "tests/test_provider.py": {
-              "anchor": "src/project_knowledge/provider.py::FakeProvider.generate_structured",
+              "anchor": "src/project_knowledge/provider.py::DisabledProvider.generate_structured",
               "stage": "impact"
             }
           },
@@ -2899,7 +2899,7 @@
             "symbol_recall"
           ],
           "id": "self-provider-preview",
-          "latency_ms": 198.81,
+          "latency_ms": 216.719,
           "line": 24,
           "metrics": {
             "file_precision": 0.272727,
@@ -2981,23 +2981,23 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/config.py": {
-              "anchor": "src/project_knowledge/provider.py::ModelRuntime.preview",
+              "anchor": "evaluation/performance_harness.py::main",
               "stage": "impact"
             },
             "src/project_knowledge/evaluate.py": {
-              "anchor": "src/project_knowledge/provider.py::ModelRuntime.preview",
+              "anchor": "evaluation/performance_harness.py::main",
               "stage": "impact"
             },
             "src/project_knowledge/evidence.py": {
-              "anchor": "src/project_knowledge/provider.py::ModelRuntime.preview",
+              "anchor": "evaluation/performance_harness.py::main",
               "stage": "impact"
             },
             "src/project_knowledge/finalization.py": {
-              "anchor": "src/project_knowledge/provider.py::ModelRuntime.preview",
+              "anchor": "evaluation/performance_harness.py::main",
               "stage": "impact"
             },
             "src/project_knowledge/gardenserver.py": {
-              "anchor": "src/project_knowledge/provider.py::ModelRuntime.preview",
+              "anchor": "evaluation/performance_harness.py::main",
               "stage": "impact"
             },
             "src/project_knowledge/guidance.py": {
@@ -3020,7 +3020,7 @@
           "estimated_context_tokens": 133,
           "failed_metrics": [],
           "id": "self-provider-extension",
-          "latency_ms": 162.045,
+          "latency_ms": 188.503,
           "line": 25,
           "metrics": {
             "extension_point_precision": 0.142857,
@@ -3076,7 +3076,7 @@
               "stage": "direct_symbol"
             },
             "tests/test_provider.py": {
-              "anchor": "src/project_knowledge/provider.py::FakeProvider.generate_structured",
+              "anchor": "src/project_knowledge/provider.py::DisabledProvider.generate_structured",
               "stage": "impact"
             }
           },
@@ -3093,7 +3093,7 @@
             "invariant_recall"
           ],
           "id": "self-feature-guide-schema",
-          "latency_ms": 162.703,
+          "latency_ms": 173.951,
           "line": 26,
           "metrics": {
             "file_precision": 0.181818,
@@ -3208,7 +3208,7 @@
           "estimated_context_tokens": 227,
           "failed_metrics": [],
           "id": "self-semantic-generation",
-          "latency_ms": 180.562,
+          "latency_ms": 163.883,
           "line": 27,
           "metrics": {
             "file_precision": 0.272727,
@@ -3273,15 +3273,15 @@
           ],
           "selection_reasons": {
             "src/project_knowledge/codegraph.py": {
-              "anchor": "src/project_knowledge/semantic.py::SemanticKnowledgeService.generate_feature_guide",
+              "anchor": "tests/test_guidance_workflow.py::GuidanceWorkflowTests.guide",
               "stage": "impact"
             },
             "src/project_knowledge/config.py": {
-              "anchor": "src/project_knowledge/semantic.py::SemanticKnowledgeService.generate_feature_guide",
+              "anchor": "tests/test_guidance_workflow.py::GuidanceWorkflowTests.guide",
               "stage": "impact"
             },
             "src/project_knowledge/knowledge.py": {
-              "anchor": "src/project_knowledge/semantic.py::SemanticKnowledgeService.generate_feature_guide",
+              "anchor": "tests/test_guidance_workflow.py::GuidanceWorkflowTests.guide",
               "stage": "impact"
             },
             "src/project_knowledge/models.py": {
@@ -3289,7 +3289,7 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/proposal.py": {
-              "anchor": "src/project_knowledge/semantic.py::SemanticKnowledgeService.generate_feature_guide",
+              "anchor": "tests/test_guidance_workflow.py::GuidanceWorkflowTests.guide",
               "stage": "impact"
             },
             "src/project_knowledge/provider.py": {
@@ -3297,7 +3297,7 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/schemas.py": {
-              "anchor": "src/project_knowledge/semantic.py::SemanticKnowledgeService.generate_feature_guide",
+              "anchor": "tests/test_guidance_workflow.py::GuidanceWorkflowTests.guide",
               "stage": "impact"
             },
             "src/project_knowledge/semantic.py": {
@@ -3305,11 +3305,11 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/store.py": {
-              "anchor": "src/project_knowledge/semantic.py::SemanticKnowledgeService.generate_feature_guide",
+              "anchor": "tests/test_guidance_workflow.py::GuidanceWorkflowTests.guide",
               "stage": "impact"
             },
             "src/project_knowledge/util.py": {
-              "anchor": "src/project_knowledge/semantic.py::SemanticKnowledgeService.generate_feature_guide",
+              "anchor": "tests/test_guidance_workflow.py::GuidanceWorkflowTests.guide",
               "stage": "impact"
             },
             "tests/test_guidance_workflow.py": {
@@ -3330,7 +3330,7 @@
             "file_recall"
           ],
           "id": "self-feature-source-validation",
-          "latency_ms": 157.287,
+          "latency_ms": 176.945,
           "line": 28,
           "metrics": {
             "file_precision": 0.090909,
@@ -3447,7 +3447,7 @@
             "file_recall"
           ],
           "id": "self-draft-lifecycle",
-          "latency_ms": 183.615,
+          "latency_ms": 177.428,
           "line": 29,
           "metrics": {
             "file_precision": 0.272727,
@@ -3525,11 +3525,11 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/models.py": {
-              "anchor": "src/project_knowledge/service.py::ProjectService",
+              "anchor": "src/project_knowledge/engine.py::BuiltinCodeIndexEngine.sync",
               "stage": "impact"
             },
             "src/project_knowledge/proposal.py": {
-              "anchor": "src/project_knowledge/service.py::ProjectService",
+              "anchor": "src/project_knowledge/engine.py::BuiltinCodeIndexEngine.sync",
               "stage": "impact"
             },
             "src/project_knowledge/retrieval.py": {
@@ -3537,7 +3537,7 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/schemas.py": {
-              "anchor": "src/project_knowledge/service.py::ProjectService",
+              "anchor": "src/project_knowledge/engine.py::BuiltinCodeIndexEngine.sync",
               "stage": "impact"
             },
             "src/project_knowledge/service.py": {
@@ -3545,11 +3545,11 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/store.py": {
-              "anchor": "src/project_knowledge/service.py::ProjectService",
+              "anchor": "src/project_knowledge/engine.py::BuiltinCodeIndexEngine.sync",
               "stage": "impact"
             },
             "src/project_knowledge/util.py": {
-              "anchor": "src/project_knowledge/service.py::ProjectService",
+              "anchor": "src/project_knowledge/engine.py::BuiltinCodeIndexEngine.sync",
               "stage": "impact"
             },
             "tests/test_semantic.py": {
@@ -3568,7 +3568,7 @@
           "estimated_context_tokens": 228,
           "failed_metrics": [],
           "id": "self-feature-retrieval",
-          "latency_ms": 183.254,
+          "latency_ms": 189.322,
           "line": 30,
           "metrics": {
             "file_precision": 0.272727,
@@ -3693,7 +3693,7 @@
             "invariant_recall"
           ],
           "id": "self-proposal-stable-id",
-          "latency_ms": 193.736,
+          "latency_ms": 192.636,
           "line": 31,
           "metrics": {
             "file_precision": 0.272727,
@@ -3763,7 +3763,7 @@
               "stage": "fallback"
             },
             "src/project_knowledge/codegraph.py": {
-              "anchor": "src/project_knowledge/models.py::PatchOperation.to_dict",
+              "anchor": "src/project_knowledge/models.py::ChangeSet",
               "stage": "impact"
             },
             "src/project_knowledge/guidance_models.py": {
@@ -3771,7 +3771,7 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/guidance_store.py": {
-              "anchor": "src/project_knowledge/models.py::PatchOperation.to_dict",
+              "anchor": "src/project_knowledge/models.py::ChangeSet",
               "stage": "impact"
             },
             "src/project_knowledge/incremental.py": {
@@ -3787,15 +3787,15 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/schemas.py": {
-              "anchor": "src/project_knowledge/models.py::PatchOperation.to_dict",
+              "anchor": "src/project_knowledge/models.py::ChangeSet",
               "stage": "impact"
             },
             "src/project_knowledge/store.py": {
-              "anchor": "src/project_knowledge/models.py::PatchOperation.to_dict",
+              "anchor": "src/project_knowledge/models.py::ChangeSet",
               "stage": "impact"
             },
             "src/project_knowledge/util.py": {
-              "anchor": "src/project_knowledge/models.py::PatchOperation.to_dict",
+              "anchor": "src/project_knowledge/models.py::ChangeSet",
               "stage": "impact"
             },
             "tests/test_proposal.py": {
@@ -3814,7 +3814,7 @@
           "estimated_context_tokens": 249,
           "failed_metrics": [],
           "id": "self-proposal-apply-conflict",
-          "latency_ms": 170.65,
+          "latency_ms": 175.854,
           "line": 32,
           "metrics": {
             "file_precision": 0.181818,
@@ -3883,15 +3883,15 @@
               "stage": "fallback"
             },
             "src/project_knowledge/codegraph.py": {
-              "anchor": "tests/test_finalization.py::FinalizationTests.test_configured_knowledge_index_is_a_generated_output",
+              "anchor": "src/project_knowledge/proposal.py::ProposalService._upsert_block",
               "stage": "impact"
             },
             "src/project_knowledge/config.py": {
-              "anchor": "tests/test_finalization.py::FinalizationTests.test_configured_knowledge_index_is_a_generated_output",
+              "anchor": "src/project_knowledge/proposal.py::ProposalService._upsert_block",
               "stage": "impact"
             },
             "src/project_knowledge/finalization.py": {
-              "anchor": "tests/test_finalization.py::FinalizationTests.test_configured_knowledge_index_is_a_generated_output",
+              "anchor": "src/project_knowledge/proposal.py::ProposalService._upsert_block",
               "stage": "impact"
             },
             "src/project_knowledge/proposal.py": {
@@ -3899,11 +3899,11 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/retrieval.py": {
-              "anchor": "tests/test_finalization.py::FinalizationTests.test_configured_knowledge_index_is_a_generated_output",
+              "anchor": "src/project_knowledge/proposal.py::ProposalService._upsert_block",
               "stage": "impact"
             },
             "src/project_knowledge/schemas.py": {
-              "anchor": "tests/test_finalization.py::FinalizationTests.test_configured_knowledge_index_is_a_generated_output",
+              "anchor": "src/project_knowledge/proposal.py::ProposalService._upsert_block",
               "stage": "impact"
             },
             "src/project_knowledge/service.py": {
@@ -3911,11 +3911,11 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/store.py": {
-              "anchor": "tests/test_finalization.py::FinalizationTests.test_configured_knowledge_index_is_a_generated_output",
+              "anchor": "src/project_knowledge/proposal.py::ProposalService._upsert_block",
               "stage": "impact"
             },
             "src/project_knowledge/util.py": {
-              "anchor": "tests/test_finalization.py::FinalizationTests.test_configured_knowledge_index_is_a_generated_output",
+              "anchor": "src/project_knowledge/proposal.py::ProposalService._upsert_block",
               "stage": "impact"
             },
             "tests/test_finalization.py": {
@@ -3937,7 +3937,7 @@
             "symbol_recall"
           ],
           "id": "self-draft-proposal-promotion",
-          "latency_ms": 174.737,
+          "latency_ms": 184.409,
           "line": 33,
           "metrics": {
             "file_precision": 0.181818,
@@ -4004,7 +4004,7 @@
           ],
           "selection_reasons": {
             "src/project_knowledge/codegraph.py": {
-              "anchor": "src/project_knowledge/semantic.py::FeatureGuideValidationError",
+              "anchor": "tests/test_guidance_incremental.py::GuidanceIncrementalTests.guide_content",
               "stage": "impact"
             },
             "src/project_knowledge/knowledge.py": {
@@ -4012,7 +4012,7 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/models.py": {
-              "anchor": "src/project_knowledge/semantic.py::FeatureGuideValidationError",
+              "anchor": "tests/test_guidance_incremental.py::GuidanceIncrementalTests.guide_content",
               "stage": "impact"
             },
             "src/project_knowledge/proposal.py": {
@@ -4020,11 +4020,11 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/retrieval.py": {
-              "anchor": "src/project_knowledge/semantic.py::FeatureGuideValidationError",
+              "anchor": "tests/test_guidance_incremental.py::GuidanceIncrementalTests.guide_content",
               "stage": "impact"
             },
             "src/project_knowledge/schemas.py": {
-              "anchor": "src/project_knowledge/semantic.py::FeatureGuideValidationError",
+              "anchor": "tests/test_guidance_incremental.py::GuidanceIncrementalTests.guide_content",
               "stage": "impact"
             },
             "src/project_knowledge/semantic.py": {
@@ -4032,11 +4032,11 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/store.py": {
-              "anchor": "src/project_knowledge/semantic.py::FeatureGuideValidationError",
+              "anchor": "tests/test_guidance_incremental.py::GuidanceIncrementalTests.guide_content",
               "stage": "impact"
             },
             "src/project_knowledge/util.py": {
-              "anchor": "src/project_knowledge/semantic.py::FeatureGuideValidationError",
+              "anchor": "tests/test_guidance_incremental.py::GuidanceIncrementalTests.guide_content",
               "stage": "impact"
             },
             "tests/test_guidance_incremental.py": {
@@ -4061,7 +4061,7 @@
             "invariant_recall"
           ],
           "id": "self-proposal-delete-adr",
-          "latency_ms": 174.174,
+          "latency_ms": 172.816,
           "line": 34,
           "metrics": {
             "file_precision": 0.3,
@@ -4136,7 +4136,7 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/schemas.py": {
-              "anchor": "tests/test_proposal.py::ProposalTests.test_adr_operation_only_creates_new_draft_and_never_rewrites_existing_adr",
+              "anchor": "src/project_knowledge/proposal.py::ProposalService._render_adr_draft",
               "stage": "impact"
             },
             "src/project_knowledge/service.py": {
@@ -4148,7 +4148,7 @@
               "stage": "fallback"
             },
             "src/project_knowledge/util.py": {
-              "anchor": "tests/test_proposal.py::ProposalTests.test_adr_operation_only_creates_new_draft_and_never_rewrites_existing_adr",
+              "anchor": "src/project_knowledge/proposal.py::ProposalService._render_adr_draft",
               "stage": "impact"
             },
             "tests/test_guidance_store.py": {
@@ -4177,7 +4177,7 @@
             "symbol_recall"
           ],
           "id": "self-semantic-update-queue",
-          "latency_ms": 179.69,
+          "latency_ms": 190.644,
           "line": 35,
           "metrics": {
             "file_precision": 0.181818,
@@ -4255,11 +4255,11 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/knowledge.py": {
-              "anchor": "src/project_knowledge/service.py::ProjectService",
+              "anchor": "src/project_knowledge/engine.py::BuiltinCodeIndexEngine.sync",
               "stage": "impact"
             },
             "src/project_knowledge/models.py": {
-              "anchor": "src/project_knowledge/service.py::ProjectService",
+              "anchor": "src/project_knowledge/engine.py::BuiltinCodeIndexEngine.sync",
               "stage": "impact"
             },
             "src/project_knowledge/proposal.py": {
@@ -4267,11 +4267,11 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/retrieval.py": {
-              "anchor": "src/project_knowledge/service.py::ProjectService",
+              "anchor": "src/project_knowledge/engine.py::BuiltinCodeIndexEngine.sync",
               "stage": "impact"
             },
             "src/project_knowledge/schemas.py": {
-              "anchor": "src/project_knowledge/service.py::ProjectService",
+              "anchor": "src/project_knowledge/engine.py::BuiltinCodeIndexEngine.sync",
               "stage": "impact"
             },
             "src/project_knowledge/service.py": {
@@ -4279,11 +4279,11 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/store.py": {
-              "anchor": "src/project_knowledge/service.py::ProjectService",
+              "anchor": "src/project_knowledge/engine.py::BuiltinCodeIndexEngine.sync",
               "stage": "impact"
             },
             "src/project_knowledge/util.py": {
-              "anchor": "src/project_knowledge/service.py::ProjectService",
+              "anchor": "src/project_knowledge/engine.py::BuiltinCodeIndexEngine.sync",
               "stage": "impact"
             }
           },
@@ -4298,7 +4298,7 @@
           "estimated_context_tokens": 126,
           "failed_metrics": [],
           "id": "self-task-classification",
-          "latency_ms": 150.047,
+          "latency_ms": 162.345,
           "line": 36,
           "metrics": {
             "file_precision": 0.090909,
@@ -4412,7 +4412,7 @@
           "estimated_context_tokens": 188,
           "failed_metrics": [],
           "id": "self-retrieval-explanation",
-          "latency_ms": 164.809,
+          "latency_ms": 169.862,
           "line": 37,
           "metrics": {
             "file_precision": 0.090909,
@@ -4490,7 +4490,7 @@
               "stage": "fallback"
             },
             "src/project_knowledge/proposal.py": {
-              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI",
+              "anchor": "tests/test_retrieval_wp06.py::RetrievalWP06Tests.test_search_exposes_score_breakdown_and_impact_supports_bounded_multihop",
               "stage": "impact"
             },
             "src/project_knowledge/retrieval.py": {
@@ -4498,11 +4498,11 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/store.py": {
-              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI",
+              "anchor": "tests/test_retrieval_wp06.py::RetrievalWP06Tests.test_search_exposes_score_breakdown_and_impact_supports_bounded_multihop",
               "stage": "impact"
             },
             "src/project_knowledge/util.py": {
-              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI",
+              "anchor": "tests/test_retrieval_wp06.py::RetrievalWP06Tests.test_search_exposes_score_breakdown_and_impact_supports_bounded_multihop",
               "stage": "impact"
             },
             "tests/test_evaluate.py": {
@@ -4529,7 +4529,7 @@
           "estimated_context_tokens": 251,
           "failed_metrics": [],
           "id": "self-bounded-multihop",
-          "latency_ms": 185.348,
+          "latency_ms": 185.196,
           "line": 38,
           "metrics": {
             "file_precision": 0.090909,
@@ -4602,19 +4602,19 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/evaluate.py": {
-              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI",
+              "anchor": "tests/test_evaluate.py::EvaluationTests.test_markdown_source_paths_are_adaptively_bounded",
               "stage": "impact"
             },
             "src/project_knowledge/evidence.py": {
-              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI",
+              "anchor": "tests/test_evaluate.py::EvaluationTests.test_markdown_source_paths_are_adaptively_bounded",
               "stage": "impact"
             },
             "src/project_knowledge/models.py": {
-              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI",
+              "anchor": "tests/test_evaluate.py::EvaluationTests.test_markdown_source_paths_are_adaptively_bounded",
               "stage": "impact"
             },
             "src/project_knowledge/proposal.py": {
-              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI",
+              "anchor": "tests/test_evaluate.py::EvaluationTests.test_markdown_source_paths_are_adaptively_bounded",
               "stage": "impact"
             },
             "src/project_knowledge/retrieval.py": {
@@ -4622,7 +4622,7 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/schemas.py": {
-              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI",
+              "anchor": "tests/test_evaluate.py::EvaluationTests.test_markdown_source_paths_are_adaptively_bounded",
               "stage": "impact"
             },
             "tests/test_evaluate.py": {
@@ -4649,7 +4649,7 @@
           "estimated_context_tokens": 159,
           "failed_metrics": [],
           "id": "self-feature-development-context",
-          "latency_ms": 196.486,
+          "latency_ms": 164.679,
           "line": 39,
           "metrics": {
             "file_precision": 0.090909,
@@ -4765,7 +4765,7 @@
           "estimated_context_tokens": 122,
           "failed_metrics": [],
           "id": "self-context-unknowns",
-          "latency_ms": 166.632,
+          "latency_ms": 165.204,
           "line": 40,
           "metrics": {
             "file_precision": 0.090909,
@@ -5002,9 +5002,9 @@
         "file_recall": 0.689583,
         "generated_source_coverage": 0.909091,
         "invariant_recall": 0.0,
-        "p50_latency_ms": 23.1285,
-        "p95_latency_ms": 26.12585,
-        "p99_latency_ms": 26.37766,
+        "p50_latency_ms": 23.6735,
+        "p95_latency_ms": 25.69195,
+        "p99_latency_ms": 26.84768,
         "success_rate": 0.0,
         "symbol_precision": 0.0,
         "symbol_recall": 0.0
@@ -5062,16 +5062,16 @@
             "Configuration"
           ]
         },
-        "generated_at": "2026-08-14T18:29:09+08:00",
-        "head_commit": "a321d49945d7f7c8107a345a2e39d90703403db3",
-        "index_commit": "a321d49945d7f7c8107a345a2e39d90703403db3",
+        "generated_at": "2026-08-14T18:37:48+08:00",
+        "head_commit": "b0a6d3332873149889ded0ed934c4f721e8443a8",
+        "index_commit": "b0a6d3332873149889ded0ed934c4f721e8443a8",
         "platform": "Windows-11-10.0.26200-SP0",
         "processor": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
         "project": "ProjectKnowledgeCLI",
         "project_files": 77,
-        "project_symbols": 918,
+        "project_symbols": 919,
         "python": "3.14.6",
-        "source_snapshot_sha256": "sha256:0037b1a48f6371296e42b49332d4068d2ae86dd5796ab1c9a864c31d04110492",
+        "source_snapshot_sha256": "sha256:dd095c000b8b0ae5227336d21a56b7807536a179620ff0da987db8e743cdfd4b",
         "working_tree": "dirty"
       },
       "results": [
@@ -5085,7 +5085,7 @@
             "call_path_recall"
           ],
           "id": "self-init-flow",
-          "latency_ms": 23.823,
+          "latency_ms": 23.685,
           "line": 1,
           "metrics": {
             "call_path_precision": 0.0,
@@ -5140,7 +5140,7 @@
             "symbol_recall"
           ],
           "id": "self-incremental-sync",
-          "latency_ms": 23.076,
+          "latency_ms": 22.358,
           "line": 2,
           "metrics": {
             "file_precision": 0.4,
@@ -5193,7 +5193,7 @@
             "invariant_recall"
           ],
           "id": "self-atomic-rebuild",
-          "latency_ms": 21.588,
+          "latency_ms": 22.414,
           "line": 3,
           "metrics": {
             "file_precision": 0.4,
@@ -5248,7 +5248,7 @@
             "invariant_recall"
           ],
           "id": "self-commit-alignment",
-          "latency_ms": 24.453,
+          "latency_ms": 24.273,
           "line": 4,
           "metrics": {
             "file_precision": 0.166667,
@@ -5308,7 +5308,7 @@
             "invariant_recall"
           ],
           "id": "self-template-confidence",
-          "latency_ms": 24.441,
+          "latency_ms": 25.041,
           "line": 5,
           "metrics": {
             "file_precision": 0.166667,
@@ -5367,7 +5367,7 @@
             "extension_point_recall"
           ],
           "id": "self-module-truncation",
-          "latency_ms": 21.406,
+          "latency_ms": 22.007,
           "line": 6,
           "metrics": {
             "extension_point_precision": 0.0,
@@ -5403,7 +5403,7 @@
             "invariant_recall"
           ],
           "id": "self-runtime-schema",
-          "latency_ms": 22.917,
+          "latency_ms": 23.653,
           "line": 7,
           "metrics": {
             "file_precision": 0.333333,
@@ -5462,7 +5462,7 @@
             "symbol_recall"
           ],
           "id": "self-config-capabilities",
-          "latency_ms": 22.271,
+          "latency_ms": 23.566,
           "line": 8,
           "metrics": {
             "file_precision": 0.2,
@@ -5516,7 +5516,7 @@
             "design_reason_recall"
           ],
           "id": "self-codegraph-failure",
-          "latency_ms": 22.505,
+          "latency_ms": 23.103,
           "line": 9,
           "metrics": {
             "design_reason_recall": 0.0,
@@ -5575,7 +5575,7 @@
             "symbol_recall"
           ],
           "id": "self-python-parser",
-          "latency_ms": 22.867,
+          "latency_ms": 23.96,
           "line": 10,
           "metrics": {
             "file_precision": 0.166667,
@@ -5634,7 +5634,7 @@
             "extension_point_recall"
           ],
           "id": "self-generic-parser",
-          "latency_ms": 23.37,
+          "latency_ms": 23.698,
           "line": 11,
           "metrics": {
             "extension_point_precision": 0.0,
@@ -5694,7 +5694,7 @@
             "symbol_recall"
           ],
           "id": "self-context-budget",
-          "latency_ms": 24.072,
+          "latency_ms": 24.904,
           "line": 12,
           "metrics": {
             "file_precision": 0.2,
@@ -5747,7 +5747,7 @@
             "invariant_recall"
           ],
           "id": "self-stale-shield",
-          "latency_ms": 22.932,
+          "latency_ms": 23.05,
           "line": 13,
           "metrics": {
             "file_precision": 0.333333,
@@ -5806,7 +5806,7 @@
             "symbol_recall"
           ],
           "id": "self-impact-analysis",
-          "latency_ms": 21.677,
+          "latency_ms": 22.838,
           "line": 14,
           "metrics": {
             "file_precision": 0.2,
@@ -5859,7 +5859,7 @@
             "symbol_recall"
           ],
           "id": "self-mcp-dispatch",
-          "latency_ms": 22.789,
+          "latency_ms": 23.813,
           "line": 15,
           "metrics": {
             "file_precision": 0.2,
@@ -5912,7 +5912,7 @@
             "symbol_recall"
           ],
           "id": "self-manifest-publication",
-          "latency_ms": 22.991,
+          "latency_ms": 23.662,
           "line": 16,
           "metrics": {
             "file_precision": 0.333333,
@@ -5971,7 +5971,7 @@
             "invariant_recall"
           ],
           "id": "self-version-bump",
-          "latency_ms": 21.208,
+          "latency_ms": 22.626,
           "line": 17,
           "metrics": {
             "file_precision": 0.25,
@@ -6021,7 +6021,7 @@
             "invariant_recall"
           ],
           "id": "self-owned-integration",
-          "latency_ms": 22.651,
+          "latency_ms": 23.021,
           "line": 18,
           "metrics": {
             "file_precision": 0.2,
@@ -6075,7 +6075,7 @@
             "symbol_recall"
           ],
           "id": "self-evaluation-gate",
-          "latency_ms": 22.264,
+          "latency_ms": 22.938,
           "line": 19,
           "metrics": {
             "file_precision": 0.0,
@@ -6127,7 +6127,7 @@
             "symbol_recall"
           ],
           "id": "self-performance-harness",
-          "latency_ms": 22.172,
+          "latency_ms": 22.81,
           "line": 20,
           "metrics": {
             "file_precision": 0.5,
@@ -6175,7 +6175,7 @@
             "symbol_recall"
           ],
           "id": "self-evidence-pack",
-          "latency_ms": 26.419,
+          "latency_ms": 25.103,
           "line": 21,
           "metrics": {
             "file_precision": 0.333333,
@@ -6232,7 +6232,7 @@
             "symbol_recall"
           ],
           "id": "self-provider-authorization",
-          "latency_ms": 24.092,
+          "latency_ms": 22.575,
           "line": 22,
           "metrics": {
             "file_precision": 0.4,
@@ -6285,7 +6285,7 @@
             "symbol_recall"
           ],
           "id": "self-provider-runtime",
-          "latency_ms": 24.497,
+          "latency_ms": 23.947,
           "line": 23,
           "metrics": {
             "file_precision": 0.166667,
@@ -6343,7 +6343,7 @@
             "symbol_recall"
           ],
           "id": "self-provider-preview",
-          "latency_ms": 26.313,
+          "latency_ms": 27.077,
           "line": 24,
           "metrics": {
             "file_precision": 0.333333,
@@ -6401,7 +6401,7 @@
             "extension_point_recall"
           ],
           "id": "self-provider-extension",
-          "latency_ms": 22.046,
+          "latency_ms": 23.583,
           "line": 25,
           "metrics": {
             "extension_point_precision": 0.0,
@@ -6441,7 +6441,7 @@
             "invariant_recall"
           ],
           "id": "self-feature-guide-schema",
-          "latency_ms": 22.82,
+          "latency_ms": 23.793,
           "line": 26,
           "metrics": {
             "file_precision": 0.4,
@@ -6495,7 +6495,7 @@
             "symbol_recall"
           ],
           "id": "self-semantic-generation",
-          "latency_ms": 24.208,
+          "latency_ms": 23.798,
           "line": 27,
           "metrics": {
             "file_precision": 0.166667,
@@ -6552,7 +6552,7 @@
             "symbol_recall"
           ],
           "id": "self-feature-source-validation",
-          "latency_ms": 23.237,
+          "latency_ms": 23.011,
           "line": 28,
           "metrics": {
             "file_precision": 0.4,
@@ -6605,7 +6605,7 @@
             "symbol_recall"
           ],
           "id": "self-draft-lifecycle",
-          "latency_ms": 25.359,
+          "latency_ms": 25.183,
           "line": 29,
           "metrics": {
             "file_precision": 0.5,
@@ -6663,7 +6663,7 @@
             "symbol_recall"
           ],
           "id": "self-feature-retrieval",
-          "latency_ms": 25.221,
+          "latency_ms": 24.731,
           "line": 30,
           "metrics": {
             "file_precision": 0.333333,
@@ -6722,7 +6722,7 @@
             "invariant_recall"
           ],
           "id": "self-proposal-stable-id",
-          "latency_ms": 25.105,
+          "latency_ms": 26.489,
           "line": 31,
           "metrics": {
             "file_precision": 0.166667,
@@ -6781,7 +6781,7 @@
             "symbol_recall"
           ],
           "id": "self-proposal-apply-conflict",
-          "latency_ms": 22.976,
+          "latency_ms": 22.87,
           "line": 32,
           "metrics": {
             "file_precision": 0.166667,
@@ -6838,7 +6838,7 @@
             "symbol_recall"
           ],
           "id": "self-draft-proposal-promotion",
-          "latency_ms": 24.746,
+          "latency_ms": 24.57,
           "line": 33,
           "metrics": {
             "file_precision": 0.5,
@@ -6897,7 +6897,7 @@
             "invariant_recall"
           ],
           "id": "self-proposal-delete-adr",
-          "latency_ms": 25.094,
+          "latency_ms": 24.322,
           "line": 34,
           "metrics": {
             "file_precision": 0.4,
@@ -6950,7 +6950,7 @@
             "symbol_recall"
           ],
           "id": "self-semantic-update-queue",
-          "latency_ms": 26.116,
+          "latency_ms": 24.659,
           "line": 35,
           "metrics": {
             "file_precision": 0.333333,
@@ -7007,7 +7007,7 @@
             "symbol_recall"
           ],
           "id": "self-task-classification",
-          "latency_ms": 22.147,
+          "latency_ms": 22.306,
           "line": 36,
           "metrics": {
             "file_precision": 0.2,
@@ -7059,7 +7059,7 @@
             "symbol_recall"
           ],
           "id": "self-retrieval-explanation",
-          "latency_ms": 23.181,
+          "latency_ms": 23.607,
           "line": 37,
           "metrics": {
             "file_precision": 0.2,
@@ -7111,7 +7111,7 @@
             "symbol_recall"
           ],
           "id": "self-bounded-multihop",
-          "latency_ms": 23.888,
+          "latency_ms": 24.792,
           "line": 38,
           "metrics": {
             "file_precision": 0.2,
@@ -7163,7 +7163,7 @@
             "symbol_recall"
           ],
           "id": "self-feature-development-context",
-          "latency_ms": 24.294,
+          "latency_ms": 25.65,
           "line": 39,
           "metrics": {
             "file_precision": 0.2,
@@ -7215,7 +7215,7 @@
             "symbol_recall"
           ],
           "id": "self-context-unknowns",
-          "latency_ms": 22.907,
+          "latency_ms": 22.371,
           "line": 40,
           "metrics": {
             "file_precision": 0.2,
@@ -7289,7 +7289,7 @@
         },
         "invariant": {
           "samples": 8,
-          "success_rate": 0.25
+          "success_rate": 0.125
         },
         "performance": {
           "samples": 1,
@@ -7309,7 +7309,7 @@
         },
         "workflow": {
           "samples": 17,
-          "success_rate": 0.529412
+          "success_rate": 0.588235
         }
       },
       "failure_samples": [
@@ -7324,9 +7324,9 @@
         "self-stale-shield",
         "self-manifest-publication",
         "self-version-bump",
+        "self-owned-integration",
         "self-provider-runtime",
         "self-provider-preview",
-        "self-draft-lifecycle",
         "self-proposal-stable-id",
         "self-draft-proposal-promotion",
         "self-proposal-delete-adr",
@@ -7345,7 +7345,7 @@
         "symbol_recall": 40
       },
       "metrics": {
-        "average_context_tokens": 637.675,
+        "average_context_tokens": 611.65,
         "average_tool_calls": 4.0,
         "call_path_precision": 0.064516,
         "call_path_recall": 1.0,
@@ -7353,12 +7353,12 @@
         "extension_point_precision": 0.422619,
         "extension_point_recall": 1.0,
         "file_precision": 0.161827,
-        "file_recall": 0.960417,
+        "file_recall": 0.958333,
         "generated_source_coverage": 0.909091,
         "invariant_recall": 0.2,
-        "p50_latency_ms": 185.3785,
-        "p95_latency_ms": 213.0721,
-        "p99_latency_ms": 230.51905,
+        "p50_latency_ms": 185.4185,
+        "p95_latency_ms": 206.7135,
+        "p99_latency_ms": 223.4064,
         "success_rate": 0.55,
         "symbol_precision": 0.349167,
         "symbol_recall": 0.825
@@ -7416,28 +7416,28 @@
             "Configuration"
           ]
         },
-        "generated_at": "2026-08-14T18:29:08+08:00",
-        "head_commit": "a321d49945d7f7c8107a345a2e39d90703403db3",
-        "index_commit": "a321d49945d7f7c8107a345a2e39d90703403db3",
+        "generated_at": "2026-08-14T18:37:47+08:00",
+        "head_commit": "b0a6d3332873149889ded0ed934c4f721e8443a8",
+        "index_commit": "b0a6d3332873149889ded0ed934c4f721e8443a8",
         "platform": "Windows-11-10.0.26200-SP0",
         "processor": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
         "project": "ProjectKnowledgeCLI",
         "project_files": 77,
-        "project_symbols": 918,
+        "project_symbols": 919,
         "python": "3.14.6",
-        "source_snapshot_sha256": "sha256:0037b1a48f6371296e42b49332d4068d2ae86dd5796ab1c9a864c31d04110492",
+        "source_snapshot_sha256": "sha256:dd095c000b8b0ae5227336d21a56b7807536a179620ff0da987db8e743cdfd4b",
         "working_tree": "dirty"
       },
       "results": [
         {
           "answer_status": "verified",
           "category": "workflow",
-          "estimated_context_tokens": 783,
+          "estimated_context_tokens": 782,
           "failed_metrics": [
             "symbol_recall"
           ],
           "id": "self-init-flow",
-          "latency_ms": 185.892,
+          "latency_ms": 183.787,
           "line": 1,
           "metrics": {
             "call_path_precision": 0.064516,
@@ -7514,7 +7514,7 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/config.py": {
-              "anchor": "src/project_knowledge/service.py::ProjectService.initialize",
+              "anchor": "src/project_knowledge/knowledge.py::KnowledgeGenerator",
               "stage": "impact"
             },
             "src/project_knowledge/engine.py": {
@@ -7526,7 +7526,7 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/proposal.py": {
-              "anchor": "src/project_knowledge/service.py::ProjectService.initialize",
+              "anchor": "src/project_knowledge/knowledge.py::KnowledgeGenerator",
               "stage": "impact"
             },
             "src/project_knowledge/retrieval.py": {
@@ -7538,11 +7538,11 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/store.py": {
-              "anchor": "src/project_knowledge/service.py::ProjectService.initialize",
+              "anchor": "src/project_knowledge/knowledge.py::KnowledgeGenerator",
               "stage": "impact"
             },
             "src/project_knowledge/util.py": {
-              "anchor": "src/project_knowledge/service.py::ProjectService.initialize",
+              "anchor": "src/project_knowledge/knowledge.py::KnowledgeGenerator",
               "stage": "impact"
             },
             "tests/test_integration.py": {
@@ -7562,7 +7562,7 @@
               "stage": "knowledge_source"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": false,
           "task": "ProjectService.initialize 如何发现源码、原子构建索引并发布 KnowledgeGenerator 生成的知识？",
           "tool_calls": 4
@@ -7570,12 +7570,12 @@
         {
           "answer_status": "verified",
           "category": "workflow",
-          "estimated_context_tokens": 696,
+          "estimated_context_tokens": 637,
           "failed_metrics": [
             "symbol_recall"
           ],
           "id": "self-incremental-sync",
-          "latency_ms": 173.336,
+          "latency_ms": 177.21,
           "line": 2,
           "metrics": {
             "file_precision": 0.214286,
@@ -7657,27 +7657,27 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/guidance.py": {
-              "anchor": "src/project_knowledge/engine.py::CodeIndexEngine",
+              "anchor": "src/project_knowledge/engine.py::BuiltinCodeIndexEngine.sync",
               "stage": "impact"
             },
             "src/project_knowledge/knowledge.py": {
-              "anchor": "src/project_knowledge/engine.py::CodeIndexEngine",
+              "anchor": "src/project_knowledge/engine.py::BuiltinCodeIndexEngine.sync",
               "stage": "impact"
             },
             "src/project_knowledge/models.py": {
-              "anchor": "src/project_knowledge/engine.py::CodeIndexEngine",
+              "anchor": "src/project_knowledge/engine.py::BuiltinCodeIndexEngine.sync",
               "stage": "impact"
             },
             "src/project_knowledge/proposal.py": {
-              "anchor": "src/project_knowledge/engine.py::CodeIndexEngine",
+              "anchor": "src/project_knowledge/engine.py::BuiltinCodeIndexEngine.sync",
               "stage": "impact"
             },
             "src/project_knowledge/retrieval.py": {
-              "anchor": "src/project_knowledge/engine.py::CodeIndexEngine",
+              "anchor": "src/project_knowledge/engine.py::BuiltinCodeIndexEngine.sync",
               "stage": "impact"
             },
             "src/project_knowledge/schemas.py": {
-              "anchor": "src/project_knowledge/engine.py::CodeIndexEngine",
+              "anchor": "src/project_knowledge/engine.py::BuiltinCodeIndexEngine.sync",
               "stage": "impact"
             },
             "src/project_knowledge/service.py": {
@@ -7685,11 +7685,11 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/store.py": {
-              "anchor": "src/project_knowledge/engine.py::CodeIndexEngine",
+              "anchor": "src/project_knowledge/engine.py::BuiltinCodeIndexEngine.sync",
               "stage": "impact"
             },
             "src/project_knowledge/util.py": {
-              "anchor": "src/project_knowledge/engine.py::CodeIndexEngine",
+              "anchor": "src/project_knowledge/engine.py::BuiltinCodeIndexEngine.sync",
               "stage": "impact"
             },
             "tests/test_integration.py": {
@@ -7697,7 +7697,7 @@
               "stage": "fallback"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": false,
           "task": "ProjectService.sync 如何识别文件变化、更新 CodeIndexEngine 结果并重新生成受影响知识？",
           "tool_calls": 4
@@ -7705,13 +7705,13 @@
         {
           "answer_status": "verified",
           "category": "invariant",
-          "estimated_context_tokens": 550,
+          "estimated_context_tokens": 740,
           "failed_metrics": [
             "symbol_recall",
             "invariant_recall"
           ],
           "id": "self-atomic-rebuild",
-          "latency_ms": 184.865,
+          "latency_ms": 176.712,
           "line": 3,
           "metrics": {
             "file_precision": 0.142857,
@@ -7753,8 +7753,8 @@
             "tests/test_retrieval_wp06.py::RetrievalWP06Tests.test_codegraph_context_uses_engine_when_sqlite_symbols_are_empty"
           ],
           "returned_files": [
-            "CHANGELOG.md",
             "docs/project-knowledge-system-audit.md",
+            "docs/project-knowledge-system-design.md",
             "src/project_knowledge/codegraph.py",
             "src/project_knowledge/config.py",
             "src/project_knowledge/guidance.py",
@@ -7773,12 +7773,12 @@
             "tests/test_retrieval_wp06.py::RetrievalWP06Tests.test_codegraph_context_uses_engine_when_sqlite_symbols_are_empty"
           ],
           "selection_reasons": {
-            "CHANGELOG.md": {
+            "docs/project-knowledge-system-audit.md": {
               "anchor": "curated.conventions",
               "stage": "knowledge_source"
             },
-            "docs/project-knowledge-system-audit.md": {
-              "anchor": "curated.conventions",
+            "docs/project-knowledge-system-design.md": {
+              "anchor": "decision.0001.local.first.core",
               "stage": "knowledge_source"
             },
             "src/project_knowledge/codegraph.py": {
@@ -7830,7 +7830,7 @@
               "stage": "direct_symbol"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": false,
           "task": "_atomic_rebuild 如何用临时 SQLite 数据库和事务保证重建原子性？",
           "tool_calls": 4
@@ -7838,13 +7838,13 @@
         {
           "answer_status": "verified",
           "category": "invariant",
-          "estimated_context_tokens": 898,
+          "estimated_context_tokens": 725,
           "failed_metrics": [
             "symbol_recall",
             "invariant_recall"
           ],
           "id": "self-commit-alignment",
-          "latency_ms": 169.792,
+          "latency_ms": 203.205,
           "line": 4,
           "metrics": {
             "file_precision": 0.142857,
@@ -7925,7 +7925,7 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/config.py": {
-              "anchor": "tests/test_integration.py::IntegrationTests.test_commit_alignment_is_distinct_from_content_freshness",
+              "anchor": "src/project_knowledge/codegraph.py::CodeGraphClient.sync",
               "stage": "impact"
             },
             "src/project_knowledge/engine.py": {
@@ -7941,7 +7941,7 @@
               "stage": "knowledge_source"
             },
             "src/project_knowledge/proposal.py": {
-              "anchor": "tests/test_integration.py::IntegrationTests.test_commit_alignment_is_distinct_from_content_freshness",
+              "anchor": "src/project_knowledge/codegraph.py::CodeGraphClient.sync",
               "stage": "impact"
             },
             "src/project_knowledge/service.py": {
@@ -7949,11 +7949,11 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/store.py": {
-              "anchor": "tests/test_integration.py::IntegrationTests.test_commit_alignment_is_distinct_from_content_freshness",
+              "anchor": "src/project_knowledge/codegraph.py::CodeGraphClient.sync",
               "stage": "impact"
             },
             "src/project_knowledge/util.py": {
-              "anchor": "tests/test_integration.py::IntegrationTests.test_commit_alignment_is_distinct_from_content_freshness",
+              "anchor": "src/project_knowledge/codegraph.py::CodeGraphClient.sync",
               "stage": "impact"
             },
             "tests/test_finalization.py": {
@@ -7969,7 +7969,7 @@
               "stage": "fallback"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": false,
           "task": "ProjectService.status 如何区分 content_fresh 与 commit_aligned，并由 sync 对齐纯 HEAD 变化？",
           "tool_calls": 4
@@ -7977,13 +7977,13 @@
         {
           "answer_status": "verified",
           "category": "invariant",
-          "estimated_context_tokens": 584,
+          "estimated_context_tokens": 582,
           "failed_metrics": [
             "symbol_recall",
             "invariant_recall"
           ],
           "id": "self-template-confidence",
-          "latency_ms": 190.477,
+          "latency_ms": 186.167,
           "line": 5,
           "metrics": {
             "file_precision": 0.142857,
@@ -8069,7 +8069,7 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/engine.py": {
-              "anchor": "src/project_knowledge/config.py::ProjectConfig",
+              "anchor": "src/project_knowledge/guidance_templates.py::<module>",
               "stage": "impact"
             },
             "src/project_knowledge/guidance_templates.py": {
@@ -8081,23 +8081,23 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/models.py": {
-              "anchor": "src/project_knowledge/config.py::ProjectConfig",
+              "anchor": "src/project_knowledge/guidance_templates.py::<module>",
               "stage": "impact"
             },
             "src/project_knowledge/proposal.py": {
-              "anchor": "src/project_knowledge/config.py::ProjectConfig",
+              "anchor": "src/project_knowledge/guidance_templates.py::<module>",
               "stage": "impact"
             },
             "src/project_knowledge/retrieval.py": {
-              "anchor": "src/project_knowledge/config.py::ProjectConfig",
+              "anchor": "src/project_knowledge/guidance_templates.py::<module>",
               "stage": "impact"
             },
             "src/project_knowledge/service.py": {
-              "anchor": "src/project_knowledge/config.py::ProjectConfig",
+              "anchor": "src/project_knowledge/guidance_templates.py::<module>",
               "stage": "impact"
             },
             "src/project_knowledge/store.py": {
-              "anchor": "src/project_knowledge/config.py::ProjectConfig",
+              "anchor": "src/project_knowledge/guidance_templates.py::<module>",
               "stage": "impact"
             },
             "src/project_knowledge/util.py": {
@@ -8109,7 +8109,7 @@
               "stage": "direct_symbol"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": false,
           "task": "KnowledgeGenerator 如何确保未删除 project-kb:template 的 curated 模板保持 inferred？",
           "tool_calls": 4
@@ -8120,7 +8120,7 @@
           "estimated_context_tokens": 321,
           "failed_metrics": [],
           "id": "self-module-truncation",
-          "latency_ms": 160.111,
+          "latency_ms": 153.317,
           "line": 6,
           "metrics": {
             "extension_point_precision": 1.0,
@@ -8207,13 +8207,13 @@
         {
           "answer_status": "verified",
           "category": "invariant",
-          "estimated_context_tokens": 498,
+          "estimated_context_tokens": 494,
           "failed_metrics": [
             "symbol_recall",
             "invariant_recall"
           ],
           "id": "self-runtime-schema",
-          "latency_ms": 187.315,
+          "latency_ms": 196.825,
           "line": 7,
           "metrics": {
             "file_precision": 0.214286,
@@ -8308,7 +8308,7 @@
               "stage": "fallback"
             },
             "src/project_knowledge/retrieval.py": {
-              "anchor": "src/project_knowledge/models.py::KnowledgeRecord",
+              "anchor": "src/project_knowledge/models.py::ChangeSet",
               "stage": "impact"
             },
             "src/project_knowledge/schemas.py": {
@@ -8320,7 +8320,7 @@
               "stage": "fallback"
             },
             "src/project_knowledge/store.py": {
-              "anchor": "src/project_knowledge/models.py::KnowledgeRecord",
+              "anchor": "src/project_knowledge/models.py::ChangeSet",
               "stage": "impact"
             },
             "tests/test_guidance_store.py": {
@@ -8336,7 +8336,7 @@
               "stage": "fallback"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": false,
           "task": "validate_instance 如何在 KnowledgeRecord 清单和 ChangeSet 事件落盘前执行运行时 Schema 校验？",
           "tool_calls": 4
@@ -8344,10 +8344,10 @@
         {
           "answer_status": "verified",
           "category": "configuration",
-          "estimated_context_tokens": 768,
+          "estimated_context_tokens": 663,
           "failed_metrics": [],
           "id": "self-config-capabilities",
-          "latency_ms": 180.498,
+          "latency_ms": 182.767,
           "line": 8,
           "metrics": {
             "file_precision": 0.142857,
@@ -8424,7 +8424,7 @@
               "stage": "fallback"
             },
             "src/project_knowledge/codegraph.py": {
-              "anchor": "scripts/validate_codegraph_adapter.py::validate_codegraph.check",
+              "anchor": "src/project_knowledge/service.py::ProjectService.check",
               "stage": "impact"
             },
             "src/project_knowledge/config.py": {
@@ -8444,11 +8444,11 @@
               "stage": "fallback"
             },
             "src/project_knowledge/proposal.py": {
-              "anchor": "scripts/validate_codegraph_adapter.py::validate_codegraph.check",
+              "anchor": "src/project_knowledge/service.py::ProjectService.check",
               "stage": "impact"
             },
             "src/project_knowledge/provider.py": {
-              "anchor": "curated.provider.and.evidence",
+              "anchor": "curated.conventions",
               "stage": "knowledge_source"
             },
             "src/project_knowledge/service.py": {
@@ -8476,13 +8476,13 @@
         {
           "answer_status": "verified",
           "category": "design_reason",
-          "estimated_context_tokens": 1039,
+          "estimated_context_tokens": 625,
           "failed_metrics": [
             "file_recall",
             "symbol_recall"
           ],
           "id": "self-codegraph-failure",
-          "latency_ms": 174.976,
+          "latency_ms": 196.59,
           "line": 9,
           "metrics": {
             "design_reason_recall": 1.0,
@@ -8533,9 +8533,9 @@
             "src/project_knowledge/gardenserver.py",
             "src/project_knowledge/models.py",
             "src/project_knowledge/proposal.py",
+            "src/project_knowledge/service.py",
             "src/project_knowledge/util.py",
             "tests/test_codegraph.py",
-            "tests/test_codegraph_validation.py",
             "tests/test_engine.py",
             "tests/test_evaluate.py"
           ],
@@ -8561,7 +8561,7 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/config.py": {
-              "anchor": "src/project_knowledge/engine.py::create_engine",
+              "anchor": "scripts/validate_codegraph_adapter.py::validate_codegraph.check",
               "stage": "impact"
             },
             "src/project_knowledge/engine.py": {
@@ -8577,24 +8577,24 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/models.py": {
-              "anchor": "src/project_knowledge/engine.py::create_engine",
+              "anchor": "scripts/validate_codegraph_adapter.py::validate_codegraph.check",
               "stage": "impact"
             },
             "src/project_knowledge/proposal.py": {
-              "anchor": "src/project_knowledge/engine.py::create_engine",
+              "anchor": "scripts/validate_codegraph_adapter.py::validate_codegraph.check",
               "stage": "impact"
             },
+            "src/project_knowledge/service.py": {
+              "anchor": "curated.architecture",
+              "stage": "knowledge_source"
+            },
             "src/project_knowledge/util.py": {
-              "anchor": "src/project_knowledge/engine.py::create_engine",
+              "anchor": "scripts/validate_codegraph_adapter.py::validate_codegraph.check",
               "stage": "impact"
             },
             "tests/test_codegraph.py": {
               "anchor": "create_engine 在 engine=codegraph 但真实 Adapter 不可用时为什么必须明确失败？",
               "stage": "fallback"
-            },
-            "tests/test_codegraph_validation.py": {
-              "anchor": "decision.0002.codegraph.adapter.boundary",
-              "stage": "knowledge_source"
             },
             "tests/test_engine.py": {
               "anchor": "create_engine 在 engine=codegraph 但真实 Adapter 不可用时为什么必须明确失败？",
@@ -8613,12 +8613,12 @@
         {
           "answer_status": "verified",
           "category": "call_path",
-          "estimated_context_tokens": 505,
+          "estimated_context_tokens": 507,
           "failed_metrics": [
             "symbol_recall"
           ],
           "id": "self-python-parser",
-          "latency_ms": 199.195,
+          "latency_ms": 190.205,
           "line": 10,
           "metrics": {
             "file_precision": 0.142857,
@@ -8702,7 +8702,7 @@
               "stage": "fallback"
             },
             "pyproject.toml": {
-              "anchor": "curated.conventions",
+              "anchor": "decision.0001.local.first.core",
               "stage": "knowledge_source"
             },
             "src/project_knowledge/codegraph.py": {
@@ -8718,7 +8718,7 @@
               "stage": "fallback"
             },
             "src/project_knowledge/models.py": {
-              "anchor": "src/project_knowledge/engine.py::PythonParser.visit_Call",
+              "anchor": "src/project_knowledge/engine.py::PythonParser._name",
               "stage": "impact"
             },
             "src/project_knowledge/real_project.py": {
@@ -8726,7 +8726,7 @@
               "stage": "fallback"
             },
             "src/project_knowledge/retrieval.py": {
-              "anchor": "src/project_knowledge/engine.py::PythonParser.visit_Call",
+              "anchor": "src/project_knowledge/engine.py::PythonParser._name",
               "stage": "impact"
             },
             "src/project_knowledge/service.py": {
@@ -8734,7 +8734,7 @@
               "stage": "fallback"
             },
             "src/project_knowledge/util.py": {
-              "anchor": "src/project_knowledge/engine.py::PythonParser.visit_Call",
+              "anchor": "src/project_knowledge/engine.py::PythonParser._name",
               "stage": "impact"
             },
             "tests/test_engine.py": {
@@ -8742,7 +8742,7 @@
               "stage": "fallback"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": false,
           "task": "PythonParser.parse 和 visit_Call 如何提取 Python 符号、调用、继承与路由？",
           "tool_calls": 4
@@ -8750,10 +8750,10 @@
         {
           "answer_status": "verified",
           "category": "extension_point",
-          "estimated_context_tokens": 378,
+          "estimated_context_tokens": 377,
           "failed_metrics": [],
           "id": "self-generic-parser",
-          "latency_ms": 232.744,
+          "latency_ms": 206.486,
           "line": 11,
           "metrics": {
             "extension_point_precision": 0.125,
@@ -8798,8 +8798,8 @@
           ],
           "returned_files": [
             ".github/workflows/quality.yml",
-            "docs/project-knowledge-system-audit.md",
             "evaluation/performance_harness.py",
+            "evaluation/real_project_harness.py",
             "pyproject.toml",
             "src/project_knowledge/codegraph.py",
             "src/project_knowledge/engine.py",
@@ -8827,16 +8827,16 @@
               "anchor": "GenericParser.parse 如何保守提取非 Python 语言的定义、导入、调用和路由？",
               "stage": "fallback"
             },
-            "docs/project-knowledge-system-audit.md": {
-              "anchor": "curated.conventions",
-              "stage": "knowledge_source"
-            },
             "evaluation/performance_harness.py": {
               "anchor": "GenericParser.parse 如何保守提取非 Python 语言的定义、导入、调用和路由？",
               "stage": "fallback"
             },
+            "evaluation/real_project_harness.py": {
+              "anchor": "curated.architecture",
+              "stage": "knowledge_source"
+            },
             "pyproject.toml": {
-              "anchor": "curated.conventions",
+              "anchor": "decision.0001.local.first.core",
               "stage": "knowledge_source"
             },
             "src/project_knowledge/codegraph.py": {
@@ -8888,10 +8888,10 @@
         {
           "answer_status": "verified",
           "category": "workflow",
-          "estimated_context_tokens": 845,
+          "estimated_context_tokens": 609,
           "failed_metrics": [],
           "id": "self-context-budget",
-          "latency_ms": 200.258,
+          "latency_ms": 184.874,
           "line": 12,
           "metrics": {
             "file_precision": 0.142857,
@@ -8933,7 +8933,6 @@
           ],
           "returned_files": [
             "docs/project-knowledge-system-audit.md",
-            "docs/project-knowledge-system-design.md",
             "evaluation/thresholds.json",
             "src/project_knowledge/evaluate.py",
             "src/project_knowledge/mcp.py",
@@ -8945,7 +8944,8 @@
             "tests/test_config.py",
             "tests/test_evaluate.py",
             "tests/test_integration.py",
-            "tests/test_retrieval_wp06.py"
+            "tests/test_retrieval_wp06.py",
+            "tests/test_semantic.py"
           ],
           "returned_symbols": [
             "src/project_knowledge/retrieval.py::KnowledgeAPI",
@@ -8958,10 +8958,6 @@
           "selection_reasons": {
             "docs/project-knowledge-system-audit.md": {
               "anchor": "curated.conventions",
-              "stage": "knowledge_source"
-            },
-            "docs/project-knowledge-system-design.md": {
-              "anchor": "curated.glossary",
               "stage": "knowledge_source"
             },
             "evaluation/thresholds.json": {
@@ -9011,9 +9007,13 @@
             "tests/test_retrieval_wp06.py": {
               "anchor": "KnowledgeAPI.context 如何排序知识、匹配符号并由 _fit_context 限制总 Token？",
               "stage": "fallback"
+            },
+            "tests/test_semantic.py": {
+              "anchor": "curated.feature.guide.generation",
+              "stage": "knowledge_source"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": true,
           "task": "KnowledgeAPI.context 如何排序知识、匹配符号并由 _fit_context 限制总 Token？",
           "tool_calls": 4
@@ -9021,13 +9021,13 @@
         {
           "answer_status": "verified",
           "category": "stale_detection",
-          "estimated_context_tokens": 827,
+          "estimated_context_tokens": 592,
           "failed_metrics": [
             "file_recall",
             "invariant_recall"
           ],
           "id": "self-stale-shield",
-          "latency_ms": 180.521,
+          "latency_ms": 174.285,
           "line": 13,
           "metrics": {
             "file_precision": 0.071429,
@@ -9070,7 +9070,6 @@
           ],
           "returned_files": [
             "docs/project-knowledge-system-audit.md",
-            "scripts/validate_codegraph_adapter.py",
             "src/project_knowledge/evaluate.py",
             "src/project_knowledge/mcp.py",
             "src/project_knowledge/performance.py",
@@ -9082,6 +9081,7 @@
             "src/project_knowledge/util.py",
             "tests/test_evaluate.py",
             "tests/test_integration.py",
+            "tests/test_retrieval_wp06.py",
             "tests/test_semantic.py"
           ],
           "returned_symbols": [
@@ -9093,10 +9093,6 @@
           "selection_reasons": {
             "docs/project-knowledge-system-audit.md": {
               "anchor": "curated.conventions",
-              "stage": "knowledge_source"
-            },
-            "scripts/validate_codegraph_adapter.py": {
-              "anchor": "decision.0001.local.first.core",
               "stage": "knowledge_source"
             },
             "src/project_knowledge/evaluate.py": {
@@ -9124,22 +9120,26 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/schemas.py": {
-              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI.get",
+              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI._pending_sources",
               "stage": "impact"
             },
             "src/project_knowledge/store.py": {
-              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI.get",
+              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI._pending_sources",
               "stage": "impact"
             },
             "src/project_knowledge/util.py": {
-              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI.get",
+              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI._pending_sources",
               "stage": "impact"
             },
             "tests/test_evaluate.py": {
+              "anchor": "curated.conventions",
+              "stage": "knowledge_source"
+            },
+            "tests/test_integration.py": {
               "anchor": "KnowledgeAPI.get 和 _pending_sources 如何阻止返回依赖待同步来源的旧正文？",
               "stage": "fallback"
             },
-            "tests/test_integration.py": {
+            "tests/test_retrieval_wp06.py": {
               "anchor": "KnowledgeAPI.get 和 _pending_sources 如何阻止返回依赖待同步来源的旧正文？",
               "stage": "fallback"
             },
@@ -9148,7 +9148,7 @@
               "stage": "fallback"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": false,
           "task": "KnowledgeAPI.get 和 _pending_sources 如何阻止返回依赖待同步来源的旧正文？",
           "tool_calls": 4
@@ -9159,7 +9159,7 @@
           "estimated_context_tokens": 203,
           "failed_metrics": [],
           "id": "self-impact-analysis",
-          "latency_ms": 163.61,
+          "latency_ms": 163.217,
           "line": 14,
           "metrics": {
             "file_precision": 0.166667,
@@ -9278,10 +9278,10 @@
         {
           "answer_status": "verified",
           "category": "workflow",
-          "estimated_context_tokens": 632,
+          "estimated_context_tokens": 660,
           "failed_metrics": [],
           "id": "self-mcp-dispatch",
-          "latency_ms": 179.99,
+          "latency_ms": 185.376,
           "line": 15,
           "metrics": {
             "file_precision": 0.142857,
@@ -9345,11 +9345,11 @@
           ],
           "selection_reasons": {
             "src/project_knowledge/codegraph.py": {
-              "anchor": "src/project_knowledge/mcp.py::MCPServer",
+              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI",
               "stage": "impact"
             },
             "src/project_knowledge/config.py": {
-              "anchor": "src/project_knowledge/mcp.py::MCPServer",
+              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI",
               "stage": "impact"
             },
             "src/project_knowledge/evaluate.py": {
@@ -9357,15 +9357,15 @@
               "stage": "knowledge_source"
             },
             "src/project_knowledge/guidance_workflow.py": {
-              "anchor": "src/project_knowledge/mcp.py::MCPServer",
+              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI",
               "stage": "impact"
             },
             "src/project_knowledge/incremental.py": {
-              "anchor": "src/project_knowledge/mcp.py::MCPServer",
+              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI",
               "stage": "impact"
             },
             "src/project_knowledge/initialization.py": {
-              "anchor": "src/project_knowledge/mcp.py::MCPServer",
+              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI",
               "stage": "impact"
             },
             "src/project_knowledge/mcp.py": {
@@ -9373,7 +9373,7 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/proposal.py": {
-              "anchor": "src/project_knowledge/mcp.py::MCPServer",
+              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI",
               "stage": "impact"
             },
             "src/project_knowledge/retrieval.py": {
@@ -9381,11 +9381,11 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/schemas.py": {
-              "anchor": "src/project_knowledge/mcp.py::MCPServer",
+              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI",
               "stage": "impact"
             },
             "src/project_knowledge/util.py": {
-              "anchor": "src/project_knowledge/mcp.py::MCPServer",
+              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI",
               "stage": "impact"
             },
             "tests/test_evaluate.py": {
@@ -9401,7 +9401,7 @@
               "stage": "fallback"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": true,
           "task": "MCPServer.handle 和 _call 如何列出工具并把 knowledge_context 等请求分派给 KnowledgeAPI？",
           "tool_calls": 4
@@ -9409,12 +9409,12 @@
         {
           "answer_status": "verified",
           "category": "workflow",
-          "estimated_context_tokens": 393,
+          "estimated_context_tokens": 394,
           "failed_metrics": [
             "symbol_recall"
           ],
           "id": "self-manifest-publication",
-          "latency_ms": 202.871,
+          "latency_ms": 206.504,
           "line": 16,
           "metrics": {
             "file_precision": 0.214286,
@@ -9455,18 +9455,18 @@
             "tests/test_wp08.py::ConfigMigrationAndClientTests.test_plugin_manifest_version_matches_core_version"
           ],
           "returned_files": [
+            "src/project_knowledge/cli.py",
             "src/project_knowledge/guidance.py",
             "src/project_knowledge/knowledge.py",
             "src/project_knowledge/models.py",
             "src/project_knowledge/retrieval.py",
             "src/project_knowledge/schemas.py",
+            "src/project_knowledge/semantic.py",
             "src/project_knowledge/service.py",
             "src/project_knowledge/store.py",
             "src/project_knowledge/util.py",
             "src/project_knowledge/versioning.py",
             "tests/test_guidance.py",
-            "tests/test_guidance_store.py",
-            "tests/test_integration.py",
             "tests/test_schemas.py",
             "tests/test_wp08.py"
           ],
@@ -9481,8 +9481,12 @@
             "tests/test_wp08.py::ConfigMigrationAndClientTests.test_plugin_manifest_version_matches_core_version"
           ],
           "selection_reasons": {
+            "src/project_knowledge/cli.py": {
+              "anchor": "generated.module.project_knowledge",
+              "stage": "knowledge_source"
+            },
             "src/project_knowledge/guidance.py": {
-              "anchor": "tests/test_wp08.py::ConfigMigrationAndClientTests.test_plugin_manifest_version_matches_core_version",
+              "anchor": "src/project_knowledge/schemas.py::<module>",
               "stage": "impact"
             },
             "src/project_knowledge/knowledge.py": {
@@ -9494,12 +9498,16 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/retrieval.py": {
-              "anchor": "tests/test_wp08.py::ConfigMigrationAndClientTests.test_plugin_manifest_version_matches_core_version",
+              "anchor": "src/project_knowledge/schemas.py::<module>",
               "stage": "impact"
             },
             "src/project_knowledge/schemas.py": {
               "anchor": "src/project_knowledge/schemas.py::<module>",
               "stage": "direct_symbol"
+            },
+            "src/project_knowledge/semantic.py": {
+              "anchor": "generated.module.project_knowledge",
+              "stage": "knowledge_source"
             },
             "src/project_knowledge/service.py": {
               "anchor": "KnowledgeGenerator._manifest 如何序列化 KnowledgeRecord、验证 Schema 并原子写入 manifest？",
@@ -9510,7 +9518,7 @@
               "stage": "fallback"
             },
             "src/project_knowledge/util.py": {
-              "anchor": "tests/test_wp08.py::ConfigMigrationAndClientTests.test_plugin_manifest_version_matches_core_version",
+              "anchor": "src/project_knowledge/schemas.py::<module>",
               "stage": "impact"
             },
             "src/project_knowledge/versioning.py": {
@@ -9521,14 +9529,6 @@
               "anchor": "tests/test_guidance.py::GuidanceTests.test_manifest_records_guidance_root_and_evidence",
               "stage": "direct_symbol"
             },
-            "tests/test_guidance_store.py": {
-              "anchor": "generated.module.tests",
-              "stage": "knowledge_source"
-            },
-            "tests/test_integration.py": {
-              "anchor": "generated.module.tests",
-              "stage": "knowledge_source"
-            },
             "tests/test_schemas.py": {
               "anchor": "tests/test_schemas.py::SchemaTests",
               "stage": "direct_symbol"
@@ -9538,7 +9538,7 @@
               "stage": "direct_symbol"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": false,
           "task": "KnowledgeGenerator._manifest 如何序列化 KnowledgeRecord、验证 Schema 并原子写入 manifest？",
           "tool_calls": 4
@@ -9546,19 +9546,18 @@
         {
           "answer_status": "verified",
           "category": "workflow",
-          "estimated_context_tokens": 733,
+          "estimated_context_tokens": 827,
           "failed_metrics": [
             "file_recall",
-            "symbol_recall",
-            "invariant_recall"
+            "symbol_recall"
           ],
           "id": "self-version-bump",
-          "latency_ms": 188.407,
+          "latency_ms": 182.065,
           "line": 17,
           "metrics": {
             "file_precision": 0.181818,
             "file_recall": 0.666667,
-            "invariant_recall": 0.0,
+            "invariant_recall": 1.0,
             "symbol_precision": 0.25,
             "symbol_recall": 0.5
           },
@@ -9660,7 +9659,7 @@
               "stage": "direct_symbol"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": false,
           "task": "bump_patch_version 如何从唯一版本源递增补丁版本并更新 CHANGELOG？",
           "tool_calls": 4
@@ -9668,15 +9667,17 @@
         {
           "answer_status": "verified",
           "category": "invariant",
-          "estimated_context_tokens": 732,
-          "failed_metrics": [],
+          "estimated_context_tokens": 1125,
+          "failed_metrics": [
+            "invariant_recall"
+          ],
           "id": "self-owned-integration",
-          "latency_ms": 178.139,
+          "latency_ms": 163.625,
           "line": 18,
           "metrics": {
             "file_precision": 0.142857,
             "file_recall": 1.0,
-            "invariant_recall": 1.0,
+            "invariant_recall": 0.0,
             "symbol_precision": 0.75,
             "symbol_recall": 1.0
           },
@@ -9713,7 +9714,7 @@
             "tests/test_wp08.py::<module>"
           ],
           "returned_files": [
-            "docs/project-knowledge-system-audit.md",
+            "docs/project-knowledge-system-design.md",
             "src/project_knowledge/cli.py",
             "src/project_knowledge/config.py",
             "src/project_knowledge/retrieval.py",
@@ -9722,10 +9723,10 @@
             "src/project_knowledge/util.py",
             "tests/test_config.py",
             "tests/test_delivery_reliability.py",
-            "tests/test_finalization.py",
             "tests/test_integration.py",
             "tests/test_retrieval_wp06.py",
             "tests/test_watch_wp07.py",
+            "tests/test_wp02_knowledge.py",
             "tests/test_wp08.py"
           ],
           "returned_symbols": [
@@ -9735,8 +9736,8 @@
             "src/project_knowledge/util.py::marker_update"
           ],
           "selection_reasons": {
-            "docs/project-knowledge-system-audit.md": {
-              "anchor": "curated.conventions",
+            "docs/project-knowledge-system-design.md": {
+              "anchor": "decision.0001.local.first.core",
               "stage": "knowledge_source"
             },
             "src/project_knowledge/cli.py": {
@@ -9744,11 +9745,11 @@
               "stage": "fallback"
             },
             "src/project_knowledge/config.py": {
-              "anchor": "src/project_knowledge/service.py::ProjectService.install",
+              "anchor": "src/project_knowledge/service.py::ProjectService",
               "stage": "impact"
             },
             "src/project_knowledge/retrieval.py": {
-              "anchor": "src/project_knowledge/service.py::ProjectService.install",
+              "anchor": "src/project_knowledge/service.py::ProjectService",
               "stage": "impact"
             },
             "src/project_knowledge/service.py": {
@@ -9756,7 +9757,7 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/store.py": {
-              "anchor": "src/project_knowledge/service.py::ProjectService.install",
+              "anchor": "src/project_knowledge/service.py::ProjectService",
               "stage": "impact"
             },
             "src/project_knowledge/util.py": {
@@ -9771,10 +9772,6 @@
               "anchor": "ProjectService.install、uninstall 与 marker_update 如何只修改工具拥有的标记区块并保留用户内容？",
               "stage": "fallback"
             },
-            "tests/test_finalization.py": {
-              "anchor": "generated.module.tests",
-              "stage": "knowledge_source"
-            },
             "tests/test_integration.py": {
               "anchor": "ProjectService.install、uninstall 与 marker_update 如何只修改工具拥有的标记区块并保留用户内容？",
               "stage": "fallback"
@@ -9787,23 +9784,27 @@
               "anchor": "ProjectService.install、uninstall 与 marker_update 如何只修改工具拥有的标记区块并保留用户内容？",
               "stage": "fallback"
             },
+            "tests/test_wp02_knowledge.py": {
+              "anchor": "curated.feature.guide.generation",
+              "stage": "knowledge_source"
+            },
             "tests/test_wp08.py": {
               "anchor": "ProjectService.install、uninstall 与 marker_update 如何只修改工具拥有的标记区块并保留用户内容？",
               "stage": "fallback"
             }
           },
           "stale_detected": false,
-          "success": true,
+          "success": false,
           "task": "ProjectService.install、uninstall 与 marker_update 如何只修改工具拥有的标记区块并保留用户内容？",
           "tool_calls": 4
         },
         {
           "answer_status": "verified",
           "category": "quality_gate",
-          "estimated_context_tokens": 486,
+          "estimated_context_tokens": 332,
           "failed_metrics": [],
           "id": "self-evaluation-gate",
-          "latency_ms": 212.337,
+          "latency_ms": 193.857,
           "line": 19,
           "metrics": {
             "file_precision": 0.142857,
@@ -9882,7 +9883,7 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/config.py": {
-              "anchor": "src/project_knowledge/evaluate.py::evaluate_quality_gate",
+              "anchor": "src/project_knowledge/cli.py::<module>",
               "stage": "impact"
             },
             "src/project_knowledge/evaluate.py": {
@@ -9890,35 +9891,35 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/evidence.py": {
-              "anchor": "src/project_knowledge/evaluate.py::evaluate_quality_gate",
+              "anchor": "src/project_knowledge/cli.py::<module>",
               "stage": "impact"
             },
             "src/project_knowledge/finalization.py": {
-              "anchor": "src/project_knowledge/evaluate.py::evaluate_quality_gate",
+              "anchor": "src/project_knowledge/cli.py::<module>",
               "stage": "impact"
             },
             "src/project_knowledge/models.py": {
-              "anchor": "src/project_knowledge/evaluate.py::evaluate_quality_gate",
+              "anchor": "src/project_knowledge/cli.py::<module>",
               "stage": "impact"
             },
             "src/project_knowledge/proposal.py": {
-              "anchor": "src/project_knowledge/evaluate.py::evaluate_quality_gate",
+              "anchor": "src/project_knowledge/cli.py::<module>",
               "stage": "impact"
             },
             "src/project_knowledge/provider.py": {
-              "anchor": "src/project_knowledge/evaluate.py::evaluate_quality_gate",
+              "anchor": "src/project_knowledge/cli.py::<module>",
               "stage": "impact"
             },
             "src/project_knowledge/semantic.py": {
-              "anchor": "src/project_knowledge/evaluate.py::evaluate_quality_gate",
+              "anchor": "src/project_knowledge/cli.py::<module>",
               "stage": "impact"
             },
             "src/project_knowledge/service.py": {
-              "anchor": "src/project_knowledge/evaluate.py::evaluate_quality_gate",
+              "anchor": "src/project_knowledge/cli.py::<module>",
               "stage": "impact"
             },
             "src/project_knowledge/util.py": {
-              "anchor": "src/project_knowledge/evaluate.py::evaluate_quality_gate",
+              "anchor": "src/project_knowledge/cli.py::<module>",
               "stage": "impact"
             },
             "tests/test_evaluate.py": {
@@ -9926,7 +9927,7 @@
               "stage": "knowledge_source"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": true,
           "task": "evaluate_suite 和 evaluate_quality_gate 如何比较多策略指标、冻结阈值并以 CLI 退出码阻止质量退化？",
           "tool_calls": 4
@@ -9934,10 +9935,10 @@
         {
           "answer_status": "verified",
           "category": "performance",
-          "estimated_context_tokens": 691,
+          "estimated_context_tokens": 628,
           "failed_metrics": [],
           "id": "self-performance-harness",
-          "latency_ms": 160.28,
+          "latency_ms": 167.463,
           "line": 20,
           "metrics": {
             "file_precision": 0.222222,
@@ -10029,7 +10030,7 @@
               "stage": "fallback"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": true,
           "task": "run_performance_harness 如何生成固定 500/5000 文件夹具并测量 P50/P95/P99 与过期检测？",
           "tool_calls": 4
@@ -10037,10 +10038,10 @@
         {
           "answer_status": "verified",
           "category": "privacy",
-          "estimated_context_tokens": 874,
+          "estimated_context_tokens": 732,
           "failed_metrics": [],
           "id": "self-evidence-pack",
-          "latency_ms": 181.311,
+          "latency_ms": 190.963,
           "line": 21,
           "metrics": {
             "file_precision": 0.214286,
@@ -10172,10 +10173,10 @@
         {
           "answer_status": "verified",
           "category": "privacy",
-          "estimated_context_tokens": 764,
+          "estimated_context_tokens": 772,
           "failed_metrics": [],
           "id": "self-provider-authorization",
-          "latency_ms": 175.655,
+          "latency_ms": 186.366,
           "line": 22,
           "metrics": {
             "file_precision": 0.142857,
@@ -10258,15 +10259,15 @@
               "stage": "knowledge_source"
             },
             "src/project_knowledge/evidence.py": {
-              "anchor": "src/project_knowledge/provider.py::<module>",
+              "anchor": "src/project_knowledge/config.py::ProjectConfig",
               "stage": "impact"
             },
             "src/project_knowledge/models.py": {
-              "anchor": "src/project_knowledge/provider.py::<module>",
+              "anchor": "src/project_knowledge/config.py::ProjectConfig",
               "stage": "impact"
             },
             "src/project_knowledge/proposal.py": {
-              "anchor": "src/project_knowledge/provider.py::<module>",
+              "anchor": "src/project_knowledge/config.py::ProjectConfig",
               "stage": "impact"
             },
             "src/project_knowledge/provider.py": {
@@ -10274,11 +10275,11 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/retrieval.py": {
-              "anchor": "src/project_knowledge/provider.py::<module>",
+              "anchor": "src/project_knowledge/config.py::ProjectConfig",
               "stage": "impact"
             },
             "src/project_knowledge/schemas.py": {
-              "anchor": "src/project_knowledge/provider.py::<module>",
+              "anchor": "src/project_knowledge/config.py::ProjectConfig",
               "stage": "impact"
             },
             "src/project_knowledge/semantic.py": {
@@ -10286,7 +10287,7 @@
               "stage": "fallback"
             },
             "src/project_knowledge/util.py": {
-              "anchor": "src/project_knowledge/provider.py::<module>",
+              "anchor": "src/project_knowledge/config.py::ProjectConfig",
               "stage": "impact"
             },
             "tests/test_config.py": {
@@ -10298,7 +10299,7 @@
               "stage": "fallback"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": true,
           "task": "create_provider、_validate_http、provider_policy_issues 与 ProjectConfig 的 Provider 字段如何保证默认禁网并阻止未授权云端源码外发？",
           "tool_calls": 4
@@ -10306,12 +10307,12 @@
         {
           "answer_status": "verified",
           "category": "workflow",
-          "estimated_context_tokens": 829,
+          "estimated_context_tokens": 1080,
           "failed_metrics": [
             "symbol_recall"
           ],
           "id": "self-provider-runtime",
-          "latency_ms": 189.645,
+          "latency_ms": 162.605,
           "line": 23,
           "metrics": {
             "file_precision": 0.214286,
@@ -10354,7 +10355,6 @@
             "src/project_knowledge/util.py::utc_now"
           ],
           "returned_files": [
-            "src/project_knowledge/cli.py",
             "src/project_knowledge/evidence.py",
             "src/project_knowledge/gardenserver.py",
             "src/project_knowledge/guidance.py",
@@ -10364,6 +10364,7 @@
             "src/project_knowledge/retrieval.py",
             "src/project_knowledge/schemas.py",
             "src/project_knowledge/semantic.py",
+            "src/project_knowledge/service.py",
             "src/project_knowledge/store.py",
             "src/project_knowledge/util.py",
             "tests/test_provider.py",
@@ -10380,16 +10381,12 @@
             "src/project_knowledge/provider.py::ModelRuntime.generate"
           ],
           "selection_reasons": {
-            "src/project_knowledge/cli.py": {
-              "anchor": "curated.provider.and.evidence",
-              "stage": "knowledge_source"
-            },
             "src/project_knowledge/evidence.py": {
-              "anchor": "src/project_knowledge/provider.py::FakeProvider.generate_structured",
+              "anchor": "src/project_knowledge/provider.py::DisabledProvider.generate_structured",
               "stage": "impact"
             },
             "src/project_knowledge/gardenserver.py": {
-              "anchor": "src/project_knowledge/provider.py::FakeProvider.generate_structured",
+              "anchor": "src/project_knowledge/provider.py::DisabledProvider.generate_structured",
               "stage": "impact"
             },
             "src/project_knowledge/guidance.py": {
@@ -10401,7 +10398,7 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/proposal.py": {
-              "anchor": "src/project_knowledge/provider.py::FakeProvider.generate_structured",
+              "anchor": "src/project_knowledge/provider.py::DisabledProvider.generate_structured",
               "stage": "impact"
             },
             "src/project_knowledge/provider.py": {
@@ -10409,27 +10406,31 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/retrieval.py": {
-              "anchor": "src/project_knowledge/provider.py::FakeProvider.generate_structured",
+              "anchor": "src/project_knowledge/provider.py::DisabledProvider.generate_structured",
               "stage": "impact"
             },
             "src/project_knowledge/schemas.py": {
-              "anchor": "src/project_knowledge/provider.py::FakeProvider.generate_structured",
+              "anchor": "src/project_knowledge/provider.py::DisabledProvider.generate_structured",
               "stage": "impact"
             },
             "src/project_knowledge/semantic.py": {
               "anchor": "curated.provider.and.evidence",
               "stage": "knowledge_source"
             },
+            "src/project_knowledge/service.py": {
+              "anchor": "curated.feature.guide.generation",
+              "stage": "knowledge_source"
+            },
             "src/project_knowledge/store.py": {
-              "anchor": "src/project_knowledge/provider.py::FakeProvider.generate_structured",
+              "anchor": "src/project_knowledge/provider.py::DisabledProvider.generate_structured",
               "stage": "impact"
             },
             "src/project_knowledge/util.py": {
-              "anchor": "src/project_knowledge/provider.py::FakeProvider.generate_structured",
+              "anchor": "src/project_knowledge/provider.py::DisabledProvider.generate_structured",
               "stage": "impact"
             },
             "tests/test_provider.py": {
-              "anchor": "src/project_knowledge/provider.py::FakeProvider.generate_structured",
+              "anchor": "src/project_knowledge/provider.py::DisabledProvider.generate_structured",
               "stage": "impact"
             },
             "tests/test_semantic.py": {
@@ -10445,12 +10446,12 @@
         {
           "answer_status": "verified",
           "category": "privacy",
-          "estimated_context_tokens": 396,
+          "estimated_context_tokens": 397,
           "failed_metrics": [
             "symbol_recall"
           ],
           "id": "self-provider-preview",
-          "latency_ms": 227.039,
+          "latency_ms": 231.534,
           "line": 24,
           "metrics": {
             "file_precision": 0.2,
@@ -10540,23 +10541,23 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/config.py": {
-              "anchor": "src/project_knowledge/provider.py::ModelRuntime.preview",
+              "anchor": "evaluation/performance_harness.py::main",
               "stage": "impact"
             },
             "src/project_knowledge/evaluate.py": {
-              "anchor": "src/project_knowledge/provider.py::ModelRuntime.preview",
+              "anchor": "evaluation/performance_harness.py::main",
               "stage": "impact"
             },
             "src/project_knowledge/evidence.py": {
-              "anchor": "src/project_knowledge/provider.py::ModelRuntime.preview",
+              "anchor": "evaluation/performance_harness.py::main",
               "stage": "impact"
             },
             "src/project_knowledge/finalization.py": {
-              "anchor": "src/project_knowledge/provider.py::ModelRuntime.preview",
+              "anchor": "evaluation/performance_harness.py::main",
               "stage": "impact"
             },
             "src/project_knowledge/gardenserver.py": {
-              "anchor": "src/project_knowledge/provider.py::ModelRuntime.preview",
+              "anchor": "evaluation/performance_harness.py::main",
               "stage": "impact"
             },
             "src/project_knowledge/guidance.py": {
@@ -10564,11 +10565,11 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/knowledge.py": {
-              "anchor": "src/project_knowledge/provider.py::ModelRuntime.preview",
+              "anchor": "evaluation/performance_harness.py::main",
               "stage": "impact"
             },
             "src/project_knowledge/models.py": {
-              "anchor": "src/project_knowledge/provider.py::ModelRuntime.preview",
+              "anchor": "evaluation/performance_harness.py::main",
               "stage": "impact"
             },
             "src/project_knowledge/provider.py": {
@@ -10588,10 +10589,10 @@
         {
           "answer_status": "verified",
           "category": "extension_point",
-          "estimated_context_tokens": 699,
+          "estimated_context_tokens": 879,
           "failed_metrics": [],
           "id": "self-provider-extension",
-          "latency_ms": 180.995,
+          "latency_ms": 179.584,
           "line": 25,
           "metrics": {
             "extension_point_precision": 0.142857,
@@ -10629,8 +10630,8 @@
             "tests/test_provider.py::ProviderTests.test_local_http_provider_retries_and_honors_cancellation.transport"
           ],
           "returned_files": [
-            "CHANGELOG.md",
-            "docs/project-knowledge-system-audit.md",
+            "scripts/validate_codegraph_adapter.py",
+            "src/project_knowledge/cli.py",
             "src/project_knowledge/provider.py",
             "tests/test_provider.py"
           ],
@@ -10644,12 +10645,12 @@
             "src/project_knowledge/provider.py::_http_transport"
           ],
           "selection_reasons": {
-            "CHANGELOG.md": {
-              "anchor": "curated.conventions",
+            "scripts/validate_codegraph_adapter.py": {
+              "anchor": "decision.0002.codegraph.adapter.boundary",
               "stage": "knowledge_source"
             },
-            "docs/project-knowledge-system-audit.md": {
-              "anchor": "curated.conventions",
+            "src/project_knowledge/cli.py": {
+              "anchor": "curated.provider.and.evidence",
               "stage": "knowledge_source"
             },
             "src/project_knowledge/provider.py": {
@@ -10657,7 +10658,7 @@
               "stage": "direct_symbol"
             },
             "tests/test_provider.py": {
-              "anchor": "src/project_knowledge/provider.py::FakeProvider.generate_structured",
+              "anchor": "src/project_knowledge/provider.py::DisabledProvider.generate_structured",
               "stage": "impact"
             }
           },
@@ -10669,10 +10670,10 @@
         {
           "answer_status": "verified",
           "category": "invariant",
-          "estimated_context_tokens": 819,
+          "estimated_context_tokens": 757,
           "failed_metrics": [],
           "id": "self-feature-guide-schema",
-          "latency_ms": 187.624,
+          "latency_ms": 178.857,
           "line": 26,
           "metrics": {
             "file_precision": 0.142857,
@@ -10767,7 +10768,7 @@
               "stage": "impact"
             },
             "src/project_knowledge/provider.py": {
-              "anchor": "curated.provider.and.evidence",
+              "anchor": "decision.0001.local.first.core",
               "stage": "knowledge_source"
             },
             "src/project_knowledge/retrieval.py": {
@@ -10791,7 +10792,7 @@
               "stage": "fallback"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": true,
           "task": "FeatureGuideValidator.validate 如何结合 FEATURE_GUIDE_DRAFT_SCHEMA、WORKFLOW_SCHEMA 和 RECIPE_SCHEMA 强制完整中文功能草案、连续流程和每条确定性陈述至少一个来源？",
           "tool_calls": 4
@@ -10799,10 +10800,10 @@
         {
           "answer_status": "verified",
           "category": "workflow",
-          "estimated_context_tokens": 592,
+          "estimated_context_tokens": 671,
           "failed_metrics": [],
           "id": "self-semantic-generation",
-          "latency_ms": 181.022,
+          "latency_ms": 185.458,
           "line": 27,
           "metrics": {
             "file_precision": 0.214286,
@@ -10874,15 +10875,15 @@
               "stage": "knowledge_source"
             },
             "src/project_knowledge/codegraph.py": {
-              "anchor": "src/project_knowledge/semantic.py::SemanticKnowledgeService.generate_feature_guide",
+              "anchor": "tests/test_guidance_workflow.py::GuidanceWorkflowTests.guide",
               "stage": "impact"
             },
             "src/project_knowledge/config.py": {
-              "anchor": "src/project_knowledge/semantic.py::SemanticKnowledgeService.generate_feature_guide",
+              "anchor": "tests/test_guidance_workflow.py::GuidanceWorkflowTests.guide",
               "stage": "impact"
             },
             "src/project_knowledge/knowledge.py": {
-              "anchor": "src/project_knowledge/semantic.py::SemanticKnowledgeService.generate_feature_guide",
+              "anchor": "tests/test_guidance_workflow.py::GuidanceWorkflowTests.guide",
               "stage": "impact"
             },
             "src/project_knowledge/models.py": {
@@ -10890,7 +10891,7 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/proposal.py": {
-              "anchor": "src/project_knowledge/semantic.py::SemanticKnowledgeService.generate_feature_guide",
+              "anchor": "tests/test_guidance_workflow.py::GuidanceWorkflowTests.guide",
               "stage": "impact"
             },
             "src/project_knowledge/provider.py": {
@@ -10898,7 +10899,7 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/schemas.py": {
-              "anchor": "src/project_knowledge/semantic.py::SemanticKnowledgeService.generate_feature_guide",
+              "anchor": "tests/test_guidance_workflow.py::GuidanceWorkflowTests.guide",
               "stage": "impact"
             },
             "src/project_knowledge/semantic.py": {
@@ -10906,15 +10907,15 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/store.py": {
-              "anchor": "src/project_knowledge/semantic.py::SemanticKnowledgeService.generate_feature_guide",
+              "anchor": "tests/test_guidance_workflow.py::GuidanceWorkflowTests.guide",
               "stage": "impact"
             },
             "src/project_knowledge/util.py": {
-              "anchor": "src/project_knowledge/semantic.py::SemanticKnowledgeService.generate_feature_guide",
+              "anchor": "tests/test_guidance_workflow.py::GuidanceWorkflowTests.guide",
               "stage": "impact"
             },
             "tests/test_guidance_incremental.py": {
-              "anchor": "src/project_knowledge/semantic.py::SemanticKnowledgeService.generate_feature_guide",
+              "anchor": "tests/test_guidance_workflow.py::GuidanceWorkflowTests.guide",
               "stage": "impact"
             },
             "tests/test_guidance_workflow.py": {
@@ -10926,7 +10927,7 @@
               "stage": "knowledge_source"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": true,
           "task": "SemanticKnowledgeService.generate_feature_guide 如何把 EvidencePack 交给 ModelRuntime、执行二次来源校验并生成中文 Feature Guide 分片？",
           "tool_calls": 4
@@ -10937,7 +10938,7 @@
           "estimated_context_tokens": 178,
           "failed_metrics": [],
           "id": "self-feature-source-validation",
-          "latency_ms": 164.508,
+          "latency_ms": 162.826,
           "line": 28,
           "metrics": {
             "file_precision": 0.166667,
@@ -11054,16 +11055,14 @@
         {
           "answer_status": "verified",
           "category": "workflow",
-          "estimated_context_tokens": 656,
-          "failed_metrics": [
-            "file_recall"
-          ],
+          "estimated_context_tokens": 883,
+          "failed_metrics": [],
           "id": "self-draft-lifecycle",
-          "latency_ms": 194.42,
+          "latency_ms": 185.379,
           "line": 29,
           "metrics": {
-            "file_precision": 0.214286,
-            "file_recall": 0.75,
+            "file_precision": 0.285714,
+            "file_recall": 1.0,
             "symbol_precision": 0.375,
             "symbol_recall": 1.0
           },
@@ -11101,19 +11100,19 @@
             "src/project_knowledge/util.py::read_text"
           ],
           "returned_files": [
-            "docs/project-knowledge-system-audit.md",
             "src/project_knowledge/cli.py",
             "src/project_knowledge/codegraph.py",
             "src/project_knowledge/engine.py",
             "src/project_knowledge/knowledge.py",
+            "src/project_knowledge/mcp.py",
             "src/project_knowledge/models.py",
             "src/project_knowledge/proposal.py",
             "src/project_knowledge/retrieval.py",
             "src/project_knowledge/schemas.py",
+            "src/project_knowledge/semantic.py",
             "src/project_knowledge/service.py",
             "src/project_knowledge/store.py",
             "src/project_knowledge/util.py",
-            "tests/test_integration.py",
             "tests/test_semantic.py"
           ],
           "returned_symbols": [
@@ -11127,10 +11126,6 @@
             "src/project_knowledge/service.py::ProjectService.sync"
           ],
           "selection_reasons": {
-            "docs/project-knowledge-system-audit.md": {
-              "anchor": "curated.conventions",
-              "stage": "knowledge_source"
-            },
             "src/project_knowledge/cli.py": {
               "anchor": "KnowledgeGenerator._draft_records、ProjectService.sync 与 KnowledgeAPI.get 如何索引 Feature Guide 草案，在源文件变化后标记 potentially_stale 并要求读取实时源码？",
               "stage": "fallback"
@@ -11147,12 +11142,16 @@
               "anchor": "src/project_knowledge/knowledge.py::KnowledgeGenerator._draft_records",
               "stage": "direct_symbol"
             },
+            "src/project_knowledge/mcp.py": {
+              "anchor": "decision.0001.local.first.core",
+              "stage": "knowledge_source"
+            },
             "src/project_knowledge/models.py": {
-              "anchor": "src/project_knowledge/service.py::ProjectService",
+              "anchor": "src/project_knowledge/engine.py::BuiltinCodeIndexEngine.sync",
               "stage": "impact"
             },
             "src/project_knowledge/proposal.py": {
-              "anchor": "src/project_knowledge/service.py::ProjectService",
+              "anchor": "src/project_knowledge/engine.py::BuiltinCodeIndexEngine.sync",
               "stage": "impact"
             },
             "src/project_knowledge/retrieval.py": {
@@ -11160,42 +11159,42 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/schemas.py": {
-              "anchor": "src/project_knowledge/service.py::ProjectService",
+              "anchor": "src/project_knowledge/engine.py::BuiltinCodeIndexEngine.sync",
               "stage": "impact"
+            },
+            "src/project_knowledge/semantic.py": {
+              "anchor": "decision.0001.local.first.core",
+              "stage": "knowledge_source"
             },
             "src/project_knowledge/service.py": {
               "anchor": "src/project_knowledge/service.py::ProjectService.sync",
               "stage": "direct_symbol"
             },
             "src/project_knowledge/store.py": {
-              "anchor": "src/project_knowledge/service.py::ProjectService",
+              "anchor": "src/project_knowledge/engine.py::BuiltinCodeIndexEngine.sync",
               "stage": "impact"
             },
             "src/project_knowledge/util.py": {
-              "anchor": "src/project_knowledge/service.py::ProjectService",
+              "anchor": "src/project_knowledge/engine.py::BuiltinCodeIndexEngine.sync",
               "stage": "impact"
-            },
-            "tests/test_integration.py": {
-              "anchor": "curated.conventions",
-              "stage": "knowledge_source"
             },
             "tests/test_semantic.py": {
               "anchor": "KnowledgeGenerator._draft_records、ProjectService.sync 与 KnowledgeAPI.get 如何索引 Feature Guide 草案，在源文件变化后标记 potentially_stale 并要求读取实时源码？",
               "stage": "fallback"
             }
           },
-          "stale_detected": true,
-          "success": false,
+          "stale_detected": false,
+          "success": true,
           "task": "KnowledgeGenerator._draft_records、ProjectService.sync 与 KnowledgeAPI.get 如何索引 Feature Guide 草案，在源文件变化后标记 potentially_stale 并要求读取实时源码？",
           "tool_calls": 4
         },
         {
           "answer_status": "verified",
           "category": "workflow",
-          "estimated_context_tokens": 669,
+          "estimated_context_tokens": 514,
           "failed_metrics": [],
           "id": "self-feature-retrieval",
-          "latency_ms": 192.673,
+          "latency_ms": 193.893,
           "line": 30,
           "metrics": {
             "file_precision": 0.214286,
@@ -11322,7 +11321,7 @@
               "stage": "fallback"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": true,
           "task": "新增类似功能时，SemanticKnowledgeService.discover_feature_candidates 与 KnowledgeAPI.search/context 如何发现功能域候选、优先 Feature Guide 并支持中文标题包含匹配？",
           "tool_calls": 4
@@ -11330,12 +11329,12 @@
         {
           "answer_status": "verified",
           "category": "invariant",
-          "estimated_context_tokens": 384,
+          "estimated_context_tokens": 424,
           "failed_metrics": [
             "invariant_recall"
           ],
           "id": "self-proposal-stable-id",
-          "latency_ms": 198.686,
+          "latency_ms": 210.694,
           "line": 31,
           "metrics": {
             "file_precision": 0.214286,
@@ -11408,7 +11407,7 @@
               "stage": "fallback"
             },
             "src/project_knowledge/codegraph.py": {
-              "anchor": "src/project_knowledge/models.py::PatchOperation.to_dict",
+              "anchor": "src/project_knowledge/models.py::ChangeSet",
               "stage": "impact"
             },
             "src/project_knowledge/guidance_models.py": {
@@ -11416,7 +11415,7 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/guidance_store.py": {
-              "anchor": "src/project_knowledge/models.py::PatchOperation.to_dict",
+              "anchor": "src/project_knowledge/models.py::ChangeSet",
               "stage": "impact"
             },
             "src/project_knowledge/incremental.py": {
@@ -11432,7 +11431,7 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/schemas.py": {
-              "anchor": "src/project_knowledge/models.py::PatchOperation.to_dict",
+              "anchor": "src/project_knowledge/models.py::ChangeSet",
               "stage": "impact"
             },
             "src/project_knowledge/service.py": {
@@ -11440,11 +11439,11 @@
               "stage": "fallback"
             },
             "src/project_knowledge/store.py": {
-              "anchor": "src/project_knowledge/models.py::PatchOperation.to_dict",
+              "anchor": "src/project_knowledge/models.py::ChangeSet",
               "stage": "impact"
             },
             "src/project_knowledge/util.py": {
-              "anchor": "src/project_knowledge/models.py::PatchOperation.to_dict",
+              "anchor": "src/project_knowledge/models.py::ChangeSet",
               "stage": "impact"
             },
             "tests/test_guidance_store.py": {
@@ -11468,10 +11467,10 @@
         {
           "answer_status": "verified",
           "category": "workflow",
-          "estimated_context_tokens": 855,
+          "estimated_context_tokens": 775,
           "failed_metrics": [],
           "id": "self-proposal-apply-conflict",
-          "latency_ms": 174.429,
+          "latency_ms": 187.377,
           "line": 32,
           "metrics": {
             "file_precision": 0.142857,
@@ -11512,12 +11511,12 @@
             "tests/test_semantic.py::<module>"
           ],
           "returned_files": [
-            "docs/project-knowledge-system-audit.md",
             "docs/project-knowledge-system-design.md",
             "src/project_knowledge/cli.py",
             "src/project_knowledge/codegraph.py",
             "src/project_knowledge/config.py",
             "src/project_knowledge/finalization.py",
+            "src/project_knowledge/models.py",
             "src/project_knowledge/proposal.py",
             "src/project_knowledge/retrieval.py",
             "src/project_knowledge/schemas.py",
@@ -11538,10 +11537,6 @@
             "tests/test_finalization.py::FinalizationTests.test_source_commit_sync_generated_commit_becomes_ready"
           ],
           "selection_reasons": {
-            "docs/project-knowledge-system-audit.md": {
-              "anchor": "curated.conventions",
-              "stage": "knowledge_source"
-            },
             "docs/project-knowledge-system-design.md": {
               "anchor": "curated.glossary",
               "stage": "knowledge_source"
@@ -11551,27 +11546,31 @@
               "stage": "fallback"
             },
             "src/project_knowledge/codegraph.py": {
-              "anchor": "tests/test_finalization.py::FinalizationTests.test_configured_knowledge_index_is_a_generated_output",
+              "anchor": "src/project_knowledge/proposal.py::ProposalService._upsert_block",
               "stage": "impact"
             },
             "src/project_knowledge/config.py": {
-              "anchor": "tests/test_finalization.py::FinalizationTests.test_configured_knowledge_index_is_a_generated_output",
+              "anchor": "src/project_knowledge/proposal.py::ProposalService._upsert_block",
               "stage": "impact"
             },
             "src/project_knowledge/finalization.py": {
-              "anchor": "tests/test_finalization.py::FinalizationTests.test_configured_knowledge_index_is_a_generated_output",
+              "anchor": "src/project_knowledge/proposal.py::ProposalService._upsert_block",
               "stage": "impact"
+            },
+            "src/project_knowledge/models.py": {
+              "anchor": "curated.provider.and.evidence",
+              "stage": "knowledge_source"
             },
             "src/project_knowledge/proposal.py": {
               "anchor": "src/project_knowledge/proposal.py::ProposalService.apply",
               "stage": "direct_symbol"
             },
             "src/project_knowledge/retrieval.py": {
-              "anchor": "tests/test_finalization.py::FinalizationTests.test_configured_knowledge_index_is_a_generated_output",
+              "anchor": "src/project_knowledge/proposal.py::ProposalService._upsert_block",
               "stage": "impact"
             },
             "src/project_knowledge/schemas.py": {
-              "anchor": "tests/test_finalization.py::FinalizationTests.test_configured_knowledge_index_is_a_generated_output",
+              "anchor": "src/project_knowledge/proposal.py::ProposalService._upsert_block",
               "stage": "impact"
             },
             "src/project_knowledge/service.py": {
@@ -11579,11 +11578,11 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/store.py": {
-              "anchor": "tests/test_finalization.py::FinalizationTests.test_configured_knowledge_index_is_a_generated_output",
+              "anchor": "src/project_knowledge/proposal.py::ProposalService._upsert_block",
               "stage": "impact"
             },
             "src/project_knowledge/util.py": {
-              "anchor": "tests/test_finalization.py::FinalizationTests.test_configured_knowledge_index_is_a_generated_output",
+              "anchor": "src/project_knowledge/proposal.py::ProposalService._upsert_block",
               "stage": "impact"
             },
             "tests/test_finalization.py": {
@@ -11603,16 +11602,17 @@
         {
           "answer_status": "verified",
           "category": "workflow",
-          "estimated_context_tokens": 592,
+          "estimated_context_tokens": 403,
           "failed_metrics": [
+            "file_recall",
             "symbol_recall"
           ],
           "id": "self-draft-proposal-promotion",
-          "latency_ms": 194.989,
+          "latency_ms": 202.268,
           "line": 33,
           "metrics": {
-            "file_precision": 0.214286,
-            "file_recall": 1.0,
+            "file_precision": 0.142857,
+            "file_recall": 0.666667,
             "symbol_precision": 0.125,
             "symbol_recall": 0.5
           },
@@ -11652,7 +11652,6 @@
           ],
           "returned_files": [
             "docs/project-knowledge-system-audit.md",
-            "src/project_knowledge/cli.py",
             "src/project_knowledge/codegraph.py",
             "src/project_knowledge/knowledge.py",
             "src/project_knowledge/models.py",
@@ -11664,7 +11663,8 @@
             "src/project_knowledge/util.py",
             "tests/test_guidance_incremental.py",
             "tests/test_guidance_workflow.py",
-            "tests/test_proposal.py"
+            "tests/test_proposal.py",
+            "tests/test_semantic.py"
           ],
           "returned_symbols": [
             "src/project_knowledge/knowledge.py::KnowledgeGenerator._curated_records",
@@ -11681,12 +11681,8 @@
               "anchor": "curated.conventions",
               "stage": "knowledge_source"
             },
-            "src/project_knowledge/cli.py": {
-              "anchor": "curated.provider.and.evidence",
-              "stage": "knowledge_source"
-            },
             "src/project_knowledge/codegraph.py": {
-              "anchor": "src/project_knowledge/semantic.py::FeatureGuideValidationError",
+              "anchor": "tests/test_guidance_incremental.py::GuidanceIncrementalTests.guide_content",
               "stage": "impact"
             },
             "src/project_knowledge/knowledge.py": {
@@ -11694,7 +11690,7 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/models.py": {
-              "anchor": "src/project_knowledge/semantic.py::FeatureGuideValidationError",
+              "anchor": "tests/test_guidance_incremental.py::GuidanceIncrementalTests.guide_content",
               "stage": "impact"
             },
             "src/project_knowledge/proposal.py": {
@@ -11702,11 +11698,11 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/retrieval.py": {
-              "anchor": "src/project_knowledge/semantic.py::FeatureGuideValidationError",
+              "anchor": "tests/test_guidance_incremental.py::GuidanceIncrementalTests.guide_content",
               "stage": "impact"
             },
             "src/project_knowledge/schemas.py": {
-              "anchor": "src/project_knowledge/semantic.py::FeatureGuideValidationError",
+              "anchor": "tests/test_guidance_incremental.py::GuidanceIncrementalTests.guide_content",
               "stage": "impact"
             },
             "src/project_knowledge/semantic.py": {
@@ -11714,11 +11710,11 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/store.py": {
-              "anchor": "src/project_knowledge/semantic.py::FeatureGuideValidationError",
+              "anchor": "tests/test_guidance_incremental.py::GuidanceIncrementalTests.guide_content",
               "stage": "impact"
             },
             "src/project_knowledge/util.py": {
-              "anchor": "src/project_knowledge/semantic.py::FeatureGuideValidationError",
+              "anchor": "tests/test_guidance_incremental.py::GuidanceIncrementalTests.guide_content",
               "stage": "impact"
             },
             "tests/test_guidance_incremental.py": {
@@ -11730,11 +11726,15 @@
               "stage": "direct_symbol"
             },
             "tests/test_proposal.py": {
-              "anchor": "src/project_knowledge/semantic.py::FeatureGuideValidationError",
+              "anchor": "tests/test_guidance_incremental.py::GuidanceIncrementalTests.guide_content",
               "stage": "impact"
+            },
+            "tests/test_semantic.py": {
+              "anchor": "curated.feature.guide.generation",
+              "stage": "knowledge_source"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": false,
           "task": "已校验 Feature Guide 草案如何通过 ProposalService.create_from_feature_draft 收集全部来源哈希、生成 curated generated block 提案并经 apply 显式提升？",
           "tool_calls": 4
@@ -11742,12 +11742,12 @@
         {
           "answer_status": "verified",
           "category": "invariant",
-          "estimated_context_tokens": 721,
+          "estimated_context_tokens": 562,
           "failed_metrics": [
             "invariant_recall"
           ],
           "id": "self-proposal-delete-adr",
-          "latency_ms": 191.518,
+          "latency_ms": 193.398,
           "line": 34,
           "metrics": {
             "file_precision": 0.25,
@@ -11832,7 +11832,7 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/schemas.py": {
-              "anchor": "tests/test_proposal.py::ProposalTests.test_adr_operation_only_creates_new_draft_and_never_rewrites_existing_adr",
+              "anchor": "src/project_knowledge/proposal.py::ProposalService._render_adr_draft",
               "stage": "impact"
             },
             "src/project_knowledge/service.py": {
@@ -11844,7 +11844,7 @@
               "stage": "fallback"
             },
             "src/project_knowledge/util.py": {
-              "anchor": "tests/test_proposal.py::ProposalTests.test_adr_operation_only_creates_new_draft_and_never_rewrites_existing_adr",
+              "anchor": "src/project_knowledge/proposal.py::ProposalService._render_adr_draft",
               "stage": "impact"
             },
             "tests/test_guidance_store.py": {
@@ -11860,7 +11860,7 @@
               "stage": "fallback"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": false,
           "task": "删除知识或新增设计决策时，PatchOperation、ProposalService._validate_intent 与 _render_adr_draft 如何强制 deleted_sources、supersedes 和 ADR 只追加草案？",
           "tool_calls": 4
@@ -11868,12 +11868,12 @@
         {
           "answer_status": "verified",
           "category": "workflow",
-          "estimated_context_tokens": 837,
+          "estimated_context_tokens": 541,
           "failed_metrics": [
             "symbol_recall"
           ],
           "id": "self-semantic-update-queue",
-          "latency_ms": 190.31,
+          "latency_ms": 188.772,
           "line": 35,
           "metrics": {
             "file_precision": 0.142857,
@@ -11962,11 +11962,11 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/knowledge.py": {
-              "anchor": "src/project_knowledge/service.py::ProjectService",
+              "anchor": "src/project_knowledge/engine.py::BuiltinCodeIndexEngine.sync",
               "stage": "impact"
             },
             "src/project_knowledge/models.py": {
-              "anchor": "src/project_knowledge/service.py::ProjectService",
+              "anchor": "src/project_knowledge/engine.py::BuiltinCodeIndexEngine.sync",
               "stage": "impact"
             },
             "src/project_knowledge/proposal.py": {
@@ -11974,11 +11974,11 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/retrieval.py": {
-              "anchor": "src/project_knowledge/service.py::ProjectService",
+              "anchor": "src/project_knowledge/engine.py::BuiltinCodeIndexEngine.sync",
               "stage": "impact"
             },
             "src/project_knowledge/schemas.py": {
-              "anchor": "src/project_knowledge/service.py::ProjectService",
+              "anchor": "src/project_knowledge/engine.py::BuiltinCodeIndexEngine.sync",
               "stage": "impact"
             },
             "src/project_knowledge/service.py": {
@@ -11986,11 +11986,11 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/store.py": {
-              "anchor": "src/project_knowledge/service.py::ProjectService",
+              "anchor": "src/project_knowledge/engine.py::BuiltinCodeIndexEngine.sync",
               "stage": "impact"
             },
             "src/project_knowledge/util.py": {
-              "anchor": "src/project_knowledge/service.py::ProjectService",
+              "anchor": "src/project_knowledge/engine.py::BuiltinCodeIndexEngine.sync",
               "stage": "impact"
             },
             "tests/test_semantic.py": {
@@ -12009,7 +12009,7 @@
           "estimated_context_tokens": 157,
           "failed_metrics": [],
           "id": "self-task-classification",
-          "latency_ms": 150.389,
+          "latency_ms": 152.333,
           "line": 36,
           "metrics": {
             "file_precision": 0.083333,
@@ -12125,10 +12125,10 @@
         {
           "answer_status": "verified",
           "category": "workflow",
-          "estimated_context_tokens": 700,
+          "estimated_context_tokens": 689,
           "failed_metrics": [],
           "id": "self-retrieval-explanation",
-          "latency_ms": 180.642,
+          "latency_ms": 184.541,
           "line": 37,
           "metrics": {
             "file_precision": 0.071429,
@@ -12217,7 +12217,7 @@
               "stage": "fallback"
             },
             "src/project_knowledge/proposal.py": {
-              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI",
+              "anchor": "tests/test_retrieval_wp06.py::RetrievalWP06Tests.test_search_exposes_score_breakdown_and_impact_supports_bounded_multihop",
               "stage": "impact"
             },
             "src/project_knowledge/retrieval.py": {
@@ -12225,11 +12225,11 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/store.py": {
-              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI",
+              "anchor": "tests/test_retrieval_wp06.py::RetrievalWP06Tests.test_search_exposes_score_breakdown_and_impact_supports_bounded_multihop",
               "stage": "impact"
             },
             "src/project_knowledge/util.py": {
-              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI",
+              "anchor": "tests/test_retrieval_wp06.py::RetrievalWP06Tests.test_search_exposes_score_breakdown_and_impact_supports_bounded_multihop",
               "stage": "impact"
             },
             "tests/test_evaluate.py": {
@@ -12249,7 +12249,7 @@
               "stage": "fallback"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": true,
           "task": "KnowledgeAPI.search 与 _score_breakdown 如何返回 score_breakdown 和 why_selected？",
           "tool_calls": 4
@@ -12257,10 +12257,10 @@
         {
           "answer_status": "verified",
           "category": "impact",
-          "estimated_context_tokens": 415,
+          "estimated_context_tokens": 544,
           "failed_metrics": [],
           "id": "self-bounded-multihop",
-          "latency_ms": 182.351,
+          "latency_ms": 186.327,
           "line": 38,
           "metrics": {
             "file_precision": 0.071429,
@@ -12336,11 +12336,11 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/evaluate.py": {
-              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI",
+              "anchor": "tests/test_evaluate.py::EvaluationTests.test_markdown_source_paths_are_adaptively_bounded",
               "stage": "impact"
             },
             "src/project_knowledge/evidence.py": {
-              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI",
+              "anchor": "tests/test_evaluate.py::EvaluationTests.test_markdown_source_paths_are_adaptively_bounded",
               "stage": "impact"
             },
             "src/project_knowledge/mcp.py": {
@@ -12348,11 +12348,11 @@
               "stage": "knowledge_source"
             },
             "src/project_knowledge/models.py": {
-              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI",
+              "anchor": "tests/test_evaluate.py::EvaluationTests.test_markdown_source_paths_are_adaptively_bounded",
               "stage": "impact"
             },
             "src/project_knowledge/proposal.py": {
-              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI",
+              "anchor": "tests/test_evaluate.py::EvaluationTests.test_markdown_source_paths_are_adaptively_bounded",
               "stage": "impact"
             },
             "src/project_knowledge/retrieval.py": {
@@ -12360,11 +12360,11 @@
               "stage": "direct_symbol"
             },
             "src/project_knowledge/schemas.py": {
-              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI",
+              "anchor": "tests/test_evaluate.py::EvaluationTests.test_markdown_source_paths_are_adaptively_bounded",
               "stage": "impact"
             },
             "src/project_knowledge/store.py": {
-              "anchor": "src/project_knowledge/retrieval.py::KnowledgeAPI",
+              "anchor": "tests/test_evaluate.py::EvaluationTests.test_markdown_source_paths_are_adaptively_bounded",
               "stage": "impact"
             },
             "tests/test_evaluate.py": {
@@ -12384,7 +12384,7 @@
               "stage": "direct_symbol"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": true,
           "task": "KnowledgeAPI.impact 如何支持 max_hops 和 max_relations 的 bounded multihop？",
           "tool_calls": 4
@@ -12392,10 +12392,10 @@
         {
           "answer_status": "verified",
           "category": "workflow",
-          "estimated_context_tokens": 759,
+          "estimated_context_tokens": 504,
           "failed_metrics": [],
           "id": "self-feature-development-context",
-          "latency_ms": 211.251,
+          "latency_ms": 192.863,
           "line": 39,
           "metrics": {
             "file_precision": 0.071429,
@@ -12515,7 +12515,7 @@
               "stage": "fallback"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": true,
           "task": "KnowledgeAPI.context 如何返回 task_type、likely_modules、reference_implementations、extension_points 和 retrieval_explanation？",
           "tool_calls": 4
@@ -12523,10 +12523,10 @@
         {
           "answer_status": "verified",
           "category": "workflow",
-          "estimated_context_tokens": 1049,
+          "estimated_context_tokens": 1181,
           "failed_metrics": [],
           "id": "self-context-unknowns",
-          "latency_ms": 189.027,
+          "latency_ms": 167.512,
           "line": 40,
           "metrics": {
             "file_precision": 0.071429,
@@ -12644,7 +12644,7 @@
               "stage": "fallback"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": true,
           "task": "KnowledgeAPI.context 如何生成 unknowns 并提示实时源码核验？",
           "tool_calls": 4
@@ -12757,8 +12757,8 @@
         "symbol_recall": 40
       },
       "metrics": {
-        "average_context_tokens": 3564.85,
-        "average_tool_calls": 4.275,
+        "average_context_tokens": 3561.1,
+        "average_tool_calls": 4.4,
         "call_path_precision": 0.0,
         "call_path_recall": 0.0,
         "design_reason_recall": 1.0,
@@ -12767,10 +12767,10 @@
         "file_precision": 0.24375,
         "file_recall": 0.902083,
         "generated_source_coverage": 0.909091,
-        "invariant_recall": 0.4,
-        "p50_latency_ms": 261.6445,
-        "p95_latency_ms": 299.0004,
-        "p99_latency_ms": 312.63406,
+        "invariant_recall": 0.6,
+        "p50_latency_ms": 259.1905,
+        "p95_latency_ms": 285.93925,
+        "p99_latency_ms": 295.01952,
         "success_rate": 0.0,
         "symbol_precision": 0.0,
         "symbol_recall": 0.0
@@ -12828,16 +12828,16 @@
             "Configuration"
           ]
         },
-        "generated_at": "2026-08-14T18:29:26+08:00",
-        "head_commit": "a321d49945d7f7c8107a345a2e39d90703403db3",
-        "index_commit": "a321d49945d7f7c8107a345a2e39d90703403db3",
+        "generated_at": "2026-08-14T18:38:06+08:00",
+        "head_commit": "b0a6d3332873149889ded0ed934c4f721e8443a8",
+        "index_commit": "b0a6d3332873149889ded0ed934c4f721e8443a8",
         "platform": "Windows-11-10.0.26200-SP0",
         "processor": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
         "project": "ProjectKnowledgeCLI",
         "project_files": 77,
-        "project_symbols": 918,
+        "project_symbols": 919,
         "python": "3.14.6",
-        "source_snapshot_sha256": "sha256:0037b1a48f6371296e42b49332d4068d2ae86dd5796ab1c9a864c31d04110492",
+        "source_snapshot_sha256": "sha256:dd095c000b8b0ae5227336d21a56b7807536a179620ff0da987db8e743cdfd4b",
         "working_tree": "dirty"
       },
       "results": [
@@ -12850,7 +12850,7 @@
             "call_path_recall"
           ],
           "id": "self-init-flow",
-          "latency_ms": 216.113,
+          "latency_ms": 239.389,
           "line": 1,
           "metrics": {
             "call_path_precision": 0.0,
@@ -12906,7 +12906,7 @@
               "stage": "knowledge_source"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": false,
           "task": "ProjectService.initialize 如何发现源码、原子构建索引并发布 KnowledgeGenerator 生成的知识？",
           "tool_calls": 4
@@ -12919,7 +12919,7 @@
             "symbol_recall"
           ],
           "id": "self-incremental-sync",
-          "latency_ms": 274.853,
+          "latency_ms": 280.223,
           "line": 2,
           "metrics": {
             "file_precision": 0.375,
@@ -12973,7 +12973,7 @@
               "stage": "knowledge_source"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": false,
           "task": "ProjectService.sync 如何识别文件变化、更新 CodeIndexEngine 结果并重新生成受影响知识？",
           "tool_calls": 5
@@ -12981,18 +12981,17 @@
         {
           "answer_status": "verified",
           "category": "invariant",
-          "estimated_context_tokens": 4001,
+          "estimated_context_tokens": 4000,
           "failed_metrics": [
-            "symbol_recall",
-            "invariant_recall"
+            "symbol_recall"
           ],
           "id": "self-atomic-rebuild",
-          "latency_ms": 292.987,
+          "latency_ms": 265.707,
           "line": 3,
           "metrics": {
             "file_precision": 0.25,
             "file_recall": 1.0,
-            "invariant_recall": 0.0,
+            "invariant_recall": 1.0,
             "symbol_precision": 0.0,
             "symbol_recall": 0.0
           },
@@ -13042,7 +13041,7 @@
               "stage": "knowledge_source"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": false,
           "task": "_atomic_rebuild 如何用临时 SQLite 数据库和事务保证重建原子性？",
           "tool_calls": 5
@@ -13050,13 +13049,13 @@
         {
           "answer_status": "verified",
           "category": "invariant",
-          "estimated_context_tokens": 3999,
+          "estimated_context_tokens": 4000,
           "failed_metrics": [
             "symbol_recall",
             "invariant_recall"
           ],
           "id": "self-commit-alignment",
-          "latency_ms": 260.848,
+          "latency_ms": 254.452,
           "line": 4,
           "metrics": {
             "file_precision": 0.25,
@@ -13111,7 +13110,7 @@
               "stage": "knowledge_source"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": false,
           "task": "ProjectService.status 如何区分 content_fresh 与 commit_aligned，并由 sync 对齐纯 HEAD 变化？",
           "tool_calls": 5
@@ -13119,19 +13118,18 @@
         {
           "answer_status": "verified",
           "category": "invariant",
-          "estimated_context_tokens": 4001,
+          "estimated_context_tokens": 4000,
           "failed_metrics": [
             "file_recall",
-            "symbol_recall",
-            "invariant_recall"
+            "symbol_recall"
           ],
           "id": "self-template-confidence",
-          "latency_ms": 269.05,
+          "latency_ms": 274.44,
           "line": 5,
           "metrics": {
             "file_precision": 0.125,
             "file_recall": 0.5,
-            "invariant_recall": 0.0,
+            "invariant_recall": 1.0,
             "symbol_precision": 0.0,
             "symbol_recall": 0.0
           },
@@ -13195,7 +13193,7 @@
             "extension_point_recall"
           ],
           "id": "self-module-truncation",
-          "latency_ms": 122.446,
+          "latency_ms": 144.76,
           "line": 6,
           "metrics": {
             "extension_point_precision": 0.0,
@@ -13265,7 +13263,7 @@
             "symbol_recall"
           ],
           "id": "self-runtime-schema",
-          "latency_ms": 298.859,
+          "latency_ms": 298.113,
           "line": 7,
           "metrics": {
             "file_precision": 0.25,
@@ -13320,7 +13318,7 @@
               "stage": "knowledge_source"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": false,
           "task": "validate_instance 如何在 KnowledgeRecord 清单和 ChangeSet 事件落盘前执行运行时 Schema 校验？",
           "tool_calls": 5
@@ -13328,12 +13326,12 @@
         {
           "answer_status": "verified",
           "category": "configuration",
-          "estimated_context_tokens": 4001,
+          "estimated_context_tokens": 4000,
           "failed_metrics": [
             "symbol_recall"
           ],
           "id": "self-config-capabilities",
-          "latency_ms": 232.618,
+          "latency_ms": 207.988,
           "line": 8,
           "metrics": {
             "file_precision": 0.25,
@@ -13395,13 +13393,13 @@
         {
           "answer_status": "verified",
           "category": "design_reason",
-          "estimated_context_tokens": 4000,
+          "estimated_context_tokens": 4001,
           "failed_metrics": [
             "file_recall",
             "symbol_recall"
           ],
           "id": "self-codegraph-failure",
-          "latency_ms": 262.141,
+          "latency_ms": 271.221,
           "line": 9,
           "metrics": {
             "design_reason_recall": 1.0,
@@ -13469,7 +13467,7 @@
             "symbol_recall"
           ],
           "id": "self-python-parser",
-          "latency_ms": 180.194,
+          "latency_ms": 261.435,
           "line": 10,
           "metrics": {
             "file_precision": 0.25,
@@ -13526,7 +13524,7 @@
           "stale_detected": false,
           "success": false,
           "task": "PythonParser.parse 和 visit_Call 如何提取 Python 符号、调用、继承与路由？",
-          "tool_calls": 3
+          "tool_calls": 5
         },
         {
           "answer_status": "verified",
@@ -13537,7 +13535,7 @@
             "extension_point_recall"
           ],
           "id": "self-generic-parser",
-          "latency_ms": 247.268,
+          "latency_ms": 216.58,
           "line": 11,
           "metrics": {
             "extension_point_precision": 0.0,
@@ -13606,7 +13604,7 @@
             "symbol_recall"
           ],
           "id": "self-context-budget",
-          "latency_ms": 261.148,
+          "latency_ms": 256.213,
           "line": 12,
           "metrics": {
             "file_precision": 0.25,
@@ -13619,11 +13617,11 @@
             "docs/project-knowledge-system-audit.md",
             "src/project_knowledge/evaluate.py",
             "src/project_knowledge/proposal.py",
+            "src/project_knowledge/real_project.py",
             "src/project_knowledge/retrieval.py",
             "src/project_knowledge/store.py",
             "src/project_knowledge/util.py",
-            "tests/test_config.py",
-            "tests/test_evaluate.py"
+            "tests/test_config.py"
           ],
           "returned_symbols": [],
           "selection_reasons": {
@@ -13636,6 +13634,10 @@
               "stage": "knowledge_source"
             },
             "src/project_knowledge/proposal.py": {
+              "anchor": "markdown_search",
+              "stage": "knowledge_source"
+            },
+            "src/project_knowledge/real_project.py": {
               "anchor": "markdown_search",
               "stage": "knowledge_source"
             },
@@ -13654,13 +13656,9 @@
             "tests/test_config.py": {
               "anchor": "markdown_search",
               "stage": "knowledge_source"
-            },
-            "tests/test_evaluate.py": {
-              "anchor": "markdown_search",
-              "stage": "knowledge_source"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": false,
           "task": "KnowledgeAPI.context 如何排序知识、匹配符号并由 _fit_context 限制总 Token？",
           "tool_calls": 5
@@ -13675,7 +13673,7 @@
             "invariant_recall"
           ],
           "id": "self-stale-shield",
-          "latency_ms": 252.145,
+          "latency_ms": 270.436,
           "line": 13,
           "metrics": {
             "file_precision": 0.125,
@@ -13686,9 +13684,9 @@
           },
           "returned_call_path": [],
           "returned_files": [
-            "docs/project-knowledge-system-audit.md",
             "src/project_knowledge/evaluate.py",
             "src/project_knowledge/proposal.py",
+            "src/project_knowledge/real_project.py",
             "src/project_knowledge/retrieval.py",
             "src/project_knowledge/schemas.py",
             "src/project_knowledge/store.py",
@@ -13697,15 +13695,15 @@
           ],
           "returned_symbols": [],
           "selection_reasons": {
-            "docs/project-knowledge-system-audit.md": {
-              "anchor": "markdown_search",
-              "stage": "knowledge_source"
-            },
             "src/project_knowledge/evaluate.py": {
               "anchor": "markdown_search",
               "stage": "knowledge_source"
             },
             "src/project_knowledge/proposal.py": {
+              "anchor": "markdown_search",
+              "stage": "knowledge_source"
+            },
+            "src/project_knowledge/real_project.py": {
               "anchor": "markdown_search",
               "stage": "knowledge_source"
             },
@@ -13730,7 +13728,7 @@
               "stage": "knowledge_source"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": false,
           "task": "KnowledgeAPI.get 和 _pending_sources 如何阻止返回依赖待同步来源的旧正文？",
           "tool_calls": 5
@@ -13743,7 +13741,7 @@
             "symbol_recall"
           ],
           "id": "self-impact-analysis",
-          "latency_ms": 106.257,
+          "latency_ms": 105.869,
           "line": 14,
           "metrics": {
             "file_precision": 0.25,
@@ -13805,12 +13803,12 @@
         {
           "answer_status": "verified",
           "category": "workflow",
-          "estimated_context_tokens": 3253,
+          "estimated_context_tokens": 3464,
           "failed_metrics": [
             "symbol_recall"
           ],
           "id": "self-mcp-dispatch",
-          "latency_ms": 294.843,
+          "latency_ms": 257.738,
           "line": 15,
           "metrics": {
             "file_precision": 0.25,
@@ -13864,7 +13862,7 @@
               "stage": "knowledge_source"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": false,
           "task": "MCPServer.handle 和 _call 如何列出工具并把 knowledge_context 等请求分派给 KnowledgeAPI？",
           "tool_calls": 5
@@ -13872,12 +13870,12 @@
         {
           "answer_status": "verified",
           "category": "workflow",
-          "estimated_context_tokens": 4001,
+          "estimated_context_tokens": 4000,
           "failed_metrics": [
             "symbol_recall"
           ],
           "id": "self-manifest-publication",
-          "latency_ms": 284.24,
+          "latency_ms": 278.536,
           "line": 16,
           "metrics": {
             "file_precision": 0.375,
@@ -13931,7 +13929,7 @@
               "stage": "knowledge_source"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": false,
           "task": "KnowledgeGenerator._manifest 如何序列化 KnowledgeRecord、验证 Schema 并原子写入 manifest？",
           "tool_calls": 5
@@ -13939,13 +13937,13 @@
         {
           "answer_status": "verified",
           "category": "workflow",
-          "estimated_context_tokens": 3486,
+          "estimated_context_tokens": 3554,
           "failed_metrics": [
             "file_recall",
             "symbol_recall"
           ],
           "id": "self-version-bump",
-          "latency_ms": 232.356,
+          "latency_ms": 222.143,
           "line": 17,
           "metrics": {
             "file_precision": 0.25,
@@ -14000,7 +13998,7 @@
               "stage": "knowledge_source"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": false,
           "task": "bump_patch_version 如何从唯一版本源递增补丁版本并更新 CHANGELOG？",
           "tool_calls": 4
@@ -14010,15 +14008,16 @@
           "category": "invariant",
           "estimated_context_tokens": 3999,
           "failed_metrics": [
-            "symbol_recall"
+            "symbol_recall",
+            "invariant_recall"
           ],
           "id": "self-owned-integration",
-          "latency_ms": 268.145,
+          "latency_ms": 290.181,
           "line": 18,
           "metrics": {
             "file_precision": 0.25,
             "file_recall": 1.0,
-            "invariant_recall": 1.0,
+            "invariant_recall": 0.0,
             "symbol_precision": 0.0,
             "symbol_recall": 0.0
           },
@@ -14076,12 +14075,12 @@
         {
           "answer_status": "verified",
           "category": "quality_gate",
-          "estimated_context_tokens": 4001,
+          "estimated_context_tokens": 4000,
           "failed_metrics": [
             "symbol_recall"
           ],
           "id": "self-evaluation-gate",
-          "latency_ms": 227.518,
+          "latency_ms": 255.88,
           "line": 19,
           "metrics": {
             "file_precision": 0.25,
@@ -14138,17 +14137,17 @@
           "stale_detected": false,
           "success": false,
           "task": "evaluate_suite 和 evaluate_quality_gate 如何比较多策略指标、冻结阈值并以 CLI 退出码阻止质量退化？",
-          "tool_calls": 4
+          "tool_calls": 5
         },
         {
           "answer_status": "verified",
           "category": "performance",
-          "estimated_context_tokens": 3638,
+          "estimated_context_tokens": 3715,
           "failed_metrics": [
             "symbol_recall"
           ],
           "id": "self-performance-harness",
-          "latency_ms": 171.694,
+          "latency_ms": 164.052,
           "line": 20,
           "metrics": {
             "file_precision": 0.25,
@@ -14202,7 +14201,7 @@
               "stage": "knowledge_source"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": false,
           "task": "run_performance_harness 如何生成固定 500/5000 文件夹具并测量 P50/P95/P99 与过期检测？",
           "tool_calls": 3
@@ -14215,7 +14214,7 @@
             "symbol_recall"
           ],
           "id": "self-evidence-pack",
-          "latency_ms": 262.398,
+          "latency_ms": 282.465,
           "line": 21,
           "metrics": {
             "file_precision": 0.375,
@@ -14277,12 +14276,12 @@
         {
           "answer_status": "verified",
           "category": "privacy",
-          "estimated_context_tokens": 3999,
+          "estimated_context_tokens": 4001,
           "failed_metrics": [
             "symbol_recall"
           ],
           "id": "self-provider-authorization",
-          "latency_ms": 269.46,
+          "latency_ms": 282.568,
           "line": 22,
           "metrics": {
             "file_precision": 0.25,
@@ -14336,7 +14335,7 @@
               "stage": "knowledge_source"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": false,
           "task": "create_provider、_validate_http、provider_policy_issues 与 ProjectConfig 的 Provider 字段如何保证默认禁网并阻止未授权云端源码外发？",
           "tool_calls": 5
@@ -14344,12 +14343,12 @@
         {
           "answer_status": "verified",
           "category": "workflow",
-          "estimated_context_tokens": 3999,
+          "estimated_context_tokens": 4000,
           "failed_metrics": [
             "symbol_recall"
           ],
           "id": "self-provider-runtime",
-          "latency_ms": 277.711,
+          "latency_ms": 258.136,
           "line": 23,
           "metrics": {
             "file_precision": 0.375,
@@ -14417,7 +14416,7 @@
             "symbol_recall"
           ],
           "id": "self-provider-preview",
-          "latency_ms": 260.955,
+          "latency_ms": 235.066,
           "line": 24,
           "metrics": {
             "file_precision": 0.25,
@@ -14479,13 +14478,13 @@
         {
           "answer_status": "verified",
           "category": "extension_point",
-          "estimated_context_tokens": 3999,
+          "estimated_context_tokens": 3493,
           "failed_metrics": [
             "symbol_recall",
             "extension_point_recall"
           ],
           "id": "self-provider-extension",
-          "latency_ms": 301.687,
+          "latency_ms": 272.086,
           "line": 25,
           "metrics": {
             "extension_point_precision": 0.0,
@@ -14501,8 +14500,8 @@
             "docs/knowledge/decisions/0001-local-first-core.md",
             "docs/knowledge/decisions/0002-codegraph-adapter-boundary.md",
             "docs/project-knowledge-system-audit.md",
+            "docs/project-knowledge-system-design.md",
             "evaluation/thresholds.json",
-            "pyproject.toml",
             "src/project_knowledge/provider.py",
             "tests/test_provider.py"
           ],
@@ -14524,11 +14523,11 @@
               "anchor": "markdown_search",
               "stage": "knowledge_source"
             },
-            "evaluation/thresholds.json": {
+            "docs/project-knowledge-system-design.md": {
               "anchor": "markdown_search",
               "stage": "knowledge_source"
             },
-            "pyproject.toml": {
+            "evaluation/thresholds.json": {
               "anchor": "markdown_search",
               "stage": "knowledge_source"
             },
@@ -14551,16 +14550,15 @@
           "category": "invariant",
           "estimated_context_tokens": 4000,
           "failed_metrics": [
-            "symbol_recall",
-            "invariant_recall"
+            "symbol_recall"
           ],
           "id": "self-feature-guide-schema",
-          "latency_ms": 220.011,
+          "latency_ms": 256.093,
           "line": 26,
           "metrics": {
             "file_precision": 0.25,
             "file_recall": 1.0,
-            "invariant_recall": 0.0,
+            "invariant_recall": 1.0,
             "symbol_precision": 0.0,
             "symbol_recall": 0.0
           },
@@ -14610,20 +14608,20 @@
               "stage": "knowledge_source"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": false,
           "task": "FeatureGuideValidator.validate 如何结合 FEATURE_GUIDE_DRAFT_SCHEMA、WORKFLOW_SCHEMA 和 RECIPE_SCHEMA 强制完整中文功能草案、连续流程和每条确定性陈述至少一个来源？",
-          "tool_calls": 4
+          "tool_calls": 5
         },
         {
           "answer_status": "verified",
           "category": "workflow",
-          "estimated_context_tokens": 4000,
+          "estimated_context_tokens": 3999,
           "failed_metrics": [
             "symbol_recall"
           ],
           "id": "self-semantic-generation",
-          "latency_ms": 267.432,
+          "latency_ms": 270.715,
           "line": 27,
           "metrics": {
             "file_precision": 0.375,
@@ -14691,7 +14689,7 @@
             "symbol_recall"
           ],
           "id": "self-feature-source-validation",
-          "latency_ms": 101.414,
+          "latency_ms": 108.369,
           "line": 28,
           "metrics": {
             "file_precision": 0.125,
@@ -14759,7 +14757,7 @@
             "symbol_recall"
           ],
           "id": "self-draft-lifecycle",
-          "latency_ms": 294.417,
+          "latency_ms": 258.402,
           "line": 29,
           "metrics": {
             "file_precision": 0.375,
@@ -14813,7 +14811,7 @@
               "stage": "knowledge_source"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": false,
           "task": "KnowledgeGenerator._draft_records、ProjectService.sync 与 KnowledgeAPI.get 如何索引 Feature Guide 草案，在源文件变化后标记 potentially_stale 并要求读取实时源码？",
           "tool_calls": 5
@@ -14827,7 +14825,7 @@
             "symbol_recall"
           ],
           "id": "self-feature-retrieval",
-          "latency_ms": 287.122,
+          "latency_ms": 263.674,
           "line": 30,
           "metrics": {
             "file_precision": 0.25,
@@ -14881,7 +14879,7 @@
               "stage": "knowledge_source"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": false,
           "task": "新增类似功能时，SemanticKnowledgeService.discover_feature_candidates 与 KnowledgeAPI.search/context 如何发现功能域候选、优先 Feature Guide 并支持中文标题包含匹配？",
           "tool_calls": 5
@@ -14894,7 +14892,7 @@
             "symbol_recall"
           ],
           "id": "self-proposal-stable-id",
-          "latency_ms": 282.982,
+          "latency_ms": 285.716,
           "line": 31,
           "metrics": {
             "file_precision": 0.375,
@@ -14962,7 +14960,7 @@
             "symbol_recall"
           ],
           "id": "self-proposal-apply-conflict",
-          "latency_ms": 319.633,
+          "latency_ms": 271.304,
           "line": 32,
           "metrics": {
             "file_precision": 0.25,
@@ -15030,7 +15028,7 @@
             "symbol_recall"
           ],
           "id": "self-draft-proposal-promotion",
-          "latency_ms": 234.627,
+          "latency_ms": 263.457,
           "line": 33,
           "metrics": {
             "file_precision": 0.25,
@@ -15084,21 +15082,21 @@
               "stage": "knowledge_source"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": false,
           "task": "已校验 Feature Guide 草案如何通过 ProposalService.create_from_feature_draft 收集全部来源哈希、生成 curated generated block 提案并经 apply 显式提升？",
-          "tool_calls": 4
+          "tool_calls": 5
         },
         {
           "answer_status": "verified",
           "category": "invariant",
-          "estimated_context_tokens": 4000,
+          "estimated_context_tokens": 3998,
           "failed_metrics": [
             "symbol_recall",
             "invariant_recall"
           ],
           "id": "self-proposal-delete-adr",
-          "latency_ms": 254.53,
+          "latency_ms": 272.261,
           "line": 34,
           "metrics": {
             "file_precision": 0.375,
@@ -15153,7 +15151,7 @@
               "stage": "knowledge_source"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": false,
           "task": "删除知识或新增设计决策时，PatchOperation、ProposalService._validate_intent 与 _render_adr_draft 如何强制 deleted_sources、supersedes 和 ADR 只追加草案？",
           "tool_calls": 5
@@ -15161,12 +15159,12 @@
         {
           "answer_status": "verified",
           "category": "workflow",
-          "estimated_context_tokens": 4000,
+          "estimated_context_tokens": 4001,
           "failed_metrics": [
             "symbol_recall"
           ],
           "id": "self-semantic-update-queue",
-          "latency_ms": 255.245,
+          "latency_ms": 241.72,
           "line": 35,
           "metrics": {
             "file_precision": 0.25,
@@ -15233,7 +15231,7 @@
             "symbol_recall"
           ],
           "id": "self-task-classification",
-          "latency_ms": 100.866,
+          "latency_ms": 97.87,
           "line": 36,
           "metrics": {
             "file_precision": 0.125,
@@ -15295,12 +15293,12 @@
         {
           "answer_status": "verified",
           "category": "workflow",
-          "estimated_context_tokens": 3998,
+          "estimated_context_tokens": 4000,
           "failed_metrics": [
             "symbol_recall"
           ],
           "id": "self-retrieval-explanation",
-          "latency_ms": 287.865,
+          "latency_ms": 272.315,
           "line": 37,
           "metrics": {
             "file_precision": 0.125,
@@ -15311,8 +15309,8 @@
           "returned_call_path": [],
           "returned_files": [
             "docs/project-knowledge-system-audit.md",
-            "src/project_knowledge/codegraph.py",
             "src/project_knowledge/evaluate.py",
+            "src/project_knowledge/mcp.py",
             "src/project_knowledge/proposal.py",
             "src/project_knowledge/retrieval.py",
             "src/project_knowledge/store.py",
@@ -15325,11 +15323,11 @@
               "anchor": "markdown_search",
               "stage": "knowledge_source"
             },
-            "src/project_knowledge/codegraph.py": {
+            "src/project_knowledge/evaluate.py": {
               "anchor": "markdown_search",
               "stage": "knowledge_source"
             },
-            "src/project_knowledge/evaluate.py": {
+            "src/project_knowledge/mcp.py": {
               "anchor": "markdown_search",
               "stage": "knowledge_source"
             },
@@ -15354,7 +15352,7 @@
               "stage": "knowledge_source"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": false,
           "task": "KnowledgeAPI.search 与 _score_breakdown 如何返回 score_breakdown 和 why_selected？",
           "tool_calls": 5
@@ -15367,7 +15365,7 @@
             "symbol_recall"
           ],
           "id": "self-bounded-multihop",
-          "latency_ms": 275.032,
+          "latency_ms": 257.231,
           "line": 38,
           "metrics": {
             "file_precision": 0.125,
@@ -15421,7 +15419,7 @@
               "stage": "knowledge_source"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": false,
           "task": "KnowledgeAPI.impact 如何支持 max_hops 和 max_relations 的 bounded multihop？",
           "tool_calls": 5
@@ -15434,7 +15432,7 @@
             "symbol_recall"
           ],
           "id": "self-feature-development-context",
-          "latency_ms": 258.376,
+          "latency_ms": 249.547,
           "line": 39,
           "metrics": {
             "file_precision": 0.125,
@@ -15488,7 +15486,7 @@
               "stage": "knowledge_source"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": false,
           "task": "KnowledgeAPI.context 如何返回 task_type、likely_modules、reference_implementations、extension_points 和 retrieval_explanation？",
           "tool_calls": 5
@@ -15501,7 +15499,7 @@
             "symbol_recall"
           ],
           "id": "self-context-unknowns",
-          "latency_ms": 263.212,
+          "latency_ms": 259.979,
           "line": 40,
           "metrics": {
             "file_precision": 0.125,
@@ -15555,7 +15553,7 @@
               "stage": "knowledge_source"
             }
           },
-          "stale_detected": true,
+          "stale_detected": false,
           "success": false,
           "task": "KnowledgeAPI.context 如何生成 unknowns 并提示实时源码核验？",
           "tool_calls": 5

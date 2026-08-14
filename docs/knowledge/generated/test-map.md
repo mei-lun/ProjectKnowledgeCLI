@@ -26,7 +26,7 @@
 | `tests/test_integration.py` | tests | 12 |
 | `tests/test_proposal.py` | tests | 9 |
 | `tests/test_provider.py` | tests | 12 |
-| `tests/test_retrieval_wp06.py` | tests | 8 |
+| `tests/test_retrieval_wp06.py` | tests | 9 |
 | `tests/test_schemas.py` | tests | 6 |
 | `tests/test_semantic.py` | tests | 7 |
 | `tests/test_single_directory.py` | tests | 4 |
