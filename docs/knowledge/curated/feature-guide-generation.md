@@ -10,10 +10,11 @@
 <!-- project-kb:source file="src/project_knowledge/semantic.py" -->
 <!-- project-kb:source file="src/project_knowledge/schemas.py" -->
 
-Feature Guide 按功能独立写入 `docs/knowledge/drafts/features/`。`KnowledgeGenerator._draft_records` 将分片写入 Manifest 和全文索引，`ProjectService.sync` 在来源变化后重新计算草案新鲜度，`KnowledgeAPI.search`、`KnowledgeAPI.get` 和 `KnowledgeAPI.context` 负责检索、完整读取和任务上下文优先选择。功能指南获得类型权重和中文标题包含匹配；即使来源新鲜，draft 仍要求开发者读取实时源码，来源变更后标记为 `potentially_stale`。
+Feature Guide 按功能独立写入 `docs/knowledge/drafts/features/`。`KnowledgeGenerator._draft_records` 将分片写入 Manifest 和全文索引，`ProjectService.sync` 在来源变化后重新计算草案新鲜度，`KnowledgeAPI.search`、`KnowledgeAPI.get` 和 `KnowledgeAPI.context` 负责检索、完整读取和任务上下文优先选择。上下文先选择知识页明确引用的路径和直接符号命中，再补充有界依赖文件；返回的 `selection_reasons` 用于说明每个证据为何入选。即使来源新鲜，draft 仍要求开发者读取实时源码，来源变更后标记为 `potentially_stale`。
 
 <!-- project-kb:source file="src/project_knowledge/knowledge.py" -->
 <!-- project-kb:source file="src/project_knowledge/retrieval.py" -->
+<!-- project-kb:source file="src/project_knowledge/codegraph.py" -->
 <!-- project-kb:source file="src/project_knowledge/service.py" -->
 
 从 draft 提升到 curated 必须调用 `project-kb propose --draft <feature-id>` 创建稳定 Proposal。创建时再次验证 Feature Guide Schema，收集草案 Markdown、结构化 JSON 与逐陈述源码引用的当前哈希。未审核 Proposal 不修改 curated。审核人使用 `apply --dry-run` 检查 diff 后显式应用，内容只进入该功能的 generated block。目标或任一来源变化都会把旧提案冻结为 `conflicted`，必须重新生成；模型或普通生成命令不能自行升级。

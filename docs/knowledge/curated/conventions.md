@@ -7,11 +7,14 @@
 - 后续功能开发以 `docs/project-knowledge-system-audit.md` 的工作包、需求 ID 和验收条件为基线；没有实现证据、正负测试和相关评测的条目不得标记为完成。
 - 每个工作包必须更新相关评测问题和失败样本。冻结阈值不得为通过 CI 而降低；确需调整时必须记录新证据、原因和版本。
 - 不同检索策略使用独立阈值；codegraph 不可用时必须报告 `adapter_unavailable`，不得用 builtin 结果冒充。
+- CodeGraph Adapter 只使用公共 CLI/API；不透明内部 ID 必须在边界内转换为公共符号引用，SQLite 缓存为空不能阻断实时引擎查询。
+- 交付必须先提交源码和文档，再用 `project-kb finalize` 同步生成物；生成物提交后以 `finalize --check` 只读验证。该命令不得执行 `git add`、`git commit` 或 `git push`。
 - 真实项目评测默认使用临时只读镜像，并以源目录全树快照前后一致作为未写入证据。
 - 评测报告和冻结基线必须排除出被测索引，避免后一次运行检索到前一次答案而造成自污染。
 - 0.1.3 首次稳定基线冻结 grep+Read 文件召回率/精确率下限 `0.67/0.29`、only-Markdown 文件精确率下限 `0.085`；后续不得无证据下调。
 - 0.1.4 将最低快速集样本数提高到 25 且不降低指标阈值；只有数据集哈希相同的报告才能比较汇总回归，不同数据集只检查冻结的绝对门槛并明确告警。
 - 0.1.5 将最低快速集样本数提高到 30，新增 Feature Guide Schema、语义生成、来源校验、草案生命周期和功能检索问题；既有指标阈值未降低，最终绝对门和同数据集相对回归门均通过。
+- 0.1.27 在 40 题数据集上保持既有召回门槛，并冻结 hybrid/code/Markdown 文件精确率下限 `0.12/0.20/0.12`；评测锚点、阈值和真实 CodeGraph 验证必须同时有版本化证据。
 - 返回给 AI 客户端的知识必须包含相对来源路径、稳定符号 ID、可信度和新鲜度。
 - 状态变更使用原子文件替换和单写入者锁；索引变更使用 SQLite 事务。
 - 如果 `status` 已知某个来源正在等待同步，不得返回从该来源派生的旧内容。
@@ -45,6 +48,9 @@
 <!-- project-kb:source file="src/project_knowledge/knowledge.py" -->
 <!-- project-kb:source file="src/project_knowledge/util.py" -->
 <!-- project-kb:source file="src/project_knowledge/evaluate.py" -->
+<!-- project-kb:source file="src/project_knowledge/finalization.py" -->
+<!-- project-kb:source file="src/project_knowledge/codegraph.py" -->
+<!-- project-kb:source file="src/project_knowledge/retrieval.py" -->
 <!-- project-kb:source file="src/project_knowledge/real_project.py" -->
 <!-- project-kb:source file="src/project_knowledge/config.py" -->
 <!-- project-kb:source file="evaluation/thresholds.json" -->

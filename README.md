@@ -79,6 +79,7 @@ project-kb mcp --project /path/to/repository
 | `rebuild` | 原子重建本地索引并保留受控知识 |
 | `status` | 查看索引、知识新鲜度、覆盖率和待处理事项 |
 | `check` | 执行适合 CI 的健康检查 |
+| `finalize` | 同步发布知识或以只读模式验证最终提交边界 |
 | `doctor` | 检查 Python、SQLite、Git、引擎和项目配置 |
 | `install` / `uninstall` | 安装或移除工具拥有的客户端集成标记 |
 | `mcp` | 启动知识查询与开发指导工作流的 stdio MCP 服务 |
@@ -90,6 +91,15 @@ project-kb mcp --project /path/to/repository
 project-kb --help
 project-kb <command> --help
 ```
+
+交付源码和文档提交后，先同步发布知识；审阅并提交生成物后，再执行只读检查：
+
+```bash
+project-kb finalize /path/to/repository --json
+project-kb finalize /path/to/repository --check --json
+```
+
+`finalize` 不会执行 `git add`、`git commit` 或 `git push`。如果仍有源码改动、待同步内容或待提交生成物，它会返回对应状态和下一步，而不会把未完成状态伪装成对齐。
 
 ## MCP 工作流
 

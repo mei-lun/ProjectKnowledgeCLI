@@ -47,7 +47,10 @@ CLI 可以立即离线运行且易于安装。在 MVP 中，Python 项目获得�
 
 ## WP-01/WP-02 复核（2026-08-07）
 
-已复核当前实现：BuiltinCodeIndexEngine 已提供统一初始化、同步、符号检索、源码读取、追踪、影响分析和受影响测试查询契约；Lua/Skynet、SQL、配置解析作为保守结构证据接入。CodeGraph 不可用时继续明确失败，正式边界见 ADR-0002。
+已复核当前实现：BuiltinCodeIndexEngine 已提供统一初始化、同步、符号检索、源码读取、追踪、影响分析和受影响测试查询契约；Lua/Skynet、SQL、配置解析作为保守结构证据接入。0.1.27 的 CodeGraph Adapter 已通过真实 1.5 公共 CLI 夹具验证；配置或运行环境不可用时仍明确失败，且绝不回退 builtin。正式边界见 ADR-0002。
+
+<!-- project-kb:source file="src/project_knowledge/codegraph.py" -->
+<!-- project-kb:source file="scripts/validate_codegraph_adapter.py" -->
 
 ## WP-08 兼容性复核（2026-08-07）
 

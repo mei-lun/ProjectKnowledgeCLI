@@ -1,33 +1,42 @@
 # ADR-0002：CodeGraph Adapter 边界与本地替代方案
 
-- 状态：草案
+- 状态：已接受
 - 来源提案：kp-12a589734edb3c2d
 - 创建审核人：codex
-
-- 状态：已接受
 - 日期：2026-08-07
-- 版本：0.1.8
+- 最近复核：2026-08-14
+- 当前版本：0.1.27
 - 决策者：项目维护者
 
 ## 背景
 
-审计要求 CodeGraph 与内置索引引擎具有相同公共契约，同时禁止在 CodeGraph 不可用时用 builtin 结果冒充。当前仓库没有可复现、可锁定版本的真实 CodeGraph 服务，也没有 Lua/Skynet 运行时图的稳定外部接口。
+审计要求 CodeGraph 与内置索引引擎具有相同公共契约，同时禁止在 CodeGraph 不可用时用 builtin 结果冒充。0.1.8 建立边界时，仓库还没有可复现、可验证的真实 CodeGraph Adapter，因此当时只能明确返回 `adapter_unavailable`。
+
+0.1.27 已通过 CodeGraph 1.5 公共 CLI 完成真实适配，并用临时项目验证初始化、文件、符号、追踪、影响和受影响测试查询。历史上的“真实 Adapter 不可用”不再代表当前状态。
 
 ## 决策
 
-1. CodeIndexEngine 的公共契约固定为 initialize、sync、search_symbols、get_source、trace、impact、affected_tests 和 status。
-2. 0.1.8 起由 BuiltinCodeIndexEngine 作为默认、离线、可复现的正式替代实现；它提供 Python AST、Lua/Skynet 证据、SQL、配置和有界图查询，并在 status 中公开精确语言、保守语言、能力与限制。
-3. engine: codegraph 不回退到 builtin，当前继续返回 adapter_unavailable/明确错误。只有在接入可验证的 CodeGraph 服务、版本锁定、同契约适配器测试和失败降级报告后，才允许实现该选项。
-4. 业务开发指导必须把静态结构事实与运行时语义分开：动态分派、反射、依赖注入、Lua metatable、协议运行时名称必须标为待验证，不得生成确定性结论。
+1. `CodeIndexEngine` 的公共契约固定为 `initialize`、`sync`、`search_symbols`、`get_source`、`trace`、`impact`、`affected_tests`、`capabilities` 与 `health`。
+2. `BuiltinCodeIndexEngine` 继续作为默认、离线、可复现的正式实现；它提供 Python AST、Lua/Skynet 专项证据以及保守的多语言启发式能力。
+3. `engine: codegraph` 只调用 CodeGraph 公共 CLI/API，不读取其私有数据库，也不回退到 builtin。CLI 不存在、项目未初始化或响应不满足契约时必须显式失败。
+4. CodeGraph 响应在 Adapter 边界内规范化。内部不透明符号 ID 不暴露给后续公共查询；追踪和影响查询优先使用 `name`/`qualifiedName` 等公共引用。受影响测试查询使用 CodeGraph 支持的公共过滤表达式。
+5. `KnowledgeAPI` 通过当前选择的引擎获得实时符号和关系事实。SQLite 是知识存储和兼容缓存，不能在 `engine=codegraph` 时成为结构事实的唯一来源。
+6. 业务开发指导必须把静态结构事实与运行时语义分开：动态分派、反射、依赖注入、Lua metatable 和协议运行时名称必须标为待验证，不得生成确定性结论。
 
-## 后续接入门槛
+## 验收证据
 
-- 提供 CodeGraph 服务版本、连接方式、项目隔离和离线失败行为；
-- 为 builtin 与 CodeGraph 编写同一组契约测试；
-- 用 Lua/Skynet 代表性工程完成随机边精度、5 个主入口和影响分析对照；
-- 在 doctor/status 中报告真实 Adapter 版本、能力和不可用原因；
-- 通过 evaluation/thresholds.json 的冻结门槛，且不得降低已有 builtin 基线。
+- `scripts/validate_codegraph_adapter.py` 在临时四文件项目中验证真实 CodeGraph 1.5.0；
+- `tests/test_codegraph.py` 覆盖命令解析、响应规范化、错误和不回退边界；
+- `tests/test_codegraph_validation.py` 覆盖验证夹具和源仓库不受污染；
+- `tests/test_retrieval_wp06.py` 覆盖 SQLite 结构缓存为空时的 CodeGraph 主链路；
+- `evaluation/reports/latest.json` 独立报告 codegraph 策略的可用性，不用 builtin 指标冒充。
+
+<!-- project-kb:source file="src/project_knowledge/codegraph.py" -->
+<!-- project-kb:source file="src/project_knowledge/retrieval.py" -->
+<!-- project-kb:source file="scripts/validate_codegraph_adapter.py" -->
+<!-- project-kb:source file="tests/test_codegraph.py" -->
+<!-- project-kb:source file="tests/test_codegraph_validation.py" -->
 
 ## 影响
 
-该决策使当前系统可在无外部服务时稳定运行，同时明确不能把静态索引当作完整运行时知识。CodeGraph 后续属于可插拔增强，不影响现有项目知识库格式和 CLI。
+默认安装仍可完全离线运行；启用 CodeGraph 的项目获得更精确的多语言结构事实，并承担外部 CLI 的安装和项目初始化要求。两种引擎能力必须在状态与诊断输出中明确区分。
