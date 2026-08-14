@@ -6,7 +6,10 @@ import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import Mock
 
+from project_knowledge.codegraph import CodeGraphEngine, CodeGraphError
+from project_knowledge.config import ProjectConfig
 from project_knowledge.guidance_models import (
     GuidanceBatch,
     GuidanceCategory,
@@ -342,6 +345,25 @@ class IntegrationTests(unittest.TestCase):
         service.initialize()
         status, _ = service.check()
         self.assertEqual(status["configuration_warnings"], doctor["configuration_warnings"])
+
+    def test_status_and_doctor_report_unavailable_codegraph_without_crashing(self) -> None:
+        service = ProjectService(self.root)
+        service.initialize()
+        engine = CodeGraphEngine(ProjectConfig(engine="codegraph"))
+        client = Mock()
+        client.project = self.root.resolve()
+        client.command_display = "codegraph"
+        client.files.side_effect = CodeGraphError("project is not initialized")
+        client.status.return_value = {"initialized": False, "version": "1.5.0"}
+        engine.client = client
+        service.engine = engine
+
+        status = service.status()
+        doctor = service.doctor()
+
+        self.assertFalse(status["engine"]["available"])
+        self.assertEqual(status["engine"]["reason_code"], "project_not_initialized")
+        self.assertEqual(doctor["engine"]["reason_code"], "project_not_initialized")
 
 
 if __name__ == "__main__":

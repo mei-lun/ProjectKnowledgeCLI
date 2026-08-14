@@ -45,4 +45,6 @@ def validate_quality_workflow(path: str | Path) -> tuple[bool, list[str]]:
         errors.append("quality job must pass evaluation thresholds")
     if not any("--baseline evaluation/baselines/" in line for _, line in command_lines):
         errors.append("quality job must compare against a passing evaluation baseline")
+    if not any(line.strip() == "run: project-kb finalize . --check --json" for line in lines):
+        errors.append("quality job must verify deterministic release finalization")
     return not errors, errors

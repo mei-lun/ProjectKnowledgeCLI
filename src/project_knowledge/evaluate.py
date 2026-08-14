@@ -91,14 +91,28 @@ def evaluate(
 ) -> dict[str, Any]:
     if strategy not in STRATEGIES:
         raise ValueError(f"unknown evaluation strategy: {strategy}")
+    api = KnowledgeAPI(project)
     if strategy == "codegraph":
-        return {
-            "schema_version": SCHEMA_VERSION,
-            "strategy": strategy,
-            "available": False,
-            "reason_code": "adapter_unavailable",
-            "message": "真实 CodeGraph Adapter 尚未实现；评测不会用 builtin 伪造 codegraph 结果。",
-        }
+        if api.config.engine != "codegraph":
+            return {
+                "schema_version": SCHEMA_VERSION,
+                "strategy": strategy,
+                "available": False,
+                "reason_code": "adapter_unavailable",
+                "details": ["engine_not_selected"],
+                "message": "Select engine=codegraph to evaluate CodeGraph facts.",
+            }
+        diagnostic = api.service.engine.diagnose(api.root)
+        if not diagnostic.get("available"):
+            return {
+                "schema_version": SCHEMA_VERSION,
+                "strategy": strategy,
+                "available": False,
+                "reason_code": "adapter_unavailable",
+                "details": [diagnostic.get("reason_code", "command_failed"), diagnostic.get("details", "")],
+                "adapter": diagnostic,
+                "message": "CodeGraph adapter probe did not pass.",
+            }
 
     dataset_path = Path(dataset)
     samples = load_dataset(dataset_path)
@@ -106,7 +120,6 @@ def evaluate(
         if limit < 1:
             raise ValueError("evaluation limit must be at least 1")
         samples = samples[:limit]
-    api = KnowledgeAPI(project)
     results = [_evaluate_sample(api, sample, strategy) for sample in samples]
     status = api.status()
     source_snapshot = hash_text("\n".join(
@@ -354,6 +367,7 @@ def _evaluate_sample(api: KnowledgeAPI, sample: dict[str, Any], strategy: str) -
         "returned_files": sorted(returned["files"]),
         "returned_symbols": sorted(returned["symbols"]),
         "returned_call_path": sorted(returned["call_path"]),
+        "selection_reasons": returned.get("selection_reasons", {}),
         "stale_detected": returned["stale_detected"],
     }
 
@@ -390,25 +404,60 @@ def _select_markdown_pages(results: list[dict[str, Any]], limit: int = 3) -> lis
     return selected
 
 
+def _path_relevance(api: KnowledgeAPI, path: str, terms: list[str]) -> int:
+    lowered_path = path.lower()
+    content = read_text(api.root / path).lower()
+    score = 5 * sum(1 for term in terms if term in lowered_path)
+    score += sum(min(4, content.count(term)) for term in terms)
+    return score
+
+
 def _rank_markdown_source_paths(
     api: KnowledgeAPI,
     results: list[dict[str, Any]],
     task: str,
-    limit: int = 23,
+    limit: int = 8,
 ) -> list[str]:
     terms = _task_terms(task)
-    paths = {
-        source.get("path")
-        for item in results
-        for source in item.get("sources", [])
-        if source.get("path")
-    }
+    sources_by_path: dict[str, list[dict[str, Any]]] = {}
+    result_scores: dict[str, float] = {}
+    for item in results:
+        for source in item.get("sources", []):
+            path = source.get("path")
+            if not path:
+                continue
+            sources_by_path.setdefault(path, []).append(source)
+            result_scores[path] = max(result_scores.get(path, 0.0), float(item.get("score", 0.0)))
+        if item.get("kind") == "decision" and item.get("path"):
+            path = item["path"]
+            sources_by_path.setdefault(path, [])
+            result_scores[path] = max(result_scores.get(path, 0.0), float(item.get("score", 0.0)) + 16)
+    if not sources_by_path:
+        for item in api.service.engine.discover(api.root, api.config):
+            sources_by_path[item.path] = []
+            result_scores[item.path] = 0.0
+    symbol_matches = api._task_symbol_matches(task, api._symbol_terms(task))[:10]
+    direct_paths = {item.get("path") for item in symbol_matches if item.get("path")}
+    dependency_paths: set[str] = set()
+    if symbol_matches:
+        impact = api.impact(
+            symbols=[item["id"] for item in symbol_matches],
+            max_hops=2,
+            max_relations=200,
+        )
+        dependency_paths.update(impact.get("dependency_files", []))
     ranked: list[tuple[int, str]] = []
-    for path in paths:
-        lowered_path = path.lower()
-        content = read_text(api.root / path).lower()
-        score = 5 * sum(1 for term in terms if term in lowered_path)
-        score += sum(1 for term in terms if term in content)
+    for path, sources in sources_by_path.items():
+        source_identity = " ".join(
+            str(source.get("id", "")) for source in sources
+        ).lower()
+        score = _path_relevance(api, path, terms)
+        score += 8 * sum(1 for term in terms if term in source_identity)
+        score += min(8, int(result_scores[path]))
+        if path in direct_paths:
+            score += 80
+        elif path in dependency_paths:
+            score += 40
         ranked.append((score, path))
     ranked.sort(key=lambda item: (-item[0], item[1]))
     return [path for _, path in ranked[:limit]]
@@ -425,29 +474,89 @@ def _select_grep_files(
     return selected
 
 
+def _novel_ranked_paths(
+    ranked_paths: list[tuple[str, tuple[int, str]]],
+    selected_paths: set[str],
+    limit: int,
+) -> list[tuple[str, str]]:
+    novel: list[tuple[str, str]] = []
+    for path, (_, record_id) in ranked_paths:
+        if path in selected_paths:
+            continue
+        novel.append((path, record_id))
+        if len(novel) >= limit:
+            break
+    return novel
+
+
 def _retrieve(api: KnowledgeAPI, sample: dict[str, Any], strategy: str) -> dict[str, Any]:
     task = sample["task"]
     budget = sample.get("max_tokens", 4000)
-    if strategy in {"hybrid", "code"}:
+    if strategy in {"hybrid", "code", "codegraph"}:
         context = api.context(task, budget)
-        symbols = {item["id"] for item in context["symbols"]}
-        files = {item["path"] for item in context["symbols"]}
-        files.update(context["impact"]["affected_files"])
+        direct_symbols = context["symbols"][:12]
+        symbols = {item["id"] for item in direct_symbols}
+        selection_reasons: dict[str, dict[str, str]] = {}
+        terms = _task_terms(task)
+        core_limit = 12 if strategy == "hybrid" else 11
+        file_limit = 20 if strategy == "hybrid" else core_limit
+
+        def select(path: str | None, stage: str, anchor: str) -> None:
+            if not path or path in selection_reasons or len(selection_reasons) >= file_limit:
+                return
+            selection_reasons[path] = {"stage": stage, "anchor": anchor}
+
+        for item in direct_symbols:
+            if sum(1 for reason in selection_reasons.values() if reason["stage"] == "direct_symbol") >= 6:
+                break
+            select(item.get("path"), "direct_symbol", item["id"])
+        graph_anchor = next(iter(symbols), task)
+        impact_paths = context["impact"].get("dependency_files") or context["impact"].get("affected_files", [])
+        for path in impact_paths[:12]:
+            select(path, "impact", graph_anchor)
+        fallback_candidates: list[tuple[int, str]] = []
+        for item in api.service.engine.discover(api.root, api.config):
+            if item.path in selection_reasons:
+                continue
+            score = _path_relevance(api, item.path, terms)
+            if score > 0:
+                fallback_candidates.append((score, item.path))
+        for _, path in sorted(fallback_candidates, key=lambda item: (-item[0], item[1]))[
+            : max(0, core_limit - len(selection_reasons))
+        ]:
+            select(path, "fallback", task)
         text_parts: list[str] = []
         stale_detected = False
         if strategy == "hybrid":
+            knowledge_paths: dict[str, tuple[int, str]] = {}
             for record in context["knowledge"]:
-                files.update(source.get("path") for source in record["sources"] if source.get("path"))
-                symbols.update(source.get("id") for source in record["sources"] if source.get("id"))
                 text_parts.append(record.get("content", ""))
                 stale_detected = stale_detected or bool(record.get("requires_live_source"))
-        impact = api.impact(symbols=sorted(symbols)) if symbols else {"relations": [], "affected_files": []}
-        files.update(impact.get("affected_files", []))
+                for source in record["sources"]:
+                    path = source.get("path")
+                    if not path:
+                        continue
+                    score = 10 if path in selection_reasons or source.get("id") in symbols else 0
+                    score += _path_relevance(api, path, terms)
+                    source_id = str(source.get("id", "")).lower()
+                    score += 8 * sum(1 for term in terms if term in source_id)
+                    previous = knowledge_paths.get(path)
+                    candidate = (score, record["id"])
+                    if previous is None or candidate > previous:
+                        knowledge_paths[path] = candidate
+            ranked_paths = sorted(
+                knowledge_paths.items(),
+                key=lambda item: (-item[1][0], item[0], item[1][1]),
+            )
+            for path, record_id in _novel_ranked_paths(
+                ranked_paths,
+                set(selection_reasons),
+                limit=2,
+            ):
+                select(path, "knowledge_source", record_id)
         call_path = set(symbols)
-        for relation in impact.get("relations", []):
-            call_path.add(relation["source"])
-            if relation.get("resolved"):
-                call_path.add(relation["target"])
+        call_path.update(context["impact"].get("call_path", []))
+        files = set(selection_reasons)
         compact = {"symbols": sorted(symbols), "files": sorted(files)}
         if strategy == "hybrid":
             compact["summary"] = context.get("summary")
@@ -456,6 +565,7 @@ def _retrieve(api: KnowledgeAPI, sample: dict[str, Any], strategy: str) -> dict[
             "files": files, "symbols": symbols, "call_path": call_path,
             "text": "\n".join(text_parts), "stale_detected": stale_detected,
             "tool_calls": 4 if strategy == "hybrid" else 3,
+            "selection_reasons": selection_reasons,
         }
 
     if strategy == "markdown":
@@ -466,7 +576,7 @@ def _retrieve(api: KnowledgeAPI, sample: dict[str, Any], strategy: str) -> dict[
         stale_detected = False
         reads = 0
         remaining = budget
-        for item in _select_markdown_pages(search["results"], limit=3):
+        for item in _select_markdown_pages(search["results"], limit=4):
             if remaining <= 0:
                 break
             reads += 1
@@ -484,6 +594,10 @@ def _retrieve(api: KnowledgeAPI, sample: dict[str, Any], strategy: str) -> dict[
             "files": files, "symbols": symbols, "call_path": set(symbols),
             "text": "\n".join(text_parts), "stale_detected": stale_detected,
             "tool_calls": 1 + reads,
+            "selection_reasons": {
+                path: {"stage": "knowledge_source", "anchor": "markdown_search"}
+                for path in sorted(files)
+            },
         }
 
     terms = _task_terms(task)
@@ -500,6 +614,10 @@ def _retrieve(api: KnowledgeAPI, sample: dict[str, Any], strategy: str) -> dict[
         "files": {item[1] for item in selected}, "symbols": set(), "call_path": set(),
         "text": "\n".join(item[2][:4000] for item in selected), "stale_detected": False,
         "tool_calls": 1 + len(selected),
+        "selection_reasons": {
+            item[1]: {"stage": "fallback", "anchor": "grep_match"}
+            for item in selected
+        },
     }
 
 

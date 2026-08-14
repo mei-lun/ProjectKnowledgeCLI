@@ -2,24 +2,24 @@
 
 # 项目地图：ProjectKnowledgeCLI
 
-生成时间：`2026-08-14T14:50:33+08:00`；来源提交：`737f4301b825087a0b64acf3e2180fcc76049b1a`。
+生成时间：`2026-08-14T18:37:28+08:00`；来源提交：`b0a6d3332873149889ded0ed934c4f721e8443a8`。
 
 ## 概览
 
 | 指标 | 数量 |
 | --- | ---: |
-| 文件 | 73 |
-| 符号 | 864 |
-| 关系 | 7614 |
+| 文件 | 77 |
+| 符号 | 919 |
+| 关系 | 8220 |
 | 模块 | 7 |
 | 路由 | 0 |
-| 未解析关系 | 5323 |
+| 未解析关系 | 5783 |
 
 ## 语言分布
 
 | 语言 | 文件数 |
 | --- | ---: |
-| Python | 66 |
+| Python | 70 |
 | 配置 | 7 |
 
 ## 模块
@@ -29,10 +29,10 @@
 | [.github](modules/github.md) | 1 |
 | [evaluation](modules/evaluation.md) | 3 |
 | [plugins](modules/plugins.md) | 5 |
-| [project_knowledge](modules/project_knowledge.md) | 30 |
+| [project_knowledge](modules/project_knowledge.md) | 31 |
 | [root](modules/root.md) | 2 |
-| [scripts](modules/scripts.md) | 3 |
-| [tests](modules/tests.md) | 29 |
+| [scripts](modules/scripts.md) | 4 |
+| [tests](modules/tests.md) | 31 |
 
 ## 静态分析边界
 

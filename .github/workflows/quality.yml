@@ -29,6 +29,8 @@ jobs:
           --baseline evaluation/baselines/self-repo-0.1.26.json
           --output evaluation/reports/ci-quick.json
           --quiet
+      - name: Verify release finalization state
+        run: project-kb finalize . --check --json
       - uses: actions/upload-artifact@v4
         if: always()
         with:

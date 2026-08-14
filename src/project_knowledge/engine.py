@@ -82,6 +82,10 @@ class CodeIndexEngine(ABC):
     def status(self) -> dict[str, object]:
         raise NotImplementedError
 
+    def diagnose(self, root: Path) -> dict[str, object]:
+        """Return side-effect-free runtime availability for this project."""
+        return self.status()
+
     def initialize(self, root: Path, config: ProjectConfig) -> dict[str, object]:
         raise NotImplementedError
 

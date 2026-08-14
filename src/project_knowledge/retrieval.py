@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import re
 import time
+from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
@@ -153,12 +154,56 @@ class KnowledgeAPI:
         symbols = symbols or []
         max_hops = max(0, min(int(max_hops), 5))
         max_relations = max(1, min(int(max_relations), 5000))
+        if self.config.engine == "codegraph":
+            engine_result = dict(self.service.engine.impact(
+                self.root,
+                self.service.config,
+                files=files,
+                symbols=symbols,
+                max_hops=max_hops,
+                max_relations=max_relations,
+            ))
+            affected_files = set(engine_result.get("affected_files", []))
+            affected_symbols = set(engine_result.get("affected_symbols", []))
+            with KnowledgeStore(self.service.db_path) as store:
+                knowledge: list[dict[str, Any]] = []
+                for record in store.all_knowledge():
+                    source_keys = {source.path or source.id for source in record.sources}
+                    if source_keys.intersection(affected_files | affected_symbols):
+                        knowledge.append({
+                            "id": record.id,
+                            "title": record.title,
+                            "path": record.path,
+                            "freshness": record.status,
+                            "confidence": record.confidence,
+                        })
+                engine_result.update({
+                    "input": {"files": files, "symbols": symbols},
+                    "max_hops": max_hops,
+                    "max_relations": max_relations,
+                    "affected_knowledge": knowledge,
+                    "impact_explanation": self._impact_explanation(
+                        files,
+                        symbols,
+                        max_hops,
+                        list(engine_result.get("relations", [])),
+                        list(engine_result.get("affected_modules", [])),
+                        list(engine_result.get("affected_tests", [])),
+                    ),
+                    "truncated": len(engine_result.get("relations", [])) >= max_relations,
+                    "fact_source": "codegraph",
+                    "dependency_files": sorted(affected_files),
+                    "limitations": self.service.engine.status().get("limitations", []),
+                })
+                self._record_query(store, "knowledge_impact", len(json.dumps(engine_result["input"])), engine_result, started)
+            return engine_result
         with KnowledgeStore(self.service.db_path) as store:
             symbol_ids = set(symbols)
             if files:
                 placeholders = ",".join("?" for _ in files)
                 symbol_ids.update(row["id"] for row in store.rows(f"SELECT id FROM symbols WHERE path IN ({placeholders})", files))
             expanded = set(symbol_ids)
+            dependency_symbols = set(symbol_ids)
             relations: list[dict[str, Any]] = []
             frontier = set(symbol_ids)
             relation_seen: set[tuple[str, str, str, int]] = set()
@@ -168,8 +213,16 @@ class KnowledgeAPI:
                 ordered_frontier = sorted(frontier)
                 placeholders = ",".join("?" for _ in ordered_frontier)
                 rows = store.rows(
-                    f"SELECT source, target, kind, path, line, confidence, resolved FROM relations WHERE source IN ({placeholders}) OR target IN ({placeholders}) ORDER BY confidence DESC, source, target LIMIT ?",
-                    [*ordered_frontier, *ordered_frontier, max_relations - len(relations)],
+                    f"SELECT source, target, kind, path, line, confidence, resolved "
+                    f"FROM relations WHERE source IN ({placeholders}) OR target IN ({placeholders}) "
+                    f"ORDER BY CASE WHEN source IN ({placeholders}) THEN 0 ELSE 1 END, "
+                    f"confidence DESC, source, target LIMIT ?",
+                    [
+                        *ordered_frontier,
+                        *ordered_frontier,
+                        *ordered_frontier,
+                        max_relations - len(relations),
+                    ],
                 )
                 next_frontier: set[str] = set()
                 for relation in rows:
@@ -182,13 +235,25 @@ class KnowledgeAPI:
                     expanded.add(relation["source"])
                     if relation["resolved"]:
                         expanded.add(relation["target"])
-                        if hop < max_hops:
+                        if relation["source"] in frontier:
+                            dependency_symbols.add(relation["target"])
+                        if hop < max_hops and relation["source"] in frontier:
                             next_frontier.add(relation["target"])
                 frontier = next_frontier
             impacted_paths = set(files)
+            dependency_paths = set(files)
             if expanded:
                 placeholders = ",".join("?" for _ in expanded)
                 impacted_paths.update(row["path"] for row in store.rows(f"SELECT DISTINCT path FROM symbols WHERE id IN ({placeholders})", expanded))
+            if dependency_symbols:
+                placeholders = ",".join("?" for _ in dependency_symbols)
+                dependency_paths.update(
+                    row["path"]
+                    for row in store.rows(
+                        f"SELECT DISTINCT path FROM symbols WHERE id IN ({placeholders})",
+                        dependency_symbols,
+                    )
+                )
             modules: list[str] = []
             tests: list[str] = []
             if impacted_paths:
@@ -212,6 +277,7 @@ class KnowledgeAPI:
                 "max_hops": max_hops,
                 "max_relations": max_relations,
                 "affected_files": sorted(impacted_paths),
+                "dependency_files": sorted(dependency_paths),
                 "affected_symbols": sorted(expanded),
                 "affected_modules": modules,
                 "affected_tests": tests,
@@ -221,6 +287,7 @@ class KnowledgeAPI:
                 "impact_explanation": self._impact_explanation(files, symbols, max_hops, relations, modules, tests),
                 "truncated": len(relations) >= max_relations,
                 "limitations": self.service.engine.status()["limitations"],
+                "fact_source": "builtin",
             }
             self._record_query(store, "knowledge_impact", len(json.dumps(result["input"])), result, started)
             return result
@@ -240,27 +307,13 @@ class KnowledgeAPI:
             if broad_project_requested or item["kind"] != "project"
         ][:4]
         terms = self._symbol_terms(task)
+        symbol_matches = self._task_symbol_matches(task, terms)
         with KnowledgeStore(self.service.db_path) as store:
-            symbol_matches: list[dict[str, Any]] = []
-            seen: set[str] = set()
-            for term in terms[:12]:
-                rows = store.rows(
-                    "SELECT id, name, kind, path, line, confidence, "
-                    "CASE WHEN name = ? OR id LIKE ? THEN 0 WHEN name LIKE ? THEN 1 ELSE 2 END AS match_rank "
-                    "FROM symbols "
-                    "WHERE name LIKE ? OR id LIKE ? "
-                    "ORDER BY match_rank, confidence DESC, LENGTH(name), id LIMIT 3",
-                    [term, f"%::{term}", f"{term}%", f"%{term}%", f"%{term}%"],
-                )
-                best_rank = min((row["match_rank"] for row in rows), default=2)
-                for row in rows:
-                    if best_rank == 0 and row["match_rank"] != 0:
-                        continue
-                    row.pop("match_rank", None)
-                    if row["id"] not in seen:
-                        seen.add(row["id"])
-                        symbol_matches.append(row)
-            impact = self.impact(symbols=[item["id"] for item in symbol_matches[:10]], max_hops=2 if intent["task_type"] in {"new_feature", "impact_analysis"} else 1, max_relations=200) if symbol_matches else {
+            impact = self.impact(
+                symbols=[item["id"] for item in symbol_matches[:10]],
+                max_hops=2,
+                max_relations=200,
+            ) if symbol_matches else {
                 "affected_modules": [], "affected_tests": [], "affected_files": [], "affected_knowledge": []
             }
             reference_implementations = self._reference_implementations(symbol_matches, selected_results)
@@ -316,7 +369,24 @@ class KnowledgeAPI:
                 "summary": self._context_summary(fragments, impact),
                 "knowledge": fragments,
                 "symbols": symbol_matches[:30],
-                "impact": {key: impact.get(key, [])[:limit] for key, limit in [("affected_modules", 12), ("affected_files", 12), ("affected_tests", 8), ("affected_knowledge", 8)]},
+                "impact": {
+                    **{
+                        key: impact.get(key, [])[:limit]
+                        for key, limit in [
+                            ("affected_modules", 12),
+                            ("affected_files", 12),
+                            ("dependency_files", 12),
+                            ("affected_tests", 8),
+                            ("affected_knowledge", 8),
+                        ]
+                    },
+                    "call_path": list(dict.fromkeys(
+                        endpoint
+                        for relation in impact.get("relations", [])
+                        for endpoint in (relation.get("source"), relation.get("target"))
+                        if endpoint and (relation.get("resolved") or endpoint == relation.get("source"))
+                    ))[:30],
+                },
                 "retrieval_explanation": retrieval_explanation,
                 "reference_implementations": reference_implementations,
                 "extension_points": extension_points,
@@ -326,10 +396,54 @@ class KnowledgeAPI:
                 "token_budget": budget,
                 "estimated_tokens": 0,
                 "guidance_workflow": status.get("guidance_workflow", {}),
+                "fact_source": "codegraph" if self.config.engine == "codegraph" else "builtin",
+                "engine_limitations": (
+                    self.service.engine.status().get("limitations", [])
+                    if self.config.engine == "codegraph"
+                    else []
+                ),
             }
             self._fit_context(result, budget)
             self._record_query(store, "knowledge_context", len(task), result, started)
             return result
+
+    def _task_symbol_matches(self, task: str, terms: list[str]) -> list[dict[str, Any]]:
+        if self.config.engine == "codegraph":
+            matches: list[dict[str, Any]] = []
+            seen: set[str] = set()
+            for term in terms[:8]:
+                for symbol in self.service.engine.search_symbols(
+                    self.root, self.service.config, term, limit=3
+                ):
+                    item = asdict(symbol)
+                    if item["id"] not in seen:
+                        seen.add(item["id"])
+                        matches.append(item)
+            return matches[:12]
+        return self._store_symbol_matches(terms)
+
+    def _store_symbol_matches(self, terms: list[str]) -> list[dict[str, Any]]:
+        symbol_matches: list[dict[str, Any]] = []
+        seen: set[str] = set()
+        with KnowledgeStore(self.service.db_path) as store:
+            for term in terms[:12]:
+                rows = store.rows(
+                    "SELECT id, name, kind, path, line, confidence, "
+                    "CASE WHEN name = ? OR id LIKE ? THEN 0 WHEN name LIKE ? THEN 1 ELSE 2 END AS match_rank "
+                    "FROM symbols "
+                    "WHERE name LIKE ? OR id LIKE ? "
+                    "ORDER BY match_rank, confidence DESC, LENGTH(name), id LIMIT 3",
+                    [term, f"%::{term}", f"{term}%", f"%{term}%", f"%{term}%"],
+                )
+                best_rank = min((row["match_rank"] for row in rows), default=2)
+                for row in rows:
+                    if best_rank == 0 and row["match_rank"] != 0:
+                        continue
+                    row.pop("match_rank", None)
+                    if row["id"] not in seen:
+                        seen.add(row["id"])
+                        symbol_matches.append(row)
+        return symbol_matches
 
     @staticmethod
     def _guidance_workflow_status(store: KnowledgeStore) -> dict[str, Any]:
@@ -426,9 +540,10 @@ class KnowledgeAPI:
         ranked: list[tuple[int, int]] = []
         for index, line in enumerate(lines):
             lowered = line.lower()
-            score = sum(1 for term in terms if term in lowered)
+            term_matches = sum(1 for term in terms if term in lowered)
+            score = term_matches * 10
             if any(keyword in lowered for keyword in ("不变量", "必须", "不能", "不得", "回滚", "验证")):
-                score += 10
+                score += 3 if term_matches else 1
             if score:
                 ranked.append((score, index))
         if not ranked:
@@ -560,12 +675,12 @@ class KnowledgeAPI:
             if len(result["knowledge"]) > 1:
                 result["knowledge"].pop()
                 continue
-            if result["symbols"]:
-                result["symbols"].pop()
-                continue
             impact_lists = [value for value in result["impact"].values() if isinstance(value, list) and value]
             if impact_lists:
                 max(impact_lists, key=len).pop()
+                continue
+            if result["symbols"]:
+                result["symbols"].pop()
                 continue
             if len(result["gaps"]) > 1:
                 result["gaps"].pop()

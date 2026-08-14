@@ -6,13 +6,18 @@ import tempfile
 import unittest
 from contextlib import redirect_stdout
 from pathlib import Path
+from unittest.mock import patch
 
 from project_knowledge.cli import main
+from project_knowledge.codegraph import CodeGraphClient, CodeGraphCommand, CodeGraphCommandResolver
+from project_knowledge.config import ProjectConfig
 from project_knowledge.evaluate import (
     evaluate,
     evaluate_quality_gate,
     evaluate_suite,
+    _novel_ranked_paths,
     _rank_markdown_source_paths,
+    _retrieve,
     _select_grep_files,
     _select_markdown_pages,
     load_dataset,
@@ -93,8 +98,38 @@ class EvaluationTests(unittest.TestCase):
         self.assertEqual(set(suite["strategies"]), {"hybrid", "grep_read", "code", "markdown", "codegraph"})
         self.assertFalse(suite["strategies"]["codegraph"]["available"])
         self.assertEqual(suite["strategies"]["codegraph"]["reason_code"], "adapter_unavailable")
+        self.assertIn("engine_not_selected", suite["strategies"]["codegraph"]["details"])
         self.assertTrue(suite["strategies"]["grep_read"]["available"])
         self.assertIn("src/app.py", suite["strategies"]["grep_read"]["results"][0]["returned_files"])
+
+    def test_codegraph_strategy_evaluates_when_adapter_is_available(self) -> None:
+        config = ProjectConfig.load(self.root)
+        config.engine = "codegraph"
+        config.write(self.root)
+        node = {
+            "id": "src/app.py::AccountService.login",
+            "name": "login",
+            "kind": "method",
+            "filePath": "src/app.py",
+            "startLine": 7,
+        }
+        with (
+            patch.object(
+                CodeGraphCommandResolver,
+                "resolve",
+                return_value=CodeGraphCommand(("codegraph",), "codegraph"),
+            ),
+            patch.object(CodeGraphClient, "status", return_value={"initialized": True, "version": "1.5.0"}),
+            patch.object(CodeGraphClient, "files", return_value=[{"path": "src/app.py", "language": "python"}]),
+            patch.object(CodeGraphClient, "query", return_value=[{"node": node}]),
+            patch.object(CodeGraphClient, "impact", return_value={"symbol": "login", "affected": [node]}),
+            patch.object(CodeGraphClient, "affected_tests", return_value={"affectedTests": []}),
+        ):
+            report = evaluate(self.root, self.dataset, strategy="codegraph")
+
+        self.assertTrue(report["available"])
+        self.assertEqual(report["strategy"], "codegraph")
+        self.assertEqual(report["reproducibility"]["engine"]["engine"], "codegraph")
 
     def test_quality_gate_checks_thresholds_and_baseline_regression(self) -> None:
         report = {
@@ -167,6 +202,36 @@ class EvaluationTests(unittest.TestCase):
         ]}]
         ranked = _rank_markdown_source_paths(api, results, "AccountService.login", limit=1)
         self.assertEqual(ranked, ["src/app.py"])
+
+    def test_markdown_source_paths_are_adaptively_bounded(self) -> None:
+        api = KnowledgeAPI(self.root)
+        sources = []
+        for index in range(12):
+            path = self.root / f"note-{index}.md"
+            path.write_text(f"AccountService login note {index}\n", encoding="utf-8")
+            sources.append({"path": path.name})
+
+        ranked = _rank_markdown_source_paths(api, [{"sources": sources}], "AccountService.login")
+
+        self.assertLessEqual(len(ranked), 8)
+
+    def test_hybrid_does_not_expand_knowledge_sources_twice(self) -> None:
+        api = KnowledgeAPI(self.root)
+        sample = load_dataset(self.dataset)[0]
+
+        result = _retrieve(api, sample, "hybrid")
+
+        self.assertLessEqual(len(result["files"]), 20)
+        self.assertIn("src/app.py", result["files"])
+        self.assertTrue(all(path in result["selection_reasons"] for path in result["files"]))
+
+    def test_hybrid_knowledge_limit_counts_only_new_paths(self) -> None:
+        ranked = [(f"existing-{index}", (20 - index, "record")) for index in range(8)]
+        ranked.extend([("new-changelog", (10, "record")), ("new-audit", (9, "record"))])
+
+        selected = _novel_ranked_paths(ranked, {path for path, _ in ranked[:8]}, limit=2)
+
+        self.assertEqual(selected, [("new-changelog", "record"), ("new-audit", "record")])
 
     def test_grep_selection_expands_only_for_a_strong_sixth_match(self) -> None:
         ranked = [(20 - index, f"file-{index}", "content") for index in range(7)]

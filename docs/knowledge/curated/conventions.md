@@ -3,15 +3,18 @@
 - 保持与 Python 3.11+ 兼容，不强制依赖网络服务或第三方运行时软件包。
 - 保持确定性生成事实与经过评审的人工意图相互分离。
 - 自动生成知识、知识索引和初始人工模板默认使用中文；代码标识、路径、记录 ID 和机器接口枚举不得为了显示翻译而改变。
-- 项目以 `0.1.0` 为版本基线。后续每批修改或新增内容都通过 `python scripts/bump_version.py "中文变更说明"` 将补丁版本递增一次，并同步记录到 `CHANGELOG.md`；同一批变更中的知识同步不重复递增。
+- 项目以 `0.1.0` 为版本基线。后续每批修改或新增内容都通过 `python scripts/bump_version.py "中文变更说明"` 更新版本和 `CHANGELOG.md`；同一批修改或新增内容只递增一次补丁版本，由该批变更触发的知识同步不重复递增。
 - 后续功能开发以 `docs/project-knowledge-system-audit.md` 的工作包、需求 ID 和验收条件为基线；没有实现证据、正负测试和相关评测的条目不得标记为完成。
 - 每个工作包必须更新相关评测问题和失败样本。冻结阈值不得为通过 CI 而降低；确需调整时必须记录新证据、原因和版本。
 - 不同检索策略使用独立阈值；codegraph 不可用时必须报告 `adapter_unavailable`，不得用 builtin 结果冒充。
+- CodeGraph Adapter 只使用公共 CLI/API；不透明内部 ID 必须在边界内转换为公共符号引用，SQLite 缓存为空不能阻断实时引擎查询。
+- 交付必须先提交源码和文档，再用 `project-kb finalize` 同步生成物；生成物提交后以 `finalize --check` 只读验证。该命令不得执行 `git add`、`git commit` 或 `git push`。
 - 真实项目评测默认使用临时只读镜像，并以源目录全树快照前后一致作为未写入证据。
 - 评测报告和冻结基线必须排除出被测索引，避免后一次运行检索到前一次答案而造成自污染。
 - 0.1.3 首次稳定基线冻结 grep+Read 文件召回率/精确率下限 `0.67/0.29`、only-Markdown 文件精确率下限 `0.085`；后续不得无证据下调。
 - 0.1.4 将最低快速集样本数提高到 25 且不降低指标阈值；只有数据集哈希相同的报告才能比较汇总回归，不同数据集只检查冻结的绝对门槛并明确告警。
 - 0.1.5 将最低快速集样本数提高到 30，新增 Feature Guide Schema、语义生成、来源校验、草案生命周期和功能检索问题；既有指标阈值未降低，最终绝对门和同数据集相对回归门均通过。
+- 0.1.27 在 40 题数据集上保持既有召回门槛，并冻结 hybrid/code/Markdown 文件精确率下限 `0.12/0.20/0.12`；评测锚点、阈值和真实 CodeGraph 验证必须同时有版本化证据。
 - 返回给 AI 客户端的知识必须包含相对来源路径、稳定符号 ID、可信度和新鲜度。
 - 状态变更使用原子文件替换和单写入者锁；索引变更使用 SQLite 事务。
 - 如果 `status` 已知某个来源正在等待同步，不得返回从该来源派生的旧内容。
@@ -31,6 +34,7 @@
 - 0.1.6 最终复核确认：队列过滤会排除 `.github/`、`docs/`、`evaluation/`、`tests/` 和 `.project-kb/`，避免工具自身产物反向触发语义更新。
 - 0.1.6 将最低快速集样本数提高到 35，新增 Proposal 稳定 ID、应用冲突、草案提升、删除/ADR 和 Semantic Update Queue 问题；冻结能力阈值没有下调。
 - 精确符号命中必须优先于模糊匹配；only-Markdown 读取页数和相关正文必须服从总 Token 预算。
+- 长知识文档的任务词命中必须优先于通用安全关键词加权；“必须/验证”等提示只能在相关性相近时提高不变量片段的优先级，不能挤掉直接任务证据。
 - 同文件重复符号的首个定义保留普通 ID，后续定义使用稳定 `@line` 后缀；任何解析器不得向 SQLite 提交重复符号 ID。
 - 使用 `unittest` 为生命周期、新鲜度、隐私、MCP 和标记所有权变更添加回归覆盖。
 - 任务上下文不得超过请求的总 Token 预算，排序后的知识页面最多返回四个。
@@ -45,6 +49,9 @@
 <!-- project-kb:source file="src/project_knowledge/knowledge.py" -->
 <!-- project-kb:source file="src/project_knowledge/util.py" -->
 <!-- project-kb:source file="src/project_knowledge/evaluate.py" -->
+<!-- project-kb:source file="src/project_knowledge/finalization.py" -->
+<!-- project-kb:source file="src/project_knowledge/codegraph.py" -->
+<!-- project-kb:source file="src/project_knowledge/retrieval.py" -->
 <!-- project-kb:source file="src/project_knowledge/real_project.py" -->
 <!-- project-kb:source file="src/project_knowledge/config.py" -->
 <!-- project-kb:source file="evaluation/thresholds.json" -->

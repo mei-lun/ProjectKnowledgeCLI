@@ -36,11 +36,28 @@ class DocumentationRoadmapTests(unittest.TestCase):
     def test_next_version_plan_is_scoped_and_testable(self) -> None:
         path = self.root / "docs" / "next-version-plan.md"
         text = path.read_text(encoding="utf-8")
-        self.assertIn("0.1.26", text)
-        for requirement in ("P0-CI-001", "P0-EVAL-001", "P0-DOC-001", "P0-ENV-001", "P0-GIT-001"):
+        self.assertIn("0.1.27", text)
+        for requirement in ("REL-001", "CG-006", "RET-006"):
             self.assertIn(requirement, text)
         self.assertIn("验收标准", text)
-        self.assertIn("0.1.27", text)
+        self.assertIn("0.1.28", text)
+
+    def test_current_audit_records_wp11_release_evidence(self) -> None:
+        audit = (self.root / "docs" / "project-knowledge-system-audit.md").read_text(encoding="utf-8")
+        current = audit.split("## 当前交付复核", 1)[1].split("## ", 1)[0]
+        for requirement in ("WP-11", "REL-001", "CG-006", "RET-006"):
+            self.assertIn(requirement, current)
+        self.assertNotIn("真实 CodeGraph Adapter 仍未完成", current)
+
+    def test_readme_documents_release_finalization(self) -> None:
+        self.assertIn("project-kb finalize", self.readme)
+
+    def test_codegraph_decision_preserves_evaluated_failure_reason(self) -> None:
+        decision = (
+            self.root / "docs" / "knowledge" / "decisions" / "0002-codegraph-adapter-boundary.md"
+        ).read_text(encoding="utf-8")
+        background = decision.split("## 背景", 1)[1].split("## 决策", 1)[0]
+        self.assertIn("不允许以 builtin 静默冒充已选择的外部引擎", background)
 
     def test_future_features_distinguishes_candidates_from_commitments(self) -> None:
         path = self.root / "docs" / "future-features.md"

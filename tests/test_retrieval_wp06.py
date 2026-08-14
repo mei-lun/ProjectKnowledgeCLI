@@ -4,9 +4,13 @@ import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import Mock
 
+from project_knowledge.codegraph import CodeGraphEngine
+from project_knowledge.config import ProjectConfig
 from project_knowledge.retrieval import KnowledgeAPI
 from project_knowledge.service import ProjectService
+from project_knowledge.store import KnowledgeStore
 
 
 APP = """
@@ -94,6 +98,20 @@ class RetrievalWP06Tests(unittest.TestCase):
         returned = "\n".join(item["content"] for item in context["knowledge"])
         self.assertIn(invariant, returned)
 
+    def test_relevant_excerpt_does_not_let_generic_rules_hide_task_evidence(self) -> None:
+        invariant = "同一批修改或新增内容只递增一次补丁版本。"
+        generic_rules = "\n".join(
+            f"无关约束 {index}：发布前必须验证普通流程。" for index in range(80)
+        )
+
+        excerpt = KnowledgeAPI._relevant_excerpt(
+            generic_rules + "\n" + invariant,
+            "bump_patch_version 如何递增补丁版本？",
+            budget=120,
+        )
+
+        self.assertIn(invariant, excerpt)
+
     def test_search_exposes_score_breakdown_and_impact_supports_bounded_multihop(self) -> None:
         results = self.api.search("Repository persistence")
         self.assertTrue(results["results"])
@@ -106,6 +124,71 @@ class RetrievalWP06Tests(unittest.TestCase):
         self.assertIn("relation_hops", impact)
         self.assertIn("impact_explanation", impact)
         self.assertIn("tests/test_app.py", impact["affected_tests"])
+
+    def test_codegraph_context_uses_engine_when_sqlite_symbols_are_empty(self) -> None:
+        (self.root / "src" / "app.lua").write_text("local function login() end\n", encoding="utf-8")
+        (self.root / "src" / "router.lua").write_text("local function route() end\n", encoding="utf-8")
+        ProjectService(self.root).sync()
+        api = KnowledgeAPI(self.root)
+        api.config.engine = "codegraph"
+        api.service.config.engine = "codegraph"
+        client = Mock()
+        client.project = self.root.resolve()
+        client.command_display = "codegraph"
+        client.status.return_value = {"initialized": True, "version": "1.5.0"}
+        client.files.return_value = [
+            {"path": "src/app.lua", "language": "lua"},
+            {"path": "src/router.lua", "language": "lua"},
+        ]
+        client.query.return_value = [{
+            "node": {
+                "id": "src/app.lua::login", "name": "login", "kind": "function",
+                "filePath": "src/app.lua", "startLine": 1,
+            }
+        }]
+        client.impact.return_value = {
+            "symbol": "login",
+            "affected": [{
+                "id": "src/router.lua::route", "name": "route", "kind": "function",
+                "filePath": "src/router.lua", "startLine": 1,
+            }],
+        }
+        client.affected_tests.return_value = {"affectedTests": ["tests/test_app.py"]}
+        engine = CodeGraphEngine(ProjectConfig(engine="codegraph"))
+        engine.client = client
+        api.service.engine = engine
+        with KnowledgeStore(api.service.db_path) as store:
+            store.connection.execute("DELETE FROM relations")
+            store.connection.execute("DELETE FROM symbols")
+            store.connection.commit()
+
+        result = api.context("修复 login 路由", max_tokens=2000)
+
+        self.assertIn("src/app.lua::login", {item["id"] for item in result["symbols"]})
+        self.assertIn("src/router.lua", result["impact"]["affected_files"])
+        self.assertEqual(result["fact_source"], "codegraph")
+
+    def test_impact_prioritizes_outgoing_dependencies_before_incoming_callers(self) -> None:
+        (self.root / "src" / "helper.py").write_text(
+            "def persist(value):\n    return value\n", encoding="utf-8"
+        )
+        (self.root / "src" / "app.py").write_text(
+            "from src.helper import persist\n\ndef create_item(value):\n    return persist(value)\n",
+            encoding="utf-8",
+        )
+        (self.root / "a.py").write_text(
+            "from src.app import create_item\n\ndef caller():\n    return create_item(1)\n",
+            encoding="utf-8",
+        )
+        ProjectService(self.root).sync()
+        api = KnowledgeAPI(self.root)
+
+        result = api.impact(
+            symbols=["src/app.py::create_item"], max_hops=1, max_relations=1
+        )
+
+        self.assertEqual(result["relations"][0]["source"], "src/app.py::create_item")
+        self.assertIn("src/helper.py", result["affected_files"])
 
 
 if __name__ == "__main__":
