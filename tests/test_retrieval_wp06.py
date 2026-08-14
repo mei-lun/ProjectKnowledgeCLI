@@ -4,9 +4,13 @@ import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import Mock
 
+from project_knowledge.codegraph import CodeGraphEngine
+from project_knowledge.config import ProjectConfig
 from project_knowledge.retrieval import KnowledgeAPI
 from project_knowledge.service import ProjectService
+from project_knowledge.store import KnowledgeStore
 
 
 APP = """
@@ -106,6 +110,49 @@ class RetrievalWP06Tests(unittest.TestCase):
         self.assertIn("relation_hops", impact)
         self.assertIn("impact_explanation", impact)
         self.assertIn("tests/test_app.py", impact["affected_tests"])
+
+    def test_codegraph_context_uses_engine_when_sqlite_symbols_are_empty(self) -> None:
+        (self.root / "src" / "app.lua").write_text("local function login() end\n", encoding="utf-8")
+        (self.root / "src" / "router.lua").write_text("local function route() end\n", encoding="utf-8")
+        ProjectService(self.root).sync()
+        api = KnowledgeAPI(self.root)
+        api.config.engine = "codegraph"
+        api.service.config.engine = "codegraph"
+        client = Mock()
+        client.project = self.root.resolve()
+        client.command_display = "codegraph"
+        client.status.return_value = {"initialized": True, "version": "1.5.0"}
+        client.files.return_value = [
+            {"path": "src/app.lua", "language": "lua"},
+            {"path": "src/router.lua", "language": "lua"},
+        ]
+        client.query.return_value = [{
+            "node": {
+                "id": "src/app.lua::login", "name": "login", "kind": "function",
+                "filePath": "src/app.lua", "startLine": 1,
+            }
+        }]
+        client.impact.return_value = {
+            "symbol": "login",
+            "affected": [{
+                "id": "src/router.lua::route", "name": "route", "kind": "function",
+                "filePath": "src/router.lua", "startLine": 1,
+            }],
+        }
+        client.affected_tests.return_value = {"affectedTests": ["tests/test_app.py"]}
+        engine = CodeGraphEngine(ProjectConfig(engine="codegraph"))
+        engine.client = client
+        api.service.engine = engine
+        with KnowledgeStore(api.service.db_path) as store:
+            store.connection.execute("DELETE FROM relations")
+            store.connection.execute("DELETE FROM symbols")
+            store.connection.commit()
+
+        result = api.context("修复 login 路由", max_tokens=2000)
+
+        self.assertIn("src/app.lua::login", {item["id"] for item in result["symbols"]})
+        self.assertIn("src/router.lua", result["impact"]["affected_files"])
+        self.assertEqual(result["fact_source"], "codegraph")
 
 
 if __name__ == "__main__":
