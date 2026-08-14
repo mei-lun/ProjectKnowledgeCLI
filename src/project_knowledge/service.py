@@ -367,6 +367,19 @@ class ProjectService:
         index_commit = metadata.get("head_commit") or None
         branch_aligned = (git["branch"] or None) == (metadata.get("branch") or None)
         content_fresh = not pending
+        commits_since_index = self._commits_since_index(index_commit, head_commit)
+        commit_aligned = head_commit == index_commit and branch_aligned
+        generated_outputs_only = (
+            branch_aligned
+            and content_fresh
+            and index_commit is not None
+            and head_commit is not None
+            and head_commit != index_commit
+            and commits_since_index is not None
+            and bool(commits_since_index)
+            and all(self._is_generated_output(path) for path in commits_since_index)
+        )
+        verification_aligned = commit_aligned or generated_outputs_only
         watcher_health = self._watcher_health(state)
         watcher_state = state.get("watcher", "stopped")
         if watcher_state == "running" and watcher_health["stale"]:
@@ -379,10 +392,13 @@ class ProjectService:
             "index_commit": index_commit,
             "content_fresh": content_fresh,
             "branch_aligned": branch_aligned,
-            "commit_aligned": head_commit == index_commit and branch_aligned,
+            "commit_aligned": commit_aligned,
+            "verification_aligned": verification_aligned,
+            "commits_since_index": commits_since_index or [],
             "commit_alignment": (
-                "aligned" if head_commit == index_commit and branch_aligned
+                "aligned" if commit_aligned
                 else "branch_changed" if not branch_aligned
+                else "generated_outputs_only" if generated_outputs_only
                 else "content_unvalidated_at_head"
             ),
             "working_tree": "dirty" if git["dirty"] else "clean",
@@ -407,7 +423,7 @@ class ProjectService:
 
     def check(self) -> tuple[dict[str, Any], bool]:
         status = self.status()
-        healthy = bool(status.get("initialized")) and bool(status.get("content_fresh")) and bool(status.get("commit_aligned"))
+        healthy = bool(status.get("initialized")) and bool(status.get("content_fresh")) and bool(status.get("verification_aligned"))
         if healthy:
             counts = status.get("counts", {})
             healthy = counts.get("stale_knowledge", 0) == 0 and counts.get("conflicted_knowledge", 0) == 0
@@ -539,8 +555,55 @@ class ProjectService:
             "watcher_health": status.get("watcher_health", {"alive": False, "stale": False}),
             "branch_aligned": status.get("branch_aligned"),
             "commit_aligned": status.get("commit_aligned"),
+            "verification_aligned": status.get("verification_aligned"),
+            "commit_alignment": status.get("commit_alignment"),
+            "package_source": self._package_source_provenance(),
             "configuration_warnings": self.config.capability_warnings(),
         }
+
+    def _package_source_provenance(self) -> dict[str, Any]:
+        package_file = Path(__file__).resolve()
+        expected_source = (self.root / "src" / "project_knowledge").resolve()
+        is_source_checkout = (expected_source / "__init__.py").exists()
+        if is_source_checkout:
+            try:
+                aligned: bool | None = package_file.is_relative_to(expected_source)
+            except AttributeError:
+                aligned = str(package_file).startswith(str(expected_source))
+        else:
+            aligned = None
+        return {
+            "package_file": str(package_file),
+            "expected_source": str(expected_source) if is_source_checkout else None,
+            "aligned": aligned,
+            "scope": "source_checkout" if is_source_checkout else "external_project",
+        }
+
+    def _commits_since_index(self, index_commit: str | None, head_commit: str | None) -> list[str] | None:
+        if not index_commit or not head_commit or index_commit == head_commit:
+            return []
+        merge_base = run_git(self.root, "merge-base", index_commit, head_commit)
+        if merge_base != index_commit:
+            return None
+        changed = run_git(self.root, "diff", "--name-only", f"{index_commit}..{head_commit}")
+        return changed.splitlines() if changed else []
+
+    def _is_generated_output(self, path: str) -> bool:
+        normalized = path.replace("\\", "/")
+        if normalized.startswith("./"):
+            normalized = normalized[2:]
+        generated_root = self.config.generated_root.replace("\\", "/").rstrip("/")
+        return normalized in {
+            ".project-kb/index.md",
+            ".project-kb/manifest.json",
+            ".project-kb/mcp.json",
+        } or normalized.startswith(f"{generated_root}/") or normalized.startswith(
+            ".project-kb/generated/"
+        ) or normalized.startswith(".project-kb/schemas/") or normalized.startswith(
+            ".project-kb/proposals/queue/"
+        ) or normalized.startswith("evaluation/reports/") or normalized.startswith(
+            "evaluation/baselines/"
+        )
 
     def _update_metadata(self, store: KnowledgeStore, full: bool, duration_ms: int) -> None:
         now = utc_now()

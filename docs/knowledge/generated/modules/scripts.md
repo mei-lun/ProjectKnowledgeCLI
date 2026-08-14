@@ -5,10 +5,12 @@
 ## 文件
 
 - `scripts/bump_version.py`（Python）
+- `scripts/validate_ci_workflow.py`（Python）
 - `scripts/validate_gardenserver_guidance_workflow.py`（Python）
 
 ## 符号
 
+- `scripts/validate_ci_workflow.py::validate_quality_workflow`：函数，位于 `scripts/validate_ci_workflow.py:6`（可信度 1.00）
 - `scripts/validate_gardenserver_guidance_workflow.py::business_fingerprint`：函数，位于 `scripts/validate_gardenserver_guidance_workflow.py:19`（可信度 1.00）
 - `scripts/validate_gardenserver_guidance_workflow.py::main`：函数，位于 `scripts/validate_gardenserver_guidance_workflow.py:33`（可信度 1.00）
 
@@ -24,6 +26,8 @@
 - `scripts/validate_gardenserver_guidance_workflow.py::<module>` 导入 `os`（可信度 1.00，未解析）
 - `scripts/validate_gardenserver_guidance_workflow.py::<module>` 导入 `sys`（可信度 1.00，未解析）
 - `scripts/validate_gardenserver_guidance_workflow.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `scripts/validate_ci_workflow.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `scripts/validate_ci_workflow.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
 - `scripts/validate_gardenserver_guidance_workflow.py::<module>` 导入 `src/project_knowledge/codegraph.py::CodeGraphClient`（可信度 0.90，已解析）
 - `scripts/validate_gardenserver_guidance_workflow.py::<module>` 导入 `src/project_knowledge/config.py::ProjectConfig`（可信度 0.90，已解析）
 - `scripts/validate_gardenserver_guidance_workflow.py::<module>` 导入 `src/project_knowledge/guidance_store.py::GuidanceStore`（可信度 0.90，已解析）
@@ -102,3 +106,31 @@
 - `scripts/validate_gardenserver_guidance_workflow.py::main` 调用 `json.dumps`（可信度 0.80，未解析）
 - `scripts/validate_gardenserver_guidance_workflow.py::<module>` 调用 `SystemExit`（可信度 0.80，未解析）
 - `scripts/validate_gardenserver_guidance_workflow.py::<module>` 调用 `main`（可信度 0.80，未解析）
+- `scripts/validate_ci_workflow.py::validate_quality_workflow` 调用 `Path`（可信度 0.80，未解析）
+- `scripts/validate_ci_workflow.py::validate_quality_workflow` 调用 `splitlines`（可信度 0.80，未解析）
+- `scripts/validate_ci_workflow.py::validate_quality_workflow` 调用 `src/project_knowledge/util.py::read_text`（可信度 0.80，已解析）
+- `scripts/validate_ci_workflow.py::validate_quality_workflow` 调用 `str`（可信度 0.80，未解析）
+- `scripts/validate_ci_workflow.py::validate_quality_workflow` 调用 `next`（可信度 0.80，未解析）
+- `scripts/validate_ci_workflow.py::validate_quality_workflow` 调用 `enumerate`（可信度 0.80，未解析）
+- `scripts/validate_ci_workflow.py::validate_quality_workflow` 调用 `line.strip`（可信度 0.80，未解析）
+- `scripts/validate_ci_workflow.py::validate_quality_workflow` 调用 `errors.append`（可信度 0.80，未解析）
+- `scripts/validate_ci_workflow.py::validate_quality_workflow` 调用 `len`（可信度 0.80，未解析）
+- `scripts/validate_ci_workflow.py::validate_quality_workflow` 调用 `len`（可信度 0.80，未解析）
+- `scripts/validate_ci_workflow.py::validate_quality_workflow` 调用 `lines.lstrip`（可信度 0.80，未解析）
+- `scripts/validate_ci_workflow.py::validate_quality_workflow` 调用 `enumerate`（可信度 0.80，未解析）
+- `scripts/validate_ci_workflow.py::validate_quality_workflow` 调用 `startswith`（可信度 0.80，未解析）
+- `scripts/validate_ci_workflow.py::validate_quality_workflow` 调用 `line.strip`（可信度 0.80，未解析）
+- `scripts/validate_ci_workflow.py::validate_quality_workflow` 调用 `line.strip`（可信度 0.80，未解析）
+- `scripts/validate_ci_workflow.py::validate_quality_workflow` 调用 `len`（可信度 0.80，未解析）
+- `scripts/validate_ci_workflow.py::validate_quality_workflow` 调用 `len`（可信度 0.80，未解析）
+- `scripts/validate_ci_workflow.py::validate_quality_workflow` 调用 `line.lstrip`（可信度 0.80，未解析）
+- `scripts/validate_ci_workflow.py::validate_quality_workflow` 调用 `command_lines.append`（可信度 0.80，未解析）
+- `scripts/validate_ci_workflow.py::validate_quality_workflow` 调用 `errors.append`（可信度 0.80，未解析）
+- `scripts/validate_ci_workflow.py::validate_quality_workflow` 调用 `len`（可信度 0.80，未解析）
+- `scripts/validate_ci_workflow.py::validate_quality_workflow` 调用 `len`（可信度 0.80，未解析）
+- `scripts/validate_ci_workflow.py::validate_quality_workflow` 调用 `line.lstrip`（可信度 0.80，未解析）
+- `scripts/validate_ci_workflow.py::validate_quality_workflow` 调用 `errors.append`（可信度 0.80，未解析）
+- `scripts/validate_ci_workflow.py::validate_quality_workflow` 调用 `any`（可信度 0.80，未解析）
+- `scripts/validate_ci_workflow.py::validate_quality_workflow` 调用 `errors.append`（可信度 0.80，未解析）
+- `scripts/validate_ci_workflow.py::validate_quality_workflow` 调用 `any`（可信度 0.80，未解析）
+- `scripts/validate_ci_workflow.py::validate_quality_workflow` 调用 `errors.append`（可信度 0.80，未解析）

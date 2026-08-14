@@ -24,7 +24,22 @@ Project Knowledge CLI（PKS）是本地优先的项目知识工具。它从代�
 在源码目录执行：
 
 ```bash
+python -m venv .venv
+```
+
+Windows PowerShell：
+
+```powershell
+.venv\Scripts\python.exe -m pip install -e .
+.venv\Scripts\python.exe -m project_knowledge doctor . --json
+```
+
+Linux/macOS：
+
+```bash
+. .venv/bin/activate
 python -m pip install -e .
+python -m project_knowledge doctor . --json
 ```
 
 安装后应能执行：
@@ -33,7 +48,9 @@ python -m pip install -e .
 project-kb --version
 ```
 
-如果终端找不到 `project-kb`，请将 Python 的 Scripts 目录加入 `PATH`；也可以使用 `python -m project_knowledge` 代替 `project-kb`。
+源码开发应使用仓库独立 `.venv`，避免多个 Git 工作树的 editable install 相互覆盖。`doctor.package_source` 会在检查 PKS 源码仓库本身时报告实际导入位置是否与当前工作树一致。普通目标项目显示为 `external_project`，不会误报源码工作树冲突。
+
+如果终端找不到 `project-kb`，请使用虚拟环境中的 `python -m project_knowledge`，或激活该虚拟环境后再执行 `project-kb`。
 
 ## 快速开始
 

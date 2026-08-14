@@ -26,7 +26,7 @@ jobs:
           --project .
           --strategy all
           --thresholds evaluation/thresholds.json
---baseline evaluation/baselines/self-repo-0.1.8.json
+          --baseline evaluation/baselines/self-repo-0.1.26.json
           --output evaluation/reports/ci-quick.json
           --quiet
       - uses: actions/upload-artifact@v4

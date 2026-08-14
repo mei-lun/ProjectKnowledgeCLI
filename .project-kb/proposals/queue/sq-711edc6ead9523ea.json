@@ -1,0 +1,49 @@
+{
+  "affected_knowledge": [
+    "curated.architecture",
+    "curated.conventions",
+    "curated.feature.guide.generation",
+    "decision.0001.local.first.core",
+    "generated.module.project_knowledge",
+    "generated.module.tests",
+    "generated.project-map",
+    "generated.test-map"
+  ],
+  "base_commit": "737f4301b825087a0b64acf3e2180fcc76049b1a",
+  "changed_files": [
+    "src/project_knowledge/evaluate.py",
+    "tests/test_delivery_reliability.py"
+  ],
+  "changed_symbols": [
+    "src/project_knowledge/evaluate.py::<module>",
+    "src/project_knowledge/evaluate.py::load_dataset",
+    "src/project_knowledge/evaluate.py::evaluate",
+    "src/project_knowledge/evaluate.py::evaluate_suite",
+    "src/project_knowledge/evaluate.py::evaluate_quality_gate",
+    "src/project_knowledge/evaluate.py::load_json_object",
+    "src/project_knowledge/evaluate.py::_evaluate_sample",
+    "src/project_knowledge/evaluate.py::_select_markdown_pages",
+    "src/project_knowledge/evaluate.py::_rank_markdown_source_paths",
+    "src/project_knowledge/evaluate.py::_select_grep_files",
+    "src/project_knowledge/evaluate.py::_retrieve",
+    "src/project_knowledge/evaluate.py::_aggregate",
+    "src/project_knowledge/evaluate.py::_category_success",
+    "src/project_knowledge/evaluate.py::_task_terms",
+    "src/project_knowledge/evaluate.py::_relevant_excerpt",
+    "src/project_knowledge/evaluate.py::_contains_text",
+    "src/project_knowledge/evaluate.py::_percentile",
+    "tests/test_delivery_reliability.py::<module>",
+    "tests/test_delivery_reliability.py::DeliveryReliabilityTests",
+    "tests/test_delivery_reliability.py::DeliveryReliabilityTests.test_quality_workflow_is_structurally_valid",
+    "tests/test_delivery_reliability.py::DeliveryReliabilityTests.test_failed_baseline_is_a_quality_gate_failure",
+    "tests/test_delivery_reliability.py::DeliveryReliabilityTests.test_suite_report_has_current_provenance",
+    "tests/test_delivery_reliability.py::DeliveryReliabilityTests.test_doctor_reports_package_source_provenance"
+  ],
+  "changeset_id": "change-20260814-144803",
+  "created_at": "2026-08-14T14:48:03+08:00",
+  "head_commit": "737f4301b825087a0b64acf3e2180fcc76049b1a",
+  "queue_id": "sq-711edc6ead9523ea",
+  "schema_version": 1,
+  "status": "awaiting_semantic_generation",
+  "task_summary": "manual synchronization"
+}

@@ -36,11 +36,11 @@ class DocumentationRoadmapTests(unittest.TestCase):
     def test_next_version_plan_is_scoped_and_testable(self) -> None:
         path = self.root / "docs" / "next-version-plan.md"
         text = path.read_text(encoding="utf-8")
-        self.assertIn("0.1.22", text)
-        for requirement in ("NV-MODEL-001", "NV-INIT-001", "NV-MCP-001", "NV-INCR-001", "NV-VERIFY-001"):
+        self.assertIn("0.1.26", text)
+        for requirement in ("P0-CI-001", "P0-EVAL-001", "P0-DOC-001", "P0-ENV-001", "P0-GIT-001"):
             self.assertIn(requirement, text)
         self.assertIn("验收标准", text)
-        self.assertIn("明确不进入", text)
+        self.assertIn("0.1.27", text)
 
     def test_future_features_distinguishes_candidates_from_commitments(self) -> None:
         path = self.root / "docs" / "future-features.md"

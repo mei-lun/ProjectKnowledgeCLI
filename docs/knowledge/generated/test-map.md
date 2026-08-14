@@ -7,10 +7,11 @@
 | `tests/__init__.py` | tests | 0 |
 | `tests/test_codegraph.py` | tests | 8 |
 | `tests/test_config.py` | tests | 7 |
+| `tests/test_delivery_reliability.py` | tests | 6 |
 | `tests/test_documentation_roadmap.py` | tests | 7 |
 | `tests/test_engine.py` | tests | 9 |
 | `tests/test_engine_wp01_wp02.py` | tests | 5 |
-| `tests/test_evaluate.py` | tests | 12 |
+| `tests/test_evaluate.py` | tests | 14 |
 | `tests/test_gardenserver_rules.py` | tests | 4 |
 | `tests/test_guidance.py` | tests | 4 |
 | `tests/test_guidance_e2e.py` | tests | 3 |

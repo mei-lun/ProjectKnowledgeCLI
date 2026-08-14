@@ -37,7 +37,7 @@
 
 ## 符号
 
-> 符号内容已截断：共 511 个，当前页面仅展示前 300 个；请使用 knowledge_context 或 knowledge_search 获取精确范围。
+> 符号内容已截断：共 516 个，当前页面仅展示前 300 个；请使用 knowledge_context 或 knowledge_search 获取精确范围。
 
 - `src/project_knowledge/cli.py::_common`：函数，位于 `src/project_knowledge/cli.py:23`（可信度 1.00）
 - `src/project_knowledge/cli.py::build_parser`：函数，位于 `src/project_knowledge/cli.py:32`（可信度 1.00）
@@ -154,20 +154,22 @@
 - `src/project_knowledge/engine.py::GenericParser.__init__`：方法，位于 `src/project_knowledge/engine.py:647`（可信度 1.00）
 - `src/project_knowledge/engine.py::GenericParser.parse`：方法，位于 `src/project_knowledge/engine.py:652`（可信度 1.00）
 - `src/project_knowledge/engine.py::create_engine`：函数，位于 `src/project_knowledge/engine.py:687`（可信度 1.00）
-- `src/project_knowledge/evaluate.py::load_dataset`：函数，位于 `src/project_knowledge/evaluate.py:43`（可信度 1.00）
-- `src/project_knowledge/evaluate.py::evaluate`：函数，位于 `src/project_knowledge/evaluate.py:84`（可信度 1.00）
-- `src/project_knowledge/evaluate.py::evaluate_suite`：函数，位于 `src/project_knowledge/evaluate.py:145`（可信度 1.00）
-- `src/project_knowledge/evaluate.py::evaluate_quality_gate`：函数，位于 `src/project_knowledge/evaluate.py:172`（可信度 1.00）
-- `src/project_knowledge/evaluate.py::load_json_object`：函数，位于 `src/project_knowledge/evaluate.py:270`（可信度 1.00）
-- `src/project_knowledge/evaluate.py::_evaluate_sample`：函数，位于 `src/project_knowledge/evaluate.py:277`（可信度 1.00）
-- `src/project_knowledge/evaluate.py::_select_markdown_pages`：函数，位于 `src/project_knowledge/evaluate.py:333`（可信度 1.00）
-- `src/project_knowledge/evaluate.py::_retrieve`：函数，位于 `src/project_knowledge/evaluate.py:365`（可信度 1.00）
-- `src/project_knowledge/evaluate.py::_aggregate`：函数，位于 `src/project_knowledge/evaluate.py:444`（可信度 1.00）
-- `src/project_knowledge/evaluate.py::_category_success`：函数，位于 `src/project_knowledge/evaluate.py:464`（可信度 1.00）
-- `src/project_knowledge/evaluate.py::_task_terms`：函数，位于 `src/project_knowledge/evaluate.py:477`（可信度 1.00）
-- `src/project_knowledge/evaluate.py::_relevant_excerpt`：函数，位于 `src/project_knowledge/evaluate.py:486`（可信度 1.00）
-- `src/project_knowledge/evaluate.py::_contains_text`：函数，位于 `src/project_knowledge/evaluate.py:512`（可信度 1.00）
-- `src/project_knowledge/evaluate.py::_percentile`：函数，位于 `src/project_knowledge/evaluate.py:517`（可信度 1.00）
+- `src/project_knowledge/evaluate.py::load_dataset`：函数，位于 `src/project_knowledge/evaluate.py:44`（可信度 1.00）
+- `src/project_knowledge/evaluate.py::evaluate`：函数，位于 `src/project_knowledge/evaluate.py:85`（可信度 1.00）
+- `src/project_knowledge/evaluate.py::evaluate_suite`：函数，位于 `src/project_knowledge/evaluate.py:152`（可信度 1.00）
+- `src/project_knowledge/evaluate.py::evaluate_quality_gate`：函数，位于 `src/project_knowledge/evaluate.py:195`（可信度 1.00）
+- `src/project_knowledge/evaluate.py::load_json_object`：函数，位于 `src/project_knowledge/evaluate.py:298`（可信度 1.00）
+- `src/project_knowledge/evaluate.py::_evaluate_sample`：函数，位于 `src/project_knowledge/evaluate.py:305`（可信度 1.00）
+- `src/project_knowledge/evaluate.py::_select_markdown_pages`：函数，位于 `src/project_knowledge/evaluate.py:361`（可信度 1.00）
+- `src/project_knowledge/evaluate.py::_rank_markdown_source_paths`：函数，位于 `src/project_knowledge/evaluate.py:393`（可信度 1.00）
+- `src/project_knowledge/evaluate.py::_select_grep_files`：函数，位于 `src/project_knowledge/evaluate.py:417`（可信度 1.00）
+- `src/project_knowledge/evaluate.py::_retrieve`：函数，位于 `src/project_knowledge/evaluate.py:428`（可信度 1.00）
+- `src/project_knowledge/evaluate.py::_aggregate`：函数，位于 `src/project_knowledge/evaluate.py:506`（可信度 1.00）
+- `src/project_knowledge/evaluate.py::_category_success`：函数，位于 `src/project_knowledge/evaluate.py:526`（可信度 1.00）
+- `src/project_knowledge/evaluate.py::_task_terms`：函数，位于 `src/project_knowledge/evaluate.py:539`（可信度 1.00）
+- `src/project_knowledge/evaluate.py::_relevant_excerpt`：函数，位于 `src/project_knowledge/evaluate.py:548`（可信度 1.00）
+- `src/project_knowledge/evaluate.py::_contains_text`：函数，位于 `src/project_knowledge/evaluate.py:574`（可信度 1.00）
+- `src/project_knowledge/evaluate.py::_percentile`：函数，位于 `src/project_knowledge/evaluate.py:579`（可信度 1.00）
 - `src/project_knowledge/evidence.py::EvidencePolicyError`：类，位于 `src/project_knowledge/evidence.py:30`（可信度 1.00）
 - `src/project_knowledge/evidence.py::SecretScanner`：类，位于 `src/project_knowledge/evidence.py:34`（可信度 1.00）
 - `src/project_knowledge/evidence.py::SecretScanner.redact`：方法，位于 `src/project_knowledge/evidence.py:53`（可信度 1.00）
@@ -337,12 +339,10 @@
 - `src/project_knowledge/models.py::OmittedEvidence`：类，位于 `src/project_knowledge/models.py:160`（可信度 1.00）
 - `src/project_knowledge/models.py::OmittedEvidence.to_dict`：方法，位于 `src/project_knowledge/models.py:164`（可信度 1.00）
 - `src/project_knowledge/models.py::EvidenceItem`：类，位于 `src/project_knowledge/models.py:169`（可信度 1.00）
-- `src/project_knowledge/models.py::EvidenceItem.to_dict`：方法，位于 `src/project_knowledge/models.py:180`（可信度 1.00）
-- `src/project_knowledge/models.py::EvidencePack`：类，位于 `src/project_knowledge/models.py:190`（可信度 1.00）
 
 ## 结构关系
 
-> 关系内容已截断：共 4675 条，当前页面仅展示前 150 条；请使用 knowledge_impact 获取完整的任务相关子图。
+> 关系内容已截断：共 4736 条，当前页面仅展示前 150 条；请使用 knowledge_impact 获取完整的任务相关子图。
 
 - `src/project_knowledge/__main__.py::<module>` 导入 `cli.main`（可信度 1.00，未解析）
 - `src/project_knowledge/evidence.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
@@ -417,16 +417,6 @@
 - `src/project_knowledge/knowledge.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
 - `src/project_knowledge/knowledge.py::<module>` 导入 `typing.Iterable`（可信度 1.00，未解析）
 - `src/project_knowledge/knowledge.py::<module>` 导入 `schemas.KNOWLEDGE_RECORD_SCHEMA`（可信度 1.00，未解析）
-- `src/project_knowledge/evaluate.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `src/project_knowledge/evaluate.py::<module>` 导入 `json`（可信度 1.00，未解析）
-- `src/project_knowledge/evaluate.py::<module>` 导入 `os`（可信度 1.00，未解析）
-- `src/project_knowledge/evaluate.py::<module>` 导入 `platform`（可信度 1.00，未解析）
-- `src/project_knowledge/evaluate.py::<module>` 导入 `re`（可信度 1.00，未解析）
-- `src/project_knowledge/evaluate.py::<module>` 导入 `statistics`（可信度 1.00，未解析）
-- `src/project_knowledge/evaluate.py::<module>` 导入 `time`（可信度 1.00，未解析）
-- `src/project_knowledge/evaluate.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
-- `src/project_knowledge/evaluate.py::<module>` 导入 `typing.Any`（可信度 1.00，未解析）
-- `src/project_knowledge/evaluate.py::<module>` 导入 `typing.Iterable`（可信度 1.00，未解析）
 - `src/project_knowledge/config.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
 - `src/project_knowledge/config.py::<module>` 导入 `json`（可信度 1.00，未解析）
 - `src/project_knowledge/config.py::<module>` 导入 `dataclasses.dataclass`（可信度 1.00，未解析）
@@ -494,3 +484,13 @@
 - `src/project_knowledge/codegraph.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
 - `src/project_knowledge/codegraph.py::<module>` 导入 `typing.Any`（可信度 1.00，未解析）
 - `src/project_knowledge/codegraph.py::<module>` 导入 `typing.Sequence`（可信度 1.00，未解析）
+- `src/project_knowledge/guidance_models.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `src/project_knowledge/guidance_models.py::<module>` 导入 `dataclasses.asdict`（可信度 1.00，未解析）
+- `src/project_knowledge/guidance_models.py::<module>` 导入 `dataclasses.dataclass`（可信度 1.00，未解析）
+- `src/project_knowledge/guidance_models.py::<module>` 导入 `dataclasses.field`（可信度 1.00，未解析）
+- `src/project_knowledge/guidance_models.py::<module>` 导入 `datetime.datetime`（可信度 1.00，未解析）
+- `src/project_knowledge/guidance_models.py::<module>` 导入 `math`（可信度 1.00，未解析）
+- `src/project_knowledge/guidance_models.py::<module>` 导入 `typing.Any`（可信度 1.00，未解析）
+- `src/project_knowledge/guidance_models.py::<module>` 导入 `typing.ClassVar`（可信度 1.00，未解析）
+- `src/project_knowledge/guidance_models.py::<module>` 导入 `typing.Literal`（可信度 1.00，未解析）
+- `src/project_knowledge/guidance_store.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）

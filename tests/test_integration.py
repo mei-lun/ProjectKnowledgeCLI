@@ -295,7 +295,29 @@ class IntegrationTests(unittest.TestCase):
         after = service.status()
         self.assertTrue(after["content_fresh"])
         self.assertTrue(after["commit_aligned"])
+        self.assertTrue(after["verification_aligned"])
         self.assertTrue(service.check()[1])
+
+        generated_note = self.root / ".project-kb" / "generated" / "release-note.md"
+        generated_note.write_text("# Generated release note\n", encoding="utf-8")
+        subprocess.run(["git", "-C", str(self.root), "add", ".project-kb/generated/release-note.md"], check=True)
+        subprocess.run(["git", "-C", str(self.root), "commit", "-qm", "publish generated knowledge"], check=True)
+        generated_only = service.status()
+        self.assertTrue(generated_only["content_fresh"])
+        self.assertFalse(generated_only["commit_aligned"])
+        self.assertTrue(generated_only["verification_aligned"])
+        self.assertEqual(generated_only["commit_alignment"], "generated_outputs_only")
+        self.assertEqual(generated_only["commits_since_index"], [".project-kb/generated/release-note.md"])
+        self.assertTrue(service.check()[1])
+
+        (self.root / "src" / "app.py").write_text(APP_V2, encoding="utf-8")
+        subprocess.run(["git", "-C", str(self.root), "add", "src/app.py"], check=True)
+        subprocess.run(["git", "-C", str(self.root), "commit", "-qm", "change source"], check=True)
+        source_changed = service.status()
+        self.assertFalse(source_changed["content_fresh"])
+        self.assertFalse(source_changed["verification_aligned"])
+        self.assertEqual(source_changed["commit_alignment"], "content_unvalidated_at_head")
+        self.assertFalse(service.check()[1])
 
     def test_large_module_reports_symbol_and_relation_truncation(self) -> None:
         functions = "\n".join(f"def function_{number}():\n    return helper()" for number in range(305))

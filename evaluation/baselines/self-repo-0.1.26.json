@@ -1,7 +1,7 @@
 {
   "dataset": "questions.jsonl",
   "dataset_sha256": "sha256:007e204f4bd395fac47aeefeb5ae68b98bcb869682df710ae2b5606c1e05b119",
-  "generated_at": "2026-08-14T14:55:41+08:00",
+  "generated_at": "2026-08-14T14:55:02+08:00",
   "index_commit": "737f4301b825087a0b64acf3e2180fcc76049b1a",
   "package_version": "0.1.26",
   "project_commit": "737f4301b825087a0b64acf3e2180fcc76049b1a",
@@ -114,9 +114,9 @@
         "file_recall": 0.929167,
         "generated_source_coverage": 0.909091,
         "invariant_recall": 0.0,
-        "p50_latency_ms": 167.2485,
-        "p95_latency_ms": 195.77095,
-        "p99_latency_ms": 213.65043,
+        "p50_latency_ms": 168.299,
+        "p95_latency_ms": 200.0399,
+        "p99_latency_ms": 203.57767,
         "success_rate": 0.525,
         "symbol_precision": 0.365863,
         "symbol_recall": 0.8375
@@ -174,7 +174,7 @@
             "Configuration"
           ]
         },
-        "generated_at": "2026-08-14T14:55:33+08:00",
+        "generated_at": "2026-08-14T14:54:54+08:00",
         "head_commit": "737f4301b825087a0b64acf3e2180fcc76049b1a",
         "index_commit": "737f4301b825087a0b64acf3e2180fcc76049b1a",
         "platform": "Windows-11-10.0.26200-SP0",
@@ -196,7 +196,7 @@
             "symbol_recall"
           ],
           "id": "self-init-flow",
-          "latency_ms": 144.889,
+          "latency_ms": 168.009,
           "line": 1,
           "metrics": {
             "call_path_precision": 0.031746,
@@ -316,7 +316,7 @@
             "symbol_recall"
           ],
           "id": "self-incremental-sync",
-          "latency_ms": 149.967,
+          "latency_ms": 193.042,
           "line": 2,
           "metrics": {
             "file_precision": 0.103448,
@@ -456,7 +456,7 @@
             "invariant_recall"
           ],
           "id": "self-atomic-rebuild",
-          "latency_ms": 157.086,
+          "latency_ms": 147.873,
           "line": 3,
           "metrics": {
             "file_precision": 0.666667,
@@ -509,7 +509,7 @@
             "invariant_recall"
           ],
           "id": "self-commit-alignment",
-          "latency_ms": 174.953,
+          "latency_ms": 176.325,
           "line": 4,
           "metrics": {
             "file_precision": 0.090909,
@@ -638,7 +638,7 @@
             "invariant_recall"
           ],
           "id": "self-template-confidence",
-          "latency_ms": 171.417,
+          "latency_ms": 183.514,
           "line": 5,
           "metrics": {
             "file_precision": 0.035714,
@@ -767,7 +767,7 @@
           "estimated_context_tokens": 58,
           "failed_metrics": [],
           "id": "self-module-truncation",
-          "latency_ms": 139.274,
+          "latency_ms": 178.348,
           "line": 6,
           "metrics": {
             "extension_point_precision": 1.0,
@@ -808,7 +808,7 @@
             "invariant_recall"
           ],
           "id": "self-runtime-schema",
-          "latency_ms": 179.936,
+          "latency_ms": 164.482,
           "line": 7,
           "metrics": {
             "file_precision": 0.15,
@@ -916,7 +916,7 @@
           "estimated_context_tokens": 283,
           "failed_metrics": [],
           "id": "self-config-capabilities",
-          "latency_ms": 165.93,
+          "latency_ms": 163.807,
           "line": 8,
           "metrics": {
             "file_precision": 0.076923,
@@ -1024,7 +1024,7 @@
             "design_reason_recall"
           ],
           "id": "self-codegraph-failure",
-          "latency_ms": 170.699,
+          "latency_ms": 174.177,
           "line": 9,
           "metrics": {
             "design_reason_recall": 0.0,
@@ -1102,7 +1102,7 @@
             "symbol_recall"
           ],
           "id": "self-python-parser",
-          "latency_ms": 169.577,
+          "latency_ms": 165.665,
           "line": 10,
           "metrics": {
             "file_precision": 0.333333,
@@ -1163,7 +1163,7 @@
           "estimated_context_tokens": 166,
           "failed_metrics": [],
           "id": "self-generic-parser",
-          "latency_ms": 205.194,
+          "latency_ms": 205.78,
           "line": 11,
           "metrics": {
             "extension_point_precision": 0.125,
@@ -1233,7 +1233,7 @@
           "estimated_context_tokens": 222,
           "failed_metrics": [],
           "id": "self-context-budget",
-          "latency_ms": 161.976,
+          "latency_ms": 182.63,
           "line": 12,
           "metrics": {
             "file_precision": 0.125,
@@ -1338,7 +1338,7 @@
             "invariant_recall"
           ],
           "id": "self-stale-shield",
-          "latency_ms": 166.595,
+          "latency_ms": 168.589,
           "line": 13,
           "metrics": {
             "file_precision": 0.045455,
@@ -1426,7 +1426,7 @@
           "estimated_context_tokens": 256,
           "failed_metrics": [],
           "id": "self-impact-analysis",
-          "latency_ms": 157.258,
+          "latency_ms": 154.951,
           "line": 14,
           "metrics": {
             "file_precision": 0.1,
@@ -1513,7 +1513,7 @@
           "estimated_context_tokens": 226,
           "failed_metrics": [],
           "id": "self-mcp-dispatch",
-          "latency_ms": 155.11,
+          "latency_ms": 166.718,
           "line": 15,
           "metrics": {
             "file_precision": 0.1,
@@ -1624,7 +1624,7 @@
             "symbol_recall"
           ],
           "id": "self-manifest-publication",
-          "latency_ms": 183.875,
+          "latency_ms": 179.861,
           "line": 16,
           "metrics": {
             "file_precision": 0.166667,
@@ -1714,7 +1714,7 @@
             "invariant_recall"
           ],
           "id": "self-version-bump",
-          "latency_ms": 156.789,
+          "latency_ms": 172.841,
           "line": 17,
           "metrics": {
             "file_precision": 0.2,
@@ -1764,7 +1764,7 @@
             "invariant_recall"
           ],
           "id": "self-owned-integration",
-          "latency_ms": 177.915,
+          "latency_ms": 160.604,
           "line": 18,
           "metrics": {
             "file_precision": 0.111111,
@@ -1872,7 +1872,7 @@
           "estimated_context_tokens": 179,
           "failed_metrics": [],
           "id": "self-evaluation-gate",
-          "latency_ms": 173.878,
+          "latency_ms": 185.577,
           "line": 19,
           "metrics": {
             "file_precision": 0.153846,
@@ -1965,7 +1965,7 @@
           "estimated_context_tokens": 55,
           "failed_metrics": [],
           "id": "self-performance-harness",
-          "latency_ms": 163.878,
+          "latency_ms": 158.348,
           "line": 20,
           "metrics": {
             "file_precision": 0.5,
@@ -2003,7 +2003,7 @@
           "estimated_context_tokens": 219,
           "failed_metrics": [],
           "id": "self-evidence-pack",
-          "latency_ms": 169.725,
+          "latency_ms": 172.977,
           "line": 21,
           "metrics": {
             "file_precision": 0.25,
@@ -2085,7 +2085,7 @@
           "estimated_context_tokens": 342,
           "failed_metrics": [],
           "id": "self-provider-authorization",
-          "latency_ms": 172.194,
+          "latency_ms": 163.943,
           "line": 22,
           "metrics": {
             "file_precision": 0.068966,
@@ -2219,7 +2219,7 @@
             "symbol_recall"
           ],
           "id": "self-provider-runtime",
-          "latency_ms": 149.431,
+          "latency_ms": 166.714,
           "line": 23,
           "metrics": {
             "file_precision": 0.1875,
@@ -2321,7 +2321,7 @@
             "symbol_recall"
           ],
           "id": "self-provider-preview",
-          "latency_ms": 219.057,
+          "latency_ms": 200.035,
           "line": 24,
           "metrics": {
             "file_precision": 0.136364,
@@ -2428,7 +2428,7 @@
           "estimated_context_tokens": 133,
           "failed_metrics": [],
           "id": "self-provider-extension",
-          "latency_ms": 145.197,
+          "latency_ms": 165.087,
           "line": 25,
           "metrics": {
             "extension_point_precision": 0.142857,
@@ -2486,7 +2486,7 @@
             "invariant_recall"
           ],
           "id": "self-feature-guide-schema",
-          "latency_ms": 174.138,
+          "latency_ms": 162.391,
           "line": 26,
           "metrics": {
             "file_precision": 0.166667,
@@ -2535,7 +2535,7 @@
           "estimated_context_tokens": 294,
           "failed_metrics": [],
           "id": "self-semantic-generation",
-          "latency_ms": 195.275,
+          "latency_ms": 155.36,
           "line": 27,
           "metrics": {
             "file_precision": 0.157895,
@@ -2625,7 +2625,7 @@
           "estimated_context_tokens": 173,
           "failed_metrics": [],
           "id": "self-feature-source-validation",
-          "latency_ms": 167.902,
+          "latency_ms": 164.789,
           "line": 28,
           "metrics": {
             "file_precision": 0.142857,
@@ -2681,7 +2681,7 @@
           "estimated_context_tokens": 376,
           "failed_metrics": [],
           "id": "self-draft-lifecycle",
-          "latency_ms": 188.635,
+          "latency_ms": 200.133,
           "line": 29,
           "metrics": {
             "file_precision": 0.133333,
@@ -2829,7 +2829,7 @@
           "estimated_context_tokens": 351,
           "failed_metrics": [],
           "id": "self-feature-retrieval",
-          "latency_ms": 156.752,
+          "latency_ms": 197.932,
           "line": 30,
           "metrics": {
             "file_precision": 0.12,
@@ -2966,7 +2966,7 @@
             "invariant_recall"
           ],
           "id": "self-proposal-stable-id",
-          "latency_ms": 176.971,
+          "latency_ms": 187.872,
           "line": 31,
           "metrics": {
             "file_precision": 0.2,
@@ -3068,7 +3068,7 @@
           "estimated_context_tokens": 232,
           "failed_metrics": [],
           "id": "self-proposal-apply-conflict",
-          "latency_ms": 182.346,
+          "latency_ms": 177.099,
           "line": 32,
           "metrics": {
             "file_precision": 0.222222,
@@ -3151,7 +3151,7 @@
             "symbol_recall"
           ],
           "id": "self-draft-proposal-promotion",
-          "latency_ms": 175.625,
+          "latency_ms": 167.489,
           "line": 33,
           "metrics": {
             "file_precision": 0.15,
@@ -3243,7 +3243,7 @@
             "invariant_recall"
           ],
           "id": "self-proposal-delete-adr",
-          "latency_ms": 152.053,
+          "latency_ms": 195.9,
           "line": 34,
           "metrics": {
             "file_precision": 0.142857,
@@ -3317,7 +3317,7 @@
             "symbol_recall"
           ],
           "id": "self-semantic-update-queue",
-          "latency_ms": 141.97,
+          "latency_ms": 166.639,
           "line": 35,
           "metrics": {
             "file_precision": 0.083333,
@@ -3453,7 +3453,7 @@
           "estimated_context_tokens": 126,
           "failed_metrics": [],
           "id": "self-task-classification",
-          "latency_ms": 146.876,
+          "latency_ms": 157.567,
           "line": 36,
           "metrics": {
             "file_precision": 0.090909,
@@ -3518,7 +3518,7 @@
           "estimated_context_tokens": 260,
           "failed_metrics": [],
           "id": "self-retrieval-explanation",
-          "latency_ms": 147.008,
+          "latency_ms": 172.458,
           "line": 37,
           "metrics": {
             "file_precision": 0.052632,
@@ -3617,7 +3617,7 @@
           "estimated_context_tokens": 327,
           "failed_metrics": [],
           "id": "self-bounded-multihop",
-          "latency_ms": 152.847,
+          "latency_ms": 191.995,
           "line": 38,
           "metrics": {
             "file_precision": 0.045455,
@@ -3714,7 +3714,7 @@
           "estimated_context_tokens": 254,
           "failed_metrics": [],
           "id": "self-feature-development-context",
-          "latency_ms": 172.395,
+          "latency_ms": 146.873,
           "line": 39,
           "metrics": {
             "file_precision": 0.047619,
@@ -3809,7 +3809,7 @@
           "estimated_context_tokens": 150,
           "failed_metrics": [],
           "id": "self-context-unknowns",
-          "latency_ms": 162.578,
+          "latency_ms": 164.095,
           "line": 40,
           "metrics": {
             "file_precision": 0.071429,
@@ -4015,9 +4015,9 @@
         "file_recall": 0.677083,
         "generated_source_coverage": 0.909091,
         "invariant_recall": 0.0,
-        "p50_latency_ms": 22.7615,
-        "p95_latency_ms": 29.4001,
-        "p99_latency_ms": 31.14763,
+        "p50_latency_ms": 22.995,
+        "p95_latency_ms": 26.55355,
+        "p99_latency_ms": 28.53073,
         "success_rate": 0.0,
         "symbol_precision": 0.0,
         "symbol_recall": 0.0
@@ -4075,7 +4075,7 @@
             "Configuration"
           ]
         },
-        "generated_at": "2026-08-14T14:55:27+08:00",
+        "generated_at": "2026-08-14T14:54:47+08:00",
         "head_commit": "737f4301b825087a0b64acf3e2180fcc76049b1a",
         "index_commit": "737f4301b825087a0b64acf3e2180fcc76049b1a",
         "platform": "Windows-11-10.0.26200-SP0",
@@ -4098,7 +4098,7 @@
             "call_path_recall"
           ],
           "id": "self-init-flow",
-          "latency_ms": 23.309,
+          "latency_ms": 24.168,
           "line": 1,
           "metrics": {
             "call_path_precision": 0.0,
@@ -4131,7 +4131,7 @@
             "symbol_recall"
           ],
           "id": "self-incremental-sync",
-          "latency_ms": 23.085,
+          "latency_ms": 21.874,
           "line": 2,
           "metrics": {
             "file_precision": 0.4,
@@ -4162,7 +4162,7 @@
             "invariant_recall"
           ],
           "id": "self-atomic-rebuild",
-          "latency_ms": 21.919,
+          "latency_ms": 20.975,
           "line": 3,
           "metrics": {
             "file_precision": 0.4,
@@ -4195,7 +4195,7 @@
             "invariant_recall"
           ],
           "id": "self-commit-alignment",
-          "latency_ms": 23.938,
+          "latency_ms": 22.853,
           "line": 4,
           "metrics": {
             "file_precision": 0.166667,
@@ -4229,7 +4229,7 @@
             "invariant_recall"
           ],
           "id": "self-template-confidence",
-          "latency_ms": 25.386,
+          "latency_ms": 23.591,
           "line": 5,
           "metrics": {
             "file_precision": 0.166667,
@@ -4262,7 +4262,7 @@
             "extension_point_recall"
           ],
           "id": "self-module-truncation",
-          "latency_ms": 21.703,
+          "latency_ms": 21.077,
           "line": 6,
           "metrics": {
             "extension_point_precision": 0.0,
@@ -4292,7 +4292,7 @@
             "invariant_recall"
           ],
           "id": "self-runtime-schema",
-          "latency_ms": 22.715,
+          "latency_ms": 21.75,
           "line": 7,
           "metrics": {
             "file_precision": 0.333333,
@@ -4325,7 +4325,7 @@
             "symbol_recall"
           ],
           "id": "self-config-capabilities",
-          "latency_ms": 22.826,
+          "latency_ms": 22.883,
           "line": 8,
           "metrics": {
             "file_precision": 0.2,
@@ -4357,7 +4357,7 @@
             "design_reason_recall"
           ],
           "id": "self-codegraph-failure",
-          "latency_ms": 23.159,
+          "latency_ms": 22.487,
           "line": 9,
           "metrics": {
             "design_reason_recall": 0.0,
@@ -4390,7 +4390,7 @@
             "symbol_recall"
           ],
           "id": "self-python-parser",
-          "latency_ms": 22.808,
+          "latency_ms": 23.168,
           "line": 10,
           "metrics": {
             "file_precision": 0.166667,
@@ -4423,7 +4423,7 @@
             "extension_point_recall"
           ],
           "id": "self-generic-parser",
-          "latency_ms": 22.482,
+          "latency_ms": 23.857,
           "line": 11,
           "metrics": {
             "extension_point_precision": 0.0,
@@ -4457,7 +4457,7 @@
             "symbol_recall"
           ],
           "id": "self-context-budget",
-          "latency_ms": 21.809,
+          "latency_ms": 24.314,
           "line": 12,
           "metrics": {
             "file_precision": 0.2,
@@ -4488,7 +4488,7 @@
             "invariant_recall"
           ],
           "id": "self-stale-shield",
-          "latency_ms": 20.533,
+          "latency_ms": 23.508,
           "line": 13,
           "metrics": {
             "file_precision": 0.333333,
@@ -4521,7 +4521,7 @@
             "symbol_recall"
           ],
           "id": "self-impact-analysis",
-          "latency_ms": 20.085,
+          "latency_ms": 21.815,
           "line": 14,
           "metrics": {
             "file_precision": 0.2,
@@ -4552,7 +4552,7 @@
             "symbol_recall"
           ],
           "id": "self-mcp-dispatch",
-          "latency_ms": 21.56,
+          "latency_ms": 22.632,
           "line": 15,
           "metrics": {
             "file_precision": 0.2,
@@ -4583,7 +4583,7 @@
             "symbol_recall"
           ],
           "id": "self-manifest-publication",
-          "latency_ms": 23.12,
+          "latency_ms": 22.638,
           "line": 16,
           "metrics": {
             "file_precision": 0.333333,
@@ -4616,7 +4616,7 @@
             "invariant_recall"
           ],
           "id": "self-version-bump",
-          "latency_ms": 20.782,
+          "latency_ms": 21.128,
           "line": 17,
           "metrics": {
             "file_precision": 0.333333,
@@ -4647,7 +4647,7 @@
             "invariant_recall"
           ],
           "id": "self-owned-integration",
-          "latency_ms": 22.057,
+          "latency_ms": 21.428,
           "line": 18,
           "metrics": {
             "file_precision": 0.2,
@@ -4679,7 +4679,7 @@
             "symbol_recall"
           ],
           "id": "self-evaluation-gate",
-          "latency_ms": 23.336,
+          "latency_ms": 21.093,
           "line": 19,
           "metrics": {
             "file_precision": 0.0,
@@ -4709,7 +4709,7 @@
             "symbol_recall"
           ],
           "id": "self-performance-harness",
-          "latency_ms": 21.736,
+          "latency_ms": 20.662,
           "line": 20,
           "metrics": {
             "file_precision": 0.5,
@@ -4739,7 +4739,7 @@
             "symbol_recall"
           ],
           "id": "self-evidence-pack",
-          "latency_ms": 24.486,
+          "latency_ms": 24.076,
           "line": 21,
           "metrics": {
             "file_precision": 0.333333,
@@ -4770,7 +4770,7 @@
             "symbol_recall"
           ],
           "id": "self-provider-authorization",
-          "latency_ms": 21.9,
+          "latency_ms": 20.969,
           "line": 22,
           "metrics": {
             "file_precision": 0.4,
@@ -4801,7 +4801,7 @@
             "symbol_recall"
           ],
           "id": "self-provider-runtime",
-          "latency_ms": 24.038,
+          "latency_ms": 21.781,
           "line": 23,
           "metrics": {
             "file_precision": 0.166667,
@@ -4833,7 +4833,7 @@
             "symbol_recall"
           ],
           "id": "self-provider-preview",
-          "latency_ms": 25.834,
+          "latency_ms": 25.042,
           "line": 24,
           "metrics": {
             "file_precision": 0.333333,
@@ -4865,7 +4865,7 @@
             "extension_point_recall"
           ],
           "id": "self-provider-extension",
-          "latency_ms": 21.776,
+          "latency_ms": 22.734,
           "line": 25,
           "metrics": {
             "extension_point_precision": 0.0,
@@ -4895,7 +4895,7 @@
             "invariant_recall"
           ],
           "id": "self-feature-guide-schema",
-          "latency_ms": 21.819,
+          "latency_ms": 23.837,
           "line": 26,
           "metrics": {
             "file_precision": 0.4,
@@ -4927,7 +4927,7 @@
             "symbol_recall"
           ],
           "id": "self-semantic-generation",
-          "latency_ms": 22.48,
+          "latency_ms": 22.204,
           "line": 27,
           "metrics": {
             "file_precision": 0.166667,
@@ -4958,7 +4958,7 @@
             "symbol_recall"
           ],
           "id": "self-feature-source-validation",
-          "latency_ms": 24.075,
+          "latency_ms": 22.586,
           "line": 28,
           "metrics": {
             "file_precision": 0.4,
@@ -4989,7 +4989,7 @@
             "symbol_recall"
           ],
           "id": "self-draft-lifecycle",
-          "latency_ms": 29.314,
+          "latency_ms": 25.495,
           "line": 29,
           "metrics": {
             "file_precision": 0.5,
@@ -5021,7 +5021,7 @@
             "symbol_recall"
           ],
           "id": "self-feature-retrieval",
-          "latency_ms": 31.219,
+          "latency_ms": 24.18,
           "line": 30,
           "metrics": {
             "file_precision": 0.333333,
@@ -5054,7 +5054,7 @@
             "invariant_recall"
           ],
           "id": "self-proposal-stable-id",
-          "latency_ms": 31.036,
+          "latency_ms": 23.665,
           "line": 31,
           "metrics": {
             "file_precision": 0.166667,
@@ -5087,7 +5087,7 @@
             "symbol_recall"
           ],
           "id": "self-proposal-apply-conflict",
-          "latency_ms": 22.982,
+          "latency_ms": 21.821,
           "line": 32,
           "metrics": {
             "file_precision": 0.166667,
@@ -5118,7 +5118,7 @@
             "symbol_recall"
           ],
           "id": "self-draft-proposal-promotion",
-          "latency_ms": 25.114,
+          "latency_ms": 26.139,
           "line": 33,
           "metrics": {
             "file_precision": 0.5,
@@ -5151,7 +5151,7 @@
             "invariant_recall"
           ],
           "id": "self-proposal-delete-adr",
-          "latency_ms": 24.306,
+          "latency_ms": 26.552,
           "line": 34,
           "metrics": {
             "file_precision": 0.4,
@@ -5182,7 +5182,7 @@
             "symbol_recall"
           ],
           "id": "self-semantic-update-queue",
-          "latency_ms": 26.149,
+          "latency_ms": 29.776,
           "line": 35,
           "metrics": {
             "file_precision": 0.333333,
@@ -5213,7 +5213,7 @@
             "symbol_recall"
           ],
           "id": "self-task-classification",
-          "latency_ms": 21.114,
+          "latency_ms": 24.716,
           "line": 36,
           "metrics": {
             "file_precision": 0.2,
@@ -5243,7 +5243,7 @@
             "symbol_recall"
           ],
           "id": "self-retrieval-explanation",
-          "latency_ms": 21.403,
+          "latency_ms": 26.583,
           "line": 37,
           "metrics": {
             "file_precision": 0.2,
@@ -5273,7 +5273,7 @@
             "symbol_recall"
           ],
           "id": "self-bounded-multihop",
-          "latency_ms": 22.655,
+          "latency_ms": 25.631,
           "line": 38,
           "metrics": {
             "file_precision": 0.2,
@@ -5303,7 +5303,7 @@
             "symbol_recall"
           ],
           "id": "self-feature-development-context",
-          "latency_ms": 22.683,
+          "latency_ms": 24.245,
           "line": 39,
           "metrics": {
             "file_precision": 0.2,
@@ -5333,7 +5333,7 @@
             "symbol_recall"
           ],
           "id": "self-context-unknowns",
-          "latency_ms": 21.57,
+          "latency_ms": 23.107,
           "line": 40,
           "metrics": {
             "file_precision": 0.2,
@@ -5451,9 +5451,9 @@
         "file_recall": 0.9875,
         "generated_source_coverage": 0.909091,
         "invariant_recall": 0.6,
-        "p50_latency_ms": 163.113,
-        "p95_latency_ms": 195.62945,
-        "p99_latency_ms": 242.39453,
+        "p50_latency_ms": 167.268,
+        "p95_latency_ms": 191.28435,
+        "p99_latency_ms": 196.66176,
         "success_rate": 0.575,
         "symbol_precision": 0.365863,
         "symbol_recall": 0.8375
@@ -5511,7 +5511,7 @@
             "Configuration"
           ]
         },
-        "generated_at": "2026-08-14T14:55:26+08:00",
+        "generated_at": "2026-08-14T14:54:46+08:00",
         "head_commit": "737f4301b825087a0b64acf3e2180fcc76049b1a",
         "index_commit": "737f4301b825087a0b64acf3e2180fcc76049b1a",
         "platform": "Windows-11-10.0.26200-SP0",
@@ -5532,7 +5532,7 @@
             "symbol_recall"
           ],
           "id": "self-init-flow",
-          "latency_ms": 172.139,
+          "latency_ms": 157.741,
           "line": 1,
           "metrics": {
             "call_path_precision": 0.031746,
@@ -5672,7 +5672,7 @@
             "symbol_recall"
           ],
           "id": "self-incremental-sync",
-          "latency_ms": 158.661,
+          "latency_ms": 157.955,
           "line": 2,
           "metrics": {
             "file_precision": 0.066667,
@@ -5827,7 +5827,7 @@
             "symbol_recall"
           ],
           "id": "self-atomic-rebuild",
-          "latency_ms": 151.75,
+          "latency_ms": 138.569,
           "line": 3,
           "metrics": {
             "file_precision": 0.064516,
@@ -5908,7 +5908,7 @@
             "invariant_recall"
           ],
           "id": "self-commit-alignment",
-          "latency_ms": 150.943,
+          "latency_ms": 152.02,
           "line": 4,
           "metrics": {
             "file_precision": 0.052632,
@@ -6051,7 +6051,7 @@
             "symbol_recall"
           ],
           "id": "self-template-confidence",
-          "latency_ms": 157.668,
+          "latency_ms": 163.735,
           "line": 5,
           "metrics": {
             "file_precision": 0.042553,
@@ -6199,7 +6199,7 @@
           "estimated_context_tokens": 545,
           "failed_metrics": [],
           "id": "self-module-truncation",
-          "latency_ms": 154.613,
+          "latency_ms": 138.226,
           "line": 6,
           "metrics": {
             "extension_point_precision": 1.0,
@@ -6265,7 +6265,7 @@
             "symbol_recall"
           ],
           "id": "self-runtime-schema",
-          "latency_ms": 159.841,
+          "latency_ms": 159.095,
           "line": 7,
           "metrics": {
             "file_precision": 0.0625,
@@ -6401,7 +6401,7 @@
           "estimated_context_tokens": 1360,
           "failed_metrics": [],
           "id": "self-config-capabilities",
-          "latency_ms": 163.892,
+          "latency_ms": 158.713,
           "line": 8,
           "metrics": {
             "file_precision": 0.030769,
@@ -6547,7 +6547,7 @@
             "file_recall"
           ],
           "id": "self-codegraph-failure",
-          "latency_ms": 173.928,
+          "latency_ms": 158.791,
           "line": 9,
           "metrics": {
             "design_reason_recall": 1.0,
@@ -6674,7 +6674,7 @@
             "symbol_recall"
           ],
           "id": "self-python-parser",
-          "latency_ms": 162.485,
+          "latency_ms": 167.7,
           "line": 10,
           "metrics": {
             "file_precision": 0.055556,
@@ -6765,7 +6765,7 @@
           "estimated_context_tokens": 1666,
           "failed_metrics": [],
           "id": "self-generic-parser",
-          "latency_ms": 193.819,
+          "latency_ms": 198.735,
           "line": 11,
           "metrics": {
             "extension_point_precision": 0.125,
@@ -6893,7 +6893,7 @@
           "estimated_context_tokens": 1459,
           "failed_metrics": [],
           "id": "self-context-budget",
-          "latency_ms": 153.814,
+          "latency_ms": 162.896,
           "line": 12,
           "metrics": {
             "file_precision": 0.037037,
@@ -7035,7 +7035,7 @@
             "invariant_recall"
           ],
           "id": "self-stale-shield",
-          "latency_ms": 155.469,
+          "latency_ms": 148.898,
           "line": 13,
           "metrics": {
             "file_precision": 0.054054,
@@ -7138,7 +7138,7 @@
           "estimated_context_tokens": 280,
           "failed_metrics": [],
           "id": "self-impact-analysis",
-          "latency_ms": 143.098,
+          "latency_ms": 149.765,
           "line": 14,
           "metrics": {
             "file_precision": 0.1,
@@ -7225,7 +7225,7 @@
           "estimated_context_tokens": 1507,
           "failed_metrics": [],
           "id": "self-mcp-dispatch",
-          "latency_ms": 157.933,
+          "latency_ms": 151.965,
           "line": 15,
           "metrics": {
             "file_precision": 0.047619,
@@ -7358,7 +7358,7 @@
             "symbol_recall"
           ],
           "id": "self-manifest-publication",
-          "latency_ms": 185.673,
+          "latency_ms": 185.773,
           "line": 16,
           "metrics": {
             "file_precision": 0.05,
@@ -7488,7 +7488,7 @@
             "symbol_recall"
           ],
           "id": "self-version-bump",
-          "latency_ms": 185.934,
+          "latency_ms": 170.672,
           "line": 17,
           "metrics": {
             "file_precision": 0.06,
@@ -7583,7 +7583,7 @@
             "invariant_recall"
           ],
           "id": "self-owned-integration",
-          "latency_ms": 159.684,
+          "latency_ms": 170.666,
           "line": 18,
           "metrics": {
             "file_precision": 0.043478,
@@ -7719,7 +7719,7 @@
           "estimated_context_tokens": 1487,
           "failed_metrics": [],
           "id": "self-evaluation-gate",
-          "latency_ms": 163.539,
+          "latency_ms": 181.685,
           "line": 19,
           "metrics": {
             "file_precision": 0.054054,
@@ -7836,7 +7836,7 @@
           "estimated_context_tokens": 795,
           "failed_metrics": [],
           "id": "self-performance-harness",
-          "latency_ms": 187.083,
+          "latency_ms": 166.062,
           "line": 20,
           "metrics": {
             "file_precision": 0.095238,
@@ -7891,7 +7891,7 @@
           "estimated_context_tokens": 1611,
           "failed_metrics": [],
           "id": "self-evidence-pack",
-          "latency_ms": 187.001,
+          "latency_ms": 179.036,
           "line": 21,
           "metrics": {
             "file_precision": 0.06383,
@@ -8008,7 +8008,7 @@
           "estimated_context_tokens": 1748,
           "failed_metrics": [],
           "id": "self-provider-authorization",
-          "latency_ms": 171.184,
+          "latency_ms": 171.629,
           "line": 22,
           "metrics": {
             "file_precision": 0.047619,
@@ -8155,7 +8155,7 @@
             "symbol_recall"
           ],
           "id": "self-provider-runtime",
-          "latency_ms": 184.307,
+          "latency_ms": 187.388,
           "line": 23,
           "metrics": {
             "file_precision": 0.12,
@@ -8266,7 +8266,7 @@
             "symbol_recall"
           ],
           "id": "self-provider-preview",
-          "latency_ms": 230.028,
+          "latency_ms": 191.172,
           "line": 24,
           "metrics": {
             "file_precision": 0.044776,
@@ -8418,7 +8418,7 @@
           "estimated_context_tokens": 1705,
           "failed_metrics": [],
           "id": "self-provider-extension",
-          "latency_ms": 165.67,
+          "latency_ms": 180.831,
           "line": 25,
           "metrics": {
             "extension_point_precision": 0.142857,
@@ -8515,7 +8515,7 @@
           "estimated_context_tokens": 1608,
           "failed_metrics": [],
           "id": "self-feature-guide-schema",
-          "latency_ms": 162.086,
+          "latency_ms": 170.763,
           "line": 26,
           "metrics": {
             "file_precision": 0.068966,
@@ -8581,7 +8581,7 @@
           "estimated_context_tokens": 1537,
           "failed_metrics": [],
           "id": "self-semantic-generation",
-          "latency_ms": 179.693,
+          "latency_ms": 175.936,
           "line": 27,
           "metrics": {
             "file_precision": 0.096774,
@@ -8683,7 +8683,7 @@
           "estimated_context_tokens": 197,
           "failed_metrics": [],
           "id": "self-feature-source-validation",
-          "latency_ms": 147.511,
+          "latency_ms": 148.225,
           "line": 28,
           "metrics": {
             "file_precision": 0.142857,
@@ -8739,7 +8739,7 @@
           "estimated_context_tokens": 1710,
           "failed_metrics": [],
           "id": "self-draft-lifecycle",
-          "latency_ms": 183.817,
+          "latency_ms": 184.621,
           "line": 29,
           "metrics": {
             "file_precision": 0.121212,
@@ -8890,7 +8890,7 @@
           "estimated_context_tokens": 1556,
           "failed_metrics": [],
           "id": "self-feature-retrieval",
-          "latency_ms": 162.687,
+          "latency_ms": 190.445,
           "line": 30,
           "metrics": {
             "file_precision": 0.090909,
@@ -9033,7 +9033,7 @@
           "estimated_context_tokens": 1585,
           "failed_metrics": [],
           "id": "self-proposal-stable-id",
-          "latency_ms": 162.052,
+          "latency_ms": 171.926,
           "line": 31,
           "metrics": {
             "file_precision": 0.05,
@@ -9180,7 +9180,7 @@
           "estimated_context_tokens": 1353,
           "failed_metrics": [],
           "id": "self-proposal-apply-conflict",
-          "latency_ms": 250.301,
+          "latency_ms": 151.298,
           "line": 32,
           "metrics": {
             "file_precision": 0.041667,
@@ -9302,7 +9302,7 @@
             "symbol_recall"
           ],
           "id": "self-draft-proposal-promotion",
-          "latency_ms": 186.613,
+          "latency_ms": 193.419,
           "line": 33,
           "metrics": {
             "file_precision": 0.076923,
@@ -9412,7 +9412,7 @@
             "invariant_recall"
           ],
           "id": "self-proposal-delete-adr",
-          "latency_ms": 153.724,
+          "latency_ms": 165.119,
           "line": 34,
           "metrics": {
             "file_precision": 0.09375,
@@ -9504,7 +9504,7 @@
             "symbol_recall"
           ],
           "id": "self-semantic-update-queue",
-          "latency_ms": 160.246,
+          "latency_ms": 177.772,
           "line": 35,
           "metrics": {
             "file_precision": 0.05,
@@ -9656,7 +9656,7 @@
           "estimated_context_tokens": 150,
           "failed_metrics": [],
           "id": "self-task-classification",
-          "latency_ms": 158.692,
+          "latency_ms": 141.702,
           "line": 36,
           "metrics": {
             "file_precision": 0.090909,
@@ -9721,7 +9721,7 @@
           "estimated_context_tokens": 1607,
           "failed_metrics": [],
           "id": "self-retrieval-explanation",
-          "latency_ms": 173.533,
+          "latency_ms": 163.056,
           "line": 37,
           "metrics": {
             "file_precision": 0.020408,
@@ -9850,7 +9850,7 @@
           "estimated_context_tokens": 1608,
           "failed_metrics": [],
           "id": "self-bounded-multihop",
-          "latency_ms": 158.133,
+          "latency_ms": 166.836,
           "line": 38,
           "metrics": {
             "file_precision": 0.020408,
@@ -9974,7 +9974,7 @@
           "estimated_context_tokens": 1628,
           "failed_metrics": [],
           "id": "self-feature-development-context",
-          "latency_ms": 186.018,
+          "latency_ms": 176.867,
           "line": 39,
           "metrics": {
             "file_precision": 0.027027,
@@ -10085,7 +10085,7 @@
           "estimated_context_tokens": 1550,
           "failed_metrics": [],
           "id": "self-context-unknowns",
-          "latency_ms": 168.792,
+          "latency_ms": 167.832,
           "line": 40,
           "metrics": {
             "file_precision": 0.028571,
@@ -10305,9 +10305,9 @@
         "file_recall": 0.904167,
         "generated_source_coverage": 0.909091,
         "invariant_recall": 0.5,
-        "p50_latency_ms": 204.659,
-        "p95_latency_ms": 226.55105,
-        "p99_latency_ms": 229.78946,
+        "p50_latency_ms": 205.0555,
+        "p95_latency_ms": 221.6768,
+        "p99_latency_ms": 228.6581,
         "success_rate": 0.0,
         "symbol_precision": 0.0,
         "symbol_recall": 0.0
@@ -10365,7 +10365,7 @@
             "Configuration"
           ]
         },
-        "generated_at": "2026-08-14T14:55:41+08:00",
+        "generated_at": "2026-08-14T14:55:02+08:00",
         "head_commit": "737f4301b825087a0b64acf3e2180fcc76049b1a",
         "index_commit": "737f4301b825087a0b64acf3e2180fcc76049b1a",
         "platform": "Windows-11-10.0.26200-SP0",
@@ -10387,7 +10387,7 @@
             "call_path_recall"
           ],
           "id": "self-init-flow",
-          "latency_ms": 194.291,
+          "latency_ms": 205.862,
           "line": 1,
           "metrics": {
             "call_path_precision": 0.0,
@@ -10438,7 +10438,7 @@
             "symbol_recall"
           ],
           "id": "self-incremental-sync",
-          "latency_ms": 197.071,
+          "latency_ms": 202.792,
           "line": 2,
           "metrics": {
             "file_precision": 0.086957,
@@ -10486,7 +10486,7 @@
             "symbol_recall"
           ],
           "id": "self-atomic-rebuild",
-          "latency_ms": 200.325,
+          "latency_ms": 198.208,
           "line": 3,
           "metrics": {
             "file_precision": 0.086957,
@@ -10536,7 +10536,7 @@
             "invariant_recall"
           ],
           "id": "self-commit-alignment",
-          "latency_ms": 193.869,
+          "latency_ms": 196.075,
           "line": 4,
           "metrics": {
             "file_precision": 0.086957,
@@ -10586,7 +10586,7 @@
             "invariant_recall"
           ],
           "id": "self-template-confidence",
-          "latency_ms": 215.464,
+          "latency_ms": 217.318,
           "line": 5,
           "metrics": {
             "file_precision": 0.086957,
@@ -10636,7 +10636,7 @@
             "extension_point_recall"
           ],
           "id": "self-module-truncation",
-          "latency_ms": 124.738,
+          "latency_ms": 107.352,
           "line": 6,
           "metrics": {
             "extension_point_precision": 0.0,
@@ -10686,7 +10686,7 @@
             "symbol_recall"
           ],
           "id": "self-runtime-schema",
-          "latency_ms": 217.609,
+          "latency_ms": 215.306,
           "line": 7,
           "metrics": {
             "file_precision": 0.130435,
@@ -10735,7 +10735,7 @@
             "symbol_recall"
           ],
           "id": "self-config-capabilities",
-          "latency_ms": 196.748,
+          "latency_ms": 200.521,
           "line": 8,
           "metrics": {
             "file_precision": 0.086957,
@@ -10784,7 +10784,7 @@
             "symbol_recall"
           ],
           "id": "self-codegraph-failure",
-          "latency_ms": 226.515,
+          "latency_ms": 214.804,
           "line": 9,
           "metrics": {
             "design_reason_recall": 1.0,
@@ -10833,7 +10833,7 @@
             "symbol_recall"
           ],
           "id": "self-python-parser",
-          "latency_ms": 222.933,
+          "latency_ms": 224.504,
           "line": 10,
           "metrics": {
             "file_precision": 0.086957,
@@ -10882,7 +10882,7 @@
             "extension_point_recall"
           ],
           "id": "self-generic-parser",
-          "latency_ms": 172.13,
+          "latency_ms": 147.428,
           "line": 11,
           "metrics": {
             "extension_point_precision": 0.0,
@@ -10932,7 +10932,7 @@
             "symbol_recall"
           ],
           "id": "self-context-budget",
-          "latency_ms": 202.188,
+          "latency_ms": 205.224,
           "line": 12,
           "metrics": {
             "file_precision": 0.086957,
@@ -10981,7 +10981,7 @@
             "invariant_recall"
           ],
           "id": "self-stale-shield",
-          "latency_ms": 190.965,
+          "latency_ms": 195.2,
           "line": 13,
           "metrics": {
             "file_precision": 0.086957,
@@ -11031,7 +11031,7 @@
             "symbol_recall"
           ],
           "id": "self-impact-analysis",
-          "latency_ms": 57.531,
+          "latency_ms": 58.34,
           "line": 14,
           "metrics": {
             "file_precision": 0.0,
@@ -11055,7 +11055,7 @@
             "symbol_recall"
           ],
           "id": "self-mcp-dispatch",
-          "latency_ms": 212.977,
+          "latency_ms": 221.451,
           "line": 15,
           "metrics": {
             "file_precision": 0.086957,
@@ -11103,7 +11103,7 @@
             "symbol_recall"
           ],
           "id": "self-manifest-publication",
-          "latency_ms": 209.015,
+          "latency_ms": 220.657,
           "line": 16,
           "metrics": {
             "file_precision": 0.130435,
@@ -11151,7 +11151,7 @@
             "symbol_recall"
           ],
           "id": "self-version-bump",
-          "latency_ms": 207.197,
+          "latency_ms": 191.059,
           "line": 17,
           "metrics": {
             "file_precision": 0.130435,
@@ -11201,7 +11201,7 @@
             "invariant_recall"
           ],
           "id": "self-owned-integration",
-          "latency_ms": 231.422,
+          "latency_ms": 192.364,
           "line": 18,
           "metrics": {
             "file_precision": 0.086957,
@@ -11250,7 +11250,7 @@
             "symbol_recall"
           ],
           "id": "self-evaluation-gate",
-          "latency_ms": 204.393,
+          "latency_ms": 199.915,
           "line": 19,
           "metrics": {
             "file_precision": 0.086957,
@@ -11298,7 +11298,7 @@
             "symbol_recall"
           ],
           "id": "self-performance-harness",
-          "latency_ms": 142.327,
+          "latency_ms": 148.773,
           "line": 20,
           "metrics": {
             "file_precision": 0.1,
@@ -11343,7 +11343,7 @@
             "symbol_recall"
           ],
           "id": "self-evidence-pack",
-          "latency_ms": 204.37,
+          "latency_ms": 221.003,
           "line": 21,
           "metrics": {
             "file_precision": 0.130435,
@@ -11391,7 +11391,7 @@
             "symbol_recall"
           ],
           "id": "self-provider-authorization",
-          "latency_ms": 225.777,
+          "latency_ms": 199.685,
           "line": 22,
           "metrics": {
             "file_precision": 0.086957,
@@ -11439,7 +11439,7 @@
             "symbol_recall"
           ],
           "id": "self-provider-runtime",
-          "latency_ms": 204.698,
+          "latency_ms": 186.065,
           "line": 23,
           "metrics": {
             "file_precision": 0.130435,
@@ -11487,7 +11487,7 @@
             "symbol_recall"
           ],
           "id": "self-provider-preview",
-          "latency_ms": 210.337,
+          "latency_ms": 202.851,
           "line": 24,
           "metrics": {
             "file_precision": 0.130435,
@@ -11536,7 +11536,7 @@
             "extension_point_recall"
           ],
           "id": "self-provider-extension",
-          "latency_ms": 194.802,
+          "latency_ms": 190.502,
           "line": 25,
           "metrics": {
             "extension_point_precision": 0.0,
@@ -11586,7 +11586,7 @@
             "symbol_recall"
           ],
           "id": "self-feature-guide-schema",
-          "latency_ms": 187.563,
+          "latency_ms": 204.887,
           "line": 26,
           "metrics": {
             "file_precision": 0.086957,
@@ -11635,7 +11635,7 @@
             "symbol_recall"
           ],
           "id": "self-semantic-generation",
-          "latency_ms": 227.236,
+          "latency_ms": 218.512,
           "line": 27,
           "metrics": {
             "file_precision": 0.130435,
@@ -11684,7 +11684,7 @@
             "symbol_recall"
           ],
           "id": "self-feature-source-validation",
-          "latency_ms": 61.899,
+          "latency_ms": 59.162,
           "line": 28,
           "metrics": {
             "file_precision": 0.0,
@@ -11708,7 +11708,7 @@
             "symbol_recall"
           ],
           "id": "self-draft-lifecycle",
-          "latency_ms": 210.638,
+          "latency_ms": 220.127,
           "line": 29,
           "metrics": {
             "file_precision": 0.173913,
@@ -11756,7 +11756,7 @@
             "symbol_recall"
           ],
           "id": "self-feature-retrieval",
-          "latency_ms": 200.783,
+          "latency_ms": 220.88,
           "line": 30,
           "metrics": {
             "file_precision": 0.130435,
@@ -11804,7 +11804,7 @@
             "symbol_recall"
           ],
           "id": "self-proposal-stable-id",
-          "latency_ms": 218.432,
+          "latency_ms": 215.396,
           "line": 31,
           "metrics": {
             "file_precision": 0.130435,
@@ -11853,7 +11853,7 @@
             "symbol_recall"
           ],
           "id": "self-proposal-apply-conflict",
-          "latency_ms": 208.839,
+          "latency_ms": 218.589,
           "line": 32,
           "metrics": {
             "file_precision": 0.086957,
@@ -11901,7 +11901,7 @@
             "symbol_recall"
           ],
           "id": "self-draft-proposal-promotion",
-          "latency_ms": 213.141,
+          "latency_ms": 216.205,
           "line": 33,
           "metrics": {
             "file_precision": 0.130435,
@@ -11950,7 +11950,7 @@
             "invariant_recall"
           ],
           "id": "self-proposal-delete-adr",
-          "latency_ms": 206.172,
+          "latency_ms": 214.581,
           "line": 34,
           "metrics": {
             "file_precision": 0.130435,
@@ -11999,7 +11999,7 @@
             "symbol_recall"
           ],
           "id": "self-semantic-update-queue",
-          "latency_ms": 204.62,
+          "latency_ms": 231.314,
           "line": 35,
           "metrics": {
             "file_precision": 0.086957,
@@ -12048,7 +12048,7 @@
             "symbol_recall"
           ],
           "id": "self-task-classification",
-          "latency_ms": 57.769,
+          "latency_ms": 52.609,
           "line": 36,
           "metrics": {
             "file_precision": 0.0,
@@ -12072,7 +12072,7 @@
             "symbol_recall"
           ],
           "id": "self-retrieval-explanation",
-          "latency_ms": 212.613,
+          "latency_ms": 211.036,
           "line": 37,
           "metrics": {
             "file_precision": 0.043478,
@@ -12120,7 +12120,7 @@
             "symbol_recall"
           ],
           "id": "self-bounded-multihop",
-          "latency_ms": 215.8,
+          "latency_ms": 221.528,
           "line": 38,
           "metrics": {
             "file_precision": 0.043478,
@@ -12168,7 +12168,7 @@
             "symbol_recall"
           ],
           "id": "self-feature-development-context",
-          "latency_ms": 199.182,
+          "latency_ms": 205.619,
           "line": 39,
           "metrics": {
             "file_precision": 0.043478,
@@ -12216,7 +12216,7 @@
             "symbol_recall"
           ],
           "id": "self-context-unknowns",
-          "latency_ms": 208.267,
+          "latency_ms": 193.278,
           "line": 40,
           "metrics": {
             "file_precision": 0.043478,

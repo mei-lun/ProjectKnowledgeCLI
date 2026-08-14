@@ -1,73 +1,45 @@
-# 下一功能版本计划：0.1.22
+# 版本交付与后续计划：0.1.26 → 0.1.27
 
-> 本文是 0.1.22 的实现与验收基线；实现代码已在 `codex/ai-guidance-workflow` 工作树完成，gardenserver 的独立草稿仍等待用户审核。完整设计见[设计规格](superpowers/specs/2026-08-12-ai-client-development-guidance-design.md)。
+> 本文是当前交付状态和下一批开发的唯一计划入口。历史版本计划只保留在 Git 历史中。
+> 复核日期：2026-08-14
 
-## 版本目标
+## 0.1.26：WP-10 交付与验证可靠性
 
-由接入 MCP 的 AI 客户端基于 CodeGraph 事实自动发现功能类别，通过可点击中文 Markdown 与用户完成两阶段审核，将确认后的两层开发指导写入 KnowledgeStore；代码变化后仅处理变化代码及必要影响范围。
+本批次先解决阻断交付、验证和本地运行环境的问题，不扩展业务能力。
 
-## 需求清单
+| 需求 ID | 交付内容 | 验收证据 | 状态 |
+| --- | --- | --- | --- |
+| P0-CI-001 | 修复 GitHub Actions 质量工作流的折叠命令缩进，并加入无依赖结构校验 | `.github/workflows/quality.yml`；`tests/test_delivery_reliability.py` | 已完成 |
+| P0-EVAL-001 | 禁止失败评测报告作为回归基线；报告记录生成时间、提交、包版本和源码快照哈希 | `evaluation/reports/latest.json`；40 题全策略评测；质量门输出 | 已完成 |
+| P0-DOC-001 | 审计报告和本计划反映 0.1.26 当前状态、已知缺陷和后续边界 | `docs/project-knowledge-system-audit.md`；本文 | 已完成 |
+| P0-ENV-001 | 使用仓库独立 `.venv`；`doctor` 报告实际包文件与期望源码路径 | `ProjectService.doctor()`；`python -m project_knowledge doctor` | 已完成 |
+| P0-GIT-001 | 严格保留源码提交对齐；仅 PKS 生成产物提交可进入 `verification_aligned` | `tests/test_integration.py` 提交边界正负用例 | 已完成 |
 
-| ID | 优先级 | 功能 | 核心验收 | 估算 |
-| --- | --- | --- | --- | ---: |
-| NV-MODEL-001 | P0 | 通用类别、指导和审核状态模型 | 无项目名和三类示例硬编码；正式状态与历史进入 KnowledgeStore | 1～2 人日 |
-| NV-INIT-001 | P0 | 首次全项目分批初始化 | 全项目覆盖、分批分析、简单断点继续、覆盖率可见 | 2～3 人日 |
-| NV-MCP-001 | P0 | MCP AI 客户端工作流 | 分析、提交、草稿、哈希确认和查询闭环 | 2～3 人日 |
-| NV-INCR-001 | P0 | CodeGraph 增量与三级更新 | 后续不重扫源码；一级自动、二级指导审核、三级分类审核 | 2～3 人日 |
-| NV-VERIFY-001 | P0 | 通用测试与真实项目验收 | 临时项目集成测试和 gardenserver 真实审核通过 | 2～3 人日 |
+### 0.1.26 验收标准与质量门
 
-预计总工作量：9～14 人日。
+- `python -m unittest discover -s tests -v` 全部通过；
+- `python -m project_knowledge --version` 输出 `0.1.26`；
+- `evaluation/reports/latest.json` 的 `quality_gate.passed` 为 `true`，并显式记录 `project_commit`、`index_commit`、`working_tree`、源码快照哈希和包版本；
+- CI 使用通过的历史基线，不使用曾失败的 `self-repo-0.1.8.json`；
+- 生成知识完成同步；陈旧人工知识必须显式列为待复核，不能伪造为已验证。
 
-## 验收标准与核心约束
+## 0.1.27：评测和检索质量
 
-| 项目 | 已确认规则 |
-| --- | --- |
-| AI 位置 | 分析和沟通由 MCP AI 客户端负责，PKS 不调用内置 ModelProvider |
-| 事实来源 | CodeGraph 公共 CLI/API；PKS 不重写 CodeGraph |
-| 首次初始化 | 全项目覆盖、分层分批、简单断点继续 |
-| 审核顺序 | 先确认分类目录，再分别审核轻量方法论与项目事实指导；两者互不隐式确认 |
-| 审核载体 | 必须生成可点击中文 Markdown，不能只在聊天中描述 |
-| 正式来源 | KnowledgeStore 唯一正式；Markdown 是审核和阅读投影 |
-| 生成位置 | 新文件全部直接位于目标项目 .project-kb 根目录 |
-| 自动更新 | CodeGraph 更新事实；下次 MCP AI 客户端参与时处理变化 |
-| 增量范围 | 可比较全项目元数据，但只分析变化代码和必要上下文 |
-| 更新分级 | 一级自动；二级指导和三级分类必须审核 |
-| 确认安全 | 草稿 ID + 正文哈希；入库正文等于用户审核正文 |
-| 失败安全 | 不覆盖正式指导、不推进快照、不丢失变化 |
+0.1.27 只在 0.1.26 质量门通过后开始，工作包暂定如下：
 
-## MCP 接口
+1. 以 40 题自有评测和 `evaluation/questions-wp01-wp02.jsonl` 为回归集，修复 Markdown/混合检索的真实召回缺口；
+2. 为不变量、设计原因和任务分类补充正负样本，保持最低阈值不变；
+3. 复核当前 7 条陈旧人工知识，逐条确认、更新或保留待复核状态；
+4. 对真实 Lua/Skynet 项目补充负责人确认的业务答案评测；
+5. 继续保持 CodeGraph Adapter 未实现时的显式不可用，不以 builtin 结果冒充。
 
-新增 knowledge_initialization_start、knowledge_initialization_next、knowledge_initialization_submit、knowledge_draft_save、knowledge_draft_confirm、knowledge_changes、knowledge_update_submit。
+### 0.1.27 暂不承诺
 
-扩展现有 knowledge_status/context/search/get/impact，返回覆盖率、待处理变化、正式指导新鲜度和待审核文件路径。
+- 生产级外部 Model Provider；
+- 自建常驻 daemon 或跨客户端共享服务；
+- 自动替用户确认 Feature Guide 或人工架构知识；
+- 通过降低评测阈值解决质量门失败。
 
-## 实施顺序
+## 更长期方向
 
-| 顺序 | 需求 | 完成标志 |
-| ---: | --- | --- |
-| 1 | NV-MODEL-001 | Schema、状态流转、KnowledgeStore 和哈希规则测试通过 |
-| 2 | NV-INIT-001 | 临时项目可分批扫描、恢复并生成分类草稿 |
-| 3 | NV-MCP-001 | AI 客户端可完成两阶段审核并精确入库 |
-| 4 | NV-INCR-001 | 增删改代码触发正确等级且不重扫源码 |
-| 5 | NV-VERIFY-001 | 临时项目与 gardenserver 真实增量验证通过；最终正式入库仍以用户审核为准 |
-
-每项先补正负测试或评测样本，再实现行为。字段、配置、空接口或静态样例不能作为完成证据。
-
-## 明确不进入 0.1.22
-
-- PKS 自建 watcher、代码图或索引；
-- 内置或联网 ModelProvider；
-- 并行扫描、后台队列、复杂自动重试；
-- Web 审核界面和自动确认；
-- 跨项目知识中心、向量检索、Lua 运行时跟踪；
-- 旧 .project-kb 子目录的全面迁移或删除。
-
-## 完成定义
-
-- 设计规格第 12 节全部满足；
-- 全量自动化测试通过；
-- gardenserver 只用于验证，不修改业务源码；
-- README、审计、CHANGELOG、版本和知识同步；
-- 明确报告 generated knowledge 是否同步以及 curated/ADR 是否需要复核。
-
-长期候选见[未来特性](future-features.md)，不得直接从候选清单开始开发。
+在连续两个版本拥有可复现的通过基线后，再讨论真正的 CodeGraph Adapter、真实客户端端到端矩阵、性能优化和团队协作治理。每项都必须先有真实样本、正负测试、文档和验收证据。

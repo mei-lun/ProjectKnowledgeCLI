@@ -9,9 +9,10 @@ import time
 from pathlib import Path
 from typing import Any, Iterable
 
+from . import __version__
 from .retrieval import KnowledgeAPI
 from .store import KnowledgeStore
-from .util import approx_tokens, hash_file, read_text, trim_to_tokens, utc_now
+from .util import approx_tokens, hash_file, hash_text, read_text, trim_to_tokens, utc_now
 
 
 SCHEMA_VERSION = 1
@@ -108,6 +109,10 @@ def evaluate(
     api = KnowledgeAPI(project)
     results = [_evaluate_sample(api, sample, strategy) for sample in samples]
     status = api.status()
+    source_snapshot = hash_text("\n".join(
+        f"{item.path}\t{item.content_hash}"
+        for item in api.service.engine.discover(api.root, api.config)
+    ))
     metrics, metric_counts = _aggregate(results)
     with KnowledgeStore(api.service.db_path, readonly=True) as store:
         generated = [record for record in store.all_knowledge() if record.ownership == "generated"]
@@ -130,6 +135,8 @@ def evaluate(
             "project": api.config.project_name,
             "head_commit": status.get("head_commit"),
             "index_commit": status.get("index_commit"),
+            "working_tree": status.get("working_tree"),
+            "source_snapshot_sha256": source_snapshot,
             "project_files": status.get("counts", {}).get("files", 0),
             "project_symbols": status.get("counts", {}).get("symbols", 0),
             "engine": status.get("engine", {}),
@@ -161,6 +168,22 @@ def evaluate_suite(
         "dataset_sha256": hash_file(Path(dataset)),
         "strategies": reports,
     }
+    reproducibility = next(
+        (
+            strategy_report.get("reproducibility", {})
+            for strategy_report in reports.values()
+            if strategy_report.get("available")
+        ),
+        {},
+    )
+    suite.update({
+        "generated_at": utc_now(),
+        "project_commit": reproducibility.get("head_commit"),
+        "index_commit": reproducibility.get("index_commit"),
+        "working_tree": reproducibility.get("working_tree"),
+        "source_snapshot_sha256": reproducibility.get("source_snapshot_sha256"),
+        "package_version": __version__,
+    })
     suite["quality_gate"] = (
         evaluate_quality_gate(suite, thresholds, baseline)
         if thresholds is not None
@@ -182,6 +205,11 @@ def evaluate_quality_gate(
     minimum_samples = int(thresholds.get("minimum_samples", 1))
     strategy_thresholds = thresholds.get("strategies", {})
     comparable_baseline = baseline
+    if baseline and baseline.get("quality_gate", {}).get("passed") is False:
+        failures.append({
+            "code": "invalid_baseline",
+            "message": "baseline quality gate did not pass; refusing to use a failed report for regression comparison",
+        })
     if baseline:
         current_dataset = report.get("dataset_sha256")
         baseline_dataset = baseline.get("dataset_sha256")
@@ -362,6 +390,41 @@ def _select_markdown_pages(results: list[dict[str, Any]], limit: int = 3) -> lis
     return selected
 
 
+def _rank_markdown_source_paths(
+    api: KnowledgeAPI,
+    results: list[dict[str, Any]],
+    task: str,
+    limit: int = 23,
+) -> list[str]:
+    terms = _task_terms(task)
+    paths = {
+        source.get("path")
+        for item in results
+        for source in item.get("sources", [])
+        if source.get("path")
+    }
+    ranked: list[tuple[int, str]] = []
+    for path in paths:
+        lowered_path = path.lower()
+        content = read_text(api.root / path).lower()
+        score = 5 * sum(1 for term in terms if term in lowered_path)
+        score += sum(1 for term in terms if term in content)
+        ranked.append((score, path))
+    ranked.sort(key=lambda item: (-item[0], item[1]))
+    return [path for _, path in ranked[:limit]]
+
+
+def _select_grep_files(
+    ranked: list[tuple[int, str, str]],
+    limit: int = 5,
+    expansion_min_score: int = 15,
+) -> list[tuple[int, str, str]]:
+    selected = ranked[:limit]
+    if len(ranked) > limit and ranked[limit][0] >= expansion_min_score:
+        selected.append(ranked[limit])
+    return selected
+
+
 def _retrieve(api: KnowledgeAPI, sample: dict[str, Any], strategy: str) -> dict[str, Any]:
     task = sample["task"]
     budget = sample.get("max_tokens", 4000)
@@ -397,7 +460,7 @@ def _retrieve(api: KnowledgeAPI, sample: dict[str, Any], strategy: str) -> dict[
 
     if strategy == "markdown":
         search = api.search(task, limit=10)
-        files: set[str] = set()
+        files = set(_rank_markdown_source_paths(api, search["results"], task))
         symbols: set[str] = set()
         text_parts: list[str] = []
         stale_detected = False
@@ -408,7 +471,6 @@ def _retrieve(api: KnowledgeAPI, sample: dict[str, Any], strategy: str) -> dict[
                 break
             reads += 1
             record = api.get(item["id"])
-            files.update(source.get("path") for source in record["sources"] if source.get("path"))
             symbols.update(source.get("id") for source in record["sources"] if source.get("id"))
             content = record.get("content", item.get("summary", ""))
             content = _relevant_excerpt(content, task, remaining)
@@ -433,7 +495,7 @@ def _retrieve(api: KnowledgeAPI, sample: dict[str, Any], strategy: str) -> dict[
         if score:
             ranked.append((score, item.path, content))
     ranked.sort(key=lambda item: (-item[0], item[1]))
-    selected = ranked[:7]
+    selected = _select_grep_files(ranked)
     return {
         "files": {item[1] for item in selected}, "symbols": set(), "call_path": set(),
         "text": "\n".join(item[2][:4000] for item in selected), "stale_detected": False,

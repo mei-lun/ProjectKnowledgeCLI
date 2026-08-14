@@ -12,11 +12,14 @@ from project_knowledge.evaluate import (
     evaluate,
     evaluate_quality_gate,
     evaluate_suite,
+    _rank_markdown_source_paths,
+    _select_grep_files,
     _select_markdown_pages,
     load_dataset,
 )
 from project_knowledge.performance import run_performance_harness
 from project_knowledge.real_project import run_readonly_mirror
+from project_knowledge.retrieval import KnowledgeAPI
 from project_knowledge.service import ProjectService
 
 
@@ -155,6 +158,21 @@ class EvaluationTests(unittest.TestCase):
         results[-1]["score"] = 2.0
         low_relevance = _select_markdown_pages(results, limit=3)
         self.assertNotIn("generated.module.project_knowledge", [item["id"] for item in low_relevance])
+
+    def test_markdown_source_ranking_prefers_task_relevant_paths(self) -> None:
+        api = KnowledgeAPI(self.root)
+        results = [{"sources": [
+            {"path": "pyproject.toml"},
+            {"path": "src/app.py"},
+        ]}]
+        ranked = _rank_markdown_source_paths(api, results, "AccountService.login", limit=1)
+        self.assertEqual(ranked, ["src/app.py"])
+
+    def test_grep_selection_expands_only_for_a_strong_sixth_match(self) -> None:
+        ranked = [(20 - index, f"file-{index}", "content") for index in range(7)]
+        self.assertEqual(len(_select_grep_files(ranked)), 6)
+        ranked[5] = (14, "file-5", "content")
+        self.assertEqual(len(_select_grep_files(ranked)), 5)
 
     def test_markdown_strategy_respects_sample_token_budget(self) -> None:
         sample = json.loads(self.dataset.read_text(encoding="utf-8"))
