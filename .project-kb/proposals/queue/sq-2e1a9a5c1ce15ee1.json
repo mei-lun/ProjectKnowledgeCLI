@@ -1,0 +1,33 @@
+{
+  "affected_knowledge": [
+    "generated.module.github",
+    "generated.module.scripts",
+    "generated.module.tests",
+    "generated.project-map",
+    "generated.test-map"
+  ],
+  "base_commit": "a3ceb9689c7e8ba7ab6e28fd519e69ee5a8c7f4b",
+  "changed_files": [
+    ".github/workflows/quality.yml",
+    "scripts/validate_ci_workflow.py",
+    "tests/test_delivery_reliability.py"
+  ],
+  "changed_symbols": [
+    "scripts/validate_ci_workflow.py::<module>",
+    "scripts/validate_ci_workflow.py::validate_quality_workflow",
+    "tests/test_delivery_reliability.py::<module>",
+    "tests/test_delivery_reliability.py::DeliveryReliabilityTests",
+    "tests/test_delivery_reliability.py::DeliveryReliabilityTests.test_quality_workflow_is_structurally_valid",
+    "tests/test_delivery_reliability.py::DeliveryReliabilityTests.test_quality_workflow_rejects_a_baseline_for_another_dataset",
+    "tests/test_delivery_reliability.py::DeliveryReliabilityTests.test_failed_baseline_is_a_quality_gate_failure",
+    "tests/test_delivery_reliability.py::DeliveryReliabilityTests.test_suite_report_has_current_provenance",
+    "tests/test_delivery_reliability.py::DeliveryReliabilityTests.test_doctor_reports_package_source_provenance"
+  ],
+  "changeset_id": "change-20260815-200206",
+  "created_at": "2026-08-15T20:02:06+08:00",
+  "head_commit": "e3e8fec0f46c1fe48a50496864a05de84f3da103",
+  "queue_id": "sq-2e1a9a5c1ce15ee1",
+  "schema_version": 1,
+  "status": "awaiting_semantic_generation",
+  "task_summary": "release finalization"
+}

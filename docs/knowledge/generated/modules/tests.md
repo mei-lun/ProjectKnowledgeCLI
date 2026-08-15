@@ -64,9 +64,10 @@
 - `tests/test_config.py::ConfigTests.test_capability_warnings_name_every_unwired_setting`：方法，位于 `tests/test_config.py:50`（可信度 1.00）
 - `tests/test_delivery_reliability.py::DeliveryReliabilityTests`：类，位于 `tests/test_delivery_reliability.py:13`（可信度 1.00）
 - `tests/test_delivery_reliability.py::DeliveryReliabilityTests.test_quality_workflow_is_structurally_valid`：方法，位于 `tests/test_delivery_reliability.py:16`（可信度 1.00）
-- `tests/test_delivery_reliability.py::DeliveryReliabilityTests.test_failed_baseline_is_a_quality_gate_failure`：方法，位于 `tests/test_delivery_reliability.py:20`（可信度 1.00）
-- `tests/test_delivery_reliability.py::DeliveryReliabilityTests.test_suite_report_has_current_provenance`：方法，位于 `tests/test_delivery_reliability.py:35`（可信度 1.00）
-- `tests/test_delivery_reliability.py::DeliveryReliabilityTests.test_doctor_reports_package_source_provenance`：方法，位于 `tests/test_delivery_reliability.py:58`（可信度 1.00）
+- `tests/test_delivery_reliability.py::DeliveryReliabilityTests.test_quality_workflow_rejects_a_baseline_for_another_dataset`：方法，位于 `tests/test_delivery_reliability.py:20`（可信度 1.00）
+- `tests/test_delivery_reliability.py::DeliveryReliabilityTests.test_failed_baseline_is_a_quality_gate_failure`：方法，位于 `tests/test_delivery_reliability.py:51`（可信度 1.00）
+- `tests/test_delivery_reliability.py::DeliveryReliabilityTests.test_suite_report_has_current_provenance`：方法，位于 `tests/test_delivery_reliability.py:66`（可信度 1.00）
+- `tests/test_delivery_reliability.py::DeliveryReliabilityTests.test_doctor_reports_package_source_provenance`：方法，位于 `tests/test_delivery_reliability.py:89`（可信度 1.00）
 - `tests/test_documentation_roadmap.py::DocumentationRoadmapTests`：类，位于 `tests/test_documentation_roadmap.py:7`（可信度 1.00）
 - `tests/test_documentation_roadmap.py::DocumentationRoadmapTests.setUpClass`：方法，位于 `tests/test_documentation_roadmap.py:9`（可信度 1.00）
 - `tests/test_documentation_roadmap.py::DocumentationRoadmapTests.test_readme_is_project_neutral_and_only_describes_current_workflows`：方法，位于 `tests/test_documentation_roadmap.py:13`（可信度 1.00）
@@ -330,7 +331,7 @@
 
 ## 结构关系
 
-> 关系内容已截断：共 3007 条，当前页面仅展示前 150 条；请使用 knowledge_impact 获取完整的任务相关子图。
+> 关系内容已截断：共 3019 条，当前页面仅展示前 150 条；请使用 knowledge_impact 获取完整的任务相关子图。
 
 - `tests/test_engine_wp01_wp02.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
 - `tests/test_engine_wp01_wp02.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
@@ -467,11 +468,6 @@
 - `tests/test_initialization_workflow.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
 - `tests/test_initialization_workflow.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
 - `tests/test_initialization_workflow.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
-- `tests/test_delivery_reliability.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `tests/test_delivery_reliability.py::<module>` 导入 `json`（可信度 1.00，未解析）
-- `tests/test_delivery_reliability.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
-- `tests/test_delivery_reliability.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
-- `tests/test_delivery_reliability.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
 - `tests/test_codegraph.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
 - `tests/test_codegraph.py::<module>` 导入 `json`（可信度 1.00，未解析）
 - `tests/test_codegraph.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
@@ -482,3 +478,8 @@
 - `tests/test_codegraph_validation.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
 - `tests/test_codegraph_validation.py::<module>` 导入 `sys`（可信度 1.00，未解析）
 - `tests/test_codegraph_validation.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
+- `tests/test_codegraph_validation.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
+- `tests/test_codegraph_validation.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `tests/test_documentation_roadmap.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `tests/test_documentation_roadmap.py::<module>` 导入 `unittest`（可信度 1.00，未解析）
+- `tests/test_documentation_roadmap.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）

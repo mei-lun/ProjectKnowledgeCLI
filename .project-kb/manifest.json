@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-15T19:57:12+08:00",
+  "generated_at": "2026-08-15T20:02:06+08:00",
   "project": "ProjectKnowledgeCLI",
   "records": [
     {
@@ -712,10 +712,10 @@
       "confidence": "generated",
       "id": "generated.entrypoints",
       "kind": "entrypoint",
-      "last_generated_at": "2026-08-15T19:57:12+08:00",
+      "last_generated_at": "2026-08-15T20:02:06+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/entrypoints.md",
-      "source_commit": "a3ceb9689c7e8ba7ab6e28fd519e69ee5a8c7f4b",
+      "source_commit": "e3e8fec0f46c1fe48a50496864a05de84f3da103",
       "source_hashes": {
         "src/project_knowledge/engine.py": "sha256:e6a2e0cc44e2f00fead89d97bcf8c015f81432cef2652188e90678d0e79cd298",
         "src/project_knowledge/knowledge.py": "sha256:ab16f6c9ac5cc167ba713a4b4682301d865be3565646d9296da0f0ea6c54cc6d"
@@ -743,10 +743,10 @@
       "confidence": "generated",
       "id": "generated.module.evaluation",
       "kind": "module",
-      "last_generated_at": "2026-08-15T19:57:12+08:00",
+      "last_generated_at": "2026-08-15T20:02:06+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/evaluation.md",
-      "source_commit": "a3ceb9689c7e8ba7ab6e28fd519e69ee5a8c7f4b",
+      "source_commit": "e3e8fec0f46c1fe48a50496864a05de84f3da103",
       "source_hashes": {
         "evaluation/performance_harness.py": "sha256:e2e4e3180624bb56a5cd72c4ec4becd6b2fe4a9b044bd4f1d5bac409084b65e0",
         "evaluation/real_project_harness.py": "sha256:d970b13db02dcc3f0f6500599a5018a9fd37595186a275a9f6aa8e4b3922a915",
@@ -777,12 +777,12 @@
       "confidence": "generated",
       "id": "generated.module.github",
       "kind": "module",
-      "last_generated_at": "2026-08-15T19:57:12+08:00",
+      "last_generated_at": "2026-08-15T20:02:06+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/github.md",
-      "source_commit": "a3ceb9689c7e8ba7ab6e28fd519e69ee5a8c7f4b",
+      "source_commit": "e3e8fec0f46c1fe48a50496864a05de84f3da103",
       "source_hashes": {
-        ".github/workflows/quality.yml": "sha256:621755c482c36b8ca07a9cdd59b92416892c8e166eca1a8f7b1519ffa2460aa9"
+        ".github/workflows/quality.yml": "sha256:3c878ea951887ed81767afeac3bcab40c10f39688085dc830623df73e37e9989"
       },
       "sources": [
         {
@@ -801,10 +801,10 @@
       "confidence": "generated",
       "id": "generated.module.plugins",
       "kind": "module",
-      "last_generated_at": "2026-08-15T19:57:12+08:00",
+      "last_generated_at": "2026-08-15T20:02:06+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/plugins.md",
-      "source_commit": "a3ceb9689c7e8ba7ab6e28fd519e69ee5a8c7f4b",
+      "source_commit": "e3e8fec0f46c1fe48a50496864a05de84f3da103",
       "source_hashes": {
         "plugins/project-knowledge/.codex-plugin/plugin.json": "sha256:1e48c427e351f8e3e8349a2b090c0d0f47d61e9f8c481c32c8c95e6a1bd08155",
         "plugins/project-knowledge/.mcp.json": "sha256:072d3643cbe55c77fda5316adb51858e49132b1aac079a741c811a26b3b94c1e",
@@ -845,10 +845,10 @@
       "confidence": "generated",
       "id": "generated.module.project_knowledge",
       "kind": "module",
-      "last_generated_at": "2026-08-15T19:57:12+08:00",
+      "last_generated_at": "2026-08-15T20:02:06+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/project_knowledge.md",
-      "source_commit": "a3ceb9689c7e8ba7ab6e28fd519e69ee5a8c7f4b",
+      "source_commit": "e3e8fec0f46c1fe48a50496864a05de84f3da103",
       "source_hashes": {
         "src/project_knowledge/__init__.py": "sha256:ed0d3e73c7a12c3521de1e8ce6a5594b390202ac1d10168837cdaa17fd943ae4",
         "src/project_knowledge/__main__.py": "sha256:2cdd23d4f5cd6c3b3e4cb690ad16d560637767b9ca5b2a3cf129fcc0a5ebc82b",
@@ -1019,10 +1019,10 @@
       "confidence": "generated",
       "id": "generated.module.root",
       "kind": "module",
-      "last_generated_at": "2026-08-15T19:57:12+08:00",
+      "last_generated_at": "2026-08-15T20:02:06+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/root.md",
-      "source_commit": "a3ceb9689c7e8ba7ab6e28fd519e69ee5a8c7f4b",
+      "source_commit": "e3e8fec0f46c1fe48a50496864a05de84f3da103",
       "source_hashes": {
         ".project-kb.yml": "sha256:4d35a65e2ab330b86d95da9c188599dc93fb19057afb19235fcaa02e50e62dc0",
         "pyproject.toml": "sha256:8723ebe262c16975fa387bbe4365ee73f394546c9c050f4fcd81288d1097d206"
@@ -1048,13 +1048,13 @@
       "confidence": "generated",
       "id": "generated.module.scripts",
       "kind": "module",
-      "last_generated_at": "2026-08-15T19:57:12+08:00",
+      "last_generated_at": "2026-08-15T20:02:06+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/scripts.md",
-      "source_commit": "a3ceb9689c7e8ba7ab6e28fd519e69ee5a8c7f4b",
+      "source_commit": "e3e8fec0f46c1fe48a50496864a05de84f3da103",
       "source_hashes": {
         "scripts/bump_version.py": "sha256:84f254dec8f3c3e1fd1dd58d995a675db61fd03839c215cf77733ad41c0c821d",
-        "scripts/validate_ci_workflow.py": "sha256:0ef6e45beca3f6f7d280d3ce607139bb468cb696046cd090342ff11ea1cde40b",
+        "scripts/validate_ci_workflow.py": "sha256:375551f71554ec1680e3001ad8b7f227f6fac75382ba3289a7e2042535fda93a",
         "scripts/validate_codegraph_adapter.py": "sha256:745515115c8c33634c76d98be05ac2dc6b3ec461ae9036f69c8ab267fc79e0c9",
         "scripts/validate_gardenserver_guidance_workflow.py": "sha256:72cb18dc8ee95bee5fe9e7531ea2d56c67eb427f27307af007f0b038528e362f"
       },
@@ -1087,16 +1087,16 @@
       "confidence": "generated",
       "id": "generated.module.tests",
       "kind": "module",
-      "last_generated_at": "2026-08-15T19:57:12+08:00",
+      "last_generated_at": "2026-08-15T20:02:06+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/tests.md",
-      "source_commit": "a3ceb9689c7e8ba7ab6e28fd519e69ee5a8c7f4b",
+      "source_commit": "e3e8fec0f46c1fe48a50496864a05de84f3da103",
       "source_hashes": {
         "tests/__init__.py": "sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
         "tests/test_codegraph.py": "sha256:77b0822f8858c98bd7ec57466762711009514cf06b5edb997f78217b72bced62",
         "tests/test_codegraph_validation.py": "sha256:d7d429099a2003e11142173df710a4196a76c32e2a99b2178b72ade810772a4f",
         "tests/test_config.py": "sha256:d6ccc0292cac93fc65d588045a27108d5c50a2a3e8155969eeb03aafa7508646",
-        "tests/test_delivery_reliability.py": "sha256:a57f7931e9d7308c541272fc145366aa087b591e46a8706cf5aefe9743a888a1",
+        "tests/test_delivery_reliability.py": "sha256:270e6cc9c52580fd8866ba871c212b4043ca7712fb28d6ff7cbee2ac43b87bdf",
         "tests/test_documentation_roadmap.py": "sha256:54e989c563f2c7aea4b3987f9171a5fba04c0f1825dda722fb0ba4539d995e6d",
         "tests/test_engine.py": "sha256:257e5b3065f3f87f171b145a47c6de0656575ffa0b652093103cb71e1eead696",
         "tests/test_engine_wp01_wp02.py": "sha256:aa008f1f56889e0c981ba8f73a59c449e866fa1bdc27d44cc0c1abc6081d0a9a",
@@ -1261,12 +1261,12 @@
       "confidence": "generated",
       "id": "generated.project-map",
       "kind": "project",
-      "last_generated_at": "2026-08-15T19:57:12+08:00",
+      "last_generated_at": "2026-08-15T20:02:06+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/project-map.md",
-      "source_commit": "a3ceb9689c7e8ba7ab6e28fd519e69ee5a8c7f4b",
+      "source_commit": "e3e8fec0f46c1fe48a50496864a05de84f3da103",
       "source_hashes": {
-        ".github/workflows/quality.yml": "sha256:621755c482c36b8ca07a9cdd59b92416892c8e166eca1a8f7b1519ffa2460aa9",
+        ".github/workflows/quality.yml": "sha256:3c878ea951887ed81767afeac3bcab40c10f39688085dc830623df73e37e9989",
         ".project-kb.yml": "sha256:4d35a65e2ab330b86d95da9c188599dc93fb19057afb19235fcaa02e50e62dc0",
         "evaluation/performance_harness.py": "sha256:e2e4e3180624bb56a5cd72c4ec4becd6b2fe4a9b044bd4f1d5bac409084b65e0",
         "evaluation/real_project_harness.py": "sha256:d970b13db02dcc3f0f6500599a5018a9fd37595186a275a9f6aa8e4b3922a915",
@@ -1278,7 +1278,7 @@
         "plugins/project-knowledge/skills/project-knowledge/agents/openai.yaml": "sha256:dfb233e13fa9e0b3a8448a697db0b865606beeb94d073989d065446ae3e65268",
         "pyproject.toml": "sha256:8723ebe262c16975fa387bbe4365ee73f394546c9c050f4fcd81288d1097d206",
         "scripts/bump_version.py": "sha256:84f254dec8f3c3e1fd1dd58d995a675db61fd03839c215cf77733ad41c0c821d",
-        "scripts/validate_ci_workflow.py": "sha256:0ef6e45beca3f6f7d280d3ce607139bb468cb696046cd090342ff11ea1cde40b",
+        "scripts/validate_ci_workflow.py": "sha256:375551f71554ec1680e3001ad8b7f227f6fac75382ba3289a7e2042535fda93a",
         "scripts/validate_codegraph_adapter.py": "sha256:745515115c8c33634c76d98be05ac2dc6b3ec461ae9036f69c8ab267fc79e0c9",
         "scripts/validate_gardenserver_guidance_workflow.py": "sha256:72cb18dc8ee95bee5fe9e7531ea2d56c67eb427f27307af007f0b038528e362f",
         "src/project_knowledge/__init__.py": "sha256:ed0d3e73c7a12c3521de1e8ce6a5594b390202ac1d10168837cdaa17fd943ae4",
@@ -1316,7 +1316,7 @@
         "tests/test_codegraph.py": "sha256:77b0822f8858c98bd7ec57466762711009514cf06b5edb997f78217b72bced62",
         "tests/test_codegraph_validation.py": "sha256:d7d429099a2003e11142173df710a4196a76c32e2a99b2178b72ade810772a4f",
         "tests/test_config.py": "sha256:d6ccc0292cac93fc65d588045a27108d5c50a2a3e8155969eeb03aafa7508646",
-        "tests/test_delivery_reliability.py": "sha256:a57f7931e9d7308c541272fc145366aa087b591e46a8706cf5aefe9743a888a1",
+        "tests/test_delivery_reliability.py": "sha256:270e6cc9c52580fd8866ba871c212b4043ca7712fb28d6ff7cbee2ac43b87bdf",
         "tests/test_documentation_roadmap.py": "sha256:54e989c563f2c7aea4b3987f9171a5fba04c0f1825dda722fb0ba4539d995e6d",
         "tests/test_engine.py": "sha256:257e5b3065f3f87f171b145a47c6de0656575ffa0b652093103cb71e1eead696",
         "tests/test_engine_wp01_wp02.py": "sha256:aa008f1f56889e0c981ba8f73a59c449e866fa1bdc27d44cc0c1abc6081d0a9a",
@@ -1667,10 +1667,10 @@
       "confidence": "generated",
       "id": "generated.routes",
       "kind": "route",
-      "last_generated_at": "2026-08-15T19:57:12+08:00",
+      "last_generated_at": "2026-08-15T20:02:06+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/routes.md",
-      "source_commit": "a3ceb9689c7e8ba7ab6e28fd519e69ee5a8c7f4b",
+      "source_commit": "e3e8fec0f46c1fe48a50496864a05de84f3da103",
       "sources": [],
       "status": "fresh",
       "tags": [
@@ -1683,16 +1683,16 @@
       "confidence": "generated",
       "id": "generated.test-map",
       "kind": "test",
-      "last_generated_at": "2026-08-15T19:57:12+08:00",
+      "last_generated_at": "2026-08-15T20:02:06+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/test-map.md",
-      "source_commit": "a3ceb9689c7e8ba7ab6e28fd519e69ee5a8c7f4b",
+      "source_commit": "e3e8fec0f46c1fe48a50496864a05de84f3da103",
       "source_hashes": {
         "tests/__init__.py": "sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
         "tests/test_codegraph.py": "sha256:77b0822f8858c98bd7ec57466762711009514cf06b5edb997f78217b72bced62",
         "tests/test_codegraph_validation.py": "sha256:d7d429099a2003e11142173df710a4196a76c32e2a99b2178b72ade810772a4f",
         "tests/test_config.py": "sha256:d6ccc0292cac93fc65d588045a27108d5c50a2a3e8155969eeb03aafa7508646",
-        "tests/test_delivery_reliability.py": "sha256:a57f7931e9d7308c541272fc145366aa087b591e46a8706cf5aefe9743a888a1",
+        "tests/test_delivery_reliability.py": "sha256:270e6cc9c52580fd8866ba871c212b4043ca7712fb28d6ff7cbee2ac43b87bdf",
         "tests/test_documentation_roadmap.py": "sha256:54e989c563f2c7aea4b3987f9171a5fba04c0f1825dda722fb0ba4539d995e6d",
         "tests/test_engine.py": "sha256:257e5b3065f3f87f171b145a47c6de0656575ffa0b652093103cb71e1eead696",
         "tests/test_engine_wp01_wp02.py": "sha256:aa008f1f56889e0c981ba8f73a59c449e866fa1bdc27d44cc0c1abc6081d0a9a",
@@ -1855,5 +1855,5 @@
     }
   ],
   "schema_version": 1,
-  "source_commit": "a3ceb9689c7e8ba7ab6e28fd519e69ee5a8c7f4b"
+  "source_commit": "e3e8fec0f46c1fe48a50496864a05de84f3da103"
 }
