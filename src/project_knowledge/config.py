@@ -11,6 +11,7 @@ from .util import atomic_write
 
 DEFAULT_EXCLUDES = [
     ".git/**",
+    ".worktrees/**",
     ".project-kb/**",
     ".project-kb/drafts/**",
     ".venv/**",

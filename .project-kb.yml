@@ -9,6 +9,7 @@ index:
     - **/*
   exclude:
     - .git/**
+    - .worktrees/**
     - .project-kb/**
     - .venv/**
     - venv/**

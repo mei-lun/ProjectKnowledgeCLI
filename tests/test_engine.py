@@ -86,6 +86,23 @@ def create_item():
             self.assertNotIn("evaluation/reports/latest.json", paths)
             self.assertNotIn("evaluation/baselines/base.json", paths)
 
+    def test_discovery_excludes_internal_git_worktrees(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "src").mkdir()
+            (root / ".worktrees" / "feature" / "src").mkdir(parents=True)
+            (root / "src" / "app.py").write_text("def app(): pass\n", encoding="utf-8")
+            (root / ".worktrees" / "feature" / "src" / "duplicate.py").write_text(
+                "def duplicate(): pass\n",
+                encoding="utf-8",
+            )
+
+            config = ProjectConfig()
+            paths = {item.path for item in create_engine(config).discover(root, config)}
+
+            self.assertIn("src/app.py", paths)
+            self.assertNotIn(".worktrees/feature/src/duplicate.py", paths)
+
 
 if __name__ == "__main__":
     unittest.main()

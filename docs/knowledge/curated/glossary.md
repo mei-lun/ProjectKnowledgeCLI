@@ -1,5 +1,7 @@
 # 术语表
 
+0.1.28 人工复核：Proposal 的稳定 ID、来源哈希、审核状态和 generated block 边界仍与当前实现一致；本次同时确认新鲜度四态及人工复核语义没有因发布最终化与 CodeGraph 主链路调整而改变。
+
 - **自动生成知识（Generated Knowledge）**：PKS 可根据当前代码索引以原子方式替换的确定性 Markdown。
 - **人工维护知识（Curated Knowledge）**：经过人工评审的项目意图和规则。PKS 可以更新其状态和生成块，但不会修改人工正文。
 - **来源锚点（Source anchor）**：用于追溯知识陈述的相对文件路径或稳定符号 ID。

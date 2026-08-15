@@ -1,6 +1,6 @@
 # Provider 与 EvidencePack
 
-0.1.6 人工复核：Proposal Schema 的新增不改变 Provider 外发授权、EvidencePack 脱敏和草案落库前校验边界；Feature Guide 草案转 Proposal 时只读取已经本地校验并持久化的草案与来源哈希，不会新增网络请求。
+0.1.28 人工复核：当前 Proposal Schema、CLI 和 Provider 配置仍不改变外发授权、EvidencePack 脱敏和草案落库前校验边界；Feature Guide 草案转 Proposal 时只读取已经本地校验并持久化的草案与来源哈希，不会新增网络请求。发布最终化和 CodeGraph Adapter 也不绕过这些边界。
 
 ## 职责
 
@@ -30,11 +30,11 @@
 3. 在 `provider_policy_issues` 中声明所有执行授权前置条件。
 4. 不在配置、异常、日志、缓存或检查点中记录凭据值与未脱敏证据。
 5. 增加 disabled、授权拒绝、dry-run、成功、超时、重试、取消、非法 Schema 和 Secret 泄漏测试。
-6. 更新 Provider/模型/提示词/输出 Schema 版本，并重跑当前 35 题质量门。
+6. 更新 Provider/模型/提示词/输出 Schema 版本，并重跑当前 40 题质量门。
 
 ## 当前边界
 
-当前 HTTP JSON 协议是通用本地/云端传输边界，不代表已经选择真实生产模型。云部署位置和源码允许外发范围仍等待 D-001/D-002。Feature Guide 输出 Schema、二次来源校验和 draft 落库已由 WP-04 完成；0.1.6 的 WP-05 允许草案经显式审核进入 curated generated block，但不自动证明语义正确。
+当前 HTTP JSON 协议是通用本地/云端传输边界，不代表已经选择真实生产模型。云部署位置和源码允许外发范围仍等待 D-001/D-002。Feature Guide 输出 Schema、二次来源校验和 draft 落库已由 WP-04 完成；WP-05 允许草案经显式审核进入 curated generated block，但不自动证明语义正确。
 
 <!-- project-kb:source file="src/project_knowledge/proposal.py" -->
 
