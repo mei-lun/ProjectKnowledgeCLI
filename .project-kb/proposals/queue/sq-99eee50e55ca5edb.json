@@ -1,0 +1,52 @@
+{
+  "affected_knowledge": [
+    "curated.conventions",
+    "curated.provider.and.evidence",
+    "generated.module.plugins",
+    "generated.module.project_knowledge",
+    "generated.module.root",
+    "generated.module.tests",
+    "generated.project-map",
+    "generated.test-map"
+  ],
+  "base_commit": "90f25ed2c2f839516140f160879b0eb296f25bfd",
+  "changed_files": [
+    ".project-kb.yml",
+    "plugins/project-knowledge/.codex-plugin/plugin.json",
+    "src/project_knowledge/__init__.py",
+    "src/project_knowledge/config.py",
+    "tests/test_engine.py"
+  ],
+  "changed_symbols": [
+    "src/project_knowledge/__init__.py::<module>",
+    "src/project_knowledge/config.py::<module>",
+    "src/project_knowledge/config.py::ProjectConfig",
+    "src/project_knowledge/config.py::ProjectConfig.load_raw",
+    "src/project_knowledge/config.py::ProjectConfig.validate_file",
+    "src/project_knowledge/config.py::ProjectConfig.migrate_file",
+    "src/project_knowledge/config.py::ProjectConfig.load",
+    "src/project_knowledge/config.py::ProjectConfig.dump",
+    "src/project_knowledge/config.py::ProjectConfig.dump.lines",
+    "src/project_knowledge/config.py::ProjectConfig.write",
+    "src/project_knowledge/config.py::ProjectConfig.capability_warnings",
+    "src/project_knowledge/config.py::_scalar",
+    "src/project_knowledge/config.py::parse_simple_yaml",
+    "tests/test_engine.py::<module>",
+    "tests/test_engine.py::EngineTests",
+    "tests/test_engine.py::EngineTests.test_python_ast_extracts_symbols_calls_inheritance_and_routes",
+    "tests/test_engine.py::EngineTests.test_invalid_python_reports_parse_error",
+    "tests/test_engine.py::EngineTests.test_generic_parser_marks_relations_low_confidence",
+    "tests/test_engine.py::EngineTests.test_codegraph_engine_is_available_as_a_public_adapter",
+    "tests/test_engine.py::EngineTests.test_generic_parser_disambiguates_repeated_lua_function_ids",
+    "tests/test_engine.py::EngineTests.test_python_parser_disambiguates_repeated_definition_ids",
+    "tests/test_engine.py::EngineTests.test_discovery_excludes_evaluation_outputs_to_prevent_self_contamination",
+    "tests/test_engine.py::EngineTests.test_discovery_excludes_internal_git_worktrees"
+  ],
+  "changeset_id": "change-20260815-195343",
+  "created_at": "2026-08-15T19:53:43+08:00",
+  "head_commit": "097f708be3f4b144d42dd40bcba035a9d467ee42",
+  "queue_id": "sq-99eee50e55ca5edb",
+  "schema_version": 1,
+  "status": "awaiting_semantic_generation",
+  "task_summary": "release finalization"
+}

@@ -32,7 +32,7 @@
 - `evaluation/performance_harness.py::main` 调用 `parser.add_argument`（可信度 0.80，未解析）
 - `evaluation/performance_harness.py::main` 调用 `parser.add_argument`（可信度 0.80，未解析）
 - `evaluation/performance_harness.py::main` 调用 `parser.add_argument`（可信度 0.80，未解析）
-- `evaluation/performance_harness.py::main` 调用 `parser.parse_args`（可信度 0.80，未解析）
+- `evaluation/performance_harness.py::main` 调用 `.worktrees/wp11-release-codegraph-retrieval/.venv/Lib/site-packages/pip/_internal/cli/base_command.py::Command.parse_args`（可信度 0.80，已解析）
 - `evaluation/performance_harness.py::main` 调用 `src/project_knowledge/performance.py::run_performance_harness`（可信度 0.80，已解析）
 - `evaluation/performance_harness.py::main` 调用 `src/project_knowledge/util.py::atomic_json`（可信度 0.80，已解析）
 - `evaluation/performance_harness.py::main` 调用 `print`（可信度 0.80，未解析）
@@ -44,7 +44,7 @@
 - `evaluation/real_project_harness.py::main` 调用 `parser.add_argument`（可信度 0.80，未解析）
 - `evaluation/real_project_harness.py::main` 调用 `parser.add_argument`（可信度 0.80，未解析）
 - `evaluation/real_project_harness.py::main` 调用 `parser.add_argument`（可信度 0.80，未解析）
-- `evaluation/real_project_harness.py::main` 调用 `parser.parse_args`（可信度 0.80，未解析）
+- `evaluation/real_project_harness.py::main` 调用 `.worktrees/wp11-release-codegraph-retrieval/.venv/Lib/site-packages/pip/_internal/cli/base_command.py::Command.parse_args`（可信度 0.80，已解析）
 - `evaluation/real_project_harness.py::main` 调用 `src/project_knowledge/real_project.py::inspect_readonly_scope`（可信度 0.80，已解析）
 - `evaluation/real_project_harness.py::main` 调用 `src/project_knowledge/real_project.py::run_readonly_mirror`（可信度 0.80，已解析）
 - `evaluation/real_project_harness.py::main` 调用 `src/project_knowledge/util.py::atomic_json`（可信度 0.80，已解析）
