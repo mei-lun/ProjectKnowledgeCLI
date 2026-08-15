@@ -9,10 +9,10 @@
 
 | 需求 ID | 交付内容 | 验收证据 | 状态 |
 | --- | --- | --- | --- |
-| REL-006 | 排除仓库内部 `.worktrees/**`，防止隔离工作树重复进入索引 | `tests/test_engine.py`、`.project-kb.yml` | 验收中 |
-| EVAL-001 | 冻结与当前 40 题数据集一致的 0.1.28 基线，并在干净工作区执行可比回归 | `evaluation/baselines/self-repo-0.1.28.json`、`evaluation/reports/latest.json` | 验收中 |
-| DOC-001 | 取消审计中的重复实测指标，以版本化 JSON 报告作为唯一指标源 | `docs/project-knowledge-system-audit.md` | 验收中 |
-| KNOW-001 | 复核所有来源变化的人工知识并完成发布最终化 | `project-kb status`、`project-kb finalize --check` | 验收中 |
+| REL-006 | 排除仓库内部 `.worktrees/**`，防止隔离工作树重复进入索引 | `tests/test_engine.py`、`.project-kb.yml` | 已完成 |
+| EVAL-001 | 冻结与当前 40 题数据集一致的 0.1.28 基线，并在干净工作区执行可比回归 | `evaluation/baselines/self-repo-0.1.28.json`、`evaluation/reports/latest.json` | 已完成 |
+| DOC-001 | 取消审计中的重复实测指标，以版本化 JSON 报告作为唯一指标源 | `docs/project-knowledge-system-audit.md` | 已完成 |
+| KNOW-001 | 复核所有来源变化的人工知识并完成发布最终化 | `project-kb status`、`project-kb finalize --check` | 已完成 |
 
 ### 0.1.28 验收标准
 

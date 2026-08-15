@@ -2,7 +2,7 @@
 
 > 当前版本：0.1.28
 > 复核日期：2026-08-15  
-> 报告状态：0.1.28 WP-11-HF 审计问题修复与发布复核
+> 报告状态：0.1.28 WP-11-HF 审计问题已修复并完成发布复核
 > 默认语言：中文
 
 ## 当前交付复核：WP-11 / WP-11-HF
@@ -17,10 +17,10 @@
 | CG-006 | 已完成 | `KnowledgeAPI` 在 SQLite 符号和关系为空时仍通过所选 CodeGraph 引擎返回实时事实，并由正负测试覆盖 |
 | RET-001～RET-005 | 已完成 | 已修正陈旧锚点并实施分阶段证据选择、依赖优先、核心文件上限、Markdown 引用约束和 `selection_reasons` 可解释输出 |
 | RET-006 | 已完成 | 40 题正式评测通过冻结绝对门槛；实测指标和可比回归结论见 `evaluation/reports/latest.json` |
-| REL-006 | 验收中 | 默认配置和本项目配置排除 `.worktrees/**`，真实发现测试证明内部 Git worktree 不进入索引 |
-| EVAL-001 | 验收中 | 0.1.28 使用与当前 40 题数据集相同哈希的冻结基线，在干净工作区执行绝对质量门和可比回归 |
-| DOC-001 | 验收中 | 审计不再复制评测实测值，版本化 JSON 报告是唯一指标源 |
-| KNOW-001 | 验收中 | 对来源变化的 curated/decision 正文逐条人工复核，最终 `stale_knowledge` 必须为 0 |
+| REL-006 | 已完成 | 默认配置和本项目配置排除 `.worktrees/**`，真实发现测试证明内部 Git worktree 不进入索引 |
+| EVAL-001 | 已完成 | 0.1.28 使用与当前 40 题数据集相同哈希的冻结基线；正式报告记录干净工作区，绝对质量门和可比回归均通过，且无 `baseline_dataset_mismatch` |
+| DOC-001 | 已完成 | 审计不再复制评测实测值，版本化 JSON 报告是唯一指标源；CI 校验器拒绝题集哈希不匹配的基线 |
+| KNOW-001 | 已完成 | 来源变化的 curated/decision 已逐条人工复核；`stale_knowledge=0`、`conflicted_knowledge=0`，`finalize --check` 返回 `ready` |
 
 当前限制：本仓库配置仍使用 builtin，因此自仓 codegraph 策略会明确报告 `adapter_unavailable`；真实 Adapter 能力由独立临时夹具证明。CodeGraph 仍不能证明动态分派、反射、运行时依赖注入等事实。真实业务项目覆盖率、查询性能和人工知识审核流程将在 WP-12 继续扩展，不能因本轮技术夹具通过而宣称最终产品目标已完成。
 
