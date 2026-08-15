@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import hashlib
+import json
+import shlex
 from pathlib import Path
 
 
@@ -45,6 +48,30 @@ def validate_quality_workflow(path: str | Path) -> tuple[bool, list[str]]:
         errors.append("quality job must pass evaluation thresholds")
     if not any("--baseline evaluation/baselines/" in line for _, line in command_lines):
         errors.append("quality job must compare against a passing evaluation baseline")
+    command = " ".join(line.strip() for _, line in command_lines)
+    try:
+        arguments = shlex.split(command)
+    except ValueError as error:
+        errors.append(f"quality job command cannot be parsed: {error}")
+        arguments = []
+    if arguments:
+        try:
+            dataset_argument = arguments[arguments.index("evaluate") + 1]
+            baseline_argument = arguments[arguments.index("--baseline") + 1]
+        except (ValueError, IndexError):
+            pass
+        else:
+            root = workflow.parents[2]
+            dataset = root / dataset_argument
+            baseline = root / baseline_argument
+            try:
+                dataset_hash = "sha256:" + hashlib.sha256(dataset.read_bytes()).hexdigest()
+                baseline_payload = json.loads(baseline.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError) as error:
+                errors.append(f"quality evaluation input cannot be read: {error}")
+            else:
+                if baseline_payload.get("dataset_sha256") != dataset_hash:
+                    errors.append("quality baseline dataset hash does not match evaluation dataset")
     if not any(line.strip() == "run: project-kb finalize . --check --json" for line in lines):
         errors.append("quality job must verify deterministic release finalization")
     return not errors, errors

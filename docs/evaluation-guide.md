@@ -37,7 +37,7 @@ project-kb evaluate evaluation/questions.jsonl \
   --project . \
   --strategy all \
   --thresholds evaluation/thresholds.json \
-  --baseline evaluation/baselines/self-repo-0.1.26.json \
+  --baseline evaluation/baselines/self-repo-0.1.28.json \
   --output evaluation/reports/latest.json \
   --json
 ```
@@ -47,6 +47,8 @@ project-kb evaluate evaluation/questions.jsonl \
 0.1.3 首次冻结前先排除了 `evaluation/reports/**` 和 `evaluation/baselines/**`，防止历史答案进入下一轮被测索引。稳定轮次实测 grep+Read 文件召回率/精确率为 `0.675/0.29375`、only-Markdown 文件精确率为 `0.087313`，对应门槛以小幅跨环境余量冻结为 `0.67/0.29/0.085`。这组数值是当前能力下限，不是产品目标；冻结后的任何降低都必须有新证据、版本记录和人工复核。
 
 0.1.4 将快速集扩展到 25 题，最低样本数同步提升为 25，未降低任何指标阈值。基线比较只有在 `dataset_sha256` 相同时才执行；数据集变化时报告 `baseline_dataset_mismatch` 并只检查绝对阈值，避免比较不可比的汇总均值。only-Markdown 每题最多读取三页，并在总 Token 预算内抽取与任务相关的片段。
+
+0.1.28 基线使用当前 40 题数据集在干净工作区生成，CI 校验器会同时验证基线文件存在且 `dataset_sha256` 与题集一致；不允许继续引用只能执行绝对门、无法进行可比回归的旧基线。
 
 ## 性能评测
 

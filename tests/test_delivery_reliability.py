@@ -17,6 +17,37 @@ class DeliveryReliabilityTests(unittest.TestCase):
         valid, errors = validate_quality_workflow(self.ROOT / ".github" / "workflows" / "quality.yml")
         self.assertTrue(valid, errors)
 
+    def test_quality_workflow_rejects_a_baseline_for_another_dataset(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            workflow = root / ".github" / "workflows" / "quality.yml"
+            workflow.parent.mkdir(parents=True)
+            (root / "evaluation" / "baselines").mkdir(parents=True)
+            (root / "evaluation" / "questions.jsonl").write_text('{"id":"current"}\n', encoding="utf-8")
+            (root / "evaluation" / "thresholds.json").write_text("{}\n", encoding="utf-8")
+            (root / "evaluation" / "baselines" / "old.json").write_text(
+                json.dumps({"dataset_sha256": "sha256:old"}) + "\n",
+                encoding="utf-8",
+            )
+            workflow.write_text(
+                "jobs:\n"
+                "  quality:\n"
+                "    steps:\n"
+                "      - name: evaluate\n"
+                "        run: >-\n"
+                "          project-kb evaluate evaluation/questions.jsonl\n"
+                "          --thresholds evaluation/thresholds.json\n"
+                "          --baseline evaluation/baselines/old.json\n"
+                "      - name: finalize\n"
+                "        run: project-kb finalize . --check --json\n",
+                encoding="utf-8",
+            )
+
+            valid, errors = validate_quality_workflow(workflow)
+
+        self.assertFalse(valid)
+        self.assertIn("quality baseline dataset hash does not match evaluation dataset", errors)
+
     def test_failed_baseline_is_a_quality_gate_failure(self) -> None:
         report = {
             "dataset_sha256": "sha256:same",
