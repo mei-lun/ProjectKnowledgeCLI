@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "frozen_for_version": "0.1.27",
+  "frozen_for_version": "0.1.28",
   "dataset": "questions.jsonl",
   "minimum_samples": 40,
   "required_strategies": [

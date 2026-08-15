@@ -1,7 +1,25 @@
-# 版本交付与后续计划：0.1.27 → 0.1.28
+# 版本交付与后续计划：0.1.28 → 0.1.29
 
 > 本文是当前交付状态和下一批开发的唯一计划入口。历史版本计划只保留在 Git 历史中。
-> 复核日期：2026-08-14
+> 复核日期：2026-08-15
+
+## 0.1.28：WP-11-HF 审计闭环
+
+本补丁只修复 0.1.27 交付复核发现的问题，不扩展 WP-12 产品范围。
+
+| 需求 ID | 交付内容 | 验收证据 | 状态 |
+| --- | --- | --- | --- |
+| REL-006 | 排除仓库内部 `.worktrees/**`，防止隔离工作树重复进入索引 | `tests/test_engine.py`、`.project-kb.yml` | 验收中 |
+| EVAL-001 | 冻结与当前 40 题数据集一致的 0.1.28 基线，并在干净工作区执行可比回归 | `evaluation/baselines/self-repo-0.1.28.json`、`evaluation/reports/latest.json` | 验收中 |
+| DOC-001 | 取消审计中的重复实测指标，以版本化 JSON 报告作为唯一指标源 | `docs/project-knowledge-system-audit.md` | 验收中 |
+| KNOW-001 | 复核所有来源变化的人工知识并完成发布最终化 | `project-kb status`、`project-kb finalize --check` | 验收中 |
+
+### 0.1.28 验收标准
+
+- 内部 `.worktrees` 文件发现回归测试和全量测试通过；
+- 评测报告记录 `working_tree: clean`，不再出现 `baseline_dataset_mismatch`，冻结绝对门和同数据集回归门同时通过；
+- 真实 CodeGraph 1.5 六项验证继续通过；
+- `stale_knowledge`、`conflicted_knowledge` 均为 0，`project-kb finalize . --check --json` 返回 `ready`。
 
 ## 0.1.27：WP-11 交付闭环、CodeGraph 主链路与检索精度
 
@@ -25,9 +43,9 @@
 - 源码与文档提交后执行 `project-kb finalize . --json`，提交其生成物，再执行 `project-kb finalize . --check --json`；
 - 生成知识已同步，人工知识的来源变更均经过人工复核，不把 `potentially_stale` 伪装为 `fresh`。
 
-## 0.1.28：WP-12 真实项目采用与质量扩展
+## 0.1.29：WP-12 真实项目采用与质量扩展
 
-0.1.28 只接收可验证、可回退的增量，不扩大 CodeGraph 私有边界。
+0.1.29 只接收可验证、可回退的增量，不扩大 CodeGraph 私有边界。
 
 | 候选需求 ID | 计划 | 验收方向 |
 | --- | --- | --- |
@@ -36,7 +54,7 @@
 | DOC-GOV-001 | 将人工知识来源复核纳入发布检查和审核记录 | 能列出、确认或拒绝每个待复核记录，审计结果可追溯 |
 | PERF-001 | 建立 CodeGraph 实时查询和混合检索的延迟、缓存与退化基线 | 固定夹具、分位数、冷/热查询和失败路径均有自动化报告 |
 
-### 0.1.28 验收标准
+### 0.1.29 验收标准
 
 - 每项进入开发前必须在审计报告中登记需求 ID、正负样本和回退边界；
 - 真实项目验证只使用临时只读镜像，不能污染源项目；
