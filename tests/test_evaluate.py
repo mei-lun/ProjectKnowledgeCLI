@@ -196,7 +196,7 @@ class EvaluationTests(unittest.TestCase):
         api = KnowledgeAPI(self.root)
         sample = load_dataset(self.dataset)[0]
 
-        for strategy in ("hybrid", "code", "markdown", "grep_read"):
+        for strategy in ("hybrid", "code", "markdown", "grep_read", "codegraph"):
             result = _retrieve(api, sample, strategy)
             self.assertIn("core_files", result)
             self.assertIn("file_rankings", result)
@@ -205,6 +205,29 @@ class EvaluationTests(unittest.TestCase):
                 list(dict.fromkeys(result["core_files"] + result["supporting_files"])),
             )
             self.assertEqual(result["ranking_status"], "ok")
+
+    def test_hybrid_and_codegraph_forward_context_ranking_and_selection_reasons(self) -> None:
+        """Catch evaluator reranking, repartitioning, or reason loss after context()."""
+        api = KnowledgeAPI(self.root)
+        sample = load_dataset(self.dataset)[0]
+        context = api.context(sample["task"], sample.get("max_tokens", 4000))
+        expected_reasons = {
+            item["path"]: {
+                "stage": item["selection_stage"],
+                "anchor": item["why_selected"],
+            }
+            for item in context["file_rankings"]
+        }
+
+        for strategy in ("hybrid", "codegraph"):
+            result = _retrieve(api, sample, strategy)
+            self.assertEqual(result["core_files"], context["core_files"])
+            self.assertEqual(result["supporting_files"], context["supporting_files"])
+            self.assertEqual(result["files"], context["files"])
+            self.assertEqual(result["file_rankings"], context["file_rankings"])
+            self.assertEqual(result["ranking_status"], context["ranking_status"])
+            self.assertEqual(result["selection_reasons"], expected_reasons)
+            self.assertEqual(set(result["selection_reasons"]), set(result["files"]))
 
     def test_markdown_and_grep_delegate_ordering_to_production_ranker(self) -> None:
         api = KnowledgeAPI(self.root)
