@@ -124,11 +124,11 @@ class CodeGraphTests(unittest.TestCase):
             )
 
             self.assertEqual(result["affected_files"], ["src/router.lua"])
-            self.assertEqual(result["affected_symbols"], ["route"])
+            self.assertEqual(result["affected_symbols"], ["src/router.lua::route"])
             self.assertEqual(result["affected_modules"], ["router.lua"])
             self.assertEqual(result["affected_tests"], ["tests/router_spec.lua"])
             self.assertEqual(result["relations"][0]["source"], "src/app.lua::login")
-            self.assertEqual(result["relations"][0]["target"], "route")
+            self.assertEqual(result["relations"][0]["target"], "src/router.lua::route")
 
     def test_status_reports_uninitialized_reason_without_builtin_fallback(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -227,6 +227,7 @@ class CodeGraphTests(unittest.TestCase):
             engine.client = client
 
             symbol = engine.search_symbols(root, engine.config, "run")[0]
+            self.assertEqual(symbol.id, "src/app.py::run")
             engine.trace(root, symbol.id, engine.config)
 
             client.callers.assert_called_once_with("run", limit=200)

@@ -86,11 +86,20 @@ def _host_path(project: Path) -> str:
     return CodeGraphCommandResolver._windows_path(project.resolve())
 
 
-def _node_identity(node: dict[str, Any]) -> str:
-    value = node.get("id") or node.get("qualifiedName") or node.get("name")
-    if not str(value or "").strip():
+def _node_identity(node: dict[str, Any], root: Path | None = None) -> str:
+    raw_id = str(node.get("id", "") or "").strip()
+    public_name = str(node.get("qualifiedName") or node.get("name") or "").strip()
+    if root is not None and public_name:
+        path = _node_path(node, root)
+        if path:
+            return f"{path}::{public_name}"
+    if raw_id and "::" in raw_id:
+        return raw_id
+    if public_name:
+        return public_name
+    if not raw_id:
         raise CodeGraphError("CodeGraph node missing identity")
-    return str(value).strip()
+    return raw_id
 
 
 def _validated_project_path(value: str, root: Path) -> str:
@@ -382,7 +391,7 @@ class CodeGraphEngine:
         symbols = []
         for item in self._client(root).query(query, limit=limit):
             node = item.get("node", item)
-            identity = _node_identity(node)
+            identity = _node_identity(node, root)
             self._symbol_references[identity] = str(
                 node.get("qualifiedName") or node.get("name") or identity
             )
@@ -411,7 +420,7 @@ class CodeGraphEngine:
             payload = self._client(root).callers(name, limit=limit) if direction == "callers" else self._client(root).callees(name, limit=limit)
             for item in payload.get(payload_key, []) if isinstance(payload, dict) else []:
                 node = item.get("node", item)
-                node_id = _node_identity(node)
+                node_id = _node_identity(node, root)
                 source, target = (
                     (node_id, symbol_id) if direction == "callers" else (symbol_id, node_id)
                 )
@@ -434,7 +443,7 @@ class CodeGraphEngine:
             nodes = payload.get("affected", []) if isinstance(payload, dict) else []
             for item in nodes:
                 node = item.get("node", item) if isinstance(item, dict) else {}
-                target = _node_identity(node)
+                target = _node_identity(node, root)
                 path = _node_path(node, root)
                 affected_symbols.add(target)
                 if path:
