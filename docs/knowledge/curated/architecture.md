@@ -1,6 +1,6 @@
 # 架构
 
-0.1.30 人工复核：代码事实边界已统一为真实 CodeGraph 公共 CLI；本地 parser、builtin engine 和 SQLite 事实读取均已移除，历史表只保留迁移兼容。
+0.1.30 人工复核：代码事实边界已统一为真实 CodeGraph 公共 CLI；本地 parser、builtin engine 和 SQLite 事实读取均已移除；Adapter 将内部节点 ID 转换为 `path::公开符号名`。
 
 Project Knowledge CLI 是一个本地优先的 Python 应用，CLI 和 MCP 适配器共用同一套核心能力。运行时不依赖第三方软件包。
 

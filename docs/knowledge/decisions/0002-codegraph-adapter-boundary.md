@@ -1,5 +1,7 @@
 # ADR-0002：CodeGraph Adapter 边界与本地替代方案
 
+0.1.30 复核补充：Adapter 对外统一使用 `项目路径::qualifiedName/name`，CodeGraph 内部哈希 ID 只用于单次查询关联，不进入公共知识契约。
+
 - 状态：已接受
 - 来源提案：kp-12a589734edb3c2d
 - 创建审核人：codex
