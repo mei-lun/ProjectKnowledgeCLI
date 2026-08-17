@@ -12,7 +12,7 @@
 | `tests/test_documentation_roadmap.py` | tests | 10 |
 | `tests/test_engine.py` | tests | 10 |
 | `tests/test_engine_wp01_wp02.py` | tests | 5 |
-| `tests/test_evaluate.py` | tests | 18 |
+| `tests/test_evaluate.py` | tests | 29 |
 | `tests/test_finalization.py` | tests | 7 |
 | `tests/test_gardenserver_rules.py` | tests | 4 |
 | `tests/test_guidance.py` | tests | 4 |
@@ -26,7 +26,8 @@
 | `tests/test_integration.py` | tests | 12 |
 | `tests/test_proposal.py` | tests | 9 |
 | `tests/test_provider.py` | tests | 12 |
-| `tests/test_retrieval_wp06.py` | tests | 9 |
+| `tests/test_ranking.py` | tests | 17 |
+| `tests/test_retrieval_wp06.py` | tests | 18 |
 | `tests/test_schemas.py` | tests | 6 |
 | `tests/test_semantic.py` | tests | 7 |
 | `tests/test_single_directory.py` | tests | 4 |

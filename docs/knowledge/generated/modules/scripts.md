@@ -23,10 +23,6 @@
 
 > 关系内容已截断：共 214 条，当前页面仅展示前 150 条；请使用 knowledge_impact 获取完整的任务相关子图。
 
-- `scripts/bump_version.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `scripts/bump_version.py::<module>` 导入 `sys`（可信度 1.00，未解析）
-- `scripts/bump_version.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
-- `scripts/bump_version.py::<module>` 导入 `project_knowledge.versioning.main`（可信度 1.00，未解析）
 - `scripts/validate_gardenserver_guidance_workflow.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
 - `scripts/validate_gardenserver_guidance_workflow.py::<module>` 导入 `hashlib`（可信度 1.00，未解析）
 - `scripts/validate_gardenserver_guidance_workflow.py::<module>` 导入 `json`（可信度 1.00，未解析）
@@ -42,6 +38,10 @@
 - `scripts/validate_codegraph_adapter.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
 - `scripts/validate_codegraph_adapter.py::<module>` 导入 `typing.Any`（可信度 1.00，未解析）
 - `scripts/validate_codegraph_adapter.py::<module>` 导入 `typing.Callable`（可信度 1.00，未解析）
+- `scripts/bump_version.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `scripts/bump_version.py::<module>` 导入 `sys`（可信度 1.00，未解析）
+- `scripts/bump_version.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `scripts/bump_version.py::<module>` 导入 `project_knowledge.versioning.main`（可信度 1.00，未解析）
 - `scripts/validate_ci_workflow.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
 - `scripts/validate_ci_workflow.py::<module>` 导入 `hashlib`（可信度 1.00，未解析）
 - `scripts/validate_ci_workflow.py::<module>` 导入 `json`（可信度 1.00，未解析）
@@ -55,12 +55,6 @@
 - `scripts/validate_codegraph_adapter.py::<module>` 导入 `src/project_knowledge/codegraph.py::CodeGraphClient`（可信度 0.90，已解析）
 - `scripts/validate_codegraph_adapter.py::<module>` 导入 `src/project_knowledge/codegraph.py::CodeGraphEngine`（可信度 0.90，已解析）
 - `scripts/validate_codegraph_adapter.py::<module>` 导入 `src/project_knowledge/config.py::ProjectConfig`（可信度 0.90，已解析）
-- `scripts/bump_version.py::<module>` 调用 `src/project_knowledge/codegraph.py::CodeGraphCommandResolver.resolve`（可信度 0.80，已解析）
-- `scripts/bump_version.py::<module>` 调用 `Path`（可信度 0.80，未解析）
-- `scripts/bump_version.py::<module>` 调用 `sys.path.insert`（可信度 0.80，未解析）
-- `scripts/bump_version.py::<module>` 调用 `str`（可信度 0.80，未解析）
-- `scripts/bump_version.py::<module>` 调用 `SystemExit`（可信度 0.80，未解析）
-- `scripts/bump_version.py::<module>` 调用 `main`（可信度 0.80，未解析）
 - `scripts/validate_gardenserver_guidance_workflow.py::business_fingerprint` 调用 `hashlib.sha256`（可信度 0.80，未解析）
 - `scripts/validate_gardenserver_guidance_workflow.py::business_fingerprint` 调用 `sorted`（可信度 0.80，未解析）
 - `scripts/validate_gardenserver_guidance_workflow.py::business_fingerprint` 调用 `root.rglob`（可信度 0.80，未解析）
@@ -173,3 +167,9 @@
 - `scripts/validate_codegraph_adapter.py::validate_codegraph` 调用 `engine.affected_tests`（可信度 0.80，未解析）
 - `scripts/validate_codegraph_adapter.py::validate_codegraph` 调用 `bool`（可信度 0.80，未解析）
 - `scripts/validate_codegraph_adapter.py::validate_codegraph` 调用 `len`（可信度 0.80，未解析）
+- `scripts/validate_codegraph_adapter.py::validate_codegraph` 调用 `len`（可信度 0.80，未解析）
+- `scripts/validate_codegraph_adapter.py::validate_codegraph` 调用 `len`（可信度 0.80，未解析）
+- `scripts/validate_codegraph_adapter.py::validate_codegraph` 调用 `len`（可信度 0.80，未解析）
+- `scripts/validate_codegraph_adapter.py::validate_codegraph` 调用 `impact.get`（可信度 0.80，未解析）
+- `scripts/validate_codegraph_adapter.py::validate_codegraph` 调用 `len`（可信度 0.80，未解析）
+- `scripts/validate_codegraph_adapter.py::validate_codegraph` 调用 `type`（可信度 0.80，未解析）

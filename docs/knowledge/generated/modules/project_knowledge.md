@@ -27,6 +27,7 @@
 - `src/project_knowledge/performance.py`（Python）
 - `src/project_knowledge/proposal.py`（Python）
 - `src/project_knowledge/provider.py`（Python）
+- `src/project_knowledge/ranking.py`（Python）
 - `src/project_knowledge/real_project.py`（Python）
 - `src/project_knowledge/retrieval.py`（Python）
 - `src/project_knowledge/schemas.py`（Python）
@@ -38,7 +39,7 @@
 
 ## 符号
 
-> 符号内容已截断：共 532 个，当前页面仅展示前 300 个；请使用 knowledge_context 或 knowledge_search 获取精确范围。
+> 符号内容已截断：共 558 个，当前页面仅展示前 300 个；请使用 knowledge_context 或 knowledge_search 获取精确范围。
 
 - `src/project_knowledge/cli.py::_common`：函数，位于 `src/project_knowledge/cli.py:24`（可信度 1.00）
 - `src/project_knowledge/cli.py::build_parser`：函数，位于 `src/project_knowledge/cli.py:33`（可信度 1.00）
@@ -161,25 +162,25 @@
 - `src/project_knowledge/engine.py::GenericParser.__init__`：方法，位于 `src/project_knowledge/engine.py:651`（可信度 1.00）
 - `src/project_knowledge/engine.py::GenericParser.parse`：方法，位于 `src/project_knowledge/engine.py:656`（可信度 1.00）
 - `src/project_knowledge/engine.py::create_engine`：函数，位于 `src/project_knowledge/engine.py:691`（可信度 1.00）
-- `src/project_knowledge/evaluate.py::load_dataset`：函数，位于 `src/project_knowledge/evaluate.py:44`（可信度 1.00）
-- `src/project_knowledge/evaluate.py::evaluate`：函数，位于 `src/project_knowledge/evaluate.py:85`（可信度 1.00）
-- `src/project_knowledge/evaluate.py::evaluate_suite`：函数，位于 `src/project_knowledge/evaluate.py:165`（可信度 1.00）
-- `src/project_knowledge/evaluate.py::evaluate_quality_gate`：函数，位于 `src/project_knowledge/evaluate.py:208`（可信度 1.00）
-- `src/project_knowledge/evaluate.py::load_json_object`：函数，位于 `src/project_knowledge/evaluate.py:311`（可信度 1.00）
-- `src/project_knowledge/evaluate.py::_evaluate_sample`：函数，位于 `src/project_knowledge/evaluate.py:318`（可信度 1.00）
-- `src/project_knowledge/evaluate.py::_select_markdown_pages`：函数，位于 `src/project_knowledge/evaluate.py:375`（可信度 1.00）
-- `src/project_knowledge/evaluate.py::_path_relevance`：函数，位于 `src/project_knowledge/evaluate.py:407`（可信度 1.00）
-- `src/project_knowledge/evaluate.py::_rank_markdown_source_paths`：函数，位于 `src/project_knowledge/evaluate.py:415`（可信度 1.00）
-- `src/project_knowledge/evaluate.py::_select_grep_files`：函数，位于 `src/project_knowledge/evaluate.py:466`（可信度 1.00）
-- `src/project_knowledge/evaluate.py::_novel_ranked_paths`：函数，位于 `src/project_knowledge/evaluate.py:477`（可信度 1.00）
-- `src/project_knowledge/evaluate.py::_retrieve`：函数，位于 `src/project_knowledge/evaluate.py:492`（可信度 1.00）
-- `src/project_knowledge/evaluate.py::_retrieve.select`：方法，位于 `src/project_knowledge/evaluate.py:504`（可信度 1.00）
-- `src/project_knowledge/evaluate.py::_aggregate`：函数，位于 `src/project_knowledge/evaluate.py:624`（可信度 1.00）
-- `src/project_knowledge/evaluate.py::_category_success`：函数，位于 `src/project_knowledge/evaluate.py:644`（可信度 1.00）
-- `src/project_knowledge/evaluate.py::_task_terms`：函数，位于 `src/project_knowledge/evaluate.py:657`（可信度 1.00）
-- `src/project_knowledge/evaluate.py::_relevant_excerpt`：函数，位于 `src/project_knowledge/evaluate.py:666`（可信度 1.00）
-- `src/project_knowledge/evaluate.py::_contains_text`：函数，位于 `src/project_knowledge/evaluate.py:692`（可信度 1.00）
-- `src/project_knowledge/evaluate.py::_percentile`：函数，位于 `src/project_knowledge/evaluate.py:697`（可信度 1.00）
+- `src/project_knowledge/evaluate.py::load_dataset`：函数，位于 `src/project_knowledge/evaluate.py:58`（可信度 1.00）
+- `src/project_knowledge/evaluate.py::evaluate`：函数，位于 `src/project_knowledge/evaluate.py:105`（可信度 1.00）
+- `src/project_knowledge/evaluate.py::evaluate_suite`：函数，位于 `src/project_knowledge/evaluate.py:185`（可信度 1.00）
+- `src/project_knowledge/evaluate.py::evaluate_quality_gate`：函数，位于 `src/project_knowledge/evaluate.py:228`（可信度 1.00）
+- `src/project_knowledge/evaluate.py::load_json_object`：函数，位于 `src/project_knowledge/evaluate.py:331`（可信度 1.00）
+- `src/project_knowledge/evaluate.py::_evaluate_sample`：函数，位于 `src/project_knowledge/evaluate.py:338`（可信度 1.00）
+- `src/project_knowledge/evaluate.py::_select_markdown_pages`：函数，位于 `src/project_knowledge/evaluate.py:424`（可信度 1.00）
+- `src/project_knowledge/evaluate.py::_matching_terms`：函数，位于 `src/project_knowledge/evaluate.py:456`（可信度 1.00）
+- `src/project_knowledge/evaluate.py::_normalized_path`：函数，位于 `src/project_knowledge/evaluate.py:461`（可信度 1.00）
+- `src/project_knowledge/evaluate.py::_selection_reasons`：函数，位于 `src/project_knowledge/evaluate.py:468`（可信度 1.00）
+- `src/project_knowledge/evaluate.py::_ndcg_at_k`：函数，位于 `src/project_knowledge/evaluate.py:478`（可信度 1.00）
+- `src/project_knowledge/evaluate.py::_context_ranking_contract`：函数，位于 `src/project_knowledge/evaluate.py:490`（可信度 1.00）
+- `src/project_knowledge/evaluate.py::_retrieve`：函数，位于 `src/project_knowledge/evaluate.py:519`（可信度 1.00）
+- `src/project_knowledge/evaluate.py::_aggregate`：函数，位于 `src/project_knowledge/evaluate.py:738`（可信度 1.00）
+- `src/project_knowledge/evaluate.py::_category_success`：函数，位于 `src/project_knowledge/evaluate.py:764`（可信度 1.00）
+- `src/project_knowledge/evaluate.py::_task_terms`：函数，位于 `src/project_knowledge/evaluate.py:777`（可信度 1.00）
+- `src/project_knowledge/evaluate.py::_relevant_excerpt`：函数，位于 `src/project_knowledge/evaluate.py:786`（可信度 1.00）
+- `src/project_knowledge/evaluate.py::_contains_text`：函数，位于 `src/project_knowledge/evaluate.py:812`（可信度 1.00）
+- `src/project_knowledge/evaluate.py::_percentile`：函数，位于 `src/project_knowledge/evaluate.py:817`（可信度 1.00）
 - `src/project_knowledge/evidence.py::EvidencePolicyError`：类，位于 `src/project_knowledge/evidence.py:30`（可信度 1.00）
 - `src/project_knowledge/evidence.py::SecretScanner`：类，位于 `src/project_knowledge/evidence.py:34`（可信度 1.00）
 - `src/project_knowledge/evidence.py::SecretScanner.redact`：方法，位于 `src/project_knowledge/evidence.py:53`（可信度 1.00）
@@ -343,105 +344,8 @@
 
 ## 结构关系
 
-> 关系内容已截断：共 4975 条，当前页面仅展示前 150 条；请使用 knowledge_impact 获取完整的任务相关子图。
+> 关系内容已截断：共 5338 条，当前页面仅展示前 150 条；请使用 knowledge_impact 获取完整的任务相关子图。
 
-- `src/project_knowledge/__main__.py::<module>` 导入 `cli.main`（可信度 1.00，未解析）
-- `src/project_knowledge/evidence.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `src/project_knowledge/evidence.py::<module>` 导入 `fnmatch`（可信度 1.00，未解析）
-- `src/project_knowledge/evidence.py::<module>` 导入 `json`（可信度 1.00，未解析）
-- `src/project_knowledge/evidence.py::<module>` 导入 `re`（可信度 1.00，未解析）
-- `src/project_knowledge/evidence.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
-- `src/project_knowledge/evidence.py::<module>` 导入 `pathlib.PureWindowsPath`（可信度 1.00，未解析）
-- `src/project_knowledge/evidence.py::<module>` 导入 `typing.Any`（可信度 1.00，未解析）
-- `src/project_knowledge/evidence.py::<module>` 导入 `typing.Iterable`（可信度 1.00，未解析）
-- `src/project_knowledge/evidence.py::<module>` 导入 `schemas.EVIDENCE_PACK_SCHEMA`（可信度 1.00，未解析）
-- `src/project_knowledge/models.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `src/project_knowledge/models.py::<module>` 导入 `dataclasses.asdict`（可信度 1.00，未解析）
-- `src/project_knowledge/models.py::<module>` 导入 `dataclasses.dataclass`（可信度 1.00，未解析）
-- `src/project_knowledge/models.py::<module>` 导入 `dataclasses.field`（可信度 1.00，未解析）
-- `src/project_knowledge/models.py::<module>` 导入 `typing.Any`（可信度 1.00，未解析）
-- `src/project_knowledge/models.py::<module>` 导入 `typing.Literal`（可信度 1.00，未解析）
-- `src/project_knowledge/performance.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `src/project_knowledge/performance.py::<module>` 导入 `os`（可信度 1.00，未解析）
-- `src/project_knowledge/performance.py::<module>` 导入 `statistics`（可信度 1.00，未解析）
-- `src/project_knowledge/performance.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
-- `src/project_knowledge/performance.py::<module>` 导入 `time`（可信度 1.00，未解析）
-- `src/project_knowledge/performance.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
-- `src/project_knowledge/performance.py::<module>` 导入 `typing.Any`（可信度 1.00，未解析）
-- `src/project_knowledge/performance.py::<module>` 导入 `typing.Callable`（可信度 1.00，未解析）
-- `src/project_knowledge/provider.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `src/project_knowledge/provider.py::<module>` 导入 `json`（可信度 1.00，未解析）
-- `src/project_knowledge/provider.py::<module>` 导入 `os`（可信度 1.00，未解析）
-- `src/project_knowledge/provider.py::<module>` 导入 `re`（可信度 1.00，未解析）
-- `src/project_knowledge/provider.py::<module>` 导入 `threading`（可信度 1.00，未解析）
-- `src/project_knowledge/provider.py::<module>` 导入 `urllib.error`（可信度 1.00，未解析）
-- `src/project_knowledge/provider.py::<module>` 导入 `urllib.request`（可信度 1.00，未解析）
-- `src/project_knowledge/provider.py::<module>` 导入 `abc.ABC`（可信度 1.00，未解析）
-- `src/project_knowledge/provider.py::<module>` 导入 `abc.abstractmethod`（可信度 1.00，未解析）
-- `src/project_knowledge/provider.py::<module>` 导入 `dataclasses.asdict`（可信度 1.00，未解析）
-- `src/project_knowledge/provider.py::<module>` 导入 `dataclasses.dataclass`（可信度 1.00，未解析）
-- `src/project_knowledge/provider.py::<module>` 导入 `dataclasses.field`（可信度 1.00，未解析）
-- `src/project_knowledge/provider.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
-- `src/project_knowledge/provider.py::<module>` 导入 `typing.Any`（可信度 1.00，未解析）
-- `src/project_knowledge/provider.py::<module>` 导入 `typing.Callable`（可信度 1.00，未解析）
-- `src/project_knowledge/provider.py::<module>` 导入 `urllib.parse.urlparse`（可信度 1.00，未解析）
-- `src/project_knowledge/provider.py::<module>` 导入 `schemas.EVIDENCE_PACK_SCHEMA`（可信度 1.00，未解析）
-- `src/project_knowledge/semantic.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `src/project_knowledge/semantic.py::<module>` 导入 `json`（可信度 1.00，未解析）
-- `src/project_knowledge/semantic.py::<module>` 导入 `collections.defaultdict`（可信度 1.00，未解析）
-- `src/project_knowledge/semantic.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
-- `src/project_knowledge/semantic.py::<module>` 导入 `typing.Any`（可信度 1.00，未解析）
-- `src/project_knowledge/semantic.py::<module>` 导入 `typing.Iterable`（可信度 1.00，未解析）
-- `src/project_knowledge/semantic.py::<module>` 导入 `schemas.FEATURE_GUIDE_DRAFT_SCHEMA`（可信度 1.00，未解析）
-- `src/project_knowledge/versioning.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `src/project_knowledge/versioning.py::<module>` 导入 `argparse`（可信度 1.00，未解析）
-- `src/project_knowledge/versioning.py::<module>` 导入 `json`（可信度 1.00，未解析）
-- `src/project_knowledge/versioning.py::<module>` 导入 `re`（可信度 1.00，未解析）
-- `src/project_knowledge/versioning.py::<module>` 导入 `datetime.date`（可信度 1.00，未解析）
-- `src/project_knowledge/versioning.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
-- `src/project_knowledge/real_project.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `src/project_knowledge/real_project.py::<module>` 导入 `fnmatch`（可信度 1.00，未解析）
-- `src/project_knowledge/real_project.py::<module>` 导入 `os`（可信度 1.00，未解析）
-- `src/project_knowledge/real_project.py::<module>` 导入 `shutil`（可信度 1.00，未解析）
-- `src/project_knowledge/real_project.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
-- `src/project_knowledge/real_project.py::<module>` 导入 `time`（可信度 1.00，未解析）
-- `src/project_knowledge/real_project.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
-- `src/project_knowledge/real_project.py::<module>` 导入 `typing.Any`（可信度 1.00，未解析）
-- `src/project_knowledge/real_project.py::<module>` 导入 `config.DEFAULT_EXCLUDES`（可信度 1.00，未解析）
-- `src/project_knowledge/knowledge.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `src/project_knowledge/knowledge.py::<module>` 导入 `json`（可信度 1.00，未解析）
-- `src/project_knowledge/knowledge.py::<module>` 导入 `re`（可信度 1.00，未解析）
-- `src/project_knowledge/knowledge.py::<module>` 导入 `collections.defaultdict`（可信度 1.00，未解析）
-- `src/project_knowledge/knowledge.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
-- `src/project_knowledge/knowledge.py::<module>` 导入 `typing.Iterable`（可信度 1.00，未解析）
-- `src/project_knowledge/knowledge.py::<module>` 导入 `schemas.KNOWLEDGE_RECORD_SCHEMA`（可信度 1.00，未解析）
-- `src/project_knowledge/gardenserver.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `src/project_knowledge/gardenserver.py::<module>` 导入 `hashlib`（可信度 1.00，未解析）
-- `src/project_knowledge/gardenserver.py::<module>` 导入 `re`（可信度 1.00，未解析）
-- `src/project_knowledge/gardenserver.py::<module>` 导入 `dataclasses.asdict`（可信度 1.00，未解析）
-- `src/project_knowledge/gardenserver.py::<module>` 导入 `dataclasses.dataclass`（可信度 1.00，未解析）
-- `src/project_knowledge/gardenserver.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
-- `src/project_knowledge/gardenserver.py::<module>` 导入 `typing.Any`（可信度 1.00，未解析）
-- `src/project_knowledge/gardenserver.py::<module>` 导入 `typing.Iterable`（可信度 1.00，未解析）
-- `src/project_knowledge/guidance.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `src/project_knowledge/guidance.py::<module>` 导入 `json`（可信度 1.00，未解析）
-- `src/project_knowledge/guidance.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
-- `src/project_knowledge/guidance.py::<module>` 导入 `typing.Any`（可信度 1.00，未解析）
-- `src/project_knowledge/guidance.py::<module>` 导入 `typing.Iterable`（可信度 1.00，未解析）
-- `src/project_knowledge/guidance.py::<module>` 导入 `gardenserver.CATEGORIES`（可信度 1.00，未解析）
-- `src/project_knowledge/guidance.py::<module>` 导入 `guidance_templates.GENERAL_METHODOLOGY`（可信度 1.00，未解析）
-- `src/project_knowledge/guidance_templates.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `src/project_knowledge/proposal.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
-- `src/project_knowledge/proposal.py::<module>` 导入 `difflib`（可信度 1.00，未解析）
-- `src/project_knowledge/proposal.py::<module>` 导入 `hashlib`（可信度 1.00，未解析）
-- `src/project_knowledge/proposal.py::<module>` 导入 `json`（可信度 1.00，未解析）
-- `src/project_knowledge/proposal.py::<module>` 导入 `re`（可信度 1.00，未解析）
-- `src/project_knowledge/proposal.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
-- `src/project_knowledge/proposal.py::<module>` 导入 `pathlib.PurePosixPath`（可信度 1.00，未解析）
-- `src/project_knowledge/proposal.py::<module>` 导入 `typing.Any`（可信度 1.00，未解析）
-- `src/project_knowledge/proposal.py::<module>` 导入 `typing.Iterable`（可信度 1.00，未解析）
-- `src/project_knowledge/proposal.py::<module>` 导入 `schemas.FEATURE_GUIDE_DRAFT_SCHEMA`（可信度 1.00，未解析）
-- `src/project_knowledge/proposal.py::<module>` 导入 `schemas.PROPOSAL_SCHEMA`（可信度 1.00，未解析）
 - `src/project_knowledge/guidance_models.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
 - `src/project_knowledge/guidance_models.py::<module>` 导入 `dataclasses.asdict`（可信度 1.00，未解析）
 - `src/project_knowledge/guidance_models.py::<module>` 导入 `dataclasses.dataclass`（可信度 1.00，未解析）
@@ -495,3 +399,100 @@
 - `src/project_knowledge/util.py::<module>` 导入 `os`（可信度 1.00，未解析）
 - `src/project_knowledge/util.py::<module>` 导入 `re`（可信度 1.00，未解析）
 - `src/project_knowledge/util.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
+- `src/project_knowledge/util.py::<module>` 导入 `time`（可信度 1.00，未解析）
+- `src/project_knowledge/util.py::<module>` 导入 `sys`（可信度 1.00，未解析）
+- `src/project_knowledge/util.py::<module>` 导入 `ctypes.wintypes`（可信度 1.00，未解析）
+- `src/project_knowledge/util.py::<module>` 导入 `contextlib.contextmanager`（可信度 1.00，未解析）
+- `src/project_knowledge/util.py::<module>` 导入 `datetime.timezone`（可信度 1.00，未解析）
+- `src/project_knowledge/util.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `src/project_knowledge/util.py::<module>` 导入 `typing.Any`（可信度 1.00，未解析）
+- `src/project_knowledge/util.py::<module>` 导入 `typing.Iterator`（可信度 1.00，未解析）
+- `src/project_knowledge/util.py::process_alive` 导入 `ctypes`（可信度 1.00，未解析）
+- `src/project_knowledge/cli.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `src/project_knowledge/cli.py::<module>` 导入 `argparse`（可信度 1.00，未解析）
+- `src/project_knowledge/cli.py::<module>` 导入 `json`（可信度 1.00，未解析）
+- `src/project_knowledge/cli.py::<module>` 导入 `sys`（可信度 1.00，未解析）
+- `src/project_knowledge/cli.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `src/project_knowledge/cli.py::<module>` 导入 `typing.Any`（可信度 1.00，未解析）
+- `src/project_knowledge/cli.py::<module>` 导入 `evaluate.STRATEGIES`（可信度 1.00，未解析）
+- `src/project_knowledge/cli.py::<module>` 导入 `mcp.serve`（可信度 1.00，未解析）
+- `src/project_knowledge/cli.py::<module>` 导入 `schemas.FEATURE_GUIDE_DRAFT_SCHEMA`（可信度 1.00，未解析）
+- `src/project_knowledge/codegraph.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `src/project_knowledge/codegraph.py::<module>` 导入 `hashlib`（可信度 1.00，未解析）
+- `src/project_knowledge/codegraph.py::<module>` 导入 `fnmatch`（可信度 1.00，未解析）
+- `src/project_knowledge/codegraph.py::<module>` 导入 `json`（可信度 1.00，未解析）
+- `src/project_knowledge/codegraph.py::<module>` 导入 `os`（可信度 1.00，未解析）
+- `src/project_knowledge/codegraph.py::<module>` 导入 `shlex`（可信度 1.00，未解析）
+- `src/project_knowledge/codegraph.py::<module>` 导入 `shutil`（可信度 1.00，未解析）
+- `src/project_knowledge/codegraph.py::<module>` 导入 `dataclasses.dataclass`（可信度 1.00，未解析）
+- `src/project_knowledge/codegraph.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `src/project_knowledge/codegraph.py::<module>` 导入 `typing.Any`（可信度 1.00，未解析）
+- `src/project_knowledge/codegraph.py::<module>` 导入 `typing.Sequence`（可信度 1.00，未解析）
+- `src/project_knowledge/engine.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `src/project_knowledge/engine.py::<module>` 导入 `ast`（可信度 1.00，未解析）
+- `src/project_knowledge/engine.py::<module>` 导入 `fnmatch`（可信度 1.00，未解析）
+- `src/project_knowledge/engine.py::<module>` 导入 `os`（可信度 1.00，未解析）
+- `src/project_knowledge/engine.py::<module>` 导入 `re`（可信度 1.00，未解析）
+- `src/project_knowledge/engine.py::<module>` 导入 `collections.deque`（可信度 1.00，未解析）
+- `src/project_knowledge/engine.py::<module>` 导入 `abc.ABC`（可信度 1.00，未解析）
+- `src/project_knowledge/engine.py::<module>` 导入 `abc.abstractmethod`（可信度 1.00，未解析）
+- `src/project_knowledge/engine.py::<module>` 导入 `dataclasses.dataclass`（可信度 1.00，未解析）
+- `src/project_knowledge/engine.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `src/project_knowledge/engine.py::<module>` 导入 `typing.Iterable`（可信度 1.00，未解析）
+- `src/project_knowledge/finalization.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `src/project_knowledge/finalization.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `src/project_knowledge/finalization.py::<module>` 导入 `typing.Any`（可信度 1.00，未解析）
+- `src/project_knowledge/service.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `src/project_knowledge/service.py::<module>` 导入 `json`（可信度 1.00，未解析）
+- `src/project_knowledge/service.py::<module>` 导入 `os`（可信度 1.00，未解析）
+- `src/project_knowledge/service.py::<module>` 导入 `shutil`（可信度 1.00，未解析）
+- `src/project_knowledge/service.py::<module>` 导入 `tempfile`（可信度 1.00，未解析）
+- `src/project_knowledge/service.py::<module>` 导入 `time`（可信度 1.00，未解析）
+- `src/project_knowledge/service.py::<module>` 导入 `collections.Counter`（可信度 1.00，未解析）
+- `src/project_knowledge/service.py::<module>` 导入 `concurrent.futures.ThreadPoolExecutor`（可信度 1.00，未解析）
+- `src/project_knowledge/service.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `src/project_knowledge/service.py::<module>` 导入 `typing.Any`（可信度 1.00，未解析）
+- `src/project_knowledge/service.py::<module>` 导入 `schemas.CHANGE_SET_SCHEMA`（可信度 1.00，未解析）
+- `src/project_knowledge/__main__.py::<module>` 导入 `cli.main`（可信度 1.00，未解析）
+- `src/project_knowledge/config.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `src/project_knowledge/config.py::<module>` 导入 `json`（可信度 1.00，未解析）
+- `src/project_knowledge/config.py::<module>` 导入 `dataclasses.dataclass`（可信度 1.00，未解析）
+- `src/project_knowledge/config.py::<module>` 导入 `dataclasses.field`（可信度 1.00，未解析）
+- `src/project_knowledge/config.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `src/project_knowledge/config.py::<module>` 导入 `typing.Any`（可信度 1.00，未解析）
+- `src/project_knowledge/config.py::<module>` 导入 `schemas.CONFIG_SCHEMA`（可信度 1.00，未解析）
+- `src/project_knowledge/evidence.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `src/project_knowledge/evidence.py::<module>` 导入 `fnmatch`（可信度 1.00，未解析）
+- `src/project_knowledge/evidence.py::<module>` 导入 `json`（可信度 1.00，未解析）
+- `src/project_knowledge/evidence.py::<module>` 导入 `re`（可信度 1.00，未解析）
+- `src/project_knowledge/evidence.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `src/project_knowledge/evidence.py::<module>` 导入 `pathlib.PureWindowsPath`（可信度 1.00，未解析）
+- `src/project_knowledge/evidence.py::<module>` 导入 `typing.Any`（可信度 1.00，未解析）
+- `src/project_knowledge/evidence.py::<module>` 导入 `typing.Iterable`（可信度 1.00，未解析）
+- `src/project_knowledge/evidence.py::<module>` 导入 `schemas.EVIDENCE_PACK_SCHEMA`（可信度 1.00，未解析）
+- `src/project_knowledge/gardenserver.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `src/project_knowledge/gardenserver.py::<module>` 导入 `hashlib`（可信度 1.00，未解析）
+- `src/project_knowledge/gardenserver.py::<module>` 导入 `re`（可信度 1.00，未解析）
+- `src/project_knowledge/gardenserver.py::<module>` 导入 `dataclasses.asdict`（可信度 1.00，未解析）
+- `src/project_knowledge/gardenserver.py::<module>` 导入 `dataclasses.dataclass`（可信度 1.00，未解析）
+- `src/project_knowledge/gardenserver.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `src/project_knowledge/gardenserver.py::<module>` 导入 `typing.Any`（可信度 1.00，未解析）
+- `src/project_knowledge/gardenserver.py::<module>` 导入 `typing.Iterable`（可信度 1.00，未解析）
+- `src/project_knowledge/guidance.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `src/project_knowledge/guidance.py::<module>` 导入 `json`（可信度 1.00，未解析）
+- `src/project_knowledge/guidance.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `src/project_knowledge/guidance.py::<module>` 导入 `typing.Any`（可信度 1.00，未解析）
+- `src/project_knowledge/guidance.py::<module>` 导入 `typing.Iterable`（可信度 1.00，未解析）
+- `src/project_knowledge/guidance.py::<module>` 导入 `gardenserver.CATEGORIES`（可信度 1.00，未解析）
+- `src/project_knowledge/guidance.py::<module>` 导入 `guidance_templates.GENERAL_METHODOLOGY`（可信度 1.00，未解析）
+- `src/project_knowledge/guidance_templates.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `src/project_knowledge/knowledge.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `src/project_knowledge/knowledge.py::<module>` 导入 `json`（可信度 1.00，未解析）
+- `src/project_knowledge/knowledge.py::<module>` 导入 `re`（可信度 1.00，未解析）
+- `src/project_knowledge/knowledge.py::<module>` 导入 `collections.defaultdict`（可信度 1.00，未解析）
+- `src/project_knowledge/knowledge.py::<module>` 导入 `pathlib.Path`（可信度 1.00，未解析）
+- `src/project_knowledge/knowledge.py::<module>` 导入 `typing.Iterable`（可信度 1.00，未解析）
+- `src/project_knowledge/knowledge.py::<module>` 导入 `schemas.KNOWLEDGE_RECORD_SCHEMA`（可信度 1.00，未解析）
+- `src/project_knowledge/models.py::<module>` 导入 `__future__.annotations`（可信度 1.00，未解析）
+- `src/project_knowledge/models.py::<module>` 导入 `dataclasses.asdict`（可信度 1.00，未解析）
+- `src/project_knowledge/models.py::<module>` 导入 `dataclasses.dataclass`（可信度 1.00，未解析）
