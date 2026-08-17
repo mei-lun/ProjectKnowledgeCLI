@@ -15,15 +15,13 @@ from project_knowledge.evaluate import (
     evaluate,
     evaluate_quality_gate,
     evaluate_suite,
-    _novel_ranked_paths,
-    _rank_markdown_source_paths,
     _retrieve,
-    _select_grep_files,
     _select_markdown_pages,
     load_dataset,
 )
 from project_knowledge.performance import run_performance_harness
 from project_knowledge.real_project import run_readonly_mirror
+from project_knowledge.ranking import rank_files
 from project_knowledge.retrieval import KnowledgeAPI
 from project_knowledge.service import ProjectService
 
@@ -194,50 +192,36 @@ class EvaluationTests(unittest.TestCase):
         low_relevance = _select_markdown_pages(results, limit=3)
         self.assertNotIn("generated.module.project_knowledge", [item["id"] for item in low_relevance])
 
-    def test_markdown_source_ranking_prefers_task_relevant_paths(self) -> None:
-        api = KnowledgeAPI(self.root)
-        results = [{"sources": [
-            {"path": "pyproject.toml"},
-            {"path": "src/app.py"},
-        ]}]
-        ranked = _rank_markdown_source_paths(api, results, "AccountService.login", limit=1)
-        self.assertEqual(ranked, ["src/app.py"])
-
-    def test_markdown_source_paths_are_adaptively_bounded(self) -> None:
-        api = KnowledgeAPI(self.root)
-        sources = []
-        for index in range(12):
-            path = self.root / f"note-{index}.md"
-            path.write_text(f"AccountService login note {index}\n", encoding="utf-8")
-            sources.append({"path": path.name})
-
-        ranked = _rank_markdown_source_paths(api, [{"sources": sources}], "AccountService.login")
-
-        self.assertLessEqual(len(ranked), 8)
-
-    def test_hybrid_does_not_expand_knowledge_sources_twice(self) -> None:
+    def test_all_available_strategies_return_ranking_contract(self) -> None:
         api = KnowledgeAPI(self.root)
         sample = load_dataset(self.dataset)[0]
 
-        result = _retrieve(api, sample, "hybrid")
+        for strategy in ("hybrid", "code", "markdown", "grep_read"):
+            result = _retrieve(api, sample, strategy)
+            self.assertIn("core_files", result)
+            self.assertIn("file_rankings", result)
+            self.assertEqual(
+                result["files"],
+                list(dict.fromkeys(result["core_files"] + result["supporting_files"])),
+            )
+            self.assertEqual(result["ranking_status"], "ok")
 
-        self.assertLessEqual(len(result["files"]), 20)
-        self.assertIn("src/app.py", result["files"])
-        self.assertTrue(all(path in result["selection_reasons"] for path in result["files"]))
+    def test_markdown_and_grep_delegate_ordering_to_production_ranker(self) -> None:
+        api = KnowledgeAPI(self.root)
+        sample = load_dataset(self.dataset)[0]
+        real_rank = rank_files
+        calls = []
 
-    def test_hybrid_knowledge_limit_counts_only_new_paths(self) -> None:
-        ranked = [(f"existing-{index}", (20 - index, "record")) for index in range(8)]
-        ranked.extend([("new-changelog", (10, "record")), ("new-audit", (9, "record"))])
+        def record_rank(candidates, **kwargs):
+            calls.append([candidate.path for candidate in candidates])
+            return real_rank(candidates, **kwargs)
 
-        selected = _novel_ranked_paths(ranked, {path for path, _ in ranked[:8]}, limit=2)
+        with patch("project_knowledge.evaluate.rank_files", side_effect=record_rank):
+            _retrieve(api, sample, "markdown")
+            _retrieve(api, sample, "grep_read")
 
-        self.assertEqual(selected, [("new-changelog", "record"), ("new-audit", "record")])
-
-    def test_grep_selection_expands_only_for_a_strong_sixth_match(self) -> None:
-        ranked = [(20 - index, f"file-{index}", "content") for index in range(7)]
-        self.assertEqual(len(_select_grep_files(ranked)), 6)
-        ranked[5] = (14, "file-5", "content")
-        self.assertEqual(len(_select_grep_files(ranked)), 5)
+        self.assertEqual(len(calls), 2)
+        self.assertTrue(all(candidates for candidates in calls))
 
     def test_markdown_strategy_respects_sample_token_budget(self) -> None:
         sample = json.loads(self.dataset.read_text(encoding="utf-8"))

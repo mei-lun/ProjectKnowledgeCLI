@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 from . import __version__
+from .ranking import FileCandidate, rank_files
 from .retrieval import KnowledgeAPI
 from .store import KnowledgeStore
 from .util import approx_tokens, hash_file, hash_text, read_text, trim_to_tokens, utc_now
@@ -404,89 +405,55 @@ def _select_markdown_pages(results: list[dict[str, Any]], limit: int = 3) -> lis
     return selected
 
 
-def _path_relevance(api: KnowledgeAPI, path: str, terms: list[str]) -> int:
-    lowered_path = path.lower()
-    content = read_text(api.root / path).lower()
-    score = 5 * sum(1 for term in terms if term in lowered_path)
-    score += sum(min(4, content.count(term)) for term in terms)
-    return score
+def _matching_terms(value: str, terms: list[str]) -> set[str]:
+    lowered = value.lower()
+    return {term for term in terms if term in lowered}
 
 
-def _rank_markdown_source_paths(
-    api: KnowledgeAPI,
-    results: list[dict[str, Any]],
-    task: str,
-    limit: int = 8,
-) -> list[str]:
-    terms = _task_terms(task)
-    sources_by_path: dict[str, list[dict[str, Any]]] = {}
-    result_scores: dict[str, float] = {}
-    for item in results:
-        for source in item.get("sources", []):
-            path = source.get("path")
-            if not path:
-                continue
-            sources_by_path.setdefault(path, []).append(source)
-            result_scores[path] = max(result_scores.get(path, 0.0), float(item.get("score", 0.0)))
-        if item.get("kind") == "decision" and item.get("path"):
-            path = item["path"]
-            sources_by_path.setdefault(path, [])
-            result_scores[path] = max(result_scores.get(path, 0.0), float(item.get("score", 0.0)) + 16)
-    if not sources_by_path:
-        for item in api.service.engine.discover(api.root, api.config):
-            sources_by_path[item.path] = []
-            result_scores[item.path] = 0.0
-    symbol_matches = api._task_symbol_matches(task, api._symbol_terms(task))[:10]
-    direct_paths = {item.get("path") for item in symbol_matches if item.get("path")}
-    dependency_paths: set[str] = set()
-    if symbol_matches:
-        impact = api.impact(
-            symbols=[item["id"] for item in symbol_matches],
-            max_hops=2,
-            max_relations=200,
-        )
-        dependency_paths.update(impact.get("dependency_files", []))
-    ranked: list[tuple[int, str]] = []
-    for path, sources in sources_by_path.items():
-        source_identity = " ".join(
-            str(source.get("id", "")) for source in sources
-        ).lower()
-        score = _path_relevance(api, path, terms)
-        score += 8 * sum(1 for term in terms if term in source_identity)
-        score += min(8, int(result_scores[path]))
-        if path in direct_paths:
-            score += 80
-        elif path in dependency_paths:
-            score += 40
-        ranked.append((score, path))
-    ranked.sort(key=lambda item: (-item[0], item[1]))
-    return [path for _, path in ranked[:limit]]
+def _normalized_path(path: str) -> str:
+    normalized = path.replace("\\", "/")
+    while normalized.startswith("./"):
+        normalized = normalized[2:]
+    return normalized
 
 
-def _select_grep_files(
-    ranked: list[tuple[int, str, str]],
-    limit: int = 5,
-    expansion_min_score: int = 15,
-) -> list[tuple[int, str, str]]:
-    selected = ranked[:limit]
-    if len(ranked) > limit and ranked[limit][0] >= expansion_min_score:
-        selected.append(ranked[limit])
-    return selected
+def _selection_reasons(file_rankings: list[dict[str, Any]]) -> dict[str, dict[str, str]]:
+    return {
+        str(item["path"]): {
+            "stage": str(item.get("selection_stage", "fallback")),
+            "anchor": str(item.get("why_selected", "")),
+        }
+        for item in file_rankings
+    }
 
 
-def _novel_ranked_paths(
-    ranked_paths: list[tuple[str, tuple[int, str]]],
-    selected_paths: set[str],
-    limit: int,
-) -> list[tuple[str, str]]:
-    novel: list[tuple[str, str]] = []
-    for path, (_, record_id) in ranked_paths:
-        if path in selected_paths:
-            continue
-        novel.append((path, record_id))
-        if len(novel) >= limit:
-            break
-    return novel
+def _context_ranking_contract(
+    context: dict[str, Any], *, exclude_knowledge_sources: bool = False
+) -> dict[str, Any]:
+    if not exclude_knowledge_sources:
+        return {
+            key: context[key]
+            for key in (
+                "core_files", "supporting_files", "files", "file_rankings",
+                "ranking_status",
+            )
+        }
+
+    file_rankings = [
+        item for item in context["file_rankings"]
+        if item.get("selection_stage") != "knowledge_source"
+    ]
+    core_files = [item["path"] for item in file_rankings if item.get("tier") == "core"]
+    supporting_files = [
+        item["path"] for item in file_rankings if item.get("tier") == "supporting"
+    ]
+    return {
+        "core_files": core_files,
+        "supporting_files": supporting_files,
+        "files": list(dict.fromkeys(core_files + supporting_files)),
+        "file_rankings": file_rankings,
+        "ranking_status": context["ranking_status"],
+    }
 
 
 def _retrieve(api: KnowledgeAPI, sample: dict[str, Any], strategy: str) -> dict[str, Any]:
@@ -496,81 +463,64 @@ def _retrieve(api: KnowledgeAPI, sample: dict[str, Any], strategy: str) -> dict[
         context = api.context(task, budget)
         direct_symbols = context["symbols"][:12]
         symbols = {item["id"] for item in direct_symbols}
-        selection_reasons: dict[str, dict[str, str]] = {}
-        terms = _task_terms(task)
-        core_limit = 12 if strategy == "hybrid" else 11
-        file_limit = 20 if strategy == "hybrid" else core_limit
-
-        def select(path: str | None, stage: str, anchor: str) -> None:
-            if not path or path in selection_reasons or len(selection_reasons) >= file_limit:
-                return
-            selection_reasons[path] = {"stage": stage, "anchor": anchor}
-
-        for item in direct_symbols:
-            if sum(1 for reason in selection_reasons.values() if reason["stage"] == "direct_symbol") >= 6:
-                break
-            select(item.get("path"), "direct_symbol", item["id"])
-        graph_anchor = next(iter(symbols), task)
-        impact_paths = context["impact"].get("dependency_files") or context["impact"].get("affected_files", [])
-        for path in impact_paths[:12]:
-            select(path, "impact", graph_anchor)
-        fallback_candidates: list[tuple[int, str]] = []
-        for item in api.service.engine.discover(api.root, api.config):
-            if item.path in selection_reasons:
-                continue
-            score = _path_relevance(api, item.path, terms)
-            if score > 0:
-                fallback_candidates.append((score, item.path))
-        for _, path in sorted(fallback_candidates, key=lambda item: (-item[0], item[1]))[
-            : max(0, core_limit - len(selection_reasons))
-        ]:
-            select(path, "fallback", task)
+        ranking_contract = _context_ranking_contract(
+            context, exclude_knowledge_sources=strategy == "code"
+        )
         text_parts: list[str] = []
         stale_detected = False
         if strategy == "hybrid":
-            knowledge_paths: dict[str, tuple[int, str]] = {}
             for record in context["knowledge"]:
                 text_parts.append(record.get("content", ""))
                 stale_detected = stale_detected or bool(record.get("requires_live_source"))
-                for source in record["sources"]:
-                    path = source.get("path")
-                    if not path:
-                        continue
-                    score = 10 if path in selection_reasons or source.get("id") in symbols else 0
-                    score += _path_relevance(api, path, terms)
-                    source_id = str(source.get("id", "")).lower()
-                    score += 8 * sum(1 for term in terms if term in source_id)
-                    previous = knowledge_paths.get(path)
-                    candidate = (score, record["id"])
-                    if previous is None or candidate > previous:
-                        knowledge_paths[path] = candidate
-            ranked_paths = sorted(
-                knowledge_paths.items(),
-                key=lambda item: (-item[1][0], item[0], item[1][1]),
-            )
-            for path, record_id in _novel_ranked_paths(
-                ranked_paths,
-                set(selection_reasons),
-                limit=2,
-            ):
-                select(path, "knowledge_source", record_id)
         call_path = set(symbols)
         call_path.update(context["impact"].get("call_path", []))
-        files = set(selection_reasons)
-        compact = {"symbols": sorted(symbols), "files": sorted(files)}
+        compact = {"symbols": sorted(symbols), "files": ranking_contract["files"]}
         if strategy == "hybrid":
             compact["summary"] = context.get("summary")
         text_parts.append(json.dumps(compact, ensure_ascii=False, separators=(",", ":")))
         return {
-            "files": files, "symbols": symbols, "call_path": call_path,
+            **ranking_contract,
+            "symbols": symbols, "call_path": call_path,
             "text": "\n".join(text_parts), "stale_detected": stale_detected,
             "tool_calls": 4 if strategy == "hybrid" else 3,
-            "selection_reasons": selection_reasons,
+            "selection_reasons": _selection_reasons(ranking_contract["file_rankings"]),
         }
 
     if strategy == "markdown":
         search = api.search(task, limit=10)
-        files = set(_rank_markdown_source_paths(api, search["results"], task))
+        terms = _task_terms(task)
+        candidates: list[FileCandidate] = []
+        for item in search["results"]:
+            sources = list(item.get("sources", []))
+            if item.get("kind") == "decision" and item.get("path"):
+                sources.append({"path": item["path"], "id": item.get("id", "")})
+            for source in sources:
+                path = str(source.get("path", ""))
+                if not path:
+                    continue
+                source_id = str(source.get("id", ""))
+                content = " ".join(
+                    str(value) for value in (item.get("summary"), item.get("content"))
+                    if value
+                )
+                candidates.append(FileCandidate(
+                    path=path,
+                    stages={"knowledge_source"},
+                    anchors={source_id or str(item.get("id", ""))},
+                    direct_knowledge_source=True,
+                    module=Path(path).parent.as_posix(),
+                    path_terms=_matching_terms(path, terms),
+                    symbol_terms=_matching_terms(source_id, terms),
+                    content_terms=_matching_terms(content, terms),
+                    is_test="test" in path.lower(),
+                    original_order=len(candidates),
+                ))
+        allowed_paths = {
+            _normalized_path(item.path)
+            for item in api.service.engine.discover(api.root, api.config)
+        }
+        ranked_files = rank_files(candidates, allowed_paths=allowed_paths)
+        ranking_contract = ranked_files.to_dict()
         symbols: set[str] = set()
         text_parts: list[str] = []
         stale_detected = False
@@ -591,33 +541,43 @@ def _retrieve(api: KnowledgeAPI, sample: dict[str, Any], strategy: str) -> dict[
                 remaining -= approx_tokens(content)
             stale_detected = stale_detected or bool(record.get("requires_live_source"))
         return {
-            "files": files, "symbols": symbols, "call_path": set(symbols),
+            **ranking_contract,
+            "symbols": symbols, "call_path": set(symbols),
             "text": "\n".join(text_parts), "stale_detected": stale_detected,
             "tool_calls": 1 + reads,
-            "selection_reasons": {
-                path: {"stage": "knowledge_source", "anchor": "markdown_search"}
-                for path in sorted(files)
-            },
+            "selection_reasons": _selection_reasons(ranking_contract["file_rankings"]),
         }
 
     terms = _task_terms(task)
-    ranked: list[tuple[int, str, str]] = []
+    candidates: list[FileCandidate] = []
+    contents: dict[str, str] = {}
+    allowed_paths: set[str] = set()
     for item in api.service.engine.discover(api.root, api.config):
-        content = read_text(api.root / item.path)
+        path = _normalized_path(item.path)
+        allowed_paths.add(path)
+        content = read_text(api.root / path)
         lowered = content.lower()
-        score = sum(lowered.count(term) for term in terms)
-        if score:
-            ranked.append((score, item.path, content))
-    ranked.sort(key=lambda item: (-item[0], item[1]))
-    selected = _select_grep_files(ranked)
+        content_terms = {term for term in terms if term in lowered}
+        if not content_terms:
+            continue
+        contents[path] = content
+        candidates.append(FileCandidate(
+            path=path,
+            stages={"fallback"},
+            anchors={"grep_match"},
+            content_terms=content_terms,
+            is_test="test" in path.lower(),
+            original_order=len(candidates),
+        ))
+    ranked_files = rank_files(candidates, allowed_paths=allowed_paths)
+    ranking_contract = ranked_files.to_dict()
     return {
-        "files": {item[1] for item in selected}, "symbols": set(), "call_path": set(),
-        "text": "\n".join(item[2][:4000] for item in selected), "stale_detected": False,
-        "tool_calls": 1 + len(selected),
-        "selection_reasons": {
-            item[1]: {"stage": "fallback", "anchor": "grep_match"}
-            for item in selected
-        },
+        **ranking_contract,
+        "symbols": set(), "call_path": set(),
+        "text": "\n".join(contents[path][:4000] for path in ranking_contract["files"]),
+        "stale_detected": False,
+        "tool_calls": 1 + len(ranking_contract["files"]),
+        "selection_reasons": _selection_reasons(ranking_contract["file_rankings"]),
     }
 
 
