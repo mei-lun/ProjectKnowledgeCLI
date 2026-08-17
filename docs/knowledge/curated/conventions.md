@@ -80,11 +80,9 @@
 <!-- project-kb:source file="src/project_knowledge/engine.py" -->
 <!-- project-kb:source file="src/project_knowledge/real_project.py" -->
 <!-- project-kb:source file="src/project_knowledge/knowledge.py" -->
-<!-- project-kb:source file="tests/test_wp02_evidence.py" -->
 - 0.1.15 WP-09：空结果的 generated 页面仍必须引用生成器/解析器实现来源；Markdown 选页仅在源码模块候选达到第三页相对得分 0.8 时替换低优先页面，不得扩大三页上限或降低冻结阈值。
 <!-- project-kb:source file="src/project_knowledge/evaluate.py" -->
 <!-- project-kb:source file="tests/test_evaluate.py" -->
-<!-- project-kb:source file="tests/test_wp02_knowledge.py" -->
 <!-- /project-kb:generated -->
 
 ## WP-12A 评测约定（0.1.29）

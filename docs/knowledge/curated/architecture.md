@@ -56,11 +56,9 @@ Project Knowledge CLI 是一个本地优先的 Python 应用，CLI 和 MCP 适�
 <!-- project-kb:source file="src/project_knowledge/real_project.py" -->
 <!-- project-kb:source file="src/project_knowledge/knowledge.py" -->
 <!-- project-kb:source file="evaluation/real_project_harness.py" -->
-<!-- project-kb:source file="tests/test_wp02_evidence.py" -->
 - 0.1.15 WP-09：only-Markdown 仍限制三页；仅当非测试源码模块候选得分至少达到当前第三页的 0.8 时才替换低优先页面，防止新增 generated 页面挤掉代码来源且避免为 recall 牺牲 precision。不得增加页数或降低阈值。
 <!-- project-kb:source file="src/project_knowledge/evaluate.py" -->
 <!-- project-kb:source file="tests/test_evaluate.py" -->
-<!-- project-kb:source file="tests/test_wp02_knowledge.py" -->
 <!-- /project-kb:generated -->
 
 ## WP-12A 检索证据边界（0.1.29）

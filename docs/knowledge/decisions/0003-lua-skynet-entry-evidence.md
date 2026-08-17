@@ -28,12 +28,12 @@
 - src/project_knowledge/real_project.py
 - src/project_knowledge/knowledge.py
 - evaluation/real_project_harness.py
-- tests/test_wp02_evidence.py
-- tests/test_wp02_knowledge.py
+- tests/test_codegraph.py
+- tests/test_retrieval_wp06.py
 
 <!-- project-kb:source file="src/project_knowledge/engine.py" -->
 <!-- project-kb:source file="src/project_knowledge/real_project.py" -->
 <!-- project-kb:source file="src/project_knowledge/knowledge.py" -->
 <!-- project-kb:source file="evaluation/real_project_harness.py" -->
-<!-- project-kb:source file="tests/test_wp02_evidence.py" -->
-<!-- project-kb:source file="tests/test_wp02_knowledge.py" -->
+<!-- project-kb:source file="tests/test_codegraph.py" -->
+<!-- project-kb:source file="tests/test_retrieval_wp06.py" -->

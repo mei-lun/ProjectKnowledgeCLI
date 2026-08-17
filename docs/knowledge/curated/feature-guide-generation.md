@@ -40,7 +40,6 @@ Feature Guide 按功能独立写入 `docs/knowledge/drafts/features/`。`Knowled
 涉及 Lua/Skynet 功能开发时，context 可以引用生成的入口证据页和只读范围报告；静态启动/派发来源必须带路径与行号，动态服务发现、协议运行时名称和启动命令必须保留在 unknowns。
 <!-- project-kb:source file="src/project_knowledge/engine.py" -->
 <!-- project-kb:source file="src/project_knowledge/real_project.py" -->
-<!-- project-kb:source file="tests/test_wp02_knowledge.py" -->
 当项目没有 Lua/Skynet 入口时，入口知识页必须明确显示未检测到，并引用解析器/生成器实现作为来源；不得让空页降低 generated source coverage。Markdown 仅在源码模块相对相关性达到 0.8 时保留该模块页，避免宽泛来源降低 precision。
 <!-- project-kb:source file="src/project_knowledge/knowledge.py" -->
 <!-- project-kb:source file="src/project_knowledge/evaluate.py" -->
