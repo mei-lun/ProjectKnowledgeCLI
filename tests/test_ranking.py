@@ -267,6 +267,44 @@ class RankingTests(unittest.TestCase):
         self.assertEqual(result.ranking_status, "fallback")
         self.assertEqual(result.reason_code, "ranking_error")
 
+    def test_rank_files_caps_core_at_full_limit_for_inconsistent_policy(self) -> None:
+        candidates = [
+            FileCandidate(
+                path=f"src/candidate_{index}.py",
+                exact_symbol=True,
+                stages={"direct_symbol"},
+                original_order=index,
+            )
+            for index in range(15)
+        ]
+        policy = RankingPolicy(core_limit=15, full_limit=10)
+
+        result = rank_files(
+            candidates,
+            allowed_paths={candidate.path for candidate in candidates},
+            policy=policy,
+        )
+
+        self.assertEqual(len(result.core_files), 10)
+        self.assertEqual(len(result.files), 10)
+
+    def test_fallback_caps_core_at_full_limit_for_inconsistent_policy(self) -> None:
+        candidates = [
+            FileCandidate(path=f"src/candidate_{index}.py", original_order=index)
+            for index in range(15)
+        ]
+        policy = RankingPolicy(core_limit=15, full_limit=10)
+
+        result = fallback_rank_files(
+            candidates,
+            allowed_paths={candidate.path for candidate in candidates},
+            reason_code="ranking_error",
+            policy=policy,
+        )
+
+        self.assertEqual(len(result.core_files), 10)
+        self.assertEqual(len(result.files), 10)
+
 
 if __name__ == "__main__":
     unittest.main()

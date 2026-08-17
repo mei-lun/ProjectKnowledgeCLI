@@ -140,7 +140,7 @@ def rank_files(
     ]
     ranked.sort(key=lambda item: (-item.score, -STAGE_PRIORITY[item.selection_stage], item.path))
     eligible_core = [item for item in ranked if item.score >= policy.core_min_score]
-    core = eligible_core[: policy.core_limit]
+    core = eligible_core[: min(policy.core_limit, policy.full_limit)]
     confidence = "high"
     if not core and ranked:
         core = ranked[:1]
@@ -186,7 +186,7 @@ def fallback_rank_files(
         for candidate in merged
     ]
     ranked.sort(key=lambda item: (original_orders[item.path], item.path))
-    core = ranked[: policy.core_limit]
+    core = ranked[: min(policy.core_limit, policy.full_limit)]
     supporting = ranked[policy.core_limit : policy.full_limit]
     core_paths = {item.path for item in core}
     selected = core + supporting
