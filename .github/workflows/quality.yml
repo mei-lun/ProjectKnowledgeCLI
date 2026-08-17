@@ -26,7 +26,7 @@ jobs:
           --project .
           --strategy all
           --thresholds evaluation/thresholds.json
-          --baseline evaluation/baselines/self-repo-0.1.28.json
+          --baseline evaluation/baselines/self-repo-0.1.29.json
           --output evaluation/reports/ci-quick.json
           --quiet
       - name: Verify release finalization state

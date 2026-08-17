@@ -464,6 +464,16 @@ PYTHONPATH=src python3 -m project_knowledge check . --json
 | RT-009 | 功能开发上下文 | 部分完成 | Feature Guide 可返回职责、流程、不变量、扩展点、Recipe、测试、陷阱和 unknowns | 缺参考实现、任务分类、多跳影响和真实 verified 功能指南 |
 | RT-010 | 紧凑准确 | 未达标 | 当前 precision 低 |
 
+### WP-12A：检索精确率与核心证据重排（0.1.29）
+
+**实施状态：实现与聚焦测试已完成；绝对质量门尚未完成。**
+
+本批次新增 50 条冻结评测（原 40 条答案逐项保护，新增 10 条 ranking hard-negative），并实现统一 `policy-v1` 文件排序、核心/辅助证据分区、fallback 质量门、严格 core 指标和 nDCG。`tests/test_evaluate.py`、`tests/test_ranking.py`、`tests/test_retrieval_wp06.py` 聚焦验证共 55 项通过。
+
+最后一次 authoritative 本地模块评测（版本 0.1.28、未提交工作树）记录：hybrid file recall `0.818333`、core recall `0.798333`、core precision `0.316`、平均上下文 `1059.78`；code file recall `0.808333`；Markdown file recall/precision `0.47/0.098`；grep recall/precision `0.815/0.326762`，fallback 均为 `0.0`。因此 RT-010 仍标记“未达标”，不能用 dirty/stale 诊断或降低阈值宣称完成。Task 8 必须从 clean source commit 重建知识索引后重跑同一数据集。
+
+审计结论：精确率改进已落地在统一排序与证据 provenance，而召回缺口仍主要来自候选覆盖和 Markdown 知识页来源质量；真实 CodeGraph Adapter 仍明确保持 `adapter_unavailable` 边界。
+
 ### 5.9 配置、并发、安全和可观测性
 
 | ID | 原始要求 | 状态 | 差距 |

@@ -43,3 +43,10 @@ Feature Guide 按功能独立写入 `docs/knowledge/drafts/features/`。`Knowled
 <!-- project-kb:source file="src/project_knowledge/knowledge.py" -->
 <!-- project-kb:source file="src/project_knowledge/evaluate.py" -->
 <!-- /project-kb:generated -->
+
+## WP-12A 上下文契约（0.1.29）
+
+`KnowledgeAPI.context()` 暴露有序的 `core_files`、`supporting_files`、`files`、`file_rankings` 和结构化 `ranking_status`。候选在 stale/pending 来源屏蔽后才进入统一生产排序；在 token 预算不足时，先压缩可选诊断，再保留核心证据、精确符号、可用知识和 token-budget withholding 记录。当前 50 条绝对门仍需 clean-source 索引重建后复核，未通过的指标保持未达标。
+
+<!-- project-kb:source file="src/project_knowledge/retrieval.py" -->
+<!-- project-kb:source file="src/project_knowledge/evaluate.py" -->
