@@ -355,15 +355,14 @@ def _evaluate_sample(api: KnowledgeAPI, sample: dict[str, Any], strategy: str) -
             metrics[precision_metric] = len(matched) / max(1, len(actual[field]))
 
     expected_files = expected["expected_files"]
-    if expected_files:
-        core_files = set(returned["core_files"])
-        core_matched = expected_files & core_files
-        core_recall = len(core_matched) / len(expected_files)
-        metrics["core_file_recall"] = core_recall
-        metrics["core_file_precision"] = len(core_matched) / max(1, len(core_files))
-        metrics["ndcg_at_5"] = _ndcg_at_k(returned["files"], expected_files)
-        if core_recall < 1:
-            core_failures.append("core_file_recall")
+    core_files = set(returned["core_files"])
+    core_matched = expected_files & core_files
+    core_recall = len(core_matched) / len(expected_files) if expected_files else 0.0
+    metrics["core_file_recall"] = core_recall
+    metrics["core_file_precision"] = len(core_matched) / max(1, len(core_files))
+    metrics["ndcg_at_5"] = _ndcg_at_k(returned["core_files"], expected_files)
+    if expected_files and core_recall < 1:
+        core_failures.append("core_file_recall")
 
     if "acceptable_supporting_files" in sample:
         supporting_files = set(returned["supporting_files"])

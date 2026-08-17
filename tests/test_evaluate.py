@@ -91,7 +91,7 @@ class EvaluationTests(unittest.TestCase):
         sample["acceptable_supporting_files"] = ["tests/test_app.py"]
         returned = {
             "files": ["src/app.py", "tests/test_app.py", "README.md"],
-            "core_files": ["src/app.py", "README.md"],
+            "core_files": ["README.md", "src/app.py"],
             "supporting_files": ["tests/test_app.py"],
             "symbols": {"src/app.py::AccountService.login"},
             "call_path": set(sample["expected_call_path"]),
@@ -110,12 +110,39 @@ class EvaluationTests(unittest.TestCase):
         self.assertEqual(result["metrics"]["core_file_precision"], 0.5)
         self.assertEqual(result["metrics"]["file_precision"], 0.333333)
         self.assertEqual(result["metrics"]["acceptable_supporting_precision"], 1.0)
-        self.assertGreater(result["metrics"]["ndcg_at_5"], 0.0)
+        self.assertEqual(result["metrics"]["ndcg_at_5"], 0.63093)
         self.assertEqual(result["core_failed_metrics"], [])
         self.assertEqual(result["core_files"], returned["core_files"])
         self.assertEqual(result["supporting_files"], returned["supporting_files"])
         self.assertEqual(result["file_rankings"], returned["file_rankings"])
         self.assertEqual(result["ranking_status"], "ok")
+
+    def test_core_metrics_are_zero_without_expected_files(self) -> None:
+        api = KnowledgeAPI(self.root)
+        sample = load_dataset(self.dataset)[0]
+        sample["expected_files"] = []
+        returned = {
+            "files": ["src/app.py"],
+            "core_files": ["src/app.py"],
+            "supporting_files": [],
+            "symbols": {"src/app.py::AccountService.login"},
+            "call_path": set(sample["expected_call_path"]),
+            "text": "",
+            "tool_calls": 1,
+            "stale_detected": False,
+            "selection_reasons": {},
+            "file_rankings": [],
+            "ranking_status": "ok",
+        }
+
+        with patch("project_knowledge.evaluate._retrieve", return_value=returned):
+            result = _evaluate_sample(api, sample, "hybrid")
+
+        self.assertEqual(result["metrics"]["core_file_precision"], 0.0)
+        self.assertEqual(result["metrics"]["core_file_recall"], 0.0)
+        self.assertEqual(result["metrics"]["ndcg_at_5"], 0.0)
+        self.assertEqual(result["core_failed_metrics"], [])
+        self.assertTrue(result["success"])
 
     def test_ranking_fallback_is_a_sample_failure(self) -> None:
         report = {
