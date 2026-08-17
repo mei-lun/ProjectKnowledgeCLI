@@ -1,5 +1,7 @@
 # 功能开发指南生成约定
 
+0.1.30 人工复核：Feature Guide 的符号引用在生成与校验时使用 CodeGraph 实时查询和公开符号名，不再依赖 SQLite 符号缓存。
+
 功能开发指导采用“确定性代码事实 + 受限模型语义组织 + 本地引用校验”的组合流程。静态分析负责候选范围、文件、符号和关系；模型负责把有限 EvidencePack 组织成 Feature Guide、Workflow 和 Recipe；系统在任何草案落库前验证 Schema、路径、符号、行号和哈希。
 
 <!-- project-kb:source file="src/project_knowledge/semantic.py" -->

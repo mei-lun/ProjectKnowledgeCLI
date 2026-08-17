@@ -1,5 +1,7 @@
 # Provider 与 EvidencePack
 
+0.1.30 人工复核：EvidencePack 的文件哈希仍由本地证据包固定，符号存在性、路径和行范围改由实时 CodeGraph Adapter 校验；外发授权边界不变。
+
 0.1.28 人工复核：当前 Proposal Schema、CLI 和 Provider 配置仍不改变外发授权、EvidencePack 脱敏和草案落库前校验边界；Feature Guide 草案转 Proposal 时只读取已经本地校验并持久化的草案与来源哈希，不会新增网络请求。发布最终化和 CodeGraph Adapter 也不绕过这些边界。
 
 ## 职责

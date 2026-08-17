@@ -1,5 +1,7 @@
 # 术语表
 
+0.1.30 人工复核：`CodeGraph` 是唯一代码事实来源；`symbol_id` 仅作 Adapter 内部关联，面向用户的引用使用公开符号名和项目内路径。
+
 0.1.28 人工复核：Proposal 的稳定 ID、来源哈希、审核状态和 generated block 边界仍与当前实现一致；本次同时确认新鲜度四态及人工复核语义没有因发布最终化与 CodeGraph 主链路调整而改变。
 
 - **自动生成知识（Generated Knowledge）**：PKS 可根据当前代码索引以原子方式替换的确定性 Markdown。

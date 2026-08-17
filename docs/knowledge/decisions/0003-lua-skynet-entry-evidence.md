@@ -1,5 +1,7 @@
 # ADR 0003：Lua/Skynet 入口证据与只读 revision 边界
 
+0.1.30 复核结论：本 ADR 的 builtin 入口提取方案已被 ADR-0002 的 CodeGraph-only 决策取代；`entrypoints.md` 占位生成物和本地 Lua/Skynet parser 已删除。
+
 - 状态：草案
 - 来源提案：kp-9b39b72c2bcb0d23
 - 创建审核人：codex
