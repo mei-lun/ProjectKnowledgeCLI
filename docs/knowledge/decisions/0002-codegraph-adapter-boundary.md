@@ -17,7 +17,7 @@
 ## 决策
 
 1. `CodeIndexEngine` 的公共契约固定为 `initialize`、`sync`、`search_symbols`、`get_source`、`trace`、`impact`、`affected_tests`、`capabilities` 与 `health`。
-2. `BuiltinCodeIndexEngine` 继续作为默认、离线、可复现的正式实现；它提供 Python AST、Lua/Skynet 专项证据以及保守的多语言启发式能力。
+2. BuiltinCodeIndexEngine 和本地 parser 不再属于产品运行时；历史 SQLite 符号、关系和路由表仅为迁移兼容保留，CodeGraph 是唯一代码事实来源。
 3. `engine: codegraph` 只调用 CodeGraph 公共 CLI/API，不读取其私有数据库，也不回退到 builtin；不允许以 builtin 静默冒充已选择的外部引擎。CLI 不存在、项目未初始化或响应不满足契约时必须显式失败。
 4. CodeGraph 响应在 Adapter 边界内规范化。内部不透明符号 ID 不暴露给后续公共查询；追踪和影响查询优先使用 `name`/`qualifiedName` 等公共引用。受影响测试查询使用 CodeGraph 支持的公共过滤表达式。
 5. `KnowledgeAPI` 通过当前选择的引擎获得实时符号和关系事实。SQLite 是知识存储和兼容缓存，不能在 `engine=codegraph` 时成为结构事实的唯一来源。
@@ -39,6 +39,6 @@
 
 ## 影响
 
-默认安装仍可完全离线运行；启用 CodeGraph 的项目获得更精确的多语言结构事实，并承担外部 CLI 的安装和项目初始化要求。两种引擎能力必须在状态与诊断输出中明确区分。
+运行项目必须安装并初始化 CodeGraph；CLI 或项目不可用时明确返回结构化错误，不执行本地解析回退。知识文档和检索结果必须标注 CodeGraph 事实来源。
 
 0.1.27 最终复核：`KnowledgeAPI` 的长文档片段相关性调整只影响证据文本排序，不改变 CodeGraph 实时事实来源、公共 CLI 边界或禁止回退 builtin 的决策。

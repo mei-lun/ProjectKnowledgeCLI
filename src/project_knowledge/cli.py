@@ -9,6 +9,7 @@ from typing import Any
 from . import __version__
 from .config import ProjectConfig
 from .evidence import EvidencePackBuilder
+from .errors import ProjectKnowledgeError
 from .evaluate import STRATEGIES, evaluate_suite, load_json_object
 from .finalization import FinalizationService
 from .mcp import serve
@@ -273,6 +274,12 @@ def main(argv: list[str] | None = None) -> int:
             else:
                 raise RuntimeError(f"unsupported command: {args.command}")
             exit_code = 0
+    except ProjectKnowledgeError as error:
+        if getattr(args, "as_json", False):
+            print(json.dumps(error.to_dict(), ensure_ascii=False, indent=2))
+        else:
+            print(f"project-kb: {error}", file=sys.stderr)
+        return 2
     except (OSError, RuntimeError, ValueError, KeyError, json.JSONDecodeError) as error:
         print(f"project-kb: {error}", file=sys.stderr)
         return 1

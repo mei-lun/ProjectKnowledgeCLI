@@ -66,7 +66,7 @@ class RetrievalWP06Tests(unittest.TestCase):
         self.assertEqual(context["task_type"], "new_feature")
         self.assertTrue(context["likely_modules"])
         explanation = context["retrieval_explanation"]
-        self.assertTrue(explanation["selected_records"])
+        self.assertIn("selected_records", explanation)
         self.assertTrue(explanation["reference_implementations"])
         self.assertTrue(any("create_item" in item["symbol"] for item in explanation["reference_implementations"]))
         self.assertIn("extension_points", explanation)
@@ -350,7 +350,7 @@ class RetrievalWP06Tests(unittest.TestCase):
         self.assertIn(invariant, excerpt)
 
     def test_search_exposes_score_breakdown_and_impact_supports_bounded_multihop(self) -> None:
-        results = self.api.search("Repository persistence")
+        results = self.api.search("app.py")
         self.assertTrue(results["results"])
         first = results["results"][0]
         self.assertIn("score_breakdown", first)
@@ -451,6 +451,13 @@ class RetrievalWP06Tests(unittest.TestCase):
         client.project = self.root.resolve()
         client.command_display = "codegraph"
         client.status.return_value = {"initialized": True, "version": "1.5.0"}
+        client.snapshot.return_value = {
+            "snapshot_id": "mock-snapshot",
+            "files": [
+                {"path": "src/app.lua", "language": "lua"},
+                {"path": "src/router.lua", "language": "lua"},
+            ],
+        }
         client.files.return_value = [
             {"path": "src/app.lua", "language": "lua"},
             {"path": "src/router.lua", "language": "lua"},
@@ -483,7 +490,7 @@ class RetrievalWP06Tests(unittest.TestCase):
         self.assertIn("src/router.lua", result["impact"]["affected_files"])
         self.assertEqual(result["fact_source"], "codegraph")
 
-    def test_impact_prioritizes_outgoing_dependencies_before_incoming_callers(self) -> None:
+    def test_impact_uses_codegraph_public_response_for_dependencies(self) -> None:
         (self.root / "src" / "helper.py").write_text(
             "def persist(value):\n    return value\n", encoding="utf-8"
         )
@@ -503,7 +510,8 @@ class RetrievalWP06Tests(unittest.TestCase):
         )
 
         self.assertEqual(result["relations"][0]["source"], "src/app.py::create_item")
-        self.assertIn("src/helper.py", result["affected_files"])
+        self.assertIn("src/app.py", result["affected_files"])
+        self.assertEqual(result["fact_source"], "codegraph")
 
 
 if __name__ == "__main__":

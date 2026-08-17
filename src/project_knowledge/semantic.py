@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 from .config import ProjectConfig
+from .engine import create_engine
 from .knowledge import KnowledgeGenerator
 from .models import EvidencePack
 from .provider import ModelRuntime
@@ -22,6 +23,8 @@ class FeatureGuideValidator:
     def __init__(self, root: str | Path, store: KnowledgeStore):
         self.root = Path(root).resolve()
         self.store = store
+        self.config = ProjectConfig.load(self.root)
+        self.engine = create_engine(self.config)
 
     def validate(self, guide: dict[str, Any], pack: EvidencePack) -> list[dict[str, Any]]:
         validate_instance(guide, FEATURE_GUIDE_DRAFT_SCHEMA)
@@ -50,17 +53,28 @@ class FeatureGuideValidator:
                 symbol_id = citation.get("id")
                 if not symbol_id:
                     raise FeatureGuideValidationError(f"符号来源缺少 id：{relative}")
-                row = self.store.connection.execute(
-                    "SELECT id, path, hash, line, end_line FROM symbols WHERE id = ?", (symbol_id,),
-                ).fetchone()
-                if row is None:
+                query = str(citation.get("name") or symbol_id).rsplit("::", 1)[-1]
+                matches = self.engine.search_symbols(self.root, self.config, query, limit=50)
+                symbol = next(
+                    (
+                        item for item in matches
+                        if item.id == symbol_id
+                        or (
+                            item.name == query
+                            and item.path == relative
+                            and ":" not in symbol_id
+                        )
+                    ),
+                    None,
+                )
+                if symbol is None:
                     raise FeatureGuideValidationError(f"符号不存在：{symbol_id}")
-                if row["path"] != relative:
+                if symbol.path != relative:
                     raise FeatureGuideValidationError(f"符号路径不匹配：{symbol_id} -> {relative}")
-                if row["hash"] != citation["hash"]:
+                if citation["hash"] != item.content_hash:
                     raise FeatureGuideValidationError(f"符号哈希不匹配：{symbol_id}")
-                end_line = row["end_line"] or row["line"]
-                if not row["line"] <= int(citation["line"]) <= end_line:
+                end_line = symbol.end_line or symbol.line
+                if not symbol.line <= int(citation["line"]) <= end_line:
                     raise FeatureGuideValidationError(f"符号行号不在定义范围内：{symbol_id}:{citation['line']}")
         return citations
 
@@ -123,26 +137,18 @@ class SemanticKnowledgeService:
             rows = store.rows(
                 "SELECT module, path FROM files ORDER BY module, path"
             )
-            symbols = store.rows(
-                "SELECT id, name, kind, path FROM symbols "
-                "WHERE kind IN ('class', 'function', 'method') ORDER BY path, line"
-            )
         paths_by_domain: dict[str, list[str]] = defaultdict(list)
-        symbols_by_path: dict[str, list[dict[str, str]]] = defaultdict(list)
         for row in rows:
             paths_by_domain[str(row["module"])].append(str(row["path"]))
-        for item in symbols:
-            symbols_by_path[str(item["path"])].append(item)
         candidates: list[dict[str, Any]] = []
         for domain, paths in sorted(paths_by_domain.items()):
-            anchors = [item for path in paths for item in symbols_by_path.get(path, [])]
             title = domain.replace("_", " ").replace("-", " ")
             candidates.append({
                 "feature_id": slug(domain),
                 "title": f"{title} 功能域候选",
                 "domain": domain,
                 "sources": paths,
-                "symbol_anchors": [item["id"] for item in anchors[:20]],
+                "symbol_anchors": [],
                 "confidence": "generated",
                 "requires_semantic_generation": True,
             })

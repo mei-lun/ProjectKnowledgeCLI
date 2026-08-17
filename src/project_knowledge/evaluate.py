@@ -113,15 +113,6 @@ def evaluate(
         raise ValueError(f"unknown evaluation strategy: {strategy}")
     api = KnowledgeAPI(project)
     if strategy == "codegraph":
-        if api.config.engine != "codegraph":
-            return {
-                "schema_version": SCHEMA_VERSION,
-                "strategy": strategy,
-                "available": False,
-                "reason_code": "adapter_unavailable",
-                "details": ["engine_not_selected"],
-                "message": "Select engine=codegraph to evaluate CodeGraph facts.",
-            }
         diagnostic = api.service.engine.diagnose(api.root)
         if not diagnostic.get("available"):
             return {
@@ -144,7 +135,7 @@ def evaluate(
     status = api.status()
     source_snapshot = hash_text("\n".join(
         f"{item.path}\t{item.content_hash}"
-        for item in api.service.engine.discover(api.root, api.config)
+        for item in api.service.engine.snapshot(api.root, api.config).files
     ))
     metrics, metric_counts = _aggregate(results)
     with KnowledgeStore(api.service.db_path, readonly=True) as store:
@@ -640,10 +631,14 @@ def _retrieve(api: KnowledgeAPI, sample: dict[str, Any], strategy: str) -> dict[
     contents: dict[str, str] = {}
     allowed_paths: set[str] = set()
     symbols_by_path: dict[str, list[dict[str, Any]]] = {}
-    with KnowledgeStore(api.service.db_path, readonly=True) as store:
-        for row in store.rows("SELECT id, name, path FROM symbols"):
-            symbols_by_path.setdefault(_normalized_path(row["path"]), []).append(row)
-    for item in api.service.engine.discover(api.root, api.config):
+    for term in terms[:12]:
+        for symbol in api.service.engine.search_symbols(api.root, api.config, term, limit=10):
+            symbols_by_path.setdefault(_normalized_path(symbol.path), []).append({
+                "id": symbol.id,
+                "name": symbol.name,
+                "path": symbol.path,
+            })
+    for item in api.service.engine.snapshot(api.root, api.config).files:
         path = _normalized_path(item.path)
         allowed_paths.add(path)
         content = read_text(api.root / path)

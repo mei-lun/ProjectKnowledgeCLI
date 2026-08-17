@@ -2,37 +2,34 @@
 
 # 测试地图
 
-| 测试文件 | 模块 | 测试类符号数 |
-| --- | --- | ---: |
-| `tests/__init__.py` | tests | 0 |
-| `tests/test_codegraph.py` | tests | 16 |
-| `tests/test_codegraph_validation.py` | tests | 3 |
-| `tests/test_config.py` | tests | 7 |
-| `tests/test_delivery_reliability.py` | tests | 7 |
-| `tests/test_documentation_roadmap.py` | tests | 10 |
-| `tests/test_engine.py` | tests | 10 |
-| `tests/test_engine_wp01_wp02.py` | tests | 5 |
-| `tests/test_evaluate.py` | tests | 29 |
-| `tests/test_finalization.py` | tests | 7 |
-| `tests/test_gardenserver_rules.py` | tests | 4 |
-| `tests/test_guidance.py` | tests | 4 |
-| `tests/test_guidance_e2e.py` | tests | 3 |
-| `tests/test_guidance_incremental.py` | tests | 8 |
-| `tests/test_guidance_mcp.py` | tests | 11 |
-| `tests/test_guidance_retrieval.py` | tests | 3 |
-| `tests/test_guidance_store.py` | tests | 24 |
-| `tests/test_guidance_workflow.py` | tests | 8 |
-| `tests/test_initialization_workflow.py` | tests | 6 |
-| `tests/test_integration.py` | tests | 12 |
-| `tests/test_proposal.py` | tests | 9 |
-| `tests/test_provider.py` | tests | 12 |
-| `tests/test_ranking.py` | tests | 17 |
-| `tests/test_retrieval_wp06.py` | tests | 18 |
-| `tests/test_schemas.py` | tests | 6 |
-| `tests/test_semantic.py` | tests | 7 |
-| `tests/test_single_directory.py` | tests | 4 |
-| `tests/test_versioning.py` | tests | 5 |
-| `tests/test_watch_wp07.py` | tests | 7 |
-| `tests/test_wp02_evidence.py` | tests | 6 |
-| `tests/test_wp02_knowledge.py` | tests | 4 |
-| `tests/test_wp08.py` | tests | 7 |
+| 测试文件 | 模块 |
+| --- | --- |
+| `tests/__init__.py` | tests |
+| `tests/test_codegraph.py` | tests |
+| `tests/test_codegraph_validation.py` | tests |
+| `tests/test_config.py` | tests |
+| `tests/test_delivery_reliability.py` | tests |
+| `tests/test_documentation_roadmap.py` | tests |
+| `tests/test_engine.py` | tests |
+| `tests/test_evaluate.py` | tests |
+| `tests/test_finalization.py` | tests |
+| `tests/test_gardenserver_rules.py` | tests |
+| `tests/test_guidance.py` | tests |
+| `tests/test_guidance_e2e.py` | tests |
+| `tests/test_guidance_incremental.py` | tests |
+| `tests/test_guidance_mcp.py` | tests |
+| `tests/test_guidance_retrieval.py` | tests |
+| `tests/test_guidance_store.py` | tests |
+| `tests/test_guidance_workflow.py` | tests |
+| `tests/test_initialization_workflow.py` | tests |
+| `tests/test_integration.py` | tests |
+| `tests/test_proposal.py` | tests |
+| `tests/test_provider.py` | tests |
+| `tests/test_ranking.py` | tests |
+| `tests/test_retrieval_wp06.py` | tests |
+| `tests/test_schemas.py` | tests |
+| `tests/test_semantic.py` | tests |
+| `tests/test_single_directory.py` | tests |
+| `tests/test_versioning.py` | tests |
+| `tests/test_watch_wp07.py` | tests |
+| `tests/test_wp08.py` | tests |

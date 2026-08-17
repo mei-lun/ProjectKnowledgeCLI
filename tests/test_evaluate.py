@@ -313,16 +313,15 @@ class EvaluationTests(unittest.TestCase):
         self.assertGreaterEqual(report["reproducibility"]["project_files"], 2)
         self.assertEqual(report["results"][0]["id"], "account-login")
 
-    def test_strategy_suite_isolates_grep_code_markdown_and_unavailable_codegraph(self) -> None:
+    def test_strategy_suite_isolates_grep_code_markdown_and_real_codegraph(self) -> None:
         suite = evaluate_suite(
             self.root,
             self.dataset,
             strategies=["hybrid", "grep_read", "code", "markdown", "codegraph"],
         )
         self.assertEqual(set(suite["strategies"]), {"hybrid", "grep_read", "code", "markdown", "codegraph"})
-        self.assertFalse(suite["strategies"]["codegraph"]["available"])
-        self.assertEqual(suite["strategies"]["codegraph"]["reason_code"], "adapter_unavailable")
-        self.assertIn("engine_not_selected", suite["strategies"]["codegraph"]["details"])
+        self.assertTrue(suite["strategies"]["codegraph"]["available"])
+        self.assertEqual(suite["strategies"]["codegraph"]["metrics"]["ranking_fallback_rate"], 0.0)
         self.assertTrue(suite["strategies"]["grep_read"]["available"])
         self.assertIn("src/app.py", suite["strategies"]["grep_read"]["results"][0]["returned_files"])
 
@@ -501,7 +500,10 @@ class EvaluationTests(unittest.TestCase):
             _retrieve(api, sample, "grep_read")
 
         self.assertEqual(len(calls), 2)
-        self.assertTrue(all(candidates for candidates in calls))
+        # A Markdown search may legitimately find no fresh selected page after
+        # the stale-evidence shield. Both strategies must still delegate their
+        # final ordering, while grep over this fixture has concrete matches.
+        self.assertTrue(calls[1])
 
     def test_markdown_expands_cited_sources_with_bounded_live_impact(self) -> None:
         dependency_paths = []

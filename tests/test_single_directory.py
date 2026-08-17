@@ -4,6 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from project_knowledge.codegraph import CodeGraphError
 from project_knowledge.config import ProjectConfig
 from project_knowledge.service import ProjectService
 
@@ -17,16 +18,15 @@ class SingleDirectoryTests(unittest.TestCase):
         self.assertEqual(config.curated_root, ".project-kb/curated")
         self.assertEqual(config.decisions_root, ".project-kb/decisions")
 
-    def test_initialize_dry_run_does_not_plan_knowledge_outside_project_kb(self) -> None:
+    def test_initialize_dry_run_requires_an_initialized_codegraph_project(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             (root / "src").mkdir()
             (root / "src" / "main.lua").write_text("function main() end\n", encoding="utf-8")
-            result = ProjectService(root).initialize(dry_run=True)
-            planned = set(result["files_to_create"])
-            self.assertTrue(planned)
-            self.assertTrue(all(path == ".project-kb.yml" or path.startswith(".project-kb/") for path in planned))
-            self.assertFalse(any(path.startswith("docs/") for path in planned))
+            with self.assertRaises(CodeGraphError):
+                ProjectService(root).initialize(dry_run=True)
+            self.assertFalse((root / ".project-kb.yml").exists())
+            self.assertFalse((root / ".project-kb").exists())
 
 
 if __name__ == "__main__":

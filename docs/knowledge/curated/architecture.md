@@ -5,7 +5,7 @@ Project Knowledge CLI 是一个本地优先的 Python 应用，CLI 和 MCP 适�
 ## 职责边界
 
 - `ProjectService` 负责初始化、同步、原子重建、文件监视、健康检查以及由标记边界保护的客户端集成。
-- `CodeIndexEngine` 是可替换的结构索引边界。内置实现使用 Python AST 提取和保守的多语言模式匹配；CodeGraph Adapter 通过 1.5 公共 CLI 提供实时文件、符号、追踪、影响和受影响测试事实，不读取私有数据库且不回退 builtin。
+- `CodeIndexEngine` 是 CodeGraph 公共 CLI 的事实边界。运行时不再内置本地 parser，也不从 SQLite 旧符号表恢复代码事实；CodeGraph 不可用或项目未初始化时明确失败。
 - `KnowledgeStore` 负责私有 SQLite 架构、WAL 行为、一致性事务、全文检索和查询统计，其数据表不属于公共 API。
 - `KnowledgeGenerator` 负责生成 Markdown、清单记录、发现人工文档中的来源标记以及维护新鲜度状态，绝不覆盖现有人工维护文档。初始 curated 模板带有未审阅标记，在删除标记前只能作为 `inferred` 信息，不能冒充已验证的项目意图。面向人的生成标题、说明、表头和索引状态默认使用中文，底层记录 ID 与接口枚举保持稳定。
 - 原子重建会将人工知识和决策记录的哈希基线带入替换数据库。仅来源发生变化时，过期状态会跨重建保留；编辑人工维护正文是接受当前哈希的显式验证事件。

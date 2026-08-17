@@ -19,7 +19,6 @@
         },
         "engine": {
           "enum": [
-            "builtin",
             "codegraph"
           ]
         },

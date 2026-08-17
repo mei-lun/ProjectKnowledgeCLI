@@ -534,7 +534,7 @@ CONFIG_SCHEMA: dict[str, Any] = {
         "index": {
             "type": "object",
             "properties": {
-                "engine": {"enum": ["builtin", "codegraph"]},
+                "engine": {"enum": ["codegraph"]},
                 "codegraph_command": {"type": "string"},
                 "codegraph_dir": {"type": "string", "pattern": "^[A-Za-z0-9._-]+$"},
                 "codegraph_timeout_seconds": {"type": "integer", "minimum": 1},

@@ -274,12 +274,11 @@ class CodeGraphClient:
 
 
 class CodeGraphEngine:
-    """CodeGraph-backed engine with the existing local store as a compatibility cache."""
+    """Code facts provided exclusively by the public CodeGraph CLI."""
 
     def __init__(self, config: ProjectConfig) -> None:
         self.config = config
         self.client: CodeGraphClient | None = None
-        self._builtin = None
         self._diagnostic: dict[str, Any] | None = None
         self._symbol_references: dict[str, str] = {}
 
@@ -289,18 +288,13 @@ class CodeGraphEngine:
             self._symbol_references.clear()
         return self.client
 
-    def _builtin_engine(self):
-        if self._builtin is None:
-            from .engine import BuiltinCodeIndexEngine
-            self._builtin = BuiltinCodeIndexEngine()
-        return self._builtin
+    def snapshot(self, root: Path, config: ProjectConfig):
+        from .engine import CodeIndexSnapshot, IndexedFile, _module_for
 
-    def discover(self, root: Path, config: ProjectConfig):
-        from .engine import IndexedFile, _module_for
-        files = self._client(root).files()
+        payload = self._client(root).snapshot()
         result: list[IndexedFile] = []
-        for item in files:
-            path = str(item.get("path", "")).replace("\\", "/").lstrip("./")
+        for item in payload["files"]:
+            path = _validated_project_path(str(item.get("path", "")), root)
             if not path:
                 continue
             language = str(item.get("language", "unknown")).lower()
@@ -308,18 +302,16 @@ class CodeGraphEngine:
             source = root / path
             try:
                 stat = source.stat()
-                content_hash = str(item.get("contentHash", "")) or "sha256:" + __import__("hashlib").sha256(source.read_bytes()).hexdigest()
+                content_hash = str(item.get("content_hash", ""))
                 size = int(item.get("size", stat.st_size) or stat.st_size)
                 mtime_ns = stat.st_mtime_ns
             except OSError:
                 continue
             result.append(IndexedFile(path, language_names.get(language, language.title()), _module_for(path), size, mtime_ns, content_hash))
-        return sorted(result, key=lambda item: item.path)
-
-    def parse(self, root: Path, indexed_file):
-        # The SQLite store remains a compatibility cache; CodeGraph is authoritative
-        # for guidance evidence and graph queries.
-        return self._builtin_engine().parse(root, indexed_file)
+        return CodeIndexSnapshot(
+            snapshot_id=str(payload["snapshot_id"]),
+            files=tuple(sorted(result, key=lambda item: item.path)),
+        )
 
     def initialize(self, root: Path, config: ProjectConfig):
         return self._client(root).init()
@@ -375,13 +367,13 @@ class CodeGraphEngine:
             "command": command,
             "details": details,
             "capabilities": [
-                "initialize", "sync", "symbols", "search_symbols", "get_source",
+                "initialize", "sync", "snapshot", "symbols", "search_symbols", "get_source",
                 "trace", "impact", "affected_tests", "calls",
             ],
             "limitations": [
                 "requires an initialized CodeGraph project",
                 "uses only the public CodeGraph CLI contract",
-                "SQLite remains a compatibility cache for generated knowledge",
+                "does not fall back to local source parsing",
             ],
         }
 
@@ -496,5 +488,3 @@ class CodeGraphEngine:
                 break
         return sorted(set(tests))
 
-    def entrypoints(self, root: Path, config: ProjectConfig, limit=200):
-        return [{"source": item, "kind": "codegraph"} for item in self._client(root).query("main", limit=limit)]

@@ -367,8 +367,7 @@ def score_candidate(candidate: FileCandidate, policy: RankingPolicy) -> ScoreBre
         + min(4, len(candidate.content_terms)) * policy.content_term
     )
     protected_test = (
-        candidate.exact_symbol
-        or candidate.direct_knowledge_source
+        candidate.direct_knowledge_source
         or candidate.affected_test
         or candidate.graph_hop == 1
     )
@@ -423,8 +422,7 @@ def _score_reasons(
             reasons.append("content_terms")
     if penalties:
         protected_test = (
-            candidate.exact_symbol
-            or candidate.direct_knowledge_source
+            candidate.direct_knowledge_source
             or candidate.affected_test
             or candidate.graph_hop == 1
         )

@@ -7,6 +7,8 @@ from pathlib import Path
 from project_knowledge.guidance_models import GuidanceBatch, GuidanceRun
 from project_knowledge.guidance_store import GuidanceStore
 from project_knowledge.guidance_workflow import GuidanceWorkflow
+from project_knowledge.config import ProjectConfig
+from project_knowledge.engine import create_engine
 from project_knowledge.store import KnowledgeStore
 from project_knowledge.util import utc_now
 
@@ -23,6 +25,14 @@ class GuidanceWorkflowTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.root = Path(self.temp.name)
+        (self.root / "src").mkdir()
+        (self.root / "src" / "login.lua").write_text(
+            "local M = {}\nfunction M.login() return true end\nreturn M\n",
+            encoding="utf-8",
+        )
+        config = ProjectConfig(project_name="guidance-fixture")
+        config.write(self.root)
+        create_engine(config).initialize(self.root, config)
         self.snapshot = {
             "snapshot_id": "snap-1",
             "files": [{"path": "src/login.lua", "language": "lua", "content_hash": "sha256:h", "module": "src", "symbols": []}],

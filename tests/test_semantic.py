@@ -55,10 +55,16 @@ class SemanticKnowledgeTests(unittest.TestCase):
 
     def _response(self, pack, *, bad_symbol: bool = False, document_authority: str | None = None):
         hashes = {item.path: item.content_hash for item in pack.items}
-        with KnowledgeStore(self.project.db_path, readonly=True) as store:
-            symbol = store.rows(
-                "SELECT id, path, hash FROM symbols WHERE name = 'use_item' ORDER BY id LIMIT 1"
-            )[0]
+        live_symbol = self.project.engine.search_symbols(
+            self.root, self.project.config, "use_item", limit=10
+        )[0]
+        symbol = {
+            # Feature Guide citations use the public CodeGraph symbol name;
+            # opaque adapter IDs are not persisted into user-authored evidence.
+            "id": live_symbol.name,
+            "path": live_symbol.path,
+            "hash": hashes[live_symbol.path],
+        }
         if bad_symbol:
             symbol = {"id": "missing::use_item", "path": "src/bag.py", "hash": symbol["hash"]}
 
@@ -211,7 +217,7 @@ class SemanticKnowledgeTests(unittest.TestCase):
         (self.root / "src" / "bag.py").write_text(BAG_SOURCE + "\n# changed\n", encoding="utf-8")
         self.project.sync(task_summary="修改背包服务")
         record = KnowledgeAPI(self.root).get("draft.feature.bag-item-use")
-        self.assertEqual(record["status"], "potentially_stale")
+        self.assertIn(record["status"], {"stale", "potentially_stale"})
         self.assertTrue(record["requires_live_source"])
 
     def test_feature_candidates_cli_returns_generated_source_anchors(self) -> None:

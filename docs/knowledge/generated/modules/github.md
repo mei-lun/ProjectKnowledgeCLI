@@ -4,12 +4,8 @@
 
 ## 文件
 
-- `.github/workflows/quality.yml`（配置）
+- `.github/workflows/quality.yml`（Yaml）
 
-## 符号
+## 代码事实
 
-- 未检测到符号
-
-## 结构关系
-
-- 未检测到结构关系
+符号、调用关系和影响范围由 CodeGraph 在查询时实时提供，本页不缓存或复制这些事实。

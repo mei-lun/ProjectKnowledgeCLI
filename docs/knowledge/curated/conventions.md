@@ -6,7 +6,7 @@
 - 项目以 `0.1.0` 为版本基线。后续每批修改或新增内容都通过 `python scripts/bump_version.py "中文变更说明"` 更新版本和 `CHANGELOG.md`；同一批修改或新增内容只递增一次补丁版本，由该批变更触发的知识同步不重复递增。
 - 后续功能开发以 `docs/project-knowledge-system-audit.md` 的工作包、需求 ID 和验收条件为基线；没有实现证据、正负测试和相关评测的条目不得标记为完成。
 - 每个工作包必须更新相关评测问题和失败样本。冻结阈值不得为通过 CI 而降低；确需调整时必须记录新证据、原因和版本。
-- 不同检索策略使用独立阈值；codegraph 不可用时必须报告 `adapter_unavailable`，不得用 builtin 结果冒充。
+- 不同检索策略使用独立阈值；CodeGraph 不可用时必须报告 `adapter_unavailable`，不得用本地 parser 或 SQLite 旧表结果冒充。
 - CodeGraph Adapter 只使用公共 CLI/API；不透明内部 ID 必须在边界内转换为公共符号引用，SQLite 缓存为空不能阻断实时引擎查询。
 - 交付必须先提交源码和文档，再用 `project-kb finalize` 同步生成物；生成物提交后以 `finalize --check` 只读验证。该命令不得执行 `git add`、`git commit` 或 `git push`。
 - 真实项目评测默认使用临时只读镜像，并以源目录全树快照前后一致作为未写入证据。

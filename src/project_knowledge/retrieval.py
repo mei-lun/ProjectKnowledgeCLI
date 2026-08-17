@@ -155,143 +155,48 @@ class KnowledgeAPI:
         symbols = symbols or []
         max_hops = max(0, min(int(max_hops), 5))
         max_relations = max(1, min(int(max_relations), 5000))
-        if self.config.engine == "codegraph":
-            engine_result = dict(self.service.engine.impact(
-                self.root,
-                self.service.config,
-                files=files,
-                symbols=symbols,
-                max_hops=max_hops,
-                max_relations=max_relations,
-            ))
-            affected_files = set(engine_result.get("affected_files", []))
-            affected_symbols = set(engine_result.get("affected_symbols", []))
-            with KnowledgeStore(self.service.db_path) as store:
-                knowledge: list[dict[str, Any]] = []
-                for record in store.all_knowledge():
-                    source_keys = {source.path or source.id for source in record.sources}
-                    if source_keys.intersection(affected_files | affected_symbols):
-                        knowledge.append({
-                            "id": record.id,
-                            "title": record.title,
-                            "path": record.path,
-                            "freshness": record.status,
-                            "confidence": record.confidence,
-                        })
-                engine_result.update({
-                    "input": {"files": files, "symbols": symbols},
-                    "max_hops": max_hops,
-                    "max_relations": max_relations,
-                    "affected_knowledge": knowledge,
-                    "impact_explanation": self._impact_explanation(
-                        files,
-                        symbols,
-                        max_hops,
-                        list(engine_result.get("relations", [])),
-                        list(engine_result.get("affected_modules", [])),
-                        list(engine_result.get("affected_tests", [])),
-                    ),
-                    "truncated": len(engine_result.get("relations", [])) >= max_relations,
-                    "fact_source": "codegraph",
-                    "dependency_files": sorted(affected_files),
-                    "limitations": self.service.engine.status().get("limitations", []),
-                })
-                self._record_query(store, "knowledge_impact", len(json.dumps(engine_result["input"])), engine_result, started)
-            return engine_result
+        engine_result = dict(self.service.engine.impact(
+            self.root,
+            self.service.config,
+            files=files,
+            symbols=symbols,
+            max_hops=max_hops,
+            max_relations=max_relations,
+        ))
+        affected_files = set(engine_result.get("affected_files", []))
+        affected_symbols = set(engine_result.get("affected_symbols", []))
         with KnowledgeStore(self.service.db_path) as store:
-            symbol_ids = set(symbols)
-            if files:
-                placeholders = ",".join("?" for _ in files)
-                symbol_ids.update(row["id"] for row in store.rows(f"SELECT id FROM symbols WHERE path IN ({placeholders})", files))
-            expanded = set(symbol_ids)
-            dependency_symbols = set(symbol_ids)
-            relations: list[dict[str, Any]] = []
-            frontier = set(symbol_ids)
-            relation_seen: set[tuple[str, str, str, int]] = set()
-            for hop in range(1, max_hops + 1):
-                if not frontier or len(relations) >= max_relations:
-                    break
-                ordered_frontier = sorted(frontier)
-                placeholders = ",".join("?" for _ in ordered_frontier)
-                rows = store.rows(
-                    f"SELECT source, target, kind, path, line, confidence, resolved "
-                    f"FROM relations WHERE source IN ({placeholders}) OR target IN ({placeholders}) "
-                    f"ORDER BY CASE WHEN source IN ({placeholders}) THEN 0 ELSE 1 END, "
-                    f"confidence DESC, source, target LIMIT ?",
-                    [
-                        *ordered_frontier,
-                        *ordered_frontier,
-                        *ordered_frontier,
-                        max_relations - len(relations),
-                    ],
-                )
-                next_frontier: set[str] = set()
-                for relation in rows:
-                    key = (relation["source"], relation["target"], relation["kind"], hop)
-                    if key in relation_seen:
-                        continue
-                    relation_seen.add(key)
-                    relation["hop"] = hop
-                    relations.append(relation)
-                    expanded.add(relation["source"])
-                    if relation["resolved"]:
-                        expanded.add(relation["target"])
-                        if relation["source"] in frontier:
-                            dependency_symbols.add(relation["target"])
-                        if hop < max_hops and relation["source"] in frontier:
-                            next_frontier.add(relation["target"])
-                frontier = next_frontier
-            impacted_paths = set(files)
-            dependency_paths = set(files)
-            if expanded:
-                placeholders = ",".join("?" for _ in expanded)
-                impacted_paths.update(row["path"] for row in store.rows(f"SELECT DISTINCT path FROM symbols WHERE id IN ({placeholders})", expanded))
-            if dependency_symbols:
-                placeholders = ",".join("?" for _ in dependency_symbols)
-                dependency_paths.update(
-                    row["path"]
-                    for row in store.rows(
-                        f"SELECT DISTINCT path FROM symbols WHERE id IN ({placeholders})",
-                        dependency_symbols,
-                    )
-                )
-            modules: list[str] = []
-            tests: list[str] = []
-            if impacted_paths:
-                placeholders = ",".join("?" for _ in impacted_paths)
-                modules = [row["module"] for row in store.rows(f"SELECT DISTINCT module FROM files WHERE path IN ({placeholders}) ORDER BY module", impacted_paths)]
-                if modules:
-                    module_marks = ",".join("?" for _ in modules)
-                    tests = [row["path"] for row in store.rows(
-                        f"SELECT path FROM files WHERE module IN ({module_marks}) AND (path LIKE '%test%' OR path LIKE '%spec%') ORDER BY path", modules
-                    )]
             knowledge: list[dict[str, Any]] = []
             for record in store.all_knowledge():
                 source_keys = {source.path or source.id for source in record.sources}
-                if source_keys.intersection(impacted_paths | expanded):
+                if source_keys.intersection(affected_files | affected_symbols):
                     knowledge.append({
-                        "id": record.id, "title": record.title, "path": record.path,
-                        "freshness": record.status, "confidence": record.confidence,
+                        "id": record.id,
+                        "title": record.title,
+                        "path": record.path,
+                        "freshness": record.status,
+                        "confidence": record.confidence,
                     })
-            result = {
+            engine_result.update({
                 "input": {"files": files, "symbols": symbols},
                 "max_hops": max_hops,
                 "max_relations": max_relations,
-                "affected_files": sorted(impacted_paths),
-                "dependency_files": sorted(dependency_paths),
-                "affected_symbols": sorted(expanded),
-                "affected_modules": modules,
-                "affected_tests": tests,
                 "affected_knowledge": knowledge,
-                "relations": relations,
-                "relation_hops": {str(hop): sum(1 for relation in relations if relation.get("hop") == hop) for hop in range(1, max_hops + 1)},
-                "impact_explanation": self._impact_explanation(files, symbols, max_hops, relations, modules, tests),
-                "truncated": len(relations) >= max_relations,
-                "limitations": self.service.engine.status()["limitations"],
-                "fact_source": "builtin",
-            }
-            self._record_query(store, "knowledge_impact", len(json.dumps(result["input"])), result, started)
-            return result
+                "impact_explanation": self._impact_explanation(
+                    files,
+                    symbols,
+                    max_hops,
+                    list(engine_result.get("relations", [])),
+                    list(engine_result.get("affected_modules", [])),
+                    list(engine_result.get("affected_tests", [])),
+                ),
+                "truncated": len(engine_result.get("relations", [])) >= max_relations,
+                "fact_source": "codegraph",
+                "dependency_files": sorted(affected_files),
+                "limitations": self.service.engine.status().get("limitations", []),
+            })
+            self._record_query(store, "knowledge_impact", len(json.dumps(engine_result["input"])), engine_result, started)
+        return engine_result
 
     def context(self, task: str, max_tokens: int | None = None) -> dict[str, Any]:
         started = time.monotonic()
@@ -397,12 +302,8 @@ class KnowledgeAPI:
                 "token_budget": budget,
                 "estimated_tokens": 0,
                 "guidance_workflow": status.get("guidance_workflow", {}),
-                "fact_source": "codegraph" if self.config.engine == "codegraph" else "builtin",
-                "engine_limitations": (
-                    self.service.engine.status().get("limitations", [])
-                    if self.config.engine == "codegraph"
-                    else []
-                ),
+                "fact_source": "codegraph",
+                "engine_limitations": self.service.engine.status().get("limitations", []),
             }
             candidates, allowed_paths = self._context_file_candidates(
                 task, intent, symbol_matches, impact, fragments
@@ -432,9 +333,9 @@ class KnowledgeAPI:
         def normalized(path: object) -> str:
             return str(path).replace("\\", "/").lstrip("./")
 
-        discovered = self.service.engine.discover(self.root, self.service.config)
-        allowed_paths = {normalized(item.path) for item in discovered if normalized(item.path)}
-        modules = {normalized(item.path): item.module for item in discovered}
+        snapshot = self.service.engine.snapshot(self.root, self.service.config)
+        allowed_paths = {normalized(item.path) for item in snapshot.files if normalized(item.path)}
+        modules = {normalized(item.path): item.module for item in snapshot.files}
         pending_paths = {
             normalized(path)
             for path in self.service.status().get("pending_files", [])
@@ -457,19 +358,25 @@ class KnowledgeAPI:
                         endpoint_hops[endpoint_id] = min(
                             endpoint_hops.get(endpoint_id, hop), hop
                         )
-        if endpoint_hops:
-            placeholders = ",".join("?" for _ in endpoint_hops)
-            with KnowledgeStore(self.service.db_path) as store:
-                for row in store.rows(
-                    f"SELECT id, path FROM symbols WHERE id IN ({placeholders})",
-                    list(endpoint_hops),
-                ):
-                    path = normalized(row["path"])
-                    hop = endpoint_hops[row["id"]]
-                    if path:
-                        relation_hops[path] = min(relation_hops.get(path, hop), hop)
+                        # Public CodeGraph relation endpoints commonly use
+                        # ``path::symbol`` identifiers. Resolve that path
+                        # directly without consulting the removed SQLite symbol cache.
+                        endpoint_path = normalized(endpoint_id.split("::", 1)[0])
+                        if endpoint_path in allowed_paths:
+                            relation_hops[endpoint_path] = min(
+                                relation_hops.get(endpoint_path, hop), hop
+                            )
+        for item in symbol_matches:
+            symbol_id = str(item.get("id", ""))
+            path = normalized(item.get("path", ""))
+            if symbol_id in endpoint_hops and path:
+                hop = endpoint_hops[symbol_id]
+                relation_hops[path] = min(relation_hops.get(path, hop), hop)
 
         candidates: list[FileCandidate] = []
+        task_explicitly_requests_tests = any(
+            term in task.lower() for term in ("test", "pytest", "unittest", "测试")
+        )
 
         def matching_terms(value: str) -> set[str]:
             lowered = value.lower()
@@ -505,6 +412,10 @@ class KnowledgeAPI:
             if not normalized_path or normalized_path in pending_paths:
                 return
             identities = identity(normalized_path, symbol)
+            is_test = "test" in Path(normalized_path).name.lower() or "test" in normalized_path.lower()
+            if is_test and not task_explicitly_requests_tests:
+                identities["exact_symbol"] = False
+                identities["qualified_symbol"] = False
             candidates.append(FileCandidate(
                 path=normalized_path,
                 stages={stage},
@@ -516,7 +427,7 @@ class KnowledgeAPI:
                 graph_hop=graph_hop,
                 affected_test=affected_test,
                 direct_knowledge_source=direct_knowledge_source,
-                is_test=("test" in Path(normalized_path).name.lower() or "test" in normalized_path.lower()),
+                is_test=is_test,
                 task_role_match=bool(intent.get("task_type") != "investigation" and matching_terms(normalized_path)),
                 unavailable_signals=set(unavailable_signals),
                 original_order=len(candidates),
@@ -524,11 +435,13 @@ class KnowledgeAPI:
             ))
 
         for match in symbol_matches:
+            symbol_id = str(match.get("id", match.get("name", "")))
+            symbol_name = str(match.get("name", ""))
             add(
                 match.get("path", ""),
                 stage="direct_symbol",
-                anchor=str(match.get("id", match.get("name", ""))),
-                symbol=str(match.get("id", match.get("name", ""))),
+                anchor=symbol_id,
+                symbol=f"{symbol_id}::{symbol_name}",
                 graph_hop=relation_hops.get(normalized(match.get("path", ""))),
             )
         for key in ("dependency_files", "affected_files"):
@@ -574,42 +487,17 @@ class KnowledgeAPI:
         return candidates, allowed_paths
 
     def _task_symbol_matches(self, task: str, terms: list[str]) -> list[dict[str, Any]]:
-        if self.config.engine == "codegraph":
-            matches: list[dict[str, Any]] = []
-            seen: set[str] = set()
-            for term in terms[:8]:
-                for symbol in self.service.engine.search_symbols(
-                    self.root, self.service.config, term, limit=3
-                ):
-                    item = asdict(symbol)
-                    if item["id"] not in seen:
-                        seen.add(item["id"])
-                        matches.append(item)
-            return matches[:12]
-        return self._store_symbol_matches(terms)
-
-    def _store_symbol_matches(self, terms: list[str]) -> list[dict[str, Any]]:
-        symbol_matches: list[dict[str, Any]] = []
+        matches: list[dict[str, Any]] = []
         seen: set[str] = set()
-        with KnowledgeStore(self.service.db_path) as store:
-            for term in terms[:12]:
-                rows = store.rows(
-                    "SELECT id, name, kind, path, line, confidence, "
-                    "CASE WHEN name = ? OR id LIKE ? THEN 0 WHEN name LIKE ? THEN 1 ELSE 2 END AS match_rank "
-                    "FROM symbols "
-                    "WHERE name LIKE ? OR id LIKE ? "
-                    "ORDER BY match_rank, confidence DESC, LENGTH(name), id LIMIT 3",
-                    [term, f"%::{term}", f"{term}%", f"%{term}%", f"%{term}%"],
-                )
-                best_rank = min((row["match_rank"] for row in rows), default=2)
-                for row in rows:
-                    if best_rank == 0 and row["match_rank"] != 0:
-                        continue
-                    row.pop("match_rank", None)
-                    if row["id"] not in seen:
-                        seen.add(row["id"])
-                        symbol_matches.append(row)
-        return symbol_matches
+        for term in terms[:8]:
+            for symbol in self.service.engine.search_symbols(
+                self.root, self.service.config, term, limit=3
+            ):
+                item = asdict(symbol)
+                if item["id"] not in seen:
+                    seen.add(item["id"])
+                    matches.append(item)
+        return matches[:12]
 
     @staticmethod
     def _guidance_workflow_status(store: KnowledgeStore) -> dict[str, Any]:
@@ -774,14 +662,14 @@ class KnowledgeAPI:
 
     @classmethod
     def _reference_implementations(cls, symbol_matches: list[dict[str, Any]], selected_results: list[dict[str, Any]]) -> list[dict[str, Any]]:
-        references = [{"symbol": item["id"], "name": item["name"], "path": item["path"], "line": item.get("line"), "kind": item["kind"], "reason": "任务词与符号名称精确或前缀命中。"} for item in symbol_matches[:4]]
+        references = [{"symbol": item["name"], "symbol_id": item["id"], "name": item["name"], "path": item["path"], "line": item.get("line"), "kind": item["kind"], "reason": "任务词与符号名称精确或前缀命中。"} for item in symbol_matches[:4]]
         if not references: references = [{"record": item["id"], "path": item["path"], "kind": item["kind"], "reason": item.get("why_selected", "")} for item in selected_results[:4]]
         return references
 
     @staticmethod
     def _extension_points(symbol_matches: list[dict[str, Any]]) -> list[dict[str, Any]]:
         keywords = ("create", "add", "extend", "register", "save", "use", "新增", "扩展", "注册")
-        return [{"symbol": item["id"], "name": item["name"], "path": item["path"], "line": item.get("line"), "reason": "可作为新增功能的现有实现或扩展锚点。"} for item in symbol_matches if item.get("kind") in {"function", "method", "class"} or any(keyword in item.get("name", "").lower() for keyword in keywords)][:4]
+        return [{"symbol": item["name"], "symbol_id": item["id"], "name": item["name"], "path": item["path"], "line": item.get("line"), "reason": "可作为新增功能的现有实现或扩展锚点。"} for item in symbol_matches if item.get("kind") in {"function", "method", "class"} or any(keyword in item.get("name", "").lower() for keyword in keywords)][:4]
 
     @staticmethod
     def _pending_sources(record: KnowledgeRecord, pending: set[str]) -> list[str]:

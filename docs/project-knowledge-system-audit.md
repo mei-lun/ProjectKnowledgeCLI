@@ -1,13 +1,13 @@
 # 项目级知识库最小需求审计与实施基线
 
-> 当前版本：0.1.28
-> 复核日期：2026-08-15  
-> 报告状态：0.1.28 WP-11-HF 审计问题已修复并完成发布复核
+> 当前版本：0.1.30
+> 复核日期：2026-08-18  
+> 报告状态：0.1.30 已移除 builtin engine，代码事实链路统一为真实 CodeGraph Adapter
 > 默认语言：中文
 
-## 当前交付复核：WP-11 / WP-11-HF
+## 当前交付复核：WP-13 / CG-ONLY（承接 WP-11 / WP-11-HF）
 
-本节是 0.1.28 的当前验收结论；下方较早版本的工作包和里程碑记录仅用于历史追溯。评测实测值只以 `evaluation/reports/latest.json` 为唯一来源，审计不复制可能随重跑漂移的指标快照。
+本节是 0.1.30 的当前验收结论；下方较早版本的工作包和里程碑记录仅用于历史追溯。评测实测值只以 `evaluation/reports/latest.json` 为唯一来源，审计不复制可能随重跑漂移的指标快照。
 
 | 需求 ID | 当前结论 | 验收边界 |
 | --- | --- | --- |
@@ -15,6 +15,7 @@
 | CG-001～CG-004 | 已完成 | CodeGraph 1.5 公共 CLI 响应被规范化为统一引擎契约；不可用或响应不合法时明确报错，绝不以 builtin 冒充 |
 | CG-005 | 已完成 | 临时四文件项目已通过真实 CodeGraph 1.5.0 的 `init/files/query/trace/impact/affected` 六项验证，源仓库未生成 `.codegraph` |
 | CG-006 | 已完成 | `KnowledgeAPI` 在 SQLite 符号和关系为空时仍通过所选 CodeGraph 引擎返回实时事实，并由正负测试覆盖 |
+| CG-ONLY-001～004 | 已完成 | 配置、Schema 和引擎工厂只接受 `codegraph`；BuiltinCodeIndexEngine 及本地 parser 已删除；旧 `engine: builtin` 返回结构化迁移错误；生成页不再发布本地路由或入口占位事实 |
 | RET-001～RET-005 | 已完成 | 已修正陈旧锚点并实施分阶段证据选择、依赖优先、核心文件上限、Markdown 引用约束和 `selection_reasons` 可解释输出 |
 | RET-006 | 已完成 | 40 题正式评测通过冻结绝对门槛；实测指标和可比回归结论见 `evaluation/reports/latest.json` |
 | REL-006 | 已完成 | 默认配置和本项目配置排除 `.worktrees/**`，真实发现测试证明内部 Git worktree 不进入索引 |
@@ -22,7 +23,7 @@
 | DOC-001 | 已完成 | 审计不再复制评测实测值，版本化 JSON 报告是唯一指标源；CI 校验器拒绝题集哈希不匹配的基线 |
 | KNOW-001 | 已完成 | 来源变化的 curated/decision 已逐条人工复核；`stale_knowledge=0`、`conflicted_knowledge=0`，`finalize --check` 返回 `ready` |
 
-当前限制：本仓库配置仍使用 builtin，因此自仓 codegraph 策略会明确报告 `adapter_unavailable`；真实 Adapter 能力由独立临时夹具证明。CodeGraph 仍不能证明动态分派、反射、运行时依赖注入等事实。真实业务项目覆盖率、查询性能和人工知识审核流程将在 WP-12 继续扩展，不能因本轮技术夹具通过而宣称最终产品目标已完成。
+当前限制：本仓库已切换为 `engine: codegraph`，运行时只接受真实 CodeGraph Adapter；CLI 不可用或项目未初始化时明确失败，不再回退到本地 parser。CodeGraph 仍不能证明动态分派、反射、运行时依赖注入等事实。真实业务项目覆盖率、查询性能和人工知识审核流程仍需继续扩展，不能因本轮 Adapter 通过而宣称最终产品目标已完成。
 
 ## 0. 需求重新对齐决议（0.1.21 起的唯一有效实施基线）
 
