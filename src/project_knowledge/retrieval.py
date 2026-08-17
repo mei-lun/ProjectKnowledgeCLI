@@ -807,9 +807,6 @@ class KnowledgeAPI:
                     "reason_code": "token_budget",
                 })
                 continue
-            if result.get("withheld_files"):
-                result["withheld_files"].pop()
-                continue
             if result.get("rejected_files"):
                 result["rejected_files"].pop()
                 continue
@@ -831,6 +828,12 @@ class KnowledgeAPI:
             else:
                 ranking = None
             if ranking is not None:
+                continue
+            if result.get("ranking_reason_code") is None and "ranking_reason_code" in result:
+                result.pop("ranking_reason_code")
+                continue
+            if result.get("protected_candidates_truncated") is False:
+                result.pop("protected_candidates_truncated")
                 continue
             contents = [item for item in result["knowledge"] if item.get("tokens", 0) > 60]
             if contents:

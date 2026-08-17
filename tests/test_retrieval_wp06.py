@@ -116,6 +116,42 @@ class RetrievalWP06Tests(unittest.TestCase):
         self.assertIn("knowledge", result)
         self.assertIn("impact", result)
 
+    def test_fit_context_keeps_token_budget_withholding_through_legacy_trimming(self) -> None:
+        result = {
+            "symbols": [{"name": "create_item"}],
+            "impact": {
+                "affected_files": ["src/app.py"],
+                "affected_tests": [],
+                "affected_knowledge": [],
+                "affected_modules": ["src"],
+            },
+            "reference_implementations": [],
+            "extension_points": [],
+            "retrieval_explanation": {"selected_records": [], "impact": {}},
+            "core_files": ["src/app.py"],
+            "supporting_files": ["tests/test_app.py"],
+            "files": ["src/app.py", "tests/test_app.py"],
+            "file_rankings": [
+                {"path": "src/app.py", "why_selected": "exact_identity"},
+                {"path": "tests/test_app.py", "why_selected": "affected_test"},
+            ],
+            "withheld_files": [],
+            "rejected_files": [],
+            "knowledge": [{"content": "evidence " * 800, "tokens": 800}],
+            "gaps": ["Inspect source."],
+            "summary": "Context summary.",
+            "estimated_tokens": 0,
+        }
+
+        KnowledgeAPI._fit_context(result, budget=350)
+
+        self.assertEqual(result["supporting_files"], [])
+        self.assertLess(result["knowledge"][0]["tokens"], 800)
+        self.assertIn(
+            {"path": "tests/test_app.py", "reason_code": "token_budget"},
+            result["withheld_files"],
+        )
+
     def test_chinese_identifier_phrases_recall_expected_exact_symbols(self) -> None:
         initialization = self.api.context("初始化项目时 config-v1 JSON Schema 如何由 all_schemas 发布", max_tokens=1000)
         self.assertTrue(any(item["name"] == "initialize" for item in initialization["symbols"]))
