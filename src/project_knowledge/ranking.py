@@ -3,6 +3,15 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
+from typing import Iterable
+
+
+STAGE_PRIORITY = {
+    "direct_symbol": 4,
+    "knowledge_source": 3,
+    "impact": 2,
+    "fallback": 1,
+}
 
 
 @dataclass
@@ -116,6 +125,221 @@ def _json_compatible(value: object) -> object:
 
 
 DEFAULT_RANKING_POLICY = RankingPolicy()
+
+
+def rank_files(
+    candidates: Iterable[FileCandidate],
+    *,
+    allowed_paths: set[str],
+    policy: RankingPolicy = DEFAULT_RANKING_POLICY,
+) -> RankingResult:
+    merged, rejected = _normalize_and_merge(candidates, allowed_paths)
+    ranked = [
+        _to_ranked(candidate, score_candidate(candidate, policy))
+        for candidate in merged
+    ]
+    ranked.sort(key=lambda item: (-item.score, -STAGE_PRIORITY[item.selection_stage], item.path))
+    eligible_core = [item for item in ranked if item.score >= policy.core_min_score]
+    core = eligible_core[: policy.core_limit]
+    confidence = "high"
+    if not core and ranked:
+        core = ranked[:1]
+        confidence = "low"
+    core_paths = {item.path for item in core}
+    remaining = [item for item in ranked if item.path not in core_paths]
+    protected = [item for item in remaining if item.protected]
+    ordinary = [
+        item for item in remaining
+        if not item.protected and item.score >= policy.supporting_min_score
+    ]
+    supporting = (protected + ordinary)[: max(0, policy.full_limit - len(core))]
+    selected_paths = {item.path for item in core + supporting}
+    withheld = _withheld_rows(ranked, selected_paths, policy)
+    return RankingResult(
+        core_files=tuple(item.path for item in core),
+        supporting_files=tuple(item.path for item in supporting),
+        files=tuple(item.path for item in core + supporting),
+        file_rankings=tuple(
+            _with_tier(item, "core" if item.path in core_paths else "supporting")
+            for item in core + supporting
+        ),
+        withheld_files=tuple(withheld),
+        rejected_files=tuple(rejected),
+        ranking_policy=policy.name,
+        ranking_status="ok",
+        ranking_confidence=confidence,
+        protected_candidates_truncated=len([item for item in ranked if item.protected]) > policy.full_limit,
+    )
+
+
+def fallback_rank_files(
+    candidates: Iterable[FileCandidate],
+    *,
+    allowed_paths: set[str],
+    reason_code: str,
+    policy: RankingPolicy = DEFAULT_RANKING_POLICY,
+) -> RankingResult:
+    merged, rejected = _normalize_and_merge(candidates, allowed_paths)
+    original_orders = {candidate.path: candidate.original_order for candidate in merged}
+    ranked = [
+        _to_ranked(candidate, score_candidate(candidate, policy))
+        for candidate in merged
+    ]
+    ranked.sort(key=lambda item: (original_orders[item.path], item.path))
+    core = ranked[: policy.core_limit]
+    supporting = ranked[policy.core_limit : policy.full_limit]
+    core_paths = {item.path for item in core}
+    selected = core + supporting
+    selected_paths = {item.path for item in selected}
+    return RankingResult(
+        core_files=tuple(item.path for item in core),
+        supporting_files=tuple(item.path for item in supporting),
+        files=tuple(item.path for item in selected),
+        file_rankings=tuple(
+            _with_tier(item, "core" if item.path in core_paths else "supporting")
+            for item in selected
+        ),
+        withheld_files=tuple(_withheld_rows(ranked, selected_paths, policy)),
+        rejected_files=tuple(rejected),
+        ranking_policy=policy.name,
+        ranking_status="fallback",
+        ranking_confidence="low",
+        reason_code=reason_code,
+        protected_candidates_truncated=len([item for item in ranked if item.protected]) > policy.full_limit,
+    )
+
+
+def _normalize_and_merge(
+    candidates: Iterable[FileCandidate], allowed_paths: set[str]
+) -> tuple[list[FileCandidate], list[dict[str, str]]]:
+    normalized_allowed = {_normalize_path(path) for path in allowed_paths}
+    valid_allowed = {path for path in normalized_allowed if path is not None}
+    merged: dict[str, FileCandidate] = {}
+    rejected: list[dict[str, str]] = []
+    for candidate in candidates:
+        path = _normalize_path(candidate.path)
+        if path is None or path not in valid_allowed:
+            rejected.append({"path": candidate.path, "reason_code": "path_not_allowed"})
+            continue
+        normalized = _copy_candidate(candidate, path=path)
+        existing = merged.get(path)
+        merged[path] = normalized if existing is None else _merge_candidates(existing, normalized)
+    return list(merged.values()), rejected
+
+
+def _normalize_path(path: str) -> str | None:
+    normalized = path.replace("\\", "/")
+    while normalized.startswith("./"):
+        normalized = normalized[2:]
+    if not normalized or normalized.startswith("/") or ":" in normalized.split("/")[0]:
+        return None
+    if any(part == ".." for part in normalized.split("/")):
+        return None
+    return normalized
+
+
+def _copy_candidate(candidate: FileCandidate, *, path: str) -> FileCandidate:
+    return FileCandidate(
+        path=path,
+        stages=set(candidate.stages),
+        anchors=set(candidate.anchors),
+        exact_symbol=candidate.exact_symbol,
+        qualified_symbol=candidate.qualified_symbol,
+        exact_path=candidate.exact_path,
+        exact_filename=candidate.exact_filename,
+        exact_module=candidate.exact_module,
+        direct_knowledge_source=candidate.direct_knowledge_source,
+        graph_hop=candidate.graph_hop,
+        module=candidate.module,
+        task_role_match=candidate.task_role_match,
+        path_terms=set(candidate.path_terms),
+        symbol_terms=set(candidate.symbol_terms),
+        content_terms=set(candidate.content_terms),
+        is_test=candidate.is_test,
+        affected_test=candidate.affected_test,
+        requires_live_source=candidate.requires_live_source,
+        unavailable_signals=set(candidate.unavailable_signals),
+        original_order=candidate.original_order,
+    )
+
+
+def _merge_candidates(left: FileCandidate, right: FileCandidate) -> FileCandidate:
+    graph_hops = [hop for hop in (left.graph_hop, right.graph_hop) if hop is not None]
+    return FileCandidate(
+        path=left.path,
+        stages=left.stages | right.stages,
+        anchors=left.anchors | right.anchors,
+        exact_symbol=left.exact_symbol or right.exact_symbol,
+        qualified_symbol=left.qualified_symbol or right.qualified_symbol,
+        exact_path=left.exact_path or right.exact_path,
+        exact_filename=left.exact_filename or right.exact_filename,
+        exact_module=left.exact_module or right.exact_module,
+        direct_knowledge_source=left.direct_knowledge_source or right.direct_knowledge_source,
+        graph_hop=min(graph_hops) if graph_hops else None,
+        module=left.module or right.module,
+        task_role_match=left.task_role_match or right.task_role_match,
+        path_terms=left.path_terms | right.path_terms,
+        symbol_terms=left.symbol_terms | right.symbol_terms,
+        content_terms=left.content_terms | right.content_terms,
+        is_test=left.is_test or right.is_test,
+        affected_test=left.affected_test or right.affected_test,
+        requires_live_source=left.requires_live_source or right.requires_live_source,
+        unavailable_signals=left.unavailable_signals | right.unavailable_signals,
+        original_order=min(left.original_order, right.original_order),
+    )
+
+
+def _to_ranked(candidate: FileCandidate, breakdown: ScoreBreakdown) -> RankedFile:
+    selection_stage = max(
+        (stage for stage in candidate.stages if stage in STAGE_PRIORITY),
+        key=STAGE_PRIORITY.__getitem__,
+        default="fallback",
+    )
+    return RankedFile(
+        path=candidate.path,
+        tier="",
+        score=breakdown.total,
+        score_breakdown=breakdown,
+        selection_stage=selection_stage,
+        why_selected=",".join(breakdown.reasons),
+        requires_live_source=candidate.requires_live_source,
+        protected=(
+            candidate.exact_symbol
+            or candidate.exact_path
+            or candidate.direct_knowledge_source
+            or candidate.graph_hop == 1
+        ),
+    )
+
+
+def _with_tier(item: RankedFile, tier: str) -> RankedFile:
+    return RankedFile(
+        path=item.path,
+        tier=tier,
+        score=item.score,
+        score_breakdown=item.score_breakdown,
+        selection_stage=item.selection_stage,
+        why_selected=item.why_selected,
+        requires_live_source=item.requires_live_source,
+        protected=item.protected,
+    )
+
+
+def _withheld_rows(
+    ranked: list[RankedFile], selected_paths: set[str], policy: RankingPolicy
+) -> list[dict[str, str]]:
+    return [
+        {
+            "path": item.path,
+            "reason_code": (
+                "below_supporting_threshold"
+                if not item.protected and item.score < policy.supporting_min_score
+                else "selection_limit"
+            ),
+        }
+        for item in ranked
+        if item.path not in selected_paths
+    ]
 
 
 def score_candidate(candidate: FileCandidate, policy: RankingPolicy) -> ScoreBreakdown:

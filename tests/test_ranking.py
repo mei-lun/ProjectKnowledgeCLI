@@ -10,6 +10,8 @@ from project_knowledge.ranking import (
     RankingPolicy,
     RankingResult,
     ScoreBreakdown,
+    fallback_rank_files,
+    rank_files,
     score_candidate,
 )
 
@@ -205,6 +207,65 @@ class RankingTests(unittest.TestCase):
             score_candidate(penalty_candidate, DEFAULT_RANKING_POLICY).reasons,
             ("path_terms", "content_terms", "irrelevant_test", "fallback_only"),
         )
+
+    def test_rank_files_merges_duplicate_evidence_and_is_stable(self) -> None:
+        candidates = [
+            FileCandidate(path="src/z.py", stages={"fallback"}, content_terms={"login"}, original_order=0),
+            FileCandidate(path="src/app.py", stages={"impact"}, graph_hop=1, original_order=1),
+            FileCandidate(
+                path="src/app.py",
+                stages={"direct_symbol"},
+                anchors={"src/app.py::login"},
+                exact_symbol=True,
+                original_order=2,
+            ),
+            FileCandidate(path="../outside.py", stages={"direct_symbol"}, exact_symbol=True, original_order=3),
+        ]
+
+        result = rank_files(candidates, allowed_paths={"src/app.py", "src/z.py"})
+
+        self.assertEqual(result.core_files, ("src/app.py",))
+        self.assertEqual(result.supporting_files, ())
+        self.assertEqual(result.files, ("src/app.py",))
+        self.assertEqual(result.file_rankings[0].score_breakdown.identity, 100)
+        self.assertEqual(result.file_rankings[0].score_breakdown.relation, 30)
+        self.assertEqual(result.file_rankings[0].selection_stage, "direct_symbol")
+        self.assertEqual(result.rejected_files[0]["reason_code"], "path_not_allowed")
+
+    def test_rank_files_caps_core_and_preserves_only_qualified_supporting(self) -> None:
+        candidates = [
+            FileCandidate(path=f"src/core_{index}.py", exact_symbol=True, stages={"direct_symbol"}, original_order=index)
+            for index in range(6)
+        ]
+        candidates.extend([
+            FileCandidate(path="src/support.py", graph_hop=2, stages={"impact"}, original_order=6),
+            FileCandidate(path="src/weak.py", content_terms={"x"}, stages={"fallback"}, original_order=7),
+        ])
+        allowed = {candidate.path for candidate in candidates}
+
+        result = rank_files(candidates, allowed_paths=allowed)
+
+        self.assertEqual(len(result.core_files), 5)
+        self.assertIn("src/core_5.py", result.supporting_files)
+        self.assertIn("src/support.py", result.supporting_files)
+        self.assertNotIn("src/weak.py", result.files)
+        self.assertEqual(result.withheld_files[-1]["reason_code"], "below_supporting_threshold")
+
+    def test_fallback_preserves_original_order_and_reports_reason(self) -> None:
+        candidates = [
+            FileCandidate(path="src/b.py", original_order=0),
+            FileCandidate(path="src/a.py", original_order=1),
+        ]
+
+        result = fallback_rank_files(
+            candidates,
+            allowed_paths={"src/a.py", "src/b.py"},
+            reason_code="ranking_error",
+        )
+
+        self.assertEqual(result.files, ("src/b.py", "src/a.py"))
+        self.assertEqual(result.ranking_status, "fallback")
+        self.assertEqual(result.reason_code, "ranking_error")
 
 
 if __name__ == "__main__":
