@@ -1,37 +1,35 @@
 {
-  "generated_at": "2026-08-18T03:16:07+08:00",
+  "generated_at": "2026-08-18T03:22:54+08:00",
   "project": "ProjectKnowledgeCLI",
   "records": [
     {
       "confidence": "verified",
       "id": "curated.architecture",
       "kind": "architecture",
-      "last_verified_at": "2026-08-18T02:51:26+08:00",
+      "last_verified_at": "2026-08-18T03:22:54+08:00",
       "ownership": "curated",
       "path": "docs/knowledge/curated/architecture.md",
-      "source_commit": "3aa039bb0585a4ad3301c41fb89340a5c26b801d",
+      "source_commit": "ff48d65d404f9ffd093672fd3cf594c762847b7e",
       "source_hashes": {
         "evaluation/real_project_harness.py": "sha256:01e5ac2e7334601b51d9bb61a14a0fc4f8412a251e7809a32a6079e23aa6316e",
-        "src/project_knowledge/codegraph.py": "sha256:2de40a91fabad58d0bba634c7ac4b3d907599902879226de8972f4e3e52e934c",
-        "src/project_knowledge/engine.py": "sha256:e6a2e0cc44e2f00fead89d97bcf8c015f81432cef2652188e90678d0e79cd298",
-        "src/project_knowledge/evaluate.py": "sha256:c6664321989d48e4723dc2069857115bc9eb835048651d2b3ac1130642b504d8",
+        "src/project_knowledge/codegraph.py": "sha256:994e9d871b8d330c7f145079fc0780e2e6619e06f79598fb3d9f1a33a72b5e75",
+        "src/project_knowledge/engine.py": "sha256:1b62747314bbe68b39063ca6d65e3bd6145e2b32ae2624a30d6556fe043eca77",
+        "src/project_knowledge/evaluate.py": "sha256:58ee1413ed4cafc272673d2fc32c1d253a7b61df3f859193567c739c615de634",
         "src/project_knowledge/evidence.py": "sha256:ace9f7921c425a148f7e338db4f148c41afe3793f0c922972723e91baf8f5b84",
         "src/project_knowledge/finalization.py": "sha256:3f4f2e4a05c6b2813c3fd94dd74fa7b85cd2d22f98340dc085f986b6040eed09",
-        "src/project_knowledge/knowledge.py": "sha256:e40c64c703fe608e4523933499999531c1f8e2a254f23028311151139e601af7",
+        "src/project_knowledge/knowledge.py": "sha256:569cba542fb7c5d8f690192e1da9ce1df66f5b57bc678a8b2666b2180f2905c4",
         "src/project_knowledge/mcp.py": "sha256:9c6790cb1bf4288219241f6e1244eaf5655715aab6b6d7463f22974fab436cbf",
-        "src/project_knowledge/performance.py": "sha256:a4760b969e85d00e015fc41ab498c3475f3d95c8b37e657a8e75fc4d8a10b126",
+        "src/project_knowledge/performance.py": "sha256:7e7bebeb4181e378258846afe2baa807853d65fde22398c23154846e1e2f28c5",
         "src/project_knowledge/proposal.py": "sha256:81dd74a107bd8e0a3cd65c015790c510b0dc059445419909b3576f0ac0fae8c7",
         "src/project_knowledge/provider.py": "sha256:89b5296b0996d1a1319ac20b972c40ec4b28989ad3c40144fe9f74702477eb72",
-        "src/project_knowledge/ranking.py": "sha256:e286f30e4ee52293fea551ec89c3b1610424afe1210c04b2dfdba083ef8fa7f0",
-        "src/project_knowledge/real_project.py": "sha256:caeed240e566db98ee2010c03dc898343658df33a3546b60f23106e9666b5f81",
-        "src/project_knowledge/retrieval.py": "sha256:43134cdd297c31b2aa45cec901c83ba22422e69bc4126248024ab28cc9b81197",
-        "src/project_knowledge/schemas.py": "sha256:cb4adc2fea953207437b29666bc63b618780f98e8b2f28e5a75acf73e820ce5d",
-        "src/project_knowledge/semantic.py": "sha256:5ac7b03d4f032667d09527b178814fa5742081514e30fbcfbc936e06124a1c10",
-        "src/project_knowledge/service.py": "sha256:f506e7cd3256f6a50196e6311fc108cdc85e2d4d760d1026521308e3d907187b",
-        "src/project_knowledge/store.py": "sha256:6a964fe53c7256e5e2a87e243dfe6739e5184d90b8eb836a374774eb58756c5b",
-        "tests/test_evaluate.py": "sha256:541ac496335c10c918a2985428cd8bf6e92e7bca7dab8f2843cf5226d2a08174",
-        "tests/test_wp02_evidence.py": "sha256:6c14c77da1c2f4442598eb57b54607bebe17f8d52e4f0a567cf23640e6c6e852",
-        "tests/test_wp02_knowledge.py": "sha256:4e42ccc2b56588f2d03e1d5afb376ff2a0d48564cc73bc51a7445abaf154219d"
+        "src/project_knowledge/ranking.py": "sha256:d8c1c44f93510efb910dd3b129d37708573fcba3e55cce7318ef3d5a8df36e9b",
+        "src/project_knowledge/real_project.py": "sha256:d06e39a9f9e39a372bd86cc70dcafb2c296c23b14a349e9df06b5c6295b05ed9",
+        "src/project_knowledge/retrieval.py": "sha256:0faeb8d9e7dffe44cb0cbc257c5b337402ede1a9e4f917e2dae692ef564c5551",
+        "src/project_knowledge/schemas.py": "sha256:13e252ec9f089eee9a07d582c07b55421bd4b15ca24b7e9391333dedf7118dcc",
+        "src/project_knowledge/semantic.py": "sha256:4b6a1b4473f6eb9c790c33944ec490fc1efe948e6c9c170383057990d1e77aa1",
+        "src/project_knowledge/service.py": "sha256:ba465f3caccf90380a5da24647bc2c95f4cad5080fac60ff5576a82aaf91e87f",
+        "src/project_knowledge/store.py": "sha256:7c8903af963139abd9974eec94fa5ecb834ba32c0f93fde04f100bbbc10dd3a1",
+        "tests/test_evaluate.py": "sha256:511fe40680e977dfc63ed53228208b3a393f658093c0d8eb44aeb5db7af89f27"
       },
       "sources": [
         {
@@ -115,19 +113,11 @@
           "type": "file"
         },
         {
-          "path": "tests/test_wp02_evidence.py",
-          "type": "file"
-        },
-        {
           "path": "src/project_knowledge/evaluate.py",
           "type": "file"
         },
         {
           "path": "tests/test_evaluate.py",
-          "type": "file"
-        },
-        {
-          "path": "tests/test_wp02_knowledge.py",
           "type": "file"
         },
         {
@@ -139,7 +129,7 @@
           "type": "file"
         }
       ],
-      "status": "stale",
+      "status": "fresh",
       "tags": [
         "curated"
       ],
@@ -149,38 +139,36 @@
       "confidence": "verified",
       "id": "curated.conventions",
       "kind": "conventions",
-      "last_verified_at": "2026-08-18T02:51:26+08:00",
+      "last_verified_at": "2026-08-18T03:22:54+08:00",
       "ownership": "curated",
       "path": "docs/knowledge/curated/conventions.md",
-      "source_commit": "3aa039bb0585a4ad3301c41fb89340a5c26b801d",
+      "source_commit": "ff48d65d404f9ffd093672fd3cf594c762847b7e",
       "source_hashes": {
-        "CHANGELOG.md": "sha256:b810eb06546b82e4c28aebd5d8fa626fed662f0cc0d00b6307872d15e2ee89db",
-        "docs/project-knowledge-system-audit.md": "sha256:b1e3f0d4054dcb213c6f9e1d7ce029260bdc5190207d1abc95417481f030a463",
+        "CHANGELOG.md": "sha256:ade9c6b42da560532ec26620b08deb29bcfe6e52f26082098547170906c03974",
+        "docs/project-knowledge-system-audit.md": "sha256:0eef39e5196e856a70ee501f0c07f63e9f8e3be66c787ea77b1c12878115c54f",
         "evaluation/thresholds.json": "sha256:6f6fd52de5d27c6aae89ac42a882a3315dbc5ec3a0907f0524a26fdb71a9c78a",
         "pyproject.toml": "sha256:2ed5019312e8f72a92e0a1bed2bf58c8431ba04b3a07723aefc0fbfd5647eda3",
         "scripts/bump_version.py": "sha256:74f74a89a7a66abfb820563c237fe4aa9eb13c6529fc8ad9ffdc66e868463829",
-        "src/project_knowledge/__init__.py": "sha256:cad651518f23db58c3f7936de7bb5966192b21fe58073d7a898e6c4bbb393516",
-        "src/project_knowledge/codegraph.py": "sha256:2de40a91fabad58d0bba634c7ac4b3d907599902879226de8972f4e3e52e934c",
-        "src/project_knowledge/config.py": "sha256:0a035ae5716f228db39cdf62dff0b3c9dab99fa7bcc8d9d9410e30c19b98c9b1",
-        "src/project_knowledge/engine.py": "sha256:e6a2e0cc44e2f00fead89d97bcf8c015f81432cef2652188e90678d0e79cd298",
-        "src/project_knowledge/evaluate.py": "sha256:c6664321989d48e4723dc2069857115bc9eb835048651d2b3ac1130642b504d8",
+        "src/project_knowledge/__init__.py": "sha256:d09d78e0f7e81038c96b4792793a19a7ed2847d44a90bca60f7bc0497f03599b",
+        "src/project_knowledge/codegraph.py": "sha256:994e9d871b8d330c7f145079fc0780e2e6619e06f79598fb3d9f1a33a72b5e75",
+        "src/project_knowledge/config.py": "sha256:a542d51c9aeaea60c126d3d74145feb404dd90df47ec5e3801e4350f7e29d4c6",
+        "src/project_knowledge/engine.py": "sha256:1b62747314bbe68b39063ca6d65e3bd6145e2b32ae2624a30d6556fe043eca77",
+        "src/project_knowledge/evaluate.py": "sha256:58ee1413ed4cafc272673d2fc32c1d253a7b61df3f859193567c739c615de634",
         "src/project_knowledge/evidence.py": "sha256:ace9f7921c425a148f7e338db4f148c41afe3793f0c922972723e91baf8f5b84",
         "src/project_knowledge/finalization.py": "sha256:3f4f2e4a05c6b2813c3fd94dd74fa7b85cd2d22f98340dc085f986b6040eed09",
-        "src/project_knowledge/knowledge.py": "sha256:e40c64c703fe608e4523933499999531c1f8e2a254f23028311151139e601af7",
+        "src/project_knowledge/knowledge.py": "sha256:569cba542fb7c5d8f690192e1da9ce1df66f5b57bc678a8b2666b2180f2905c4",
         "src/project_knowledge/proposal.py": "sha256:81dd74a107bd8e0a3cd65c015790c510b0dc059445419909b3576f0ac0fae8c7",
         "src/project_knowledge/provider.py": "sha256:89b5296b0996d1a1319ac20b972c40ec4b28989ad3c40144fe9f74702477eb72",
-        "src/project_knowledge/real_project.py": "sha256:caeed240e566db98ee2010c03dc898343658df33a3546b60f23106e9666b5f81",
-        "src/project_knowledge/retrieval.py": "sha256:43134cdd297c31b2aa45cec901c83ba22422e69bc4126248024ab28cc9b81197",
-        "src/project_knowledge/schemas.py": "sha256:cb4adc2fea953207437b29666bc63b618780f98e8b2f28e5a75acf73e820ce5d",
-        "src/project_knowledge/semantic.py": "sha256:5ac7b03d4f032667d09527b178814fa5742081514e30fbcfbc936e06124a1c10",
+        "src/project_knowledge/real_project.py": "sha256:d06e39a9f9e39a372bd86cc70dcafb2c296c23b14a349e9df06b5c6295b05ed9",
+        "src/project_knowledge/retrieval.py": "sha256:0faeb8d9e7dffe44cb0cbc257c5b337402ede1a9e4f917e2dae692ef564c5551",
+        "src/project_knowledge/schemas.py": "sha256:13e252ec9f089eee9a07d582c07b55421bd4b15ca24b7e9391333dedf7118dcc",
+        "src/project_knowledge/semantic.py": "sha256:4b6a1b4473f6eb9c790c33944ec490fc1efe948e6c9c170383057990d1e77aa1",
         "src/project_knowledge/util.py": "sha256:11f4902fd9593f986e15add4d047f0fffdd870696704ae10399da6591224fb79",
         "src/project_knowledge/versioning.py": "sha256:71843362edc3f04014abd94e035c534cdbc24d8c125caa462e936f3bc8b02dfc",
-        "tests/test_evaluate.py": "sha256:541ac496335c10c918a2985428cd8bf6e92e7bca7dab8f2843cf5226d2a08174",
-        "tests/test_integration.py": "sha256:63738174fea27b65778642fcac3ba9330554caba6b4901340312110dae308c05",
+        "tests/test_evaluate.py": "sha256:511fe40680e977dfc63ed53228208b3a393f658093c0d8eb44aeb5db7af89f27",
+        "tests/test_integration.py": "sha256:142ee5243fc394a97738d81d8ec8ff166902725460cabd7f0873b3867e2531a7",
         "tests/test_proposal.py": "sha256:443cc42ee6bf86f66ab282367dd40226f87a968fdde336190c872984d9b1b925",
-        "tests/test_semantic.py": "sha256:20d60f526ef855080685372d61b93b1bf1769aa7e374bd479f8e78555014b0e6",
-        "tests/test_wp02_evidence.py": "sha256:6c14c77da1c2f4442598eb57b54607bebe17f8d52e4f0a567cf23640e6c6e852",
-        "tests/test_wp02_knowledge.py": "sha256:4e42ccc2b56588f2d03e1d5afb376ff2a0d48564cc73bc51a7445abaf154219d"
+        "tests/test_semantic.py": "sha256:d5a619bf47a0289eb7f4c55e0943401473b11ba73f1980f6da1859b8fae50718"
       },
       "sources": [
         {
@@ -288,19 +276,11 @@
           "type": "file"
         },
         {
-          "path": "tests/test_wp02_evidence.py",
-          "type": "file"
-        },
-        {
           "path": "src/project_knowledge/evaluate.py",
           "type": "file"
         },
         {
           "path": "tests/test_evaluate.py",
-          "type": "file"
-        },
-        {
-          "path": "tests/test_wp02_knowledge.py",
           "type": "file"
         },
         {
@@ -312,7 +292,7 @@
           "type": "file"
         }
       ],
-      "status": "stale",
+      "status": "fresh",
       "tags": [
         "curated"
       ],
@@ -322,24 +302,23 @@
       "confidence": "verified",
       "id": "curated.feature.guide.generation",
       "kind": "feature-guide-generation",
-      "last_verified_at": "2026-08-17T23:36:25+08:00",
+      "last_verified_at": "2026-08-18T03:22:54+08:00",
       "ownership": "curated",
       "path": "docs/knowledge/curated/feature-guide-generation.md",
-      "source_commit": "b4b0f9e23d101189f7f44a57081023eb78fa6baa",
+      "source_commit": "ff48d65d404f9ffd093672fd3cf594c762847b7e",
       "source_hashes": {
-        "src/project_knowledge/codegraph.py": "sha256:2de40a91fabad58d0bba634c7ac4b3d907599902879226de8972f4e3e52e934c",
-        "src/project_knowledge/engine.py": "sha256:e6a2e0cc44e2f00fead89d97bcf8c015f81432cef2652188e90678d0e79cd298",
-        "src/project_knowledge/evaluate.py": "sha256:c6664321989d48e4723dc2069857115bc9eb835048651d2b3ac1130642b504d8",
-        "src/project_knowledge/knowledge.py": "sha256:e40c64c703fe608e4523933499999531c1f8e2a254f23028311151139e601af7",
+        "src/project_knowledge/codegraph.py": "sha256:994e9d871b8d330c7f145079fc0780e2e6619e06f79598fb3d9f1a33a72b5e75",
+        "src/project_knowledge/engine.py": "sha256:1b62747314bbe68b39063ca6d65e3bd6145e2b32ae2624a30d6556fe043eca77",
+        "src/project_knowledge/evaluate.py": "sha256:58ee1413ed4cafc272673d2fc32c1d253a7b61df3f859193567c739c615de634",
+        "src/project_knowledge/knowledge.py": "sha256:569cba542fb7c5d8f690192e1da9ce1df66f5b57bc678a8b2666b2180f2905c4",
         "src/project_knowledge/proposal.py": "sha256:81dd74a107bd8e0a3cd65c015790c510b0dc059445419909b3576f0ac0fae8c7",
-        "src/project_knowledge/real_project.py": "sha256:caeed240e566db98ee2010c03dc898343658df33a3546b60f23106e9666b5f81",
-        "src/project_knowledge/retrieval.py": "sha256:43134cdd297c31b2aa45cec901c83ba22422e69bc4126248024ab28cc9b81197",
-        "src/project_knowledge/schemas.py": "sha256:cb4adc2fea953207437b29666bc63b618780f98e8b2f28e5a75acf73e820ce5d",
-        "src/project_knowledge/semantic.py": "sha256:5ac7b03d4f032667d09527b178814fa5742081514e30fbcfbc936e06124a1c10",
-        "src/project_knowledge/service.py": "sha256:f506e7cd3256f6a50196e6311fc108cdc85e2d4d760d1026521308e3d907187b",
+        "src/project_knowledge/real_project.py": "sha256:d06e39a9f9e39a372bd86cc70dcafb2c296c23b14a349e9df06b5c6295b05ed9",
+        "src/project_knowledge/retrieval.py": "sha256:0faeb8d9e7dffe44cb0cbc257c5b337402ede1a9e4f917e2dae692ef564c5551",
+        "src/project_knowledge/schemas.py": "sha256:13e252ec9f089eee9a07d582c07b55421bd4b15ca24b7e9391333dedf7118dcc",
+        "src/project_knowledge/semantic.py": "sha256:4b6a1b4473f6eb9c790c33944ec490fc1efe948e6c9c170383057990d1e77aa1",
+        "src/project_knowledge/service.py": "sha256:ba465f3caccf90380a5da24647bc2c95f4cad5080fac60ff5576a82aaf91e87f",
         "tests/test_proposal.py": "sha256:443cc42ee6bf86f66ab282367dd40226f87a968fdde336190c872984d9b1b925",
-        "tests/test_semantic.py": "sha256:20d60f526ef855080685372d61b93b1bf1769aa7e374bd479f8e78555014b0e6",
-        "tests/test_wp02_knowledge.py": "sha256:4e42ccc2b56588f2d03e1d5afb376ff2a0d48564cc73bc51a7445abaf154219d"
+        "tests/test_semantic.py": "sha256:d5a619bf47a0289eb7f4c55e0943401473b11ba73f1980f6da1859b8fae50718"
       },
       "sources": [
         {
@@ -395,10 +374,6 @@
           "type": "file"
         },
         {
-          "path": "tests/test_wp02_knowledge.py",
-          "type": "file"
-        },
-        {
           "path": "src/project_knowledge/knowledge.py",
           "type": "file"
         },
@@ -415,7 +390,7 @@
           "type": "file"
         }
       ],
-      "status": "stale",
+      "status": "fresh",
       "tags": [
         "curated"
       ],
@@ -425,18 +400,18 @@
       "confidence": "verified",
       "id": "curated.glossary",
       "kind": "glossary",
-      "last_verified_at": "2026-08-15T19:53:43+08:00",
+      "last_verified_at": "2026-08-18T03:20:19+08:00",
       "ownership": "curated",
       "path": "docs/knowledge/curated/glossary.md",
-      "source_commit": "097f708be3f4b144d42dd40bcba035a9d467ee42",
+      "source_commit": "fc3215b2b515ce46fdfd58383990729bf8cfd23b",
       "source_hashes": {
-        "docs/project-knowledge-system-design.md": "sha256:b3903b9a9a0d3c145a4db5763c32d7b625fdef82c270b41bdad866300b716a25",
-        "src/project_knowledge/evidence.py": "sha256:a6e2d8b52da925698170141f61673d32647c7b3bbbab9eac2838524dce0e0197",
-        "src/project_knowledge/models.py": "sha256:ba171bac907a4f4eaf49d817cc20b6a1cfecf79aec2c0e96fdaf0021e8dc66e9",
-        "src/project_knowledge/proposal.py": "sha256:7f4406b0fb500be7df2348d1313f1d6c09c792f5bc09bd3da6d18b6831f4aca7",
-        "src/project_knowledge/provider.py": "sha256:f30830ca8b98dc9f4b154decbf62e8c9cfe542dc74246efd28a35790080d3369",
-        "src/project_knowledge/schemas.py": "sha256:cb4adc2fea953207437b29666bc63b618780f98e8b2f28e5a75acf73e820ce5d",
-        "src/project_knowledge/semantic.py": "sha256:aac3e93a91a0730802c327bf7c93e7a5a51421c7493621743e972fd62a65930a"
+        "docs/project-knowledge-system-design.md": "sha256:edd48d922cfeefb305aa348e6e082446a942aecb3f412b397722603fa7c57748",
+        "src/project_knowledge/evidence.py": "sha256:ace9f7921c425a148f7e338db4f148c41afe3793f0c922972723e91baf8f5b84",
+        "src/project_knowledge/models.py": "sha256:59c6d271654c393ed00e537f62c172c193e452da4ad91174aaf8cc22e5714711",
+        "src/project_knowledge/proposal.py": "sha256:81dd74a107bd8e0a3cd65c015790c510b0dc059445419909b3576f0ac0fae8c7",
+        "src/project_knowledge/provider.py": "sha256:89b5296b0996d1a1319ac20b972c40ec4b28989ad3c40144fe9f74702477eb72",
+        "src/project_knowledge/schemas.py": "sha256:13e252ec9f089eee9a07d582c07b55421bd4b15ca24b7e9391333dedf7118dcc",
+        "src/project_knowledge/semantic.py": "sha256:4b6a1b4473f6eb9c790c33944ec490fc1efe948e6c9c170383057990d1e77aa1"
       },
       "sources": [
         {
@@ -468,7 +443,7 @@
           "type": "file"
         }
       ],
-      "status": "potentially_stale",
+      "status": "fresh",
       "tags": [
         "curated"
       ],
@@ -478,19 +453,19 @@
       "confidence": "verified",
       "id": "curated.provider.and.evidence",
       "kind": "provider-and-evidence",
-      "last_verified_at": "2026-08-15T19:53:43+08:00",
+      "last_verified_at": "2026-08-18T03:20:19+08:00",
       "ownership": "curated",
       "path": "docs/knowledge/curated/provider-and-evidence.md",
-      "source_commit": "097f708be3f4b144d42dd40bcba035a9d467ee42",
+      "source_commit": "fc3215b2b515ce46fdfd58383990729bf8cfd23b",
       "source_hashes": {
-        "src/project_knowledge/cli.py": "sha256:2b5b891dc0c69a43dcff6414ebaf699ffbd6b6b9238860cb4818a92f1a299716",
-        "src/project_knowledge/config.py": "sha256:0d2e5ebdad93e600f8310e8b3942840352ad5544a95263ff4f6b7dab0bdcbfdb",
-        "src/project_knowledge/evidence.py": "sha256:a6e2d8b52da925698170141f61673d32647c7b3bbbab9eac2838524dce0e0197",
-        "src/project_knowledge/models.py": "sha256:ba171bac907a4f4eaf49d817cc20b6a1cfecf79aec2c0e96fdaf0021e8dc66e9",
-        "src/project_knowledge/proposal.py": "sha256:7f4406b0fb500be7df2348d1313f1d6c09c792f5bc09bd3da6d18b6831f4aca7",
-        "src/project_knowledge/provider.py": "sha256:f30830ca8b98dc9f4b154decbf62e8c9cfe542dc74246efd28a35790080d3369",
-        "src/project_knowledge/schemas.py": "sha256:cb4adc2fea953207437b29666bc63b618780f98e8b2f28e5a75acf73e820ce5d",
-        "src/project_knowledge/semantic.py": "sha256:aac3e93a91a0730802c327bf7c93e7a5a51421c7493621743e972fd62a65930a"
+        "src/project_knowledge/cli.py": "sha256:312eee8fc51735f1a1d4e1cfef245e188fc7b3b6be6261d181adca5594280e84",
+        "src/project_knowledge/config.py": "sha256:a542d51c9aeaea60c126d3d74145feb404dd90df47ec5e3801e4350f7e29d4c6",
+        "src/project_knowledge/evidence.py": "sha256:ace9f7921c425a148f7e338db4f148c41afe3793f0c922972723e91baf8f5b84",
+        "src/project_knowledge/models.py": "sha256:59c6d271654c393ed00e537f62c172c193e452da4ad91174aaf8cc22e5714711",
+        "src/project_knowledge/proposal.py": "sha256:81dd74a107bd8e0a3cd65c015790c510b0dc059445419909b3576f0ac0fae8c7",
+        "src/project_knowledge/provider.py": "sha256:89b5296b0996d1a1319ac20b972c40ec4b28989ad3c40144fe9f74702477eb72",
+        "src/project_knowledge/schemas.py": "sha256:13e252ec9f089eee9a07d582c07b55421bd4b15ca24b7e9391333dedf7118dcc",
+        "src/project_knowledge/semantic.py": "sha256:4b6a1b4473f6eb9c790c33944ec490fc1efe948e6c9c170383057990d1e77aa1"
       },
       "sources": [
         {
@@ -526,7 +501,7 @@
           "type": "file"
         }
       ],
-      "status": "potentially_stale",
+      "status": "fresh",
       "tags": [
         "curated"
       ],
@@ -536,27 +511,27 @@
       "confidence": "verified",
       "id": "decision.0001.local.first.core",
       "kind": "decision",
-      "last_verified_at": "2026-08-15T19:57:12+08:00",
+      "last_verified_at": "2026-08-18T03:20:19+08:00",
       "ownership": "decision",
       "path": "docs/knowledge/decisions/0001-local-first-core.md",
-      "source_commit": "a3ceb9689c7e8ba7ab6e28fd519e69ee5a8c7f4b",
+      "source_commit": "fc3215b2b515ce46fdfd58383990729bf8cfd23b",
       "source_hashes": {
-        "docs/project-knowledge-system-design.md": "sha256:b3903b9a9a0d3c145a4db5763c32d7b625fdef82c270b41bdad866300b716a25",
-        "evaluation/thresholds.json": "sha256:60bf43c86794b2856276e657c0eee3d280994172e2c4c8c07e0096469c662492",
-        "pyproject.toml": "sha256:8723ebe262c16975fa387bbe4365ee73f394546c9c050f4fcd81288d1097d206",
+        "docs/project-knowledge-system-design.md": "sha256:edd48d922cfeefb305aa348e6e082446a942aecb3f412b397722603fa7c57748",
+        "evaluation/thresholds.json": "sha256:6f6fd52de5d27c6aae89ac42a882a3315dbc5ec3a0907f0524a26fdb71a9c78a",
+        "pyproject.toml": "sha256:2ed5019312e8f72a92e0a1bed2bf58c8431ba04b3a07723aefc0fbfd5647eda3",
         "scripts/validate_codegraph_adapter.py": "sha256:745515115c8c33634c76d98be05ac2dc6b3ec461ae9036f69c8ab267fc79e0c9",
-        "src/project_knowledge/codegraph.py": "sha256:2de40a91fabad58d0bba634c7ac4b3d907599902879226de8972f4e3e52e934c",
-        "src/project_knowledge/config.py": "sha256:0d2e5ebdad93e600f8310e8b3942840352ad5544a95263ff4f6b7dab0bdcbfdb",
-        "src/project_knowledge/engine.py": "sha256:e6a2e0cc44e2f00fead89d97bcf8c015f81432cef2652188e90678d0e79cd298",
-        "src/project_knowledge/evaluate.py": "sha256:7c61136c6445f7b039188382a2f65444812f8f6ffbb2d6f885af5a2f45818ac7",
-        "src/project_knowledge/evidence.py": "sha256:a6e2d8b52da925698170141f61673d32647c7b3bbbab9eac2838524dce0e0197",
+        "src/project_knowledge/codegraph.py": "sha256:994e9d871b8d330c7f145079fc0780e2e6619e06f79598fb3d9f1a33a72b5e75",
+        "src/project_knowledge/config.py": "sha256:a542d51c9aeaea60c126d3d74145feb404dd90df47ec5e3801e4350f7e29d4c6",
+        "src/project_knowledge/engine.py": "sha256:1b62747314bbe68b39063ca6d65e3bd6145e2b32ae2624a30d6556fe043eca77",
+        "src/project_knowledge/evaluate.py": "sha256:58ee1413ed4cafc272673d2fc32c1d253a7b61df3f859193567c739c615de634",
+        "src/project_knowledge/evidence.py": "sha256:ace9f7921c425a148f7e338db4f148c41afe3793f0c922972723e91baf8f5b84",
         "src/project_knowledge/mcp.py": "sha256:9c6790cb1bf4288219241f6e1244eaf5655715aab6b6d7463f22974fab436cbf",
-        "src/project_knowledge/proposal.py": "sha256:7f4406b0fb500be7df2348d1313f1d6c09c792f5bc09bd3da6d18b6831f4aca7",
-        "src/project_knowledge/provider.py": "sha256:f30830ca8b98dc9f4b154decbf62e8c9cfe542dc74246efd28a35790080d3369",
-        "src/project_knowledge/real_project.py": "sha256:fd9b662a08ddb024b9db426790846dc1206e37c40c2aa53ec3fdea60ad77dca3",
-        "src/project_knowledge/schemas.py": "sha256:cb4adc2fea953207437b29666bc63b618780f98e8b2f28e5a75acf73e820ce5d",
-        "src/project_knowledge/semantic.py": "sha256:aac3e93a91a0730802c327bf7c93e7a5a51421c7493621743e972fd62a65930a",
-        "src/project_knowledge/versioning.py": "sha256:28c1eb70f34cef82854e409a23843cfe22a0c29eff5595dab889fd32b2f1cedb"
+        "src/project_knowledge/proposal.py": "sha256:81dd74a107bd8e0a3cd65c015790c510b0dc059445419909b3576f0ac0fae8c7",
+        "src/project_knowledge/provider.py": "sha256:89b5296b0996d1a1319ac20b972c40ec4b28989ad3c40144fe9f74702477eb72",
+        "src/project_knowledge/real_project.py": "sha256:d06e39a9f9e39a372bd86cc70dcafb2c296c23b14a349e9df06b5c6295b05ed9",
+        "src/project_knowledge/schemas.py": "sha256:13e252ec9f089eee9a07d582c07b55421bd4b15ca24b7e9391333dedf7118dcc",
+        "src/project_knowledge/semantic.py": "sha256:4b6a1b4473f6eb9c790c33944ec490fc1efe948e6c9c170383057990d1e77aa1",
+        "src/project_knowledge/versioning.py": "sha256:71843362edc3f04014abd94e035c534cdbc24d8c125caa462e936f3bc8b02dfc"
       },
       "sources": [
         {
@@ -636,7 +611,7 @@
           "type": "file"
         }
       ],
-      "status": "potentially_stale",
+      "status": "fresh",
       "tags": [
         "decision"
       ],
@@ -689,17 +664,17 @@
       "confidence": "verified",
       "id": "decision.0003.lua.skynet.entry.evidence",
       "kind": "decision",
-      "last_verified_at": "2026-08-15T19:53:43+08:00",
+      "last_verified_at": "2026-08-18T03:22:54+08:00",
       "ownership": "decision",
       "path": "docs/knowledge/decisions/0003-lua-skynet-entry-evidence.md",
-      "source_commit": "097f708be3f4b144d42dd40bcba035a9d467ee42",
+      "source_commit": "ff48d65d404f9ffd093672fd3cf594c762847b7e",
       "source_hashes": {
-        "evaluation/real_project_harness.py": "sha256:d970b13db02dcc3f0f6500599a5018a9fd37595186a275a9f6aa8e4b3922a915",
-        "src/project_knowledge/engine.py": "sha256:e6a2e0cc44e2f00fead89d97bcf8c015f81432cef2652188e90678d0e79cd298",
-        "src/project_knowledge/knowledge.py": "sha256:ab16f6c9ac5cc167ba713a4b4682301d865be3565646d9296da0f0ea6c54cc6d",
-        "src/project_knowledge/real_project.py": "sha256:fd9b662a08ddb024b9db426790846dc1206e37c40c2aa53ec3fdea60ad77dca3",
-        "tests/test_wp02_evidence.py": "sha256:2cde542c77d113d7091b804eb51c947b3e635e43341fe82185a1ab359adec8ef",
-        "tests/test_wp02_knowledge.py": "sha256:1c3d9a72ffc4c3a03f13280b41a4687c6147278da8cfc1398113be115a43ef5c"
+        "evaluation/real_project_harness.py": "sha256:01e5ac2e7334601b51d9bb61a14a0fc4f8412a251e7809a32a6079e23aa6316e",
+        "src/project_knowledge/engine.py": "sha256:1b62747314bbe68b39063ca6d65e3bd6145e2b32ae2624a30d6556fe043eca77",
+        "src/project_knowledge/knowledge.py": "sha256:569cba542fb7c5d8f690192e1da9ce1df66f5b57bc678a8b2666b2180f2905c4",
+        "src/project_knowledge/real_project.py": "sha256:d06e39a9f9e39a372bd86cc70dcafb2c296c23b14a349e9df06b5c6295b05ed9",
+        "tests/test_codegraph.py": "sha256:77b0822f8858c98bd7ec57466762711009514cf06b5edb997f78217b72bced62",
+        "tests/test_retrieval_wp06.py": "sha256:e97df9eeb0397b2d5a3ded6452b05c67ecab51ae66f75aaddb7a2979e1da17d6"
       },
       "sources": [
         {
@@ -719,15 +694,15 @@
           "type": "file"
         },
         {
-          "path": "tests/test_wp02_evidence.py",
+          "path": "tests/test_codegraph.py",
           "type": "file"
         },
         {
-          "path": "tests/test_wp02_knowledge.py",
+          "path": "tests/test_retrieval_wp06.py",
           "type": "file"
         }
       ],
-      "status": "stale",
+      "status": "fresh",
       "tags": [
         "decision"
       ],
@@ -737,10 +712,10 @@
       "confidence": "generated",
       "id": "generated.module.evaluation",
       "kind": "module",
-      "last_generated_at": "2026-08-18T03:16:07+08:00",
+      "last_generated_at": "2026-08-18T03:22:54+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/evaluation.md",
-      "source_commit": "b17bcf25a7e416c96b6ec10723b38941c610b88e",
+      "source_commit": "ff48d65d404f9ffd093672fd3cf594c762847b7e",
       "source_hashes": {
         "evaluation/performance_harness.py": "sha256:1ae745129353689da1f472ec2e4a196e2fcc458862116ab7273d2487130fd100",
         "evaluation/real_project_harness.py": "sha256:01e5ac2e7334601b51d9bb61a14a0fc4f8412a251e7809a32a6079e23aa6316e"
@@ -766,10 +741,10 @@
       "confidence": "generated",
       "id": "generated.module.github",
       "kind": "module",
-      "last_generated_at": "2026-08-18T03:16:07+08:00",
+      "last_generated_at": "2026-08-18T03:22:54+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/github.md",
-      "source_commit": "b17bcf25a7e416c96b6ec10723b38941c610b88e",
+      "source_commit": "ff48d65d404f9ffd093672fd3cf594c762847b7e",
       "source_hashes": {
         ".github/workflows/quality.yml": "sha256:3ca51e24104bf9a5f5c3ca0dd6cbfb95e81cc229786f13f6c54456941b414f37"
       },
@@ -790,10 +765,10 @@
       "confidence": "generated",
       "id": "generated.module.plugins",
       "kind": "module",
-      "last_generated_at": "2026-08-18T03:16:07+08:00",
+      "last_generated_at": "2026-08-18T03:22:54+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/plugins.md",
-      "source_commit": "b17bcf25a7e416c96b6ec10723b38941c610b88e",
+      "source_commit": "ff48d65d404f9ffd093672fd3cf594c762847b7e",
       "source_hashes": {
         "plugins/project-knowledge/hooks/sync_after_task.py": "sha256:c23f0ebd93740fb9390a87cb9d6b106f03c0dd9b504c19f9df0396972c4618b0",
         "plugins/project-knowledge/scripts/project_status.py": "sha256:1dc8c49658cd7372f1d1d758f12f4b52cfec8f9b666b6be237d7558013c28bfb",
@@ -824,10 +799,10 @@
       "confidence": "generated",
       "id": "generated.module.project_knowledge",
       "kind": "module",
-      "last_generated_at": "2026-08-18T03:16:07+08:00",
+      "last_generated_at": "2026-08-18T03:22:54+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/project_knowledge.md",
-      "source_commit": "b17bcf25a7e416c96b6ec10723b38941c610b88e",
+      "source_commit": "ff48d65d404f9ffd093672fd3cf594c762847b7e",
       "source_hashes": {
         "src/project_knowledge/__init__.py": "sha256:d09d78e0f7e81038c96b4792793a19a7ed2847d44a90bca60f7bc0497f03599b",
         "src/project_knowledge/__main__.py": "sha256:fd860037dd55b06637cd907eaf6efa4ba12f072e134d3393d8bde0e390758626",
@@ -1008,10 +983,10 @@
       "confidence": "generated",
       "id": "generated.module.root",
       "kind": "module",
-      "last_generated_at": "2026-08-18T03:16:07+08:00",
+      "last_generated_at": "2026-08-18T03:22:54+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/root.md",
-      "source_commit": "b17bcf25a7e416c96b6ec10723b38941c610b88e",
+      "source_commit": "ff48d65d404f9ffd093672fd3cf594c762847b7e",
       "source_hashes": {
         ".project-kb.yml": "sha256:f9c4d55fa33046455c73f824fafe9fdef651155962fabb75bdd2efd10ac05a2f"
       },
@@ -1032,10 +1007,10 @@
       "confidence": "generated",
       "id": "generated.module.scripts",
       "kind": "module",
-      "last_generated_at": "2026-08-18T03:16:07+08:00",
+      "last_generated_at": "2026-08-18T03:22:54+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/scripts.md",
-      "source_commit": "b17bcf25a7e416c96b6ec10723b38941c610b88e",
+      "source_commit": "ff48d65d404f9ffd093672fd3cf594c762847b7e",
       "source_hashes": {
         "scripts/bump_version.py": "sha256:74f74a89a7a66abfb820563c237fe4aa9eb13c6529fc8ad9ffdc66e868463829",
         "scripts/validate_ci_workflow.py": "sha256:10ec81b055ab830f329e4efd7393296e3ab046d87e32a95467c994ef670ea980",
@@ -1071,10 +1046,10 @@
       "confidence": "generated",
       "id": "generated.module.tests",
       "kind": "module",
-      "last_generated_at": "2026-08-18T03:16:07+08:00",
+      "last_generated_at": "2026-08-18T03:22:54+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/tests.md",
-      "source_commit": "b17bcf25a7e416c96b6ec10723b38941c610b88e",
+      "source_commit": "ff48d65d404f9ffd093672fd3cf594c762847b7e",
       "source_hashes": {
         "tests/__init__.py": "sha256:7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
         "tests/test_codegraph.py": "sha256:77b0822f8858c98bd7ec57466762711009514cf06b5edb997f78217b72bced62",
@@ -1235,10 +1210,10 @@
       "confidence": "generated",
       "id": "generated.project-map",
       "kind": "project",
-      "last_generated_at": "2026-08-18T03:16:07+08:00",
+      "last_generated_at": "2026-08-18T03:22:54+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/project-map.md",
-      "source_commit": "b17bcf25a7e416c96b6ec10723b38941c610b88e",
+      "source_commit": "ff48d65d404f9ffd093672fd3cf594c762847b7e",
       "source_hashes": {
         ".github/workflows/quality.yml": "sha256:3ca51e24104bf9a5f5c3ca0dd6cbfb95e81cc229786f13f6c54456941b414f37",
         ".project-kb.yml": "sha256:f9c4d55fa33046455c73f824fafe9fdef651155962fabb75bdd2efd10ac05a2f",
@@ -1621,10 +1596,10 @@
       "confidence": "generated",
       "id": "generated.test-map",
       "kind": "test",
-      "last_generated_at": "2026-08-18T03:16:07+08:00",
+      "last_generated_at": "2026-08-18T03:22:54+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/test-map.md",
-      "source_commit": "b17bcf25a7e416c96b6ec10723b38941c610b88e",
+      "source_commit": "ff48d65d404f9ffd093672fd3cf594c762847b7e",
       "source_hashes": {
         "tests/__init__.py": "sha256:7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
         "tests/test_codegraph.py": "sha256:77b0822f8858c98bd7ec57466762711009514cf06b5edb997f78217b72bced62",
@@ -1783,5 +1758,5 @@
     }
   ],
   "schema_version": 1,
-  "source_commit": "b17bcf25a7e416c96b6ec10723b38941c610b88e"
+  "source_commit": "ff48d65d404f9ffd093672fd3cf594c762847b7e"
 }
