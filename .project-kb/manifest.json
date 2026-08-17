@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-18T02:51:38+08:00",
+  "generated_at": "2026-08-18T03:16:07+08:00",
   "project": "ProjectKnowledgeCLI",
   "records": [
     {
@@ -737,10 +737,10 @@
       "confidence": "generated",
       "id": "generated.module.evaluation",
       "kind": "module",
-      "last_generated_at": "2026-08-18T02:51:38+08:00",
+      "last_generated_at": "2026-08-18T03:16:07+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/evaluation.md",
-      "source_commit": "3aa039bb0585a4ad3301c41fb89340a5c26b801d",
+      "source_commit": "b17bcf25a7e416c96b6ec10723b38941c610b88e",
       "source_hashes": {
         "evaluation/performance_harness.py": "sha256:1ae745129353689da1f472ec2e4a196e2fcc458862116ab7273d2487130fd100",
         "evaluation/real_project_harness.py": "sha256:01e5ac2e7334601b51d9bb61a14a0fc4f8412a251e7809a32a6079e23aa6316e"
@@ -766,10 +766,10 @@
       "confidence": "generated",
       "id": "generated.module.github",
       "kind": "module",
-      "last_generated_at": "2026-08-18T02:51:38+08:00",
+      "last_generated_at": "2026-08-18T03:16:07+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/github.md",
-      "source_commit": "3aa039bb0585a4ad3301c41fb89340a5c26b801d",
+      "source_commit": "b17bcf25a7e416c96b6ec10723b38941c610b88e",
       "source_hashes": {
         ".github/workflows/quality.yml": "sha256:3ca51e24104bf9a5f5c3ca0dd6cbfb95e81cc229786f13f6c54456941b414f37"
       },
@@ -790,10 +790,10 @@
       "confidence": "generated",
       "id": "generated.module.plugins",
       "kind": "module",
-      "last_generated_at": "2026-08-18T02:51:38+08:00",
+      "last_generated_at": "2026-08-18T03:16:07+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/plugins.md",
-      "source_commit": "3aa039bb0585a4ad3301c41fb89340a5c26b801d",
+      "source_commit": "b17bcf25a7e416c96b6ec10723b38941c610b88e",
       "source_hashes": {
         "plugins/project-knowledge/hooks/sync_after_task.py": "sha256:c23f0ebd93740fb9390a87cb9d6b106f03c0dd9b504c19f9df0396972c4618b0",
         "plugins/project-knowledge/scripts/project_status.py": "sha256:1dc8c49658cd7372f1d1d758f12f4b52cfec8f9b666b6be237d7558013c28bfb",
@@ -824,10 +824,10 @@
       "confidence": "generated",
       "id": "generated.module.project_knowledge",
       "kind": "module",
-      "last_generated_at": "2026-08-18T02:51:38+08:00",
+      "last_generated_at": "2026-08-18T03:16:07+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/project_knowledge.md",
-      "source_commit": "3aa039bb0585a4ad3301c41fb89340a5c26b801d",
+      "source_commit": "b17bcf25a7e416c96b6ec10723b38941c610b88e",
       "source_hashes": {
         "src/project_knowledge/__init__.py": "sha256:d09d78e0f7e81038c96b4792793a19a7ed2847d44a90bca60f7bc0497f03599b",
         "src/project_knowledge/__main__.py": "sha256:fd860037dd55b06637cd907eaf6efa4ba12f072e134d3393d8bde0e390758626",
@@ -1008,10 +1008,10 @@
       "confidence": "generated",
       "id": "generated.module.root",
       "kind": "module",
-      "last_generated_at": "2026-08-18T02:51:38+08:00",
+      "last_generated_at": "2026-08-18T03:16:07+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/root.md",
-      "source_commit": "3aa039bb0585a4ad3301c41fb89340a5c26b801d",
+      "source_commit": "b17bcf25a7e416c96b6ec10723b38941c610b88e",
       "source_hashes": {
         ".project-kb.yml": "sha256:f9c4d55fa33046455c73f824fafe9fdef651155962fabb75bdd2efd10ac05a2f"
       },
@@ -1032,10 +1032,10 @@
       "confidence": "generated",
       "id": "generated.module.scripts",
       "kind": "module",
-      "last_generated_at": "2026-08-18T02:51:38+08:00",
+      "last_generated_at": "2026-08-18T03:16:07+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/scripts.md",
-      "source_commit": "3aa039bb0585a4ad3301c41fb89340a5c26b801d",
+      "source_commit": "b17bcf25a7e416c96b6ec10723b38941c610b88e",
       "source_hashes": {
         "scripts/bump_version.py": "sha256:74f74a89a7a66abfb820563c237fe4aa9eb13c6529fc8ad9ffdc66e868463829",
         "scripts/validate_ci_workflow.py": "sha256:10ec81b055ab830f329e4efd7393296e3ab046d87e32a95467c994ef670ea980",
@@ -1071,10 +1071,10 @@
       "confidence": "generated",
       "id": "generated.module.tests",
       "kind": "module",
-      "last_generated_at": "2026-08-18T02:51:38+08:00",
+      "last_generated_at": "2026-08-18T03:16:07+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/tests.md",
-      "source_commit": "3aa039bb0585a4ad3301c41fb89340a5c26b801d",
+      "source_commit": "b17bcf25a7e416c96b6ec10723b38941c610b88e",
       "source_hashes": {
         "tests/__init__.py": "sha256:7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
         "tests/test_codegraph.py": "sha256:77b0822f8858c98bd7ec57466762711009514cf06b5edb997f78217b72bced62",
@@ -1101,9 +1101,9 @@
         "tests/test_retrieval_wp06.py": "sha256:e97df9eeb0397b2d5a3ded6452b05c67ecab51ae66f75aaddb7a2979e1da17d6",
         "tests/test_schemas.py": "sha256:1e1588dc950a7447e1255e3b752d5f2ea5956e297dda2122e5f5fbc511960afa",
         "tests/test_semantic.py": "sha256:d5a619bf47a0289eb7f4c55e0943401473b11ba73f1980f6da1859b8fae50718",
-        "tests/test_single_directory.py": "sha256:296eeda07b8140b0f39bfd5a3857b4680b35b04f58bc5b7bc334adb909ad3211",
+        "tests/test_single_directory.py": "sha256:29011c6860cb9cb6e8f8ef71a42255caca7f037a91c6f209a230b4eac86622fc",
         "tests/test_versioning.py": "sha256:1f49b0111871156278ce5f89a49e79d52c503bd9a8cb4f87952c11d037dbda07",
-        "tests/test_watch_wp07.py": "sha256:c62143d9f438a8cc005f126e39ed8245642b42fb1f4a100613b0615ab191e11f",
+        "tests/test_watch_wp07.py": "sha256:73006d3beacea7b990cfcf35d92a08903026185ce64bb7830f7dc1d6c9910768",
         "tests/test_wp08.py": "sha256:91bdab7fed17eb5e92423e4e67938bc1ae3de35d6cff26053b0a1dd305d547ac"
       },
       "sources": [
@@ -1235,10 +1235,10 @@
       "confidence": "generated",
       "id": "generated.project-map",
       "kind": "project",
-      "last_generated_at": "2026-08-18T02:51:38+08:00",
+      "last_generated_at": "2026-08-18T03:16:07+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/project-map.md",
-      "source_commit": "3aa039bb0585a4ad3301c41fb89340a5c26b801d",
+      "source_commit": "b17bcf25a7e416c96b6ec10723b38941c610b88e",
       "source_hashes": {
         ".github/workflows/quality.yml": "sha256:3ca51e24104bf9a5f5c3ca0dd6cbfb95e81cc229786f13f6c54456941b414f37",
         ".project-kb.yml": "sha256:f9c4d55fa33046455c73f824fafe9fdef651155962fabb75bdd2efd10ac05a2f",
@@ -1309,9 +1309,9 @@
         "tests/test_retrieval_wp06.py": "sha256:e97df9eeb0397b2d5a3ded6452b05c67ecab51ae66f75aaddb7a2979e1da17d6",
         "tests/test_schemas.py": "sha256:1e1588dc950a7447e1255e3b752d5f2ea5956e297dda2122e5f5fbc511960afa",
         "tests/test_semantic.py": "sha256:d5a619bf47a0289eb7f4c55e0943401473b11ba73f1980f6da1859b8fae50718",
-        "tests/test_single_directory.py": "sha256:296eeda07b8140b0f39bfd5a3857b4680b35b04f58bc5b7bc334adb909ad3211",
+        "tests/test_single_directory.py": "sha256:29011c6860cb9cb6e8f8ef71a42255caca7f037a91c6f209a230b4eac86622fc",
         "tests/test_versioning.py": "sha256:1f49b0111871156278ce5f89a49e79d52c503bd9a8cb4f87952c11d037dbda07",
-        "tests/test_watch_wp07.py": "sha256:c62143d9f438a8cc005f126e39ed8245642b42fb1f4a100613b0615ab191e11f",
+        "tests/test_watch_wp07.py": "sha256:73006d3beacea7b990cfcf35d92a08903026185ce64bb7830f7dc1d6c9910768",
         "tests/test_wp08.py": "sha256:91bdab7fed17eb5e92423e4e67938bc1ae3de35d6cff26053b0a1dd305d547ac"
       },
       "sources": [
@@ -1621,10 +1621,10 @@
       "confidence": "generated",
       "id": "generated.test-map",
       "kind": "test",
-      "last_generated_at": "2026-08-18T02:51:38+08:00",
+      "last_generated_at": "2026-08-18T03:16:07+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/test-map.md",
-      "source_commit": "3aa039bb0585a4ad3301c41fb89340a5c26b801d",
+      "source_commit": "b17bcf25a7e416c96b6ec10723b38941c610b88e",
       "source_hashes": {
         "tests/__init__.py": "sha256:7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
         "tests/test_codegraph.py": "sha256:77b0822f8858c98bd7ec57466762711009514cf06b5edb997f78217b72bced62",
@@ -1651,9 +1651,9 @@
         "tests/test_retrieval_wp06.py": "sha256:e97df9eeb0397b2d5a3ded6452b05c67ecab51ae66f75aaddb7a2979e1da17d6",
         "tests/test_schemas.py": "sha256:1e1588dc950a7447e1255e3b752d5f2ea5956e297dda2122e5f5fbc511960afa",
         "tests/test_semantic.py": "sha256:d5a619bf47a0289eb7f4c55e0943401473b11ba73f1980f6da1859b8fae50718",
-        "tests/test_single_directory.py": "sha256:296eeda07b8140b0f39bfd5a3857b4680b35b04f58bc5b7bc334adb909ad3211",
+        "tests/test_single_directory.py": "sha256:29011c6860cb9cb6e8f8ef71a42255caca7f037a91c6f209a230b4eac86622fc",
         "tests/test_versioning.py": "sha256:1f49b0111871156278ce5f89a49e79d52c503bd9a8cb4f87952c11d037dbda07",
-        "tests/test_watch_wp07.py": "sha256:c62143d9f438a8cc005f126e39ed8245642b42fb1f4a100613b0615ab191e11f",
+        "tests/test_watch_wp07.py": "sha256:73006d3beacea7b990cfcf35d92a08903026185ce64bb7830f7dc1d6c9910768",
         "tests/test_wp08.py": "sha256:91bdab7fed17eb5e92423e4e67938bc1ae3de35d6cff26053b0a1dd305d547ac"
       },
       "sources": [
@@ -1783,5 +1783,5 @@
     }
   ],
   "schema_version": 1,
-  "source_commit": "3aa039bb0585a4ad3301c41fb89340a5c26b801d"
+  "source_commit": "b17bcf25a7e416c96b6ec10723b38941c610b88e"
 }
