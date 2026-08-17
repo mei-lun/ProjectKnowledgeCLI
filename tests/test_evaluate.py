@@ -12,6 +12,8 @@ from project_knowledge.cli import main
 from project_knowledge.codegraph import CodeGraphClient, CodeGraphCommand, CodeGraphCommandResolver
 from project_knowledge.config import ProjectConfig
 from project_knowledge.evaluate import (
+    _aggregate,
+    _evaluate_sample,
     evaluate,
     evaluate_quality_gate,
     evaluate_suite,
@@ -68,10 +70,100 @@ class EvaluationTests(unittest.TestCase):
     def test_dataset_requires_stable_ids_categories_and_expectations(self) -> None:
         loaded = load_dataset(self.dataset)
         self.assertEqual(loaded[0]["id"], "account-login")
+        labeled = json.loads(self.dataset.read_text(encoding="utf-8"))
+        labeled["acceptable_supporting_files"] = ["tests/test_app.py"]
+        self.dataset.write_text(json.dumps(labeled, ensure_ascii=False) + "\n", encoding="utf-8")
+        self.assertEqual(load_dataset(self.dataset)[0]["acceptable_supporting_files"], ["tests/test_app.py"])
         invalid = self.root / "invalid.jsonl"
         invalid.write_text('{"task":"missing metadata"}\n', encoding="utf-8")
         with self.assertRaisesRegex(ValueError, "line 1"):
             load_dataset(invalid)
+        invalid.write_text(json.dumps({
+            **labeled,
+            "acceptable_supporting_files": [""],
+        }, ensure_ascii=False) + "\n", encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "line 1"):
+            load_dataset(invalid)
+
+    def test_core_metrics_are_strict_and_supporting_labels_are_diagnostic(self) -> None:
+        api = KnowledgeAPI(self.root)
+        sample = load_dataset(self.dataset)[0]
+        sample["acceptable_supporting_files"] = ["tests/test_app.py"]
+        returned = {
+            "files": ["src/app.py", "tests/test_app.py", "README.md"],
+            "core_files": ["src/app.py", "README.md"],
+            "supporting_files": ["tests/test_app.py"],
+            "symbols": {"src/app.py::AccountService.login"},
+            "call_path": set(sample["expected_call_path"]),
+            "text": "",
+            "tool_calls": 1,
+            "stale_detected": False,
+            "selection_reasons": {},
+            "file_rankings": [],
+            "ranking_status": "ok",
+        }
+
+        with patch("project_knowledge.evaluate._retrieve", return_value=returned):
+            result = _evaluate_sample(api, sample, "hybrid")
+
+        self.assertEqual(result["metrics"]["core_file_recall"], 1.0)
+        self.assertEqual(result["metrics"]["core_file_precision"], 0.5)
+        self.assertEqual(result["metrics"]["file_precision"], 0.333333)
+        self.assertEqual(result["metrics"]["acceptable_supporting_precision"], 1.0)
+        self.assertGreater(result["metrics"]["ndcg_at_5"], 0.0)
+        self.assertEqual(result["core_failed_metrics"], [])
+        self.assertEqual(result["core_files"], returned["core_files"])
+        self.assertEqual(result["supporting_files"], returned["supporting_files"])
+        self.assertEqual(result["file_rankings"], returned["file_rankings"])
+        self.assertEqual(result["ranking_status"], "ok")
+
+    def test_ranking_fallback_is_a_sample_failure(self) -> None:
+        report = {
+            "strategies": {
+                "hybrid": {
+                    "available": True,
+                    "samples": 50,
+                    "metrics": {"ranking_fallback_rate": 0.02},
+                }
+            }
+        }
+        thresholds = {
+            "minimum_samples": 50,
+            "required_strategies": ["hybrid"],
+            "maximum": {"ranking_fallback_rate": 0.0},
+        }
+
+        gate = evaluate_quality_gate(report, thresholds)
+
+        self.assertFalse(gate["passed"])
+        self.assertTrue(any(item["metric"] == "ranking_fallback_rate" for item in gate["failures"]))
+
+    def test_aggregate_reports_core_file_counts_and_fallback_rate(self) -> None:
+        metrics, counts = _aggregate([
+            {
+                "metrics": {"ranking_fallback": 0.0},
+                "core_files": ["src/app.py"],
+                "returned_files": ["src/app.py", "README.md"],
+                "success": True,
+                "estimated_context_tokens": 10,
+                "tool_calls": 1,
+                "latency_ms": 1.0,
+            },
+            {
+                "metrics": {"ranking_fallback": 1.0},
+                "core_files": ["src/app.py", "src/other.py"],
+                "returned_files": ["src/app.py"],
+                "success": False,
+                "estimated_context_tokens": 20,
+                "tool_calls": 2,
+                "latency_ms": 2.0,
+            },
+        ])
+
+        self.assertEqual(metrics["average_core_files"], 1.5)
+        self.assertEqual(metrics["average_returned_files"], 1.5)
+        self.assertEqual(metrics["ranking_fallback_rate"], 0.5)
+        self.assertEqual(counts["ranking_fallback_rate"], 2)
 
     def test_report_contains_anchor_semantic_cost_and_reproducibility_metrics(self) -> None:
         report = evaluate(self.root, self.dataset, strategy="hybrid")

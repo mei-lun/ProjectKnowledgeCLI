@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 import os
 import platform
 import re
@@ -70,6 +71,12 @@ def load_dataset(dataset: str | Path) -> list[dict[str, Any]]:
             value = sample.get(field, [])
             if not isinstance(value, list) or any(not isinstance(item, str) or not item for item in value):
                 raise ValueError(f"dataset line {number}: {field} 必须是非空字符串数组")
+        if "acceptable_supporting_files" in sample:
+            value = sample["acceptable_supporting_files"]
+            if not isinstance(value, list) or any(not isinstance(item, str) or not item for item in value):
+                raise ValueError(
+                    f"dataset line {number}: acceptable_supporting_files 必须是非空字符串数组"
+                )
         if not any(sample.get(field) for field in EXPECTED_LIST_FIELDS) and "expected_stale" not in sample:
             raise ValueError(f"dataset line {number}: 至少需要一个期望锚点或 expected_stale")
         if "expected_stale" in sample and not isinstance(sample["expected_stale"], bool):
@@ -329,6 +336,7 @@ def _evaluate_sample(api: KnowledgeAPI, sample: dict[str, Any], strategy: str) -
     }
     metrics: dict[str, float] = {}
     failures: list[str] = []
+    core_failures: list[str] = []
     for field, metric in RECALL_FIELDS.items():
         values = expected[field]
         if not values:
@@ -346,6 +354,30 @@ def _evaluate_sample(api: KnowledgeAPI, sample: dict[str, Any], strategy: str) -
         if precision_metric:
             metrics[precision_metric] = len(matched) / max(1, len(actual[field]))
 
+    expected_files = expected["expected_files"]
+    if expected_files:
+        core_files = set(returned["core_files"])
+        core_matched = expected_files & core_files
+        core_recall = len(core_matched) / len(expected_files)
+        metrics["core_file_recall"] = core_recall
+        metrics["core_file_precision"] = len(core_matched) / max(1, len(core_files))
+        metrics["ndcg_at_5"] = _ndcg_at_k(returned["files"], expected_files)
+        if core_recall < 1:
+            core_failures.append("core_file_recall")
+
+    if "acceptable_supporting_files" in sample:
+        supporting_files = set(returned["supporting_files"])
+        acceptable_supporting_files = set(sample["acceptable_supporting_files"])
+        metrics["acceptable_supporting_precision"] = (
+            len(supporting_files & acceptable_supporting_files) / len(supporting_files)
+            if supporting_files else 0.0
+        )
+
+    ranking_fallback = returned["ranking_status"] == "fallback"
+    metrics["ranking_fallback"] = 1.0 if ranking_fallback else 0.0
+    if ranking_fallback:
+        failures.append("ranking_status")
+
     if "expected_stale" in sample:
         stale_match = bool(returned["stale_detected"]) == sample["expected_stale"]
         metrics["stale_detection"] = 1.0 if stale_match else 0.0
@@ -362,12 +394,17 @@ def _evaluate_sample(api: KnowledgeAPI, sample: dict[str, Any], strategy: str) -
         "metrics": {key: round(value, 6) for key, value in metrics.items()},
         "success": not failures,
         "failed_metrics": failures,
+        "core_failed_metrics": core_failures,
         "estimated_context_tokens": context_tokens,
         "tool_calls": returned["tool_calls"],
         "latency_ms": round(latency_ms, 3),
         "returned_files": sorted(returned["files"]),
         "returned_symbols": sorted(returned["symbols"]),
         "returned_call_path": sorted(returned["call_path"]),
+        "core_files": returned["core_files"],
+        "supporting_files": returned["supporting_files"],
+        "file_rankings": returned["file_rankings"],
+        "ranking_status": returned["ranking_status"],
         "selection_reasons": returned.get("selection_reasons", {}),
         "stale_detected": returned["stale_detected"],
     }
@@ -425,6 +462,18 @@ def _selection_reasons(file_rankings: list[dict[str, Any]]) -> dict[str, dict[st
         }
         for item in file_rankings
     }
+
+
+def _ndcg_at_k(ranked: list[str], relevant: set[str], k: int = 5) -> float:
+    if not relevant:
+        return 0.0
+    dcg = sum(
+        (1.0 / math.log2(index + 2)) if path in relevant else 0.0
+        for index, path in enumerate(ranked[:k])
+    )
+    ideal_hits = min(k, len(relevant))
+    ideal = sum(1.0 / math.log2(index + 2) for index in range(ideal_hits))
+    return dcg / ideal if ideal else 0.0
 
 
 def _context_ranking_contract(
@@ -586,6 +635,8 @@ def _aggregate(results: list[dict[str, Any]]) -> tuple[dict[str, float], dict[st
     metrics: dict[str, float] = {}
     counts: dict[str, int] = {}
     for name in sorted(names):
+        if name == "ranking_fallback":
+            continue
         values = [item["metrics"][name] for item in results if name in item["metrics"]]
         metrics[name] = statistics.fmean(values)
         counts[name] = len(values)
@@ -594,10 +645,14 @@ def _aggregate(results: list[dict[str, Any]]) -> tuple[dict[str, float], dict[st
         "success_rate": statistics.fmean(1.0 if item["success"] else 0.0 for item in results),
         "average_context_tokens": statistics.fmean(item["estimated_context_tokens"] for item in results),
         "average_tool_calls": statistics.fmean(item["tool_calls"] for item in results),
+        "average_core_files": statistics.fmean(len(item["core_files"]) for item in results),
+        "average_returned_files": statistics.fmean(len(item["returned_files"]) for item in results),
+        "ranking_fallback_rate": statistics.fmean(item["metrics"]["ranking_fallback"] for item in results),
         "p50_latency_ms": _percentile(latencies, 50),
         "p95_latency_ms": _percentile(latencies, 95),
         "p99_latency_ms": _percentile(latencies, 99),
     })
+    counts["ranking_fallback_rate"] = len(results)
     return metrics, counts
 
 
