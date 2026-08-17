@@ -43,6 +43,16 @@ PRECISION_FIELDS = {
     "expected_call_path": "call_path_precision",
     "expected_extension_points": "extension_point_precision",
 }
+LOWER_IS_BETTER_METRICS = {
+    "average_context_tokens",
+    "average_core_files",
+    "average_returned_files",
+    "average_tool_calls",
+    "p50_latency_ms",
+    "p95_latency_ms",
+    "p99_latency_ms",
+    "ranking_fallback_rate",
+}
 
 
 def load_dataset(dataset: str | Path) -> list[dict[str, Any]]:
@@ -301,7 +311,7 @@ def evaluate_quality_gate(
                     continue
                 regressed = (
                     current[metric] - previous[metric] > tolerance
-                    if metric in maximum_metrics
+                    if metric in maximum_metrics or metric in LOWER_IS_BETTER_METRICS
                     else previous[metric] - current[metric] > tolerance
                 )
                 if regressed:
@@ -545,7 +555,8 @@ def _retrieve(api: KnowledgeAPI, sample: dict[str, Any], strategy: str) -> dict[
         stale_detected = False
         reads = 0
         remaining = budget
-        for item in search["results"]:
+        selected_pages = _select_markdown_pages(search["results"], limit=3)
+        for item in selected_pages:
             sources = list(item.get("sources", []))
             if item.get("kind") == "decision" and item.get("path"):
                 sources.append({"path": item["path"], "id": item.get("id", "")})
@@ -571,7 +582,6 @@ def _retrieve(api: KnowledgeAPI, sample: dict[str, Any], strategy: str) -> dict[
                     for source in sources
                     if source.get("path")
                 )
-        selected_pages = _select_markdown_pages(search["results"], limit=3)
         for index, item in enumerate(selected_pages):
             if remaining <= 0:
                 break

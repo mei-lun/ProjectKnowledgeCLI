@@ -383,6 +383,37 @@ class EvaluationTests(unittest.TestCase):
         baseline["strategies"]["hybrid"]["metrics"]["file_recall"] = 0.71
         self.assertTrue(evaluate_quality_gate(report, thresholds, baseline)["passed"])
 
+    def test_quality_gate_treats_file_counts_as_lower_is_better_costs(self) -> None:
+        thresholds = {
+            "minimum_samples": 1,
+            "required_strategies": ["code"],
+            "allowed_regression": {
+                "average_core_files": 0.5,
+                "average_returned_files": 0.5,
+            },
+        }
+        baseline = {"strategies": {"code": {"metrics": {
+            "average_core_files": 5.0,
+            "average_returned_files": 7.0,
+        }}}}
+        improved = {"strategies": {"code": {
+            "available": True,
+            "samples": 1,
+            "metrics": {"average_core_files": 4.0, "average_returned_files": 6.0},
+        }}}
+        regressed = {"strategies": {"code": {
+            "available": True,
+            "samples": 1,
+            "metrics": {"average_core_files": 6.0, "average_returned_files": 8.0},
+        }}}
+
+        self.assertTrue(evaluate_quality_gate(improved, thresholds, baseline)["passed"])
+        failures = evaluate_quality_gate(regressed, thresholds, baseline)["failures"]
+        self.assertEqual(
+            {item["metric"] for item in failures if item["code"] == "metric_regression"},
+            {"average_core_files", "average_returned_files"},
+        )
+
     def test_quality_gate_does_not_compare_aggregate_regression_across_different_datasets(self) -> None:
         report = {
             "dataset_sha256": "sha256:new",
@@ -607,6 +638,19 @@ class EvaluationTests(unittest.TestCase):
             "status": "fresh",
             "content": "AccountService login behavior without path citations.",
         }
+        unselected = {
+            "id": "curated.unrelated",
+            "kind": "curated",
+            "score": 0.1,
+            "summary": "Unrelated notes.",
+            "freshness": "fresh",
+            "requires_live_source": False,
+            "sources": [{"type": "file", "path": "src/unselected.py"}],
+        }
+        filler_pages = [
+            {**selected, "id": f"curated.selected-{index}", "score": 8.0 - index}
+            for index in range(2)
+        ]
         captured = []
         real_rank = rank_files
 
@@ -615,7 +659,11 @@ class EvaluationTests(unittest.TestCase):
             return real_rank(candidates, **kwargs)
 
         with (
-            patch.object(api, "search", return_value={"results": [selected]}),
+            patch.object(
+                api,
+                "search",
+                return_value={"results": [selected, *filler_pages, unselected]},
+            ),
             patch.object(api, "get", return_value=record),
             patch.object(api, "impact", return_value={
                 "relations": [], "affected_files": [],
