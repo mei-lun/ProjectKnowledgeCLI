@@ -41,7 +41,7 @@ class FileCandidate:
 @dataclass(frozen=True)
 class RankingPolicy:
     name: str = "policy-v1"
-    exact_identity: int = 100
+    exact_identity: int = 104
     qualified_identity: int = 70
     file_or_module_identity: int = 40
     direct_knowledge_source: int = 35

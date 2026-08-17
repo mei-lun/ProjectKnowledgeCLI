@@ -444,11 +444,30 @@ class KnowledgeAPI:
         capabilities = set(engine_status.get("capabilities", []))
         unavailable_signals = {"graph"} if capabilities and "impact" not in capabilities else set()
         relation_hops: dict[str, int] = {}
+        endpoint_hops: dict[str, int] = {}
         for relation in impact.get("relations", []):
             path = normalized(relation.get("path", ""))
             hop = relation.get("hop")
             if path and isinstance(hop, int):
                 relation_hops[path] = min(relation_hops.get(path, hop), hop)
+            if isinstance(hop, int):
+                for endpoint in (relation.get("source"), relation.get("target")):
+                    if endpoint:
+                        endpoint_id = str(endpoint)
+                        endpoint_hops[endpoint_id] = min(
+                            endpoint_hops.get(endpoint_id, hop), hop
+                        )
+        if endpoint_hops:
+            placeholders = ",".join("?" for _ in endpoint_hops)
+            with KnowledgeStore(self.service.db_path) as store:
+                for row in store.rows(
+                    f"SELECT id, path FROM symbols WHERE id IN ({placeholders})",
+                    list(endpoint_hops),
+                ):
+                    path = normalized(row["path"])
+                    hop = endpoint_hops[row["id"]]
+                    if path:
+                        relation_hops[path] = min(relation_hops.get(path, hop), hop)
 
         candidates: list[FileCandidate] = []
 
@@ -516,19 +535,38 @@ class KnowledgeAPI:
             for path in impact.get(key, []):
                 normalized_path = normalized(path)
                 add(path, stage="impact", graph_hop=relation_hops.get(normalized_path))
-        for path in impact.get("affected_tests", []):
+        task_requests_tests = (
+            intent.get("task_type") in {"new_feature", "bug_fix", "impact_analysis"}
+            or any(term in task.lower() for term in ("test", "pytest", "unittest", "测试"))
+        )
+        affected_tests = sorted(
+            {normalized(path) for path in impact.get("affected_tests", []) if normalized(path)},
+            key=lambda path: (
+                -len(matching_terms(path)),
+                relation_hops.get(path, 99),
+                path,
+            ),
+        )[: 4 if task_requests_tests else 2]
+        for path in affected_tests:
             add(path, stage="impact", graph_hop=1, affected_test=True)
         for fragment in fragments:
             if fragment.get("freshness") != "fresh" or fragment.get("requires_live_source"):
                 continue
+            fragment_content = str(fragment.get("content", ""))
+            lowered_content = fragment_content.lower()
             for source in fragment.get("sources", []):
                 if source.get("path"):
+                    source_path = normalized(source["path"])
+                    source_id = str(source.get("id", ""))
                     add(
-                        source["path"],
+                        source_path,
                         stage="knowledge_source",
                         anchor=str(fragment.get("id", "")),
-                        direct_knowledge_source=True,
-                        content=str(fragment.get("content", "")),
+                        direct_knowledge_source=(
+                            source_path.lower() in lowered_content
+                            or bool(source_id and source_id.lower() in lowered_content)
+                        ),
+                        content=fragment_content,
                     )
         for path in sorted(allowed_paths):
             if matching_terms(path):
@@ -776,14 +814,42 @@ class KnowledgeAPI:
     @staticmethod
     def _fit_context(result: dict[str, Any], budget: int) -> None:
         result["symbols"] = result["symbols"][:8]
+        result["withheld_files"] = [
+            item for item in result.get("withheld_files", [])
+            if item.get("reason_code") == "token_budget"
+        ]
+        result["rejected_files"] = []
+        for item in result.get("knowledge", []):
+            item["sources"] = item.get("sources", [])[:4]
+            item["withheld_sources"] = item.get("withheld_sources", [])[:4]
         for key, limit in [("affected_files", 8), ("affected_tests", 4), ("affected_knowledge", 4)]:
             result["impact"][key] = result["impact"][key][:limit]
         result["impact"]["affected_modules"] = result["impact"]["affected_modules"][:8]
-        result["reference_implementations"] = result.get("reference_implementations", [])[:2]
-        result["extension_points"] = result.get("extension_points", [])[:2]
+        result["reference_implementations"] = result.get("reference_implementations", [])[:1]
+        result["extension_points"] = result.get("extension_points", [])[:1]
         explanation = result.get("retrieval_explanation", {})
-        explanation["selected_records"] = explanation.get("selected_records", [])[:2]
-        explanation.get("impact", {}).update({"files": explanation.get("impact", {}).get("files", [])[:4], "tests": explanation.get("impact", {}).get("tests", [])[:4]})
+        explanation["selected_records"] = explanation.get("selected_records", [])[:1]
+        explanation["reference_implementations"] = result.get(
+            "reference_implementations", []
+        )[:1]
+        explanation["reference_implementations"] = [
+            {
+                "symbol": item.get("symbol", item.get("record", "")),
+                "path": item.get("path", ""),
+            }
+            for item in explanation["reference_implementations"]
+        ]
+        explanation["extension_points"] = [
+            {
+                "symbol": item.get("symbol", ""),
+                "path": item.get("path", ""),
+            }
+            for item in result.get("extension_points", [])[:1]
+        ]
+        explanation.get("impact", {}).update({
+            "files": explanation.get("impact", {}).get("files", [])[:2],
+            "tests": explanation.get("impact", {}).get("tests", [])[:2],
+        })
 
         def size() -> int:
             result["estimated_tokens"] = 0
@@ -794,22 +860,6 @@ class KnowledgeAPI:
         for _ in range(200):
             if size() <= budget:
                 return
-            supporting_files = result.get("supporting_files", [])
-            if supporting_files:
-                path = supporting_files.pop()
-                result["files"] = [item for item in result.get("files", []) if item != path]
-                result["file_rankings"] = [
-                    item for item in result.get("file_rankings", [])
-                    if item.get("path") != path
-                ]
-                result.setdefault("withheld_files", []).append({
-                    "path": path,
-                    "reason_code": "token_budget",
-                })
-                continue
-            if result.get("rejected_files"):
-                result["rejected_files"].pop()
-                continue
             rankings_with_breakdowns = [
                 item for item in result.get("file_rankings", [])
                 if item.get("score_breakdown")
@@ -835,6 +885,82 @@ class KnowledgeAPI:
             if result.get("protected_candidates_truncated") is False:
                 result.pop("protected_candidates_truncated")
                 continue
+            supporting_files = result.get("supporting_files", [])
+            if supporting_files:
+                path = supporting_files.pop()
+                result["files"] = [item for item in result.get("files", []) if item != path]
+                result["file_rankings"] = [
+                    item for item in result.get("file_rankings", [])
+                    if item.get("path") != path
+                ]
+                result.setdefault("withheld_files", []).append({
+                    "path": path,
+                    "reason_code": "token_budget",
+                })
+                continue
+            if result.get("rejected_files"):
+                result["rejected_files"].pop()
+                continue
+            optional_list = next(
+                (
+                    items for items in (
+                        result.get("reference_implementations", []),
+                        result.get("extension_points", []),
+                        explanation.get("reference_implementations", []),
+                        explanation.get("extension_points", []),
+                        explanation.get("selected_records", []),
+                        explanation.get("unknowns", []),
+                        explanation.get("impact", {}).get("files", []),
+                        explanation.get("impact", {}).get("tests", []),
+                        result.get("unknowns", []),
+                        result.get("likely_modules", []),
+                        result.get("verification_commands", []),
+                    )
+                    if items
+                ),
+                None,
+            )
+            if optional_list is not None:
+                optional_list.pop()
+                continue
+            optional_explanation_key = next(
+                (
+                    key for key in (
+                        "impact", "rationale", "signals", "reference_count",
+                        "extension_point_count", "unknown_count",
+                    )
+                    if key in explanation
+                ),
+                None,
+            )
+            if optional_explanation_key is not None:
+                explanation.pop(optional_explanation_key)
+                continue
+            empty_explanation_key = next(
+                (
+                    key for key in ("reference_implementations", "extension_points")
+                    if key in explanation and not explanation[key]
+                ),
+                None,
+            )
+            if empty_explanation_key is not None:
+                explanation.pop(empty_explanation_key)
+                continue
+            guidance = result.get("guidance_workflow")
+            if isinstance(guidance, dict) and set(guidance) != {"available"}:
+                result["guidance_workflow"] = {"available": bool(guidance.get("available"))}
+                continue
+            knowledge_sources = next(
+                (
+                    item.get("sources", [])
+                    for item in result.get("knowledge", [])
+                    if len(item.get("sources", [])) > 1
+                ),
+                None,
+            )
+            if knowledge_sources is not None:
+                knowledge_sources.pop()
+                continue
             contents = [item for item in result["knowledge"] if item.get("tokens", 0) > 60]
             if contents:
                 longest = max(contents, key=lambda item: len(item["content"]))
@@ -848,13 +974,13 @@ class KnowledgeAPI:
             if impact_lists:
                 max(impact_lists, key=len).pop()
                 continue
-            if result["symbols"]:
+            if len(result["symbols"]) > 1:
                 result["symbols"].pop()
                 continue
             if len(result["gaps"]) > 1:
                 result["gaps"].pop()
                 continue
-            result["summary"] = trim_to_tokens(result["summary"], 30)
+            result["summary"] = trim_to_tokens(result["summary"], 10)
             break
         size()
 

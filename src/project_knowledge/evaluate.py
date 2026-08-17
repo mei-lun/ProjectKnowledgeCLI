@@ -7,11 +7,12 @@ import platform
 import re
 import statistics
 import time
+from dataclasses import replace
 from pathlib import Path
 from typing import Any, Iterable
 
 from . import __version__
-from .ranking import FileCandidate, rank_files
+from .ranking import DEFAULT_RANKING_POLICY, FileCandidate, rank_files
 from .retrieval import KnowledgeAPI
 from .store import KnowledgeStore
 from .util import approx_tokens, hash_file, hash_text, read_text, trim_to_tokens, utc_now
@@ -19,6 +20,7 @@ from .util import approx_tokens, hash_file, hash_text, read_text, trim_to_tokens
 
 SCHEMA_VERSION = 1
 STRATEGIES = {"hybrid", "grep_read", "code", "markdown", "codegraph"}
+GREP_RANKING_POLICY = replace(DEFAULT_RANKING_POLICY, full_limit=7)
 EXPECTED_LIST_FIELDS = {
     "expected_files",
     "expected_symbols",
@@ -536,70 +538,101 @@ def _retrieve(api: KnowledgeAPI, sample: dict[str, Any], strategy: str) -> dict[
 
     if strategy == "markdown":
         search = api.search(task, limit=10)
-        terms = _task_terms(task)
-        candidates: list[FileCandidate] = []
+        symbols: set[str] = set()
+        text_parts: list[str] = []
+        fragments: list[dict[str, Any]] = []
+        direct_paths: list[str] = []
+        stale_detected = False
+        reads = 0
+        remaining = budget
         for item in search["results"]:
             sources = list(item.get("sources", []))
             if item.get("kind") == "decision" and item.get("path"):
                 sources.append({"path": item["path"], "id": item.get("id", "")})
-            for source in sources:
-                path = str(source.get("path", ""))
-                if not path:
-                    continue
-                source_id = str(source.get("id", ""))
-                content = " ".join(
-                    str(value) for value in (item.get("summary"), item.get("content"))
-                    if value
+            source_evidence = [
+                value
+                for source in sources
+                for value in (str(source.get("path", "")), str(source.get("id", "")))
+                if value
+            ]
+            fragment = {
+                "id": item.get("id", ""),
+                "freshness": item.get("freshness", "fresh"),
+                "requires_live_source": bool(item.get("requires_live_source")),
+                "content": "\n".join(
+                    [str(item.get("summary", "")), *source_evidence]
+                ),
+                "sources": sources,
+            }
+            fragments.append(fragment)
+            if fragment["freshness"] == "fresh" and not fragment["requires_live_source"]:
+                direct_paths.extend(
+                    _normalized_path(str(source.get("path", "")))
+                    for source in sources
+                    if source.get("path")
                 )
-                candidates.append(FileCandidate(
-                    path=path,
-                    stages={"knowledge_source"},
-                    anchors={source_id or str(item.get("id", ""))},
-                    direct_knowledge_source=True,
-                    module=Path(path).parent.as_posix(),
-                    path_terms=_matching_terms(path, terms),
-                    symbol_terms=_matching_terms(source_id, terms),
-                    content_terms=_matching_terms(content, terms),
-                    is_test="test" in path.lower(),
-                    original_order=len(candidates),
-                ))
-        allowed_paths = {
-            _normalized_path(item.path)
-            for item in api.service.engine.discover(api.root, api.config)
-        }
-        ranked_files = rank_files(candidates, allowed_paths=allowed_paths)
-        ranking_contract = ranked_files.to_dict()
-        symbols: set[str] = set()
-        text_parts: list[str] = []
-        stale_detected = False
-        reads = 0
-        remaining = budget
-        for item in _select_markdown_pages(search["results"], limit=4):
+        selected_pages = _select_markdown_pages(search["results"], limit=3)
+        for index, item in enumerate(selected_pages):
             if remaining <= 0:
                 break
             reads += 1
             record = api.get(item["id"])
-            symbols.update(source.get("id") for source in record["sources"] if source.get("id"))
-            content = record.get("content", item.get("summary", ""))
-            content = _relevant_excerpt(content, task, remaining)
-            while content and approx_tokens(content) > remaining:
-                content = content[:-1]
+            sources = list(record.get("sources", []))
+            if item.get("kind") == "decision" and item.get("path"):
+                sources.append({"path": item["path"], "id": item.get("id", "")})
+            symbols.update(source.get("id") for source in sources if source.get("id"))
+            page_budget = max(1, remaining // (len(selected_pages) - index))
+            content = _relevant_excerpt(
+                record.get("content", item.get("summary", "")), task, page_budget
+            )
             if content:
                 text_parts.append(content)
                 remaining -= approx_tokens(content)
             stale_detected = stale_detected or bool(record.get("requires_live_source"))
+
+        impact_used = bool(direct_paths)
+        impact = (
+            api.impact(
+                files=list(dict.fromkeys(direct_paths))[:8],
+                max_hops=2,
+                max_relations=100,
+            )
+            if impact_used
+            else {"relations": [], "affected_files": [], "dependency_files": [], "affected_tests": []}
+        )
+        bounded_impact = {
+            **impact,
+            "relations": list(impact.get("relations", []))[:100],
+            "affected_files": list(impact.get("affected_files", []))[:13],
+            "dependency_files": list(impact.get("dependency_files", []))[:13],
+            "affected_tests": list(impact.get("affected_tests", []))[:4],
+        }
+        candidates, allowed_paths = api._context_file_candidates(
+            task,
+            api.classify_task(task),
+            [],
+            bounded_impact,
+            fragments,
+        )
+        ranked_files = rank_files(candidates, allowed_paths=allowed_paths)
+        ranking_contract = ranked_files.to_dict()
         return {
             **ranking_contract,
             "symbols": symbols, "call_path": set(symbols),
             "text": "\n".join(text_parts), "stale_detected": stale_detected,
-            "tool_calls": 1 + reads,
+            "tool_calls": 1 + reads + int(impact_used),
             "selection_reasons": _selection_reasons(ranking_contract["file_rankings"]),
         }
 
     terms = _task_terms(task)
+    intent = api.classify_task(task)
     candidates: list[FileCandidate] = []
     contents: dict[str, str] = {}
     allowed_paths: set[str] = set()
+    symbols_by_path: dict[str, list[dict[str, Any]]] = {}
+    with KnowledgeStore(api.service.db_path, readonly=True) as store:
+        for row in store.rows("SELECT id, name, path FROM symbols"):
+            symbols_by_path.setdefault(_normalized_path(row["path"]), []).append(row)
     for item in api.service.engine.discover(api.root, api.config):
         path = _normalized_path(item.path)
         allowed_paths.add(path)
@@ -608,16 +641,79 @@ def _retrieve(api: KnowledgeAPI, sample: dict[str, Any], strategy: str) -> dict[
         content_terms = {term for term in terms if term in lowered}
         if not content_terms:
             continue
+        path_terms = _matching_terms(path, terms)
+        file_symbols = symbols_by_path.get(path, [])
+        symbol_terms = {
+            term
+            for term in terms
+            if any(
+                term in str(symbol[field]).lower()
+                for symbol in file_symbols
+                for field in ("id", "name")
+            )
+        }
+        exact_symbol = any(
+            term == str(symbol["name"]).lower()
+            or term == str(symbol["id"]).lower()
+            or str(symbol["id"]).lower().endswith(f"::{term}")
+            for symbol in file_symbols
+            for term in terms
+        )
+        filename = Path(path).name.lower()
+        stem = Path(path).stem.lower()
+        module = str(item.module).lower()
+        is_test = "test" in path.lower()
+        production_source_role = (
+            not is_test
+            and Path(path).suffix.lower() in {
+                ".c", ".cc", ".cpp", ".cs", ".go", ".java", ".js", ".kt",
+                ".lua", ".php", ".py", ".rb", ".rs", ".scala", ".sh",
+                ".swift", ".ts",
+            }
+        )
         contents[path] = content
         candidates.append(FileCandidate(
             path=path,
-            stages={"fallback"},
-            anchors={"grep_match"},
+            stages={"direct_symbol" if symbol_terms else "fallback"},
+            anchors={
+                str(symbol["id"])
+                for symbol in file_symbols
+                if any(term in str(symbol["id"]).lower() for term in symbol_terms)
+            } or {"grep_match"},
+            exact_symbol=exact_symbol,
+            qualified_symbol=(
+                not exact_symbol
+                and any(
+                    str(symbol["name"]).lower().startswith(term)
+                    for symbol in file_symbols
+                    for term in terms
+                )
+            ),
+            exact_path=path.lower() in terms,
+            exact_filename=filename in terms or stem in terms,
+            exact_module=module in terms,
+            module=str(item.module),
+            task_role_match=(
+                bool(path_terms or symbol_terms)
+                or (
+                    production_source_role
+                    and len(content_terms) >= 4
+                    and intent.get("task_type") in {
+                        "investigation", "impact_analysis", "new_feature", "bug_fix", "refactor",
+                    }
+                )
+            ),
+            path_terms=path_terms,
+            symbol_terms=symbol_terms,
             content_terms=content_terms,
-            is_test="test" in path.lower(),
+            is_test=is_test,
             original_order=len(candidates),
         ))
-    ranked_files = rank_files(candidates, allowed_paths=allowed_paths)
+    ranked_files = rank_files(
+        candidates,
+        allowed_paths=allowed_paths,
+        policy=GREP_RANKING_POLICY,
+    )
     ranking_contract = ranked_files.to_dict()
     return {
         **ranking_contract,

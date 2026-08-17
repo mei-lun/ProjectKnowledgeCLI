@@ -35,13 +35,13 @@ class RankingTests(unittest.TestCase):
 
         breakdown = score_candidate(candidate, DEFAULT_RANKING_POLICY)
 
-        self.assertEqual(breakdown.identity, 100)
+        self.assertEqual(breakdown.identity, 104)
         self.assertEqual(breakdown.provenance, 35)
         self.assertEqual(breakdown.relation, 30)
         self.assertEqual(breakdown.role, 20)
         self.assertEqual(breakdown.text, 50)
         self.assertEqual(breakdown.penalties, 0)
-        self.assertEqual(breakdown.total, 235)
+        self.assertEqual(breakdown.total, 239)
 
     def test_irrelevant_test_and_fallback_only_penalties_are_explicit(self) -> None:
         candidate = FileCandidate(
@@ -147,7 +147,7 @@ class RankingTests(unittest.TestCase):
 
     def test_identity_precedence_is_exact_path_then_qualified_then_filename(self) -> None:
         cases = (
-            ("exact_path", FileCandidate(path="src/app.py", exact_path=True, qualified_symbol=True, exact_filename=True), 100, "exact_identity"),
+            ("exact_path", FileCandidate(path="src/app.py", exact_path=True, qualified_symbol=True, exact_filename=True), 104, "exact_identity"),
             ("qualified", FileCandidate(path="src/app.py", qualified_symbol=True, exact_filename=True), 70, "qualified_identity"),
             ("filename", FileCandidate(path="src/app.py", exact_filename=True), 40, "file_or_module_identity"),
         )
@@ -171,6 +171,37 @@ class RankingTests(unittest.TestCase):
         self.assertEqual(breakdown.penalties, -15)
         self.assertNotIn("irrelevant_test", breakdown.reasons)
         self.assertEqual(breakdown.reasons, ("fallback_only",))
+
+    def test_exact_source_survives_five_affected_test_matches(self) -> None:
+        source = FileCandidate(
+            path="src/project_knowledge/ranking.py",
+            stages={"direct_symbol", "impact"},
+            exact_symbol=True,
+            graph_hop=1,
+            symbol_terms={"rank_files"},
+        )
+        affected_tests = [
+            FileCandidate(
+                path=f"tests/test_noise_{index}.py",
+                stages={"knowledge_source", "impact"},
+                exact_filename=True,
+                direct_knowledge_source=True,
+                graph_hop=1,
+                task_role_match=True,
+                path_terms={"ranking"},
+                content_terms={"rank", "files", "policy"},
+                is_test=True,
+                affected_test=True,
+            )
+            for index in range(5)
+        ]
+
+        result = rank_files(
+            [source, *affected_tests],
+            allowed_paths={source.path, *(item.path for item in affected_tests)},
+        )
+
+        self.assertIn(source.path, result.core_files)
 
     def test_reasons_have_stable_policy_order(self) -> None:
         candidate = FileCandidate(
@@ -227,7 +258,7 @@ class RankingTests(unittest.TestCase):
         self.assertEqual(result.core_files, ("src/app.py",))
         self.assertEqual(result.supporting_files, ())
         self.assertEqual(result.files, ("src/app.py",))
-        self.assertEqual(result.file_rankings[0].score_breakdown.identity, 100)
+        self.assertEqual(result.file_rankings[0].score_breakdown.identity, 104)
         self.assertEqual(result.file_rankings[0].score_breakdown.relation, 30)
         self.assertEqual(result.file_rankings[0].selection_stage, "direct_symbol")
         self.assertEqual(result.rejected_files[0]["reason_code"], "path_not_allowed")
