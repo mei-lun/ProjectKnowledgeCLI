@@ -10,6 +10,7 @@ from typing import Any
 from .config import ProjectConfig
 from .guidance_store import GuidanceStore
 from .models import KnowledgeRecord
+from .ranking import FileCandidate, fallback_rank_files, rank_files
 from .service import ProjectService
 from .store import SCHEMA_VERSION, KnowledgeStore
 from .util import approx_tokens, project_lock, trim_to_tokens, utc_now
@@ -403,9 +404,136 @@ class KnowledgeAPI:
                     else []
                 ),
             }
+            candidates, allowed_paths = self._context_file_candidates(
+                task, intent, symbol_matches, impact, fragments
+            )
+            try:
+                ranked_files = rank_files(candidates, allowed_paths=allowed_paths)
+            except Exception:
+                ranked_files = fallback_rank_files(
+                    candidates,
+                    allowed_paths=allowed_paths,
+                    reason_code="ranking_error",
+                )
+            result.update(ranked_files.to_dict())
+            result["ranking_reason_code"] = ranked_files.reason_code
             self._fit_context(result, budget)
             self._record_query(store, "knowledge_context", len(task), result, started)
             return result
+
+    def _context_file_candidates(
+        self,
+        task: str,
+        intent: dict[str, Any],
+        symbol_matches: list[dict[str, Any]],
+        impact: dict[str, Any],
+        fragments: list[dict[str, Any]],
+    ) -> tuple[list[FileCandidate], set[str]]:
+        def normalized(path: object) -> str:
+            return str(path).replace("\\", "/").lstrip("./")
+
+        discovered = self.service.engine.discover(self.root, self.service.config)
+        allowed_paths = {normalized(item.path) for item in discovered if normalized(item.path)}
+        modules = {normalized(item.path): item.module for item in discovered}
+        pending_paths = {
+            normalized(path)
+            for path in self.service.status().get("pending_files", [])
+        }
+        terms = {term.lower() for term in self._symbol_terms(task)}
+        engine_status = self.service.engine.status()
+        capabilities = set(engine_status.get("capabilities", []))
+        unavailable_signals = {"graph"} if capabilities and "impact" not in capabilities else set()
+        relation_hops: dict[str, int] = {}
+        for relation in impact.get("relations", []):
+            path = normalized(relation.get("path", ""))
+            hop = relation.get("hop")
+            if path and isinstance(hop, int):
+                relation_hops[path] = min(relation_hops.get(path, hop), hop)
+
+        candidates: list[FileCandidate] = []
+
+        def matching_terms(value: str) -> set[str]:
+            lowered = value.lower()
+            return {term for term in terms if term in lowered}
+
+        def identity(path: str, symbol: str = "") -> dict[str, bool]:
+            lowered_path = path.lower()
+            filename = Path(path).name.lower()
+            stem = Path(path).stem.lower()
+            module = modules.get(path, self._module_from_path(path)).lower()
+            lowered_symbol = symbol.lower()
+            symbol_name = lowered_symbol.rsplit("::", 1)[-1].rsplit(".", 1)[-1]
+            return {
+                "exact_symbol": bool(symbol and any(term in {lowered_symbol, symbol_name} for term in terms)),
+                "qualified_symbol": bool(symbol and any(lowered_symbol.startswith(term) for term in terms)),
+                "exact_path": lowered_path in terms,
+                "exact_filename": filename in terms or stem in terms,
+                "exact_module": module in terms,
+            }
+
+        def add(
+            path: object,
+            *,
+            stage: str,
+            anchor: str = "",
+            symbol: str = "",
+            graph_hop: int | None = None,
+            affected_test: bool = False,
+            direct_knowledge_source: bool = False,
+            content: str = "",
+        ) -> None:
+            normalized_path = normalized(path)
+            if not normalized_path or normalized_path in pending_paths:
+                return
+            identities = identity(normalized_path, symbol)
+            candidates.append(FileCandidate(
+                path=normalized_path,
+                stages={stage},
+                anchors={anchor} if anchor else set(),
+                module=modules.get(normalized_path, self._module_from_path(normalized_path)),
+                path_terms=matching_terms(normalized_path),
+                symbol_terms=matching_terms(symbol),
+                content_terms=matching_terms(content),
+                graph_hop=graph_hop,
+                affected_test=affected_test,
+                direct_knowledge_source=direct_knowledge_source,
+                is_test=("test" in Path(normalized_path).name.lower() or "test" in normalized_path.lower()),
+                task_role_match=bool(intent.get("task_type") != "investigation" and matching_terms(normalized_path)),
+                unavailable_signals=set(unavailable_signals),
+                original_order=len(candidates),
+                **identities,
+            ))
+
+        for match in symbol_matches:
+            add(
+                match.get("path", ""),
+                stage="direct_symbol",
+                anchor=str(match.get("id", match.get("name", ""))),
+                symbol=str(match.get("id", match.get("name", ""))),
+                graph_hop=relation_hops.get(normalized(match.get("path", ""))),
+            )
+        for key in ("dependency_files", "affected_files"):
+            for path in impact.get(key, []):
+                normalized_path = normalized(path)
+                add(path, stage="impact", graph_hop=relation_hops.get(normalized_path))
+        for path in impact.get("affected_tests", []):
+            add(path, stage="impact", graph_hop=1, affected_test=True)
+        for fragment in fragments:
+            if fragment.get("freshness") != "fresh" or fragment.get("requires_live_source"):
+                continue
+            for source in fragment.get("sources", []):
+                if source.get("path"):
+                    add(
+                        source["path"],
+                        stage="knowledge_source",
+                        anchor=str(fragment.get("id", "")),
+                        direct_knowledge_source=True,
+                        content=str(fragment.get("content", "")),
+                    )
+        for path in sorted(allowed_paths):
+            if matching_terms(path):
+                add(path, stage="fallback")
+        return candidates, allowed_paths
 
     def _task_symbol_matches(self, task: str, terms: list[str]) -> list[dict[str, Any]]:
         if self.config.engine == "codegraph":
@@ -666,6 +794,44 @@ class KnowledgeAPI:
         for _ in range(200):
             if size() <= budget:
                 return
+            supporting_files = result.get("supporting_files", [])
+            if supporting_files:
+                path = supporting_files.pop()
+                result["files"] = [item for item in result.get("files", []) if item != path]
+                result["file_rankings"] = [
+                    item for item in result.get("file_rankings", [])
+                    if item.get("path") != path
+                ]
+                result.setdefault("withheld_files", []).append({
+                    "path": path,
+                    "reason_code": "token_budget",
+                })
+                continue
+            if result.get("withheld_files"):
+                result["withheld_files"].pop()
+                continue
+            if result.get("rejected_files"):
+                result["rejected_files"].pop()
+                continue
+            rankings_with_breakdowns = [
+                item for item in result.get("file_rankings", [])
+                if item.get("score_breakdown")
+            ]
+            if rankings_with_breakdowns:
+                rankings_with_breakdowns[-1].pop("score_breakdown", None)
+                continue
+            for field in ("protected", "requires_live_source", "selection_stage", "score"):
+                ranking = next(
+                    (item for item in reversed(result.get("file_rankings", [])) if field in item),
+                    None,
+                )
+                if ranking is not None:
+                    ranking.pop(field)
+                    break
+            else:
+                ranking = None
+            if ranking is not None:
+                continue
             contents = [item for item in result["knowledge"] if item.get("tokens", 0) > 60]
             if contents:
                 longest = max(contents, key=lambda item: len(item["content"]))

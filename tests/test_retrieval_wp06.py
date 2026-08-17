@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+import json
 import subprocess
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 from project_knowledge.codegraph import CodeGraphEngine
 from project_knowledge.config import ProjectConfig
@@ -70,6 +71,50 @@ class RetrievalWP06Tests(unittest.TestCase):
         self.assertTrue(any("create_item" in item["symbol"] for item in explanation["reference_implementations"]))
         self.assertIn("extension_points", explanation)
         self.assertIn("unknowns", explanation)
+
+    def test_context_returns_ranked_core_and_supporting_files(self) -> None:
+        result = self.api.context("新增类似功能 create_item", max_tokens=1200)
+
+        self.assertEqual(result["ranking_status"], "ok")
+        self.assertEqual(result["ranking_policy"], "policy-v1")
+        self.assertLessEqual(len(result["core_files"]), 5)
+        self.assertLessEqual(len(result["files"]), 10)
+        self.assertEqual(
+            result["files"],
+            result["core_files"] + result["supporting_files"],
+        )
+        self.assertEqual(result["core_files"][0], "src/app.py")
+        self.assertEqual(
+            [item["path"] for item in result["file_rankings"]],
+            result["files"],
+        )
+        self.assertTrue(all(item["why_selected"] for item in result["file_rankings"]))
+
+    def test_unrelated_test_file_does_not_displace_exact_source(self) -> None:
+        (self.root / "tests" / "test_noise.py").write_text(
+            "def create_item():\n    return 'noise'\n" * 50,
+            encoding="utf-8",
+        )
+        ProjectService(self.root).sync()
+
+        result = KnowledgeAPI(self.root).context("create_item", max_tokens=1200)
+
+        self.assertEqual(result["core_files"][0], "src/app.py")
+        self.assertNotEqual(result["core_files"][0], "tests/test_noise.py")
+
+    def test_context_ranking_failure_is_structured_and_compatible(self) -> None:
+        with patch(
+            "project_knowledge.retrieval.rank_files",
+            side_effect=RuntimeError("private C:\\secret"),
+        ):
+            result = self.api.context("create_item", max_tokens=1200)
+
+        self.assertEqual(result["ranking_status"], "fallback")
+        self.assertEqual(result["ranking_reason_code"], "ranking_error")
+        self.assertNotIn("secret", json.dumps(result, ensure_ascii=False))
+        self.assertIn("symbols", result)
+        self.assertIn("knowledge", result)
+        self.assertIn("impact", result)
 
     def test_chinese_identifier_phrases_recall_expected_exact_symbols(self) -> None:
         initialization = self.api.context("初始化项目时 config-v1 JSON Schema 如何由 all_schemas 发布", max_tokens=1000)
