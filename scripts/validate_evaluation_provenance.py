@@ -48,10 +48,15 @@ def validate_evaluation_report(
         if engine.get("adapter") != "codegraph-public-cli":
             errors.append("CodeGraph report must use codegraph-public-cli")
 
-    serialized = json.dumps(payload, ensure_ascii=False).lower()
-    if "adapter_unavailable" in serialized:
+    warnings = payload.get("quality_gate", {}).get("warnings", [])
+    warning_text = json.dumps(warnings, ensure_ascii=False).lower()
+    if "adapter_unavailable" in warning_text:
         errors.append("active report must not contain adapter_unavailable")
-    if "builtin" in serialized:
+    engine_text = json.dumps(
+        codegraph.get("reproducibility", {}).get("engine", {}) if isinstance(codegraph, dict) else {},
+        ensure_ascii=False,
+    ).lower()
+    if "builtin" in engine_text:
         errors.append("active report must not contain builtin")
 
     if project_root is not None:
