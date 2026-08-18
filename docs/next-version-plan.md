@@ -69,3 +69,13 @@
 - 更大规模代码库的分片索引、增量物化和资源预算治理。
 
 这些条目是方向，不代表开发承诺。只有迁入当前版本计划并补齐需求 ID 与验收样本后，才进入实施。
+# 下一批实施入口：0.1.31 → 0.1.32
+
+0.1.31 已完成真实 CodeGraph Adapter 基础契约和 Git 生命周期补偿。下一批不重复实现 CodeGraph，而是以当前 `git-event` 状态机为基线推进框架感知索引；向量检索保持可选，不改变默认 lexical/CodeGraph 主链路。
+
+| 工作包 | 目标 | 进入条件 | 验收结果 |
+| --- | --- | --- | --- |
+| IN-007 | 建立 FrameworkDetector registry，先覆盖 Python Web 与 Lua/Skynet 的入口、注册点和生命周期证据 | CodeGraph `search_symbols/get_source/trace` 已稳定；每个框架先补正负夹具 | 框架事实带来源、confidence、unknowns；不依赖 builtin parser |
+| RT-003 | 设计 EmbeddingProvider/VectorIndex 可插拔接口，默认 disabled | lexical 与 CodeGraph 评测基线冻结；provider 不可用路径先有测试 | local provider 可增量建索引和删除；hybrid precision 不低于 lexical 基线 |
+
+UP-005/UP-006 的后续增强（共享 daemon、复杂 merge conflict 自动恢复、多 worktree 并发协调）暂不阻塞 0.1.32，作为独立增强项排入后续版本。

@@ -53,3 +53,7 @@
 
 Provider 配置属于 config-v1 Schema 的可扩展对象。v0→v1 迁移不会删除自定义 Provider 字段；高于 v1 的配置由旧程序显式拒绝，避免静默误解网络授权。当前正式 Provider ID 仍只有 disabled、fake、http-json，客户端适配不改变 Provider 的网络授权或证据外发边界。
 <!-- /project-kb:generated -->
+
+## 0.1.31 Provider 边界复核
+
+新增的 `git-event` 命令不调用模型 Provider，也不改变 EvidencePack、网络授权、Secret 脱敏或缓存边界。它只协调本地 CodeGraph 与知识索引同步；由同步产生的语义队列仍需后续 Provider 生成和 Proposal 人工审核。

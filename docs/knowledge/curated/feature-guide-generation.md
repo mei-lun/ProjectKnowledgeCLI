@@ -51,3 +51,7 @@ Feature Guide 按功能独立写入 `docs/knowledge/drafts/features/`。`Knowled
 
 <!-- project-kb:source file="src/project_knowledge/retrieval.py" -->
 <!-- project-kb:source file="src/project_knowledge/evaluate.py" -->
+
+## 0.1.31 生命周期复核
+
+Git 事件补偿只刷新 CodeGraph 事实、生成知识和 Semantic Update Queue，不会把 Feature Guide draft 自动提升为 verified，也不会绕过 Proposal 审核。checkout、merge 或 rewrite 后若来源发生变化，既有语义知识仍按来源哈希进入 `potentially_stale`，必须重新生成或人工复核。

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import os
 import shutil
 import tempfile
@@ -53,9 +54,46 @@ GITIGNORE_BODY = """.project-kb/index.db
 .project-kb/logs/
 """
 
-HOOK_BODY = """# project-kb lifecycle hook
-project-kb sync "$PWD" --quiet >/dev/null 2>&1 || true
-"""
+HOOK_EVENTS = ("post-checkout", "post-merge", "post-rewrite", "post-commit")
+
+
+def _hook_body(event: str) -> str:
+    """Forward Git lifecycle details to the Python state machine."""
+    if event == "post-rewrite":
+        return (
+            "# project-kb lifecycle hook\n"
+            "first_old=\"\"\n"
+            "last_new=\"\"\n"
+            "while IFS=' ' read -r old_head new_head _; do\n"
+            '  [ -n "$first_old" ] || first_old="$old_head"\n'
+            '  last_new="$new_head"\n'
+            "done\n"
+            'project-kb git-event --event "post-rewrite" '
+            '--project "$(git rev-parse --show-toplevel)" '
+            '--old-head "$first_old" --new-head "$last_new" '
+            '--quiet >/dev/null 2>&1 || true\n'
+        )
+    if event == "post-merge":
+        return (
+            "# project-kb lifecycle hook\n"
+            'project-kb git-event --event "post-merge" --project "$(git rev-parse --show-toplevel)" '
+            '--old-head "$(git rev-parse ORIG_HEAD 2>/dev/null || true)" '
+            '--new-head "$(git rev-parse HEAD 2>/dev/null || true)" '
+            '--quiet >/dev/null 2>&1 || true\n'
+        )
+    if event == "post-commit":
+        return (
+            "# project-kb lifecycle hook\n"
+            'project-kb git-event --event "post-commit" --project "$(git rev-parse --show-toplevel)" '
+            '--new-head "$(git rev-parse HEAD 2>/dev/null || true)" '
+            '--quiet >/dev/null 2>&1 || true\n'
+        )
+    return (
+        "# project-kb lifecycle hook\n"
+        f'project-kb git-event --event "{event}" --project "$(git rev-parse --show-toplevel)" '
+        '--old-head "${1:-}" --new-head "${2:-}" --flag "${3:-}" '
+        '--quiet >/dev/null 2>&1 || true\n'
+    )
 
 CLIENT_BODIES = {
     "claude": ("CLAUDE.md", "请先读取项目知识库状态、任务上下文和影响分析，再进行跨模块修改。"),
@@ -251,6 +289,61 @@ class ProjectService:
             "guidance": guidance,
         }
 
+    def git_event(
+        self,
+        event: str,
+        *,
+        old_head: str = "",
+        new_head: str = "",
+        flag: str = "",
+    ) -> dict[str, Any]:
+        """Record and compensate a Git lifecycle event through one stable entrypoint."""
+        if event not in HOOK_EVENTS:
+            raise ValueError(f"unsupported Git lifecycle event: {event}")
+        event_id = hashlib.sha256(
+            f"{event}|{old_head}|{new_head}|{flag}|{utc_now()}".encode("utf-8")
+        ).hexdigest()[:16]
+        self._log_event(
+            "git_event_received", event_id=event_id, event_type=event,
+            old_head=old_head, new_head=new_head, flag=flag,
+        )
+        try:
+            merge_base = run_git(self.root, "merge-base", old_head, new_head) if old_head and new_head else ""
+            non_ancestor = bool(old_head and new_head and old_head != new_head and merge_base != old_head)
+            action = "rebuild" if event == "post-rewrite" or non_ancestor else "sync"
+            if action == "rebuild":
+                codegraph_sync = self.engine.sync(self.root, self.config)
+                result = self.rebuild()
+                result["codegraph"] = codegraph_sync
+            else:
+                result = self.sync(task_summary=f"Git {event} compensation")
+            status = self.status()
+            state = (
+                "compensation_required" if not status.get("verification_aligned")
+                else "detached" if status.get("git_state") == "detached"
+                else "rewritten" if event == "post-rewrite"
+                else "branch_changed" if event == "post-checkout" and flag == "1"
+                else "merged" if event == "post-merge"
+                else "committed" if event == "post-commit"
+                else "synchronized"
+            )
+            self._log_event(
+                "git_event_completed", event_id=event_id, event_type=event,
+                state=state, action=action,
+                reconciliation_required=state == "compensation_required",
+            )
+            return {
+                "event_id": event_id, "event": event, "state": state,
+                "action": action, "reconciliation_required": state == "compensation_required",
+                "result": result, "status": status,
+            }
+        except (OSError, RuntimeError, ValueError) as error:
+            self._log_event(
+                "git_event_failed", event_id=event_id, event_type=event,
+                error=str(error), reconciliation_required=True,
+            )
+            raise
+
     def _refresh_guidance(self) -> dict[str, Any] | None:
         if self.config.project_name.lower() != "gardenserver":
             return None
@@ -343,10 +436,12 @@ class ProjectService:
         watcher_state = state.get("watcher", "stopped")
         if watcher_state == "running" and watcher_health["stale"]:
             watcher_state = "crashed"
+        last_git_event = self._last_git_event()
         return {
             "initialized": True,
             "project_root": str(self.root),
             "branch": git["branch"],
+            "git_state": "detached" if git["branch"] == "(detached)" else "attached",
             "head_commit": head_commit,
             "index_commit": index_commit,
             "content_fresh": content_fresh,
@@ -379,6 +474,11 @@ class ProjectService:
             "status_duration_ms": int((time.monotonic() - started) * 1000),
             "engine": engine_status,
             "configuration_warnings": self.config.capability_warnings(),
+            "last_git_event": last_git_event,
+            "reconciliation_required": (
+                not verification_aligned
+                or bool(last_git_event and last_git_event.get("event") == "git_event_failed")
+            ),
         }
 
     def check(self) -> tuple[dict[str, Any], bool]:
@@ -434,8 +534,8 @@ class ProjectService:
         unknown = sorted(set(selected) - set(self._client_targets()))
         if unknown:
             raise ValueError("不支持的客户端：" + "、".join(unknown))
-        hook_names = ["post-checkout", "post-merge", "pre-commit"]
-        git_hooks = self.root / ".git" / "hooks"
+        hook_names = list(HOOK_EVENTS)
+        git_hooks = self._git_hooks_dir()
         if dry_run:
             return {
                 "action": "install", "dry_run": True,
@@ -450,7 +550,7 @@ class ProjectService:
         if git_hooks.exists():
             for name in hook_names:
                 path = git_hooks / name
-                script_marker_update(path, "hook", HOOK_BODY)
+                script_marker_update(path, "hook", _hook_body(name))
                 path.chmod(path.stat().st_mode | 0o111)
                 hooks.append(str(path))
         installed_clients: list[str] = []
@@ -469,8 +569,8 @@ class ProjectService:
         unknown = sorted(set(selected) - set(self._client_targets()))
         if unknown:
             raise ValueError("不支持的客户端：" + "、".join(unknown))
-        hook_names = ["post-checkout", "post-merge", "pre-commit"]
-        git_hooks = self.root / ".git" / "hooks"
+        hook_names = list(HOOK_EVENTS)
+        git_hooks = self._git_hooks_dir()
         if dry_run:
             return {
                 "action": "uninstall", "dry_run": True,
@@ -520,7 +620,28 @@ class ProjectService:
             "commit_alignment": status.get("commit_alignment"),
             "package_source": self._package_source_provenance(),
             "configuration_warnings": self.config.capability_warnings(),
+            "last_git_event": self._last_git_event(),
         }
+
+    def _last_git_event(self) -> dict[str, Any] | None:
+        path = self.root / ".project-kb" / "logs" / "service.jsonl"
+        if not path.exists():
+            return None
+        for line in reversed(path.read_text(encoding="utf-8", errors="replace").splitlines()):
+            try:
+                event = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if event.get("event") in {"git_event_completed", "git_event_failed"}:
+                return event
+        return None
+
+    def _git_hooks_dir(self) -> Path:
+        value = run_git(self.root, "rev-parse", "--git-path", "hooks")
+        if not value:
+            return self.root / ".git" / "hooks"
+        path = Path(value)
+        return path if path.is_absolute() else (self.root / path).resolve()
 
     def _package_source_provenance(self) -> dict[str, Any]:
         package_file = Path(__file__).resolve()
@@ -570,8 +691,9 @@ class ProjectService:
 
     def _update_metadata(self, store: KnowledgeStore, full: bool, duration_ms: int) -> None:
         now = utc_now()
-        store.set_meta("head_commit", run_git(self.root, "rev-parse", "HEAD") or "")
-        store.set_meta("branch", run_git(self.root, "branch", "--show-current") or "")
+        git = git_status(self.root)
+        store.set_meta("head_commit", str(git["head_commit"] or ""))
+        store.set_meta("branch", str(git["branch"] or ""))
         store.set_meta("worktree", run_git(self.root, "rev-parse", "--show-toplevel") or str(self.root))
         store.set_meta("last_sync_at", now)
         store.set_meta("last_sync_duration_ms", str(duration_ms))
@@ -609,8 +731,8 @@ class ProjectService:
             "pid": pid,
             "updated_at": utc_now(),
             "heartbeat": utc_now(),
-            "head_commit": run_git(self.root, "rev-parse", "HEAD"),
-            "branch": run_git(self.root, "branch", "--show-current"),
+            "head_commit": git_status(self.root)["head_commit"],
+            "branch": git_status(self.root)["branch"],
         }
         if coordinator is not None:
             payload["coordinator"] = coordinator

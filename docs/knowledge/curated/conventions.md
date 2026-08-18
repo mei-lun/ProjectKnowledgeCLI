@@ -91,3 +91,7 @@
 
 <!-- project-kb:source file="src/project_knowledge/evaluate.py" -->
 <!-- project-kb:source file="evaluation/thresholds.json" -->
+
+## 0.1.31 Git hook 约定复核
+
+项目只管理 `project-kb:hook` 标记区块，不覆盖用户已有 hook 正文。hook 通过 `project-kb git-event` 传递事件类型和可用的旧/新 HEAD；post-rewrite 的 stdin 批次聚合为一次补偿，避免按每个重写 commit 重复重建。hook 采用 fail-open 保护 Git 操作，但失败必须写入本地结构化日志并在状态中显示为需要补偿。

@@ -1416,3 +1416,17 @@ WP-00 基线可靠性
 ### 真实项目验收
 
 gardenserver 的 CodeGraph 1.5.0 事实快照与业务文件指纹核验已完成，初始化批次可恢复，代码变化只生成第二层项目事实指导草稿。5 个业务类别的独立方法论与项目事实指导（共 10 份）已由用户完成审核并写入 KnowledgeStore；旧混合草稿未被复用。正式版本和 Markdown 投影均已生成。
+# 0.1.31 当前交付校正：Git 生命周期与补偿
+
+本节覆盖旧版审计表中 IN-007、EN-002、EN-003、UP-005、UP-006、RT-003 六项的当前事实。旧表中的“未完成”描述保留为历史审计记录，不再作为 0.1.31 的状态来源。
+
+| ID | 0.1.31 状态 | 证据与边界 |
+| --- | --- | --- |
+| EN-002 | 已完成 | `CodeGraphEngine` 只使用真实 `codegraph-public-cli`；无 builtin fallback；真实 CodeGraph 1.5.0 已通过 init/files/query/trace/impact/affected 验证。 |
+| EN-003 | 已完成基础契约 | `search_symbols/get_source/trace` 已进入 Adapter 和 MCP 主链路，公开符号身份统一为 `path::qualifiedName`；后续仍需扩充跨语言真实项目覆盖。 |
+| UP-005 | 已完成基础交付 | `ProjectService.install` 管理 `post-checkout/post-merge/post-rewrite/post-commit`，使用 marker 保留用户 hook 内容，并支持 linked worktree 的真实 hooks 目录。 |
+| UP-006 | 已完成基础状态机 | `git-event` 统一记录事件；支持 checkout、merge、rewrite、detached HEAD、非祖先 reset 的 sync/rebuild 补偿；失败状态暴露为 `reconciliation_required`。共享 daemon、复杂冲突自动恢复仍不在本版本范围。 |
+| IN-007 | 未完成 | 当前仍只有 CodeGraph 通用代码事实，没有框架 profile、注册点和框架入口证据层。 |
+| RT-003 | 未完成 | `embeddings` 仍是显式禁用/告警配置，没有 provider、向量索引和混合检索行为。 |
+
+0.1.31 验收证据：`tests/test_watch_wp07.py` 覆盖 10 项 Git 生命周期、失败可观测性、用户 hook 保留和 linked worktree；全量 pytest 通过；`scripts/validate_ci_workflow.py` 通过。生成知识已在 main 工作区同步，curated knowledge 仍需在后续框架索引和向量检索实现后逐项复核。

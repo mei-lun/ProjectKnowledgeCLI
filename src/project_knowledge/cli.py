@@ -65,6 +65,15 @@ def build_parser() -> argparse.ArgumentParser:
     mcp = commands.add_parser("mcp", help="run the stdio MCP server and guidance workflow")
     mcp.add_argument("--project", default=".", help="initialized project path")
 
+    git_event = commands.add_parser("git-event", help="record and compensate a Git lifecycle event")
+    git_event.add_argument("--event", required=True, choices=["post-checkout", "post-merge", "post-rewrite", "post-commit"])
+    git_event.add_argument("--project", default=".", help="project path")
+    git_event.add_argument("--old-head", default="")
+    git_event.add_argument("--new-head", default="")
+    git_event.add_argument("--flag", default="")
+    git_event.add_argument("--json", action="store_true", dest="as_json")
+    git_event.add_argument("--quiet", action="store_true")
+
     evaluation = commands.add_parser("evaluate", help="evaluate retrieval against a JSONL dataset")
     evaluation.add_argument("dataset", help="JSONL dataset with task and expected source anchors")
     evaluation.add_argument("--project", default=".", help="initialized project path")
@@ -165,6 +174,11 @@ def main(argv: list[str] | None = None) -> int:
                 result = SemanticKnowledgeService(root, runtime).generate_feature_guide(pack, persist=True)
             else:
                 result = runtime.generate(pack, FEATURE_GUIDE_DRAFT_SCHEMA).to_dict()
+            exit_code = 0
+        elif args.command == "git-event":
+            result = ProjectService(args.project).git_event(
+                args.event, old_head=args.old_head, new_head=args.new_head, flag=args.flag,
+            )
             exit_code = 0
         elif args.command == "feature-candidates":
             result = {
