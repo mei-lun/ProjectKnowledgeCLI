@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-18T19:42:27+08:00",
+  "generated_at": "2026-08-18T19:49:57+08:00",
   "project": "ProjectKnowledgeCLI",
   "records": [
     {
@@ -752,10 +752,10 @@
       "confidence": "generated",
       "id": "generated.frameworks",
       "kind": "framework",
-      "last_generated_at": "2026-08-18T19:42:27+08:00",
+      "last_generated_at": "2026-08-18T19:49:57+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/frameworks.md",
-      "source_commit": "37768a5e5ae1c9f8f7bc2ac05f223495b8f81f78",
+      "source_commit": "8a375c241aa07de02173a6734b5256ef0239b6b4",
       "source_hashes": {
         ".github/workflows/quality.yml": "sha256:2f7c6ba0be1218e863929531bcffea0073273f9b37200612d55e9ae3b5bf56e3",
         ".project-kb.yml": "sha256:48736e6e85940ae62a4ca22c00aa3c169999c7f1b3d953d343d4db4617a85467",
@@ -1147,10 +1147,10 @@
       "confidence": "generated",
       "id": "generated.module.evaluation",
       "kind": "module",
-      "last_generated_at": "2026-08-18T19:42:27+08:00",
+      "last_generated_at": "2026-08-18T19:49:57+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/evaluation.md",
-      "source_commit": "37768a5e5ae1c9f8f7bc2ac05f223495b8f81f78",
+      "source_commit": "8a375c241aa07de02173a6734b5256ef0239b6b4",
       "source_hashes": {
         "evaluation/performance_harness.py": "sha256:e2e4e3180624bb56a5cd72c4ec4becd6b2fe4a9b044bd4f1d5bac409084b65e0",
         "evaluation/real_project_harness.py": "sha256:d970b13db02dcc3f0f6500599a5018a9fd37595186a275a9f6aa8e4b3922a915"
@@ -1176,10 +1176,10 @@
       "confidence": "generated",
       "id": "generated.module.github",
       "kind": "module",
-      "last_generated_at": "2026-08-18T19:42:27+08:00",
+      "last_generated_at": "2026-08-18T19:49:57+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/github.md",
-      "source_commit": "37768a5e5ae1c9f8f7bc2ac05f223495b8f81f78",
+      "source_commit": "8a375c241aa07de02173a6734b5256ef0239b6b4",
       "source_hashes": {
         ".github/workflows/quality.yml": "sha256:2f7c6ba0be1218e863929531bcffea0073273f9b37200612d55e9ae3b5bf56e3"
       },
@@ -1200,10 +1200,10 @@
       "confidence": "generated",
       "id": "generated.module.plugins",
       "kind": "module",
-      "last_generated_at": "2026-08-18T19:42:27+08:00",
+      "last_generated_at": "2026-08-18T19:49:57+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/plugins.md",
-      "source_commit": "37768a5e5ae1c9f8f7bc2ac05f223495b8f81f78",
+      "source_commit": "8a375c241aa07de02173a6734b5256ef0239b6b4",
       "source_hashes": {
         "plugins/project-knowledge/hooks/sync_after_task.py": "sha256:17a639cbf549923ae57be2bb45ff88706a38cbcaa8556d25588fe7d3912ce110",
         "plugins/project-knowledge/scripts/project_status.py": "sha256:7f8532a6c877d51ed78ebf71d7c35c700d28691483f44c16717f39fe0b3ec7cc",
@@ -1234,10 +1234,10 @@
       "confidence": "generated",
       "id": "generated.module.project_knowledge",
       "kind": "module",
-      "last_generated_at": "2026-08-18T19:42:27+08:00",
+      "last_generated_at": "2026-08-18T19:49:57+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/project_knowledge.md",
-      "source_commit": "37768a5e5ae1c9f8f7bc2ac05f223495b8f81f78",
+      "source_commit": "8a375c241aa07de02173a6734b5256ef0239b6b4",
       "source_hashes": {
         "src/project_knowledge/__init__.py": "sha256:8b5c3b14eb30377c09c829313f15c8b62cce8ceabd61e3c0c727fb6c70d6d428",
         "src/project_knowledge/__main__.py": "sha256:2cdd23d4f5cd6c3b3e4cb690ad16d560637767b9ca5b2a3cf129fcc0a5ebc82b",
@@ -1423,10 +1423,10 @@
       "confidence": "generated",
       "id": "generated.module.root",
       "kind": "module",
-      "last_generated_at": "2026-08-18T19:42:27+08:00",
+      "last_generated_at": "2026-08-18T19:49:57+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/root.md",
-      "source_commit": "37768a5e5ae1c9f8f7bc2ac05f223495b8f81f78",
+      "source_commit": "8a375c241aa07de02173a6734b5256ef0239b6b4",
       "source_hashes": {
         ".project-kb.yml": "sha256:48736e6e85940ae62a4ca22c00aa3c169999c7f1b3d953d343d4db4617a85467"
       },
@@ -1447,10 +1447,10 @@
       "confidence": "generated",
       "id": "generated.module.scripts",
       "kind": "module",
-      "last_generated_at": "2026-08-18T19:42:27+08:00",
+      "last_generated_at": "2026-08-18T19:49:57+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/scripts.md",
-      "source_commit": "37768a5e5ae1c9f8f7bc2ac05f223495b8f81f78",
+      "source_commit": "8a375c241aa07de02173a6734b5256ef0239b6b4",
       "source_hashes": {
         "scripts/bump_version.py": "sha256:84f254dec8f3c3e1fd1dd58d995a675db61fd03839c215cf77733ad41c0c821d",
         "scripts/validate_ci_workflow.py": "sha256:cb7fdf51a0d369b1ce3a90834063b8d35afabb3ad8ab36bbdc974d39a3391cb5",
@@ -1486,10 +1486,10 @@
       "confidence": "generated",
       "id": "generated.module.tests",
       "kind": "module",
-      "last_generated_at": "2026-08-18T19:42:27+08:00",
+      "last_generated_at": "2026-08-18T19:49:57+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/tests.md",
-      "source_commit": "37768a5e5ae1c9f8f7bc2ac05f223495b8f81f78",
+      "source_commit": "8a375c241aa07de02173a6734b5256ef0239b6b4",
       "source_hashes": {
         "tests/__init__.py": "sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
         "tests/test_codegraph.py": "sha256:f99b4a4434dd04bbacd142a7952a6d55db805bb5908c6dd97d1c419fff167cbd",
@@ -1655,10 +1655,10 @@
       "confidence": "generated",
       "id": "generated.project-map",
       "kind": "project",
-      "last_generated_at": "2026-08-18T19:42:27+08:00",
+      "last_generated_at": "2026-08-18T19:49:57+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/project-map.md",
-      "source_commit": "37768a5e5ae1c9f8f7bc2ac05f223495b8f81f78",
+      "source_commit": "8a375c241aa07de02173a6734b5256ef0239b6b4",
       "source_hashes": {
         ".github/workflows/quality.yml": "sha256:2f7c6ba0be1218e863929531bcffea0073273f9b37200612d55e9ae3b5bf56e3",
         ".project-kb.yml": "sha256:48736e6e85940ae62a4ca22c00aa3c169999c7f1b3d953d343d4db4617a85467",
@@ -2051,10 +2051,10 @@
       "confidence": "generated",
       "id": "generated.test-map",
       "kind": "test",
-      "last_generated_at": "2026-08-18T19:42:27+08:00",
+      "last_generated_at": "2026-08-18T19:49:57+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/test-map.md",
-      "source_commit": "37768a5e5ae1c9f8f7bc2ac05f223495b8f81f78",
+      "source_commit": "8a375c241aa07de02173a6734b5256ef0239b6b4",
       "source_hashes": {
         "tests/__init__.py": "sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
         "tests/test_codegraph.py": "sha256:f99b4a4434dd04bbacd142a7952a6d55db805bb5908c6dd97d1c419fff167cbd",
@@ -2218,5 +2218,5 @@
     }
   ],
   "schema_version": 1,
-  "source_commit": "37768a5e5ae1c9f8f7bc2ac05f223495b8f81f78"
+  "source_commit": "8a375c241aa07de02173a6734b5256ef0239b6b4"
 }
