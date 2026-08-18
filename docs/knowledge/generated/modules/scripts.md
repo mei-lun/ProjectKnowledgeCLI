@@ -7,6 +7,7 @@
 - `scripts/bump_version.py`（Python）
 - `scripts/validate_ci_workflow.py`（Python）
 - `scripts/validate_codegraph_adapter.py`（Python）
+- `scripts/validate_evaluation_provenance.py`（Python）
 - `scripts/validate_gardenserver_guidance_workflow.py`（Python）
 
 ## 代码事实

@@ -12,6 +12,7 @@
 - `tests/test_documentation_roadmap.py`（Python）
 - `tests/test_engine.py`（Python）
 - `tests/test_evaluate.py`（Python）
+- `tests/test_evaluation_provenance.py`（Python）
 - `tests/test_finalization.py`（Python）
 - `tests/test_frameworks.py`（Python）
 - `tests/test_gardenserver_rules.py`（Python）

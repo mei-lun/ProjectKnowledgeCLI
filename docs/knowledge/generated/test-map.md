@@ -12,6 +12,7 @@
 | `tests/test_documentation_roadmap.py` | tests |
 | `tests/test_engine.py` | tests |
 | `tests/test_evaluate.py` | tests |
+| `tests/test_evaluation_provenance.py` | tests |
 | `tests/test_finalization.py` | tests |
 | `tests/test_frameworks.py` | tests |
 | `tests/test_gardenserver_rules.py` | tests |
