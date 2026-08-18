@@ -44,3 +44,5 @@
 
 <!-- project-kb:source file="src/project_knowledge/frameworks.py" -->
 <!-- project-kb:source file="tests/test_frameworks.py" -->
+
+0.1.32 最终人工复核：Lua/Skynet marker 必须出现在 CodeGraph 索引的应用源文件中；测试、验证脚本、fixture 字符串和 profile 常量不构成项目采用 Skynet 的证据。当前项目因此正确返回“未识别到受支持框架”。
