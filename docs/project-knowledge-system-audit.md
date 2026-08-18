@@ -403,7 +403,7 @@ PYTHONPATH=src python3 -m project_knowledge check . --json
 | IN-004 | 服务入口、路由、任务和消费者识别 | 部分完成 | Python 路由；其他入口、调度器、消费者缺失 |
 | IN-005 | Schema、迁移和配置识别 | 未完成 | 配置文件仅入库为空 ParseResult；无数据模型 |
 | IN-006 | 已有 README、ADR、API 文档识别 | 未完成 | 不导入、不分类、不建议转 curated |
-| IN-007 | 框架感知结构索引 | 未完成 | 只有 Python AST 和通用正则 |
+| IN-007 | 框架感知结构索引 | 已完成基础版 | 只消费真实 CodeGraph 的 `snapshot/search_symbols/get_source`；首批覆盖 FastAPI、Flask、Django、Lua/Skynet，并输出来源、置信度和 unknowns |
 | IN-008 | 低置信和解析失败报告 | 部分完成 | 有计数和 confidence；缺按风险排序 |
 | IN-009 | 初始化建议人工确认问题 | 部分完成 | 只有通用建议，不生成项目特定问题 |
 
@@ -412,8 +412,8 @@ PYTHONPATH=src python3 -m project_knowledge check . --json
 | ID | 原始要求 | 状态 | 差距 |
 | --- | --- | --- | --- |
 | EN-001 | 可替换 CodeIndexEngine | 部分完成 | 接口只有 discover/parse/status，低于设计接口 |
-| EN-002 | 真正的 CodeGraph Adapter | 未完成 | `engine: codegraph` 仍返回 builtin |
-| EN-003 | searchSymbols/getSource/trace | 未完成 | 逻辑散落在 KnowledgeAPI SQL 中 |
+| EN-002 | 真正的 CodeGraph Adapter | 已完成 | 仅使用真实 `codegraph-public-cli`，无 builtin fallback；已通过真实 CodeGraph 1.5.0 验证 |
+| EN-003 | searchSymbols/getSource/trace | 已完成基础版 | Adapter 与 MCP 主链路已公开三项能力；公开符号身份统一为 `path::qualifiedName` |
 | EN-004 | impact/affectedTests 引擎能力 | 部分完成 | 简单一跳关系和测试路径启发式 |
 | EN-005 | 关系可信度 | 已完成基础版 | 缺按解析器能力校准和真实精度评测 |
 | EN-006 | 动态边界报告 | 已完成基础版 | 只有通用 limitations，缺项目级缺口 |
@@ -444,8 +444,8 @@ PYTHONPATH=src python3 -m project_knowledge check . --json
 | UP-002 | 防抖和事件合并 | 部分完成 | sleep 间隔，不是真正事件批次 |
 | UP-003 | 文件保存不调用 LLM | 已完成 | 当前没有 LLM |
 | UP-004 | ChangeSet | 部分完成 | tests_run/results/author 未采集 |
-| UP-005 | Git hook 触发 | 未完成 | 只有 Codex post-task hook |
-| UP-006 | checkout/merge/rebase 补偿 | 未完成 | MCP 连接会 sync，但无状态机 |
+| UP-005 | Git hook 触发 | 已完成基础版 | 管理 `post-checkout/post-merge/post-rewrite/post-commit`，保留用户 hook，并支持 linked worktree |
+| UP-006 | checkout/merge/rebase 补偿 | 已完成基础版 | `git-event` 状态机覆盖 checkout、merge、rewrite、detached HEAD 和非祖先 reset；失败暴露为 `reconciliation_required` |
 | UP-007 | 语义更新队列 | 已完成基础版 | sync 将 ChangeSet 写入稳定队列项，关联 Proposal 后更新状态；尚无批量治理和自动模型 worker |
 | UP-008 | 生成 Knowledge Proposal | 已完成基础版 | 稳定 ID、严格 Schema、手工 Patch 与 Feature Guide 草案入口；尚无生产模型自动建议 |
 | UP-009 | 审核、应用、拒绝 | 已完成 | CLI/API 支持 dry-run/json/quiet，记录审核人、时间、理由、状态与结果哈希 |
@@ -1426,7 +1426,15 @@ gardenserver 的 CodeGraph 1.5.0 事实快照与业务文件指纹核验已完�
 | EN-003 | 已完成基础契约 | `search_symbols/get_source/trace` 已进入 Adapter 和 MCP 主链路，公开符号身份统一为 `path::qualifiedName`；后续仍需扩充跨语言真实项目覆盖。 |
 | UP-005 | 已完成基础交付 | `ProjectService.install` 管理 `post-checkout/post-merge/post-rewrite/post-commit`，使用 marker 保留用户 hook 内容，并支持 linked worktree 的真实 hooks 目录。 |
 | UP-006 | 已完成基础状态机 | `git-event` 统一记录事件；支持 checkout、merge、rewrite、detached HEAD、非祖先 reset 的 sync/rebuild 补偿；失败状态暴露为 `reconciliation_required`。共享 daemon、复杂冲突自动恢复仍不在本版本范围。 |
-| IN-007 | 未完成 | 当前仍只有 CodeGraph 通用代码事实，没有框架 profile、注册点和框架入口证据层。 |
+| IN-007 | 已完成基础交付（0.1.32） | `FrameworkIndex` 只消费 CodeGraph 公共契约；FastAPI、Flask、Django、Lua/Skynet profile 已输出入口、注册点、生命周期、confidence、逐条来源和 unknowns。 |
 | RT-003 | 未完成 | `embeddings` 仍是显式禁用/告警配置，没有 provider、向量索引和混合检索行为。 |
 
 0.1.31 验收证据：`tests/test_watch_wp07.py` 覆盖 10 项 Git 生命周期、失败可观测性、用户 hook 保留和 linked worktree；全量 pytest 通过；`scripts/validate_ci_workflow.py` 通过。生成知识已在 main 工作区同步，curated knowledge 仍需在后续框架索引和向量检索实现后逐项复核。
+
+# 0.1.32 当前交付校正：IN-007 框架感知结构索引
+
+IN-007 已完成基础交付。`FrameworkIndex` 只消费 CodeGraph 公共 `snapshot/search_symbols/get_source` 契约，不恢复 builtin parser；首批 profile 覆盖 FastAPI、Flask、Django 和 Lua/Skynet，输出 marker、入口、注册点、生命周期、confidence、逐条来源和 unknowns。测试、脚本和 profile 定义文件不作为应用框架 marker 来源。`KnowledgeGenerator` 将结果写入 `generated.frameworks`/`frameworks.md`，普通 knowledge search/context 可检索该记录。
+
+验收证据：`tests/test_frameworks.py` 包含四类框架正例、通用 route 负例、生成记录契约和真实 CodeGraph FastAPI 临时项目；检索、评测与单目录相关聚焦测试通过。动态注册、反射、运行时服务发现仍明确属于 unknown，不得视为静态事实。
+
+RT-003 仍未完成：当前只有 `embeddings` 禁用配置和能力告警，尚无真实 provider、向量索引、失效处理或混合排名链路。

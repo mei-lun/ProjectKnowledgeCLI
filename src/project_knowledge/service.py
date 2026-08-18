@@ -189,7 +189,9 @@ class ProjectService:
                     store.import_guidance_graph(preserved_guidance)
                     store.replace_code_snapshot(snapshot)
                     self._update_metadata(store, full=True, duration_ms=0)
-                    records = KnowledgeGenerator(self.root, self.config, store).generate()
+                    records = KnowledgeGenerator(
+                        self.root, self.config, store, engine=self.engine
+                    ).generate()
                 store.connection.execute("PRAGMA wal_checkpoint(TRUNCATE)")
                 counts = store.counts()
             os.replace(temporary, self.db_path)
@@ -245,7 +247,9 @@ class ProjectService:
                 store.replace_code_snapshot(snapshot)
                 duration = int((time.monotonic() - started) * 1000)
                 self._update_metadata(store, full=False, duration_ms=duration)
-                records = KnowledgeGenerator(self.root, self.config, store).generate(
+                records = KnowledgeGenerator(
+                    self.root, self.config, store, engine=self.engine
+                ).generate(
                     refresh_generated=bool(changed or deleted or commit_changed)
                 )
                 affected_modules = sorted({by_path[path].module for path in changed if path in by_path})

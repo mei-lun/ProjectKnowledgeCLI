@@ -71,3 +71,10 @@ Project Knowledge CLI 是一个本地优先的 Python 应用，CLI 和 MCP 适�
 ## 0.1.31 Git 生命周期补偿复核
 
 `ProjectService.git_event` 是 Git 生命周期进入知识同步的统一边界。受管 hook 只转发 `post-checkout`、`post-merge`、`post-rewrite` 和 `post-commit` 事件；普通提交和线性历史使用增量 sync，rewrite、非祖先 checkout/reset 使用 CodeGraph sync 后的完整 rebuild。linked worktree 通过 `git rev-parse --git-path hooks` 共享真实 hooks 目录。补偿失败不会伪装为成功，`status.reconciliation_required` 和结构化服务日志保留失败状态；detached HEAD 以独立 `git_state` 报告。
+
+## 0.1.32 框架感知索引复核
+
+框架识别位于 CodeGraph Adapter 与生成知识之间。`FrameworkIndex` 不解析本地语法树，只使用 CodeGraph `snapshot/search_symbols/get_source` 获取受索引约束的文件、符号和源码，随后由独立 profile 识别框架 marker、入口、注册点和生命周期。测试、脚本和 detector profile 定义文件不参与应用框架判定。检测结果作为 generated knowledge 进入统一检索；动态注册、反射和运行时服务发现保留为 unknown。
+
+<!-- project-kb:source file="src/project_knowledge/frameworks.py" -->
+<!-- project-kb:source file="tests/test_frameworks.py" -->

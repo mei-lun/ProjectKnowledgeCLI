@@ -55,3 +55,10 @@ Feature Guide 按功能独立写入 `docs/knowledge/drafts/features/`。`Knowled
 ## 0.1.31 生命周期复核
 
 Git 事件补偿只刷新 CodeGraph 事实、生成知识和 Semantic Update Queue，不会把 Feature Guide draft 自动提升为 verified，也不会绕过 Proposal 审核。checkout、merge 或 rewrite 后若来源发生变化，既有语义知识仍按来源哈希进入 `potentially_stale`，必须重新生成或人工复核。
+
+## 0.1.32 框架证据复核
+
+Feature Guide 检索可以选中 `generated.frameworks`，但框架 profile 结果仍是 generated 代码事实，不会自动成为 verified 业务意图。框架证据必须保留文件、行号、公开符号 ID 和 confidence；profile 未确认的运行时行为进入 unknowns。
+
+<!-- project-kb:source file="src/project_knowledge/frameworks.py" -->
+<!-- project-kb:source file="tests/test_frameworks.py" -->

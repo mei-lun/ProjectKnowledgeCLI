@@ -1,4 +1,4 @@
-# 版本交付与后续计划：0.1.28 → 0.1.29
+# 版本交付与后续计划：0.1.32 → 0.1.33
 
 > 本文是当前交付状态和下一批开发的唯一计划入口。历史版本计划只保留在 Git 历史中。
 > 复核日期：2026-08-15
@@ -79,3 +79,9 @@
 | RT-003 | 设计 EmbeddingProvider/VectorIndex 可插拔接口，默认 disabled | lexical 与 CodeGraph 评测基线冻结；provider 不可用路径先有测试 | local provider 可增量建索引和删除；hybrid precision 不低于 lexical 基线 |
 
 UP-005/UP-006 的后续增强（共享 daemon、复杂 merge conflict 自动恢复、多 worktree 并发协调）暂不阻塞 0.1.32，作为独立增强项排入后续版本。
+
+# 下一批实施入口：0.1.32 → 0.1.33
+
+0.1.32 已完成 IN-007 基础框架索引。下一批只处理 RT-003 可选向量检索：默认继续 `disabled`，不得引入默认网络请求，不得让向量相似度覆盖路径、符号或 CodeGraph 结构证据；先使用确定性 fake provider 冻结索引、失效和排名契约，再接入可选 local provider。
+
+验收必须覆盖：disabled 零加载、模型/维度/内容哈希失效、文件删除、provider unavailable、混合检索可复现、hybrid precision 不低于 lexical 基线，以及向量成本与 fallback 统计。

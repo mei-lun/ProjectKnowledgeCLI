@@ -95,3 +95,10 @@
 ## 0.1.31 Git hook 约定复核
 
 项目只管理 `project-kb:hook` 标记区块，不覆盖用户已有 hook 正文。hook 通过 `project-kb git-event` 传递事件类型和可用的旧/新 HEAD；post-rewrite 的 stdin 批次聚合为一次补偿，避免按每个重写 commit 重复重建。hook 采用 fail-open 保护 Git 操作，但失败必须写入本地结构化日志并在状态中显示为需要补偿。
+
+## 0.1.32 框架 profile 约定复核
+
+框架 profile 必须以明确的框架 marker 为入口，通用 `route`、`handler` 或文件名不能单独生成框架事实。所有入口、注册点和生命周期结论必须来自 CodeGraph `snapshot/search_symbols/get_source`，并保留 unknowns；测试、脚本和 profile 常量不得生成应用框架事实。新增 profile 必须同时提供正例、相似命名负例、fixture 字符串负例和真实 CodeGraph 夹具。
+
+<!-- project-kb:source file="src/project_knowledge/frameworks.py" -->
+<!-- project-kb:source file="tests/test_frameworks.py" -->

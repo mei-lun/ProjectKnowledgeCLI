@@ -7,6 +7,8 @@ from pathlib import Path
 from typing import Iterable
 
 from .config import ProjectConfig
+from .engine import CodeIndexEngine
+from .frameworks import FrameworkIndex
 from .models import KnowledgeRecord, SourceReference
 from .schemas import KNOWLEDGE_RECORD_SCHEMA, validate_instance
 from .store import KnowledgeStore
@@ -22,10 +24,18 @@ RELATION_KIND_TITLES = {"calls": "调用", "imports": "导入", "inherits": "继
 
 
 class KnowledgeGenerator:
-    def __init__(self, root: Path, config: ProjectConfig, store: KnowledgeStore):
+    def __init__(
+        self,
+        root: Path,
+        config: ProjectConfig,
+        store: KnowledgeStore,
+        *,
+        engine: CodeIndexEngine | None = None,
+    ):
         self.root = root
         self.config = config
         self.store = store
+        self.engine = engine
         self.generated_root = root / config.generated_root
         self.drafts_root = root / config.drafts_root
         self.curated_root = root / config.curated_root
@@ -38,7 +48,10 @@ class KnowledgeGenerator:
         if refresh_generated:
             for obsolete in ("routes.md", "entrypoints.md"):
                 (self.generated_root / obsolete).unlink(missing_ok=True)
-            generated = [self._project_map(), *self._module_maps(), self._test_map()]
+            generated = [
+                self._project_map(), *self._module_maps(), self._test_map(),
+                self._framework_map(),
+            ]
             generated = [record for record in generated if record is not None]
             for record in generated:
                 self.store.upsert_knowledge(record)
@@ -373,6 +386,64 @@ class KnowledgeGenerator:
             content=content,
             sources=sources,
             tags=["tests", "verification"],
+        )
+
+    def _framework_map(self) -> KnowledgeRecord | None:
+        if self.engine is None:
+            return None
+        result = FrameworkIndex(self.engine).detect(self.root, self.config)
+        sections: list[str] = []
+        sources: list[SourceReference] = []
+        seen_sources: set[tuple[str | None, str | None, int | None]] = set()
+        for detection in result.detections:
+            evidence = [
+                *detection.evidence,
+                *detection.entrypoints,
+                *detection.registration_points,
+                *detection.lifecycle,
+            ]
+            for item in evidence:
+                source = item.source()
+                key = (source.path, source.id, source.line)
+                if key not in seen_sources:
+                    seen_sources.add(key)
+                    sources.append(source)
+            rows = "\n".join(
+                f"| {item.kind} | `{item.path}:{item.line}` | `{item.symbol_id or '-'}` | {item.detail} |"
+                for item in evidence
+            ) or "| marker | - | - | 未确认静态入口或注册点 |"
+            unknowns = "\n".join(f"- {item}" for item in detection.unknowns) or "- 无"
+            sections.append(
+                f"## {detection.framework}\n\n"
+                f"置信度：`{detection.confidence:.2f}`\n\n"
+                "| 证据类型 | 位置 | 符号 | 事实 |\n"
+                "| --- | --- | --- | --- |\n"
+                f"{rows}\n\n"
+                f"### 未确认项\n\n{unknowns}"
+            )
+        if not sections:
+            sections.append("## 未识别到受支持框架\n\n" + "\n".join(f"- {item}" for item in result.unknowns))
+        if not sources:
+            sources = [
+                SourceReference(type="file", path=item["path"])
+                for item in self.store.rows("SELECT path FROM files ORDER BY path")
+            ]
+        content = f"""{GENERATED_NOTICE}
+
+# 框架感知结构索引
+
+事实来源：`{result.fact_source}`。本页只整理 CodeGraph 公共查询确认的框架 marker、入口、注册点和生命周期；无法静态确认的动态行为保留为 unknown，不使用本地 parser 推断。
+
+{chr(10).join(sections)}
+"""
+        return self._record(
+            record_id="generated.frameworks",
+            kind="framework",
+            title="框架感知结构索引",
+            relative_path=f"{self.config.generated_root}/frameworks.md",
+            content=content,
+            sources=sources,
+            tags=["framework", "structure", "codegraph", *[item.framework for item in result.detections]],
         )
 
     def _ensure_curated_templates(self) -> None:

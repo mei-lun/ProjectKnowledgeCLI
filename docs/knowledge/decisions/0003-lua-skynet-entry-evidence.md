@@ -37,3 +37,10 @@
 <!-- project-kb:source file="evaluation/real_project_harness.py" -->
 <!-- project-kb:source file="tests/test_codegraph.py" -->
 <!-- project-kb:source file="tests/test_retrieval_wp06.py" -->
+
+## 0.1.32 当前执行结论
+
+本 ADR 中由 `BuiltinCodeIndexEngine` 提取入口的历史方案已停止执行。当前 Lua/Skynet 框架事实由 `FrameworkIndex` 的 `lua-skynet` profile 基于 CodeGraph 公共符号和源码窗口生成：`skynet.start`/`skynet.dispatch` 作为入口或生命周期证据，`skynet.newservice`/`skynet.uniqueservice`/`skynet.register` 作为注册证据。动态服务发现、运行时协议名和反射调用继续保留为 unknown。
+
+<!-- project-kb:source file="src/project_knowledge/frameworks.py" -->
+<!-- project-kb:source file="tests/test_frameworks.py" -->
