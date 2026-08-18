@@ -64,3 +64,5 @@ Feature Guide 检索可以选中 `generated.frameworks`，但框架 profile 结�
 <!-- project-kb:source file="tests/test_frameworks.py" -->
 
 0.1.32 最终人工复核：框架证据现在只来自 CodeGraph `snapshot/search_symbols/get_source`，测试、脚本和 detector profile 常量均被排除；真实 FastAPI 夹具与误判负例均已通过。该边界可继续作为 Feature Guide 的 verified 生成约束。
+
+0.1.33 最终人工复核：Feature Guide 检索可使用 `vector_retrieval` 诊断，但 provider unavailable、非法维度和失效向量均必须保留 lexical fallback，不得把向量相似度包装为 CodeGraph 事实或 verified 业务意图。

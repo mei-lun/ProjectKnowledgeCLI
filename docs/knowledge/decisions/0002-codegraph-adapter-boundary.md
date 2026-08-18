@@ -39,6 +39,10 @@
 <!-- project-kb:source file="tests/test_codegraph.py" -->
 <!-- project-kb:source file="tests/test_codegraph_validation.py" -->
 
+## 0.1.33 CodeGraph 边界复核
+
+向量索引不改变 CodeGraph Adapter 的权威边界。向量只能排序知识候选，不能生成符号、路径、调用关系或影响分析事实；CodeGraph 不可用时向量层也不得伪造结构证据。
+
 ## 影响
 
 运行项目必须安装并初始化 CodeGraph；CLI 或项目不可用时明确返回结构化错误，不执行本地解析回退。知识文档和检索结果必须标注 CodeGraph 事实来源。

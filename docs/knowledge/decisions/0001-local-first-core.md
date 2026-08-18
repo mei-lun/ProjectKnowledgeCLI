@@ -65,6 +65,10 @@ CLI 可以立即离线运行且易于安装。在 MVP 中，Python 项目获得�
 <!-- project-kb:source file="src/project_knowledge/evaluate.py" -->
 <!-- project-kb:source file="evaluation/thresholds.json" -->
 
+## 0.1.33 Local-first 向量复核
+
+可选向量检索继续遵守 local-first：默认 disabled，唯一内置实现为确定性离线 provider；网络模型不属于默认能力，provider 失败时必须回到 lexical 结果并暴露 fallback。
+
 ## WP-11-HF 发布复核（2026-08-15）
 
 0.1.28 继续保持本地优先边界：默认文件发现排除仓库内部 `.worktrees/**`，避免隔离工作树重复进入索引；正式评测使用与当前 40 题数据集相同哈希的版本化基线，同时执行冻结绝对门和可比回归门。评测报告与基线仍排除出被测索引。

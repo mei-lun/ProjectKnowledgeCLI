@@ -78,3 +78,7 @@ Project Knowledge CLI 是一个本地优先的 Python 应用，CLI 和 MCP 适�
 
 <!-- project-kb:source file="src/project_knowledge/frameworks.py" -->
 <!-- project-kb:source file="tests/test_frameworks.py" -->
+
+## 0.1.33 可选向量检索复核
+
+向量层位于 KnowledgeStore 与 KnowledgeAPI lexical 检索之间，默认 disabled；local provider 只使用离线确定性哈希向量，不能替代 CodeGraph 文件、符号和关系事实。provider、model、维度或内容哈希变化会触发单条重建，失效或不可用时保持 lexical fallback。

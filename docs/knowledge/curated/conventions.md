@@ -102,3 +102,7 @@
 
 <!-- project-kb:source file="src/project_knowledge/frameworks.py" -->
 <!-- project-kb:source file="tests/test_frameworks.py" -->
+
+## 0.1.33 向量检索约定
+
+向量记录必须保存知识 ID、内容哈希、provider/model、维度和可复现向量；默认配置不得加载 provider 或写向量表。hybrid 只能把向量作为补充候选与有限加分，lexical 精确命中和 CodeGraph 结构证据始终优先。
