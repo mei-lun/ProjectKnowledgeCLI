@@ -37,6 +37,7 @@
 - `src/project_knowledge/service.py`（Python）
 - `src/project_knowledge/store.py`（Python）
 - `src/project_knowledge/util.py`（Python）
+- `src/project_knowledge/vector.py`（Python）
 - `src/project_knowledge/versioning.py`（Python）
 
 ## 代码事实

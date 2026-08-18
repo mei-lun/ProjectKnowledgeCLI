@@ -31,6 +31,7 @@
 | `tests/test_schemas.py` | tests |
 | `tests/test_semantic.py` | tests |
 | `tests/test_single_directory.py` | tests |
+| `tests/test_vector_retrieval.py` | tests |
 | `tests/test_versioning.py` | tests |
 | `tests/test_watch_wp07.py` | tests |
 | `tests/test_wp08.py` | tests |

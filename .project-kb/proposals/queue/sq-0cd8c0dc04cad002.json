@@ -1,0 +1,36 @@
+{
+  "affected_knowledge": [
+    "curated.architecture",
+    "curated.conventions",
+    "curated.feature.guide.generation",
+    "curated.provider.and.evidence",
+    "decision.0001.local.first.core",
+    "decision.0002.codegraph.adapter.boundary",
+    "generated.frameworks",
+    "generated.module.project_knowledge",
+    "generated.module.tests",
+    "generated.project-map",
+    "generated.test-map"
+  ],
+  "base_commit": "f9d9dfc9985e9cd09ca58025a005a7d5182753b3",
+  "changed_files": [
+    "src/project_knowledge/__init__.py",
+    "src/project_knowledge/config.py",
+    "src/project_knowledge/retrieval.py",
+    "src/project_knowledge/service.py",
+    "src/project_knowledge/store.py",
+    "src/project_knowledge/vector.py",
+    "tests/test_config.py",
+    "tests/test_guidance_store.py",
+    "tests/test_integration.py",
+    "tests/test_vector_retrieval.py"
+  ],
+  "changed_symbols": [],
+  "changeset_id": "change-20260818-225025",
+  "created_at": "2026-08-18T22:50:25+08:00",
+  "head_commit": "557b96b8490de39ad78c099342661927c0db961d",
+  "queue_id": "sq-0cd8c0dc04cad002",
+  "schema_version": 1,
+  "status": "awaiting_semantic_generation",
+  "task_summary": "同步 0.1.33 RT-003 向量检索实现"
+}
