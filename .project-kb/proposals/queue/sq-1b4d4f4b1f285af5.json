@@ -1,0 +1,26 @@
+{
+  "affected_knowledge": [
+    "curated.architecture",
+    "curated.conventions",
+    "curated.feature.guide.generation",
+    "decision.0003.lua.skynet.entry.evidence",
+    "generated.frameworks",
+    "generated.module.project_knowledge",
+    "generated.module.tests",
+    "generated.project-map",
+    "generated.test-map"
+  ],
+  "base_commit": "a7a0222c795b8880e37170892a8b15352251c0b5",
+  "changed_files": [
+    "src/project_knowledge/frameworks.py",
+    "tests/test_frameworks.py"
+  ],
+  "changed_symbols": [],
+  "changeset_id": "change-20260818-194238",
+  "created_at": "2026-08-18T19:42:38+08:00",
+  "head_commit": "37768a5e5ae1c9f8f7bc2ac05f223495b8f81f78",
+  "queue_id": "sq-1b4d4f4b1f285af5",
+  "schema_version": 1,
+  "status": "awaiting_semantic_generation",
+  "task_summary": "同步 0.1.32 框架索引精确性修复"
+}

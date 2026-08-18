@@ -13,6 +13,7 @@
 | `tests/test_engine.py` | tests |
 | `tests/test_evaluate.py` | tests |
 | `tests/test_finalization.py` | tests |
+| `tests/test_frameworks.py` | tests |
 | `tests/test_gardenserver_rules.py` | tests |
 | `tests/test_guidance.py` | tests |
 | `tests/test_guidance_e2e.py` | tests |

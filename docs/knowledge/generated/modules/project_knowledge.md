@@ -14,6 +14,7 @@
 - `src/project_knowledge/evaluate.py`（Python）
 - `src/project_knowledge/evidence.py`（Python）
 - `src/project_knowledge/finalization.py`（Python）
+- `src/project_knowledge/frameworks.py`（Python）
 - `src/project_knowledge/gardenserver.py`（Python）
 - `src/project_knowledge/guidance.py`（Python）
 - `src/project_knowledge/guidance_models.py`（Python）

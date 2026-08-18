@@ -13,6 +13,7 @@
 - `tests/test_engine.py`（Python）
 - `tests/test_evaluate.py`（Python）
 - `tests/test_finalization.py`（Python）
+- `tests/test_frameworks.py`（Python）
 - `tests/test_gardenserver_rules.py`（Python）
 - `tests/test_guidance.py`（Python）
 - `tests/test_guidance_e2e.py`（Python）

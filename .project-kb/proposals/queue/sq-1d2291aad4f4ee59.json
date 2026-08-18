@@ -1,0 +1,29 @@
+{
+  "affected_knowledge": [
+    "curated.architecture",
+    "curated.conventions",
+    "curated.feature.guide.generation",
+    "decision.0003.lua.skynet.entry.evidence",
+    "generated.frameworks",
+    "generated.module.project_knowledge",
+    "generated.module.tests",
+    "generated.project-map",
+    "generated.test-map"
+  ],
+  "base_commit": "85a5720b8287ca16fb4c2770bdddbc8535e46a49",
+  "changed_files": [
+    "src/project_knowledge/__init__.py",
+    "src/project_knowledge/frameworks.py",
+    "src/project_knowledge/knowledge.py",
+    "src/project_knowledge/service.py",
+    "tests/test_frameworks.py"
+  ],
+  "changed_symbols": [],
+  "changeset_id": "change-20260818-155545",
+  "created_at": "2026-08-18T15:55:45+08:00",
+  "head_commit": "a56fc07745747c2e9c0060fc90c5852d94af1eeb",
+  "queue_id": "sq-1d2291aad4f4ee59",
+  "schema_version": 1,
+  "status": "awaiting_semantic_generation",
+  "task_summary": "同步 0.1.32 框架感知索引"
+}
