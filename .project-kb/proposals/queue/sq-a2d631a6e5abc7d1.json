@@ -1,0 +1,27 @@
+{
+  "affected_knowledge": [
+    "curated.architecture",
+    "curated.conventions",
+    "curated.feature.guide.generation",
+    "curated.provider.and.evidence",
+    "generated.module.project_knowledge",
+    "generated.module.tests",
+    "generated.project-map",
+    "generated.test-map"
+  ],
+  "base_commit": "13a471287f9f050f2a33251ad0573da9467c7817",
+  "changed_files": [
+    "src/project_knowledge/__init__.py",
+    "src/project_knowledge/cli.py",
+    "src/project_knowledge/service.py",
+    "tests/test_watch_wp07.py"
+  ],
+  "changed_symbols": [],
+  "changeset_id": "change-20260818-151143",
+  "created_at": "2026-08-18T15:11:43+08:00",
+  "head_commit": "0efeb395c142e2f74954c305aca749b6199023e9",
+  "queue_id": "sq-a2d631a6e5abc7d1",
+  "schema_version": 1,
+  "status": "awaiting_semantic_generation",
+  "task_summary": "同步 0.1.31 Git 生命周期实现和审计"
+}
