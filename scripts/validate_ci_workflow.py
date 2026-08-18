@@ -46,6 +46,8 @@ def validate_quality_workflow(path: str | Path) -> tuple[bool, list[str]]:
             errors.append(f"line {number}: folded command must be indented beyond run")
     if not any("--thresholds evaluation/thresholds.json" in line for _, line in command_lines):
         errors.append("quality job must pass evaluation thresholds")
+    if not any("scripts/validate_evaluation_provenance.py" in line for line in lines):
+        errors.append("quality job must validate active evaluation report provenance")
     command = " ".join(line.strip() for _, line in command_lines)
     try:
         arguments = shlex.split(command)
