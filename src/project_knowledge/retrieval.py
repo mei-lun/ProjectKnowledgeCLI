@@ -14,6 +14,7 @@ from .ranking import FileCandidate, fallback_rank_files, rank_files
 from .service import ProjectService
 from .store import SCHEMA_VERSION, KnowledgeStore
 from .util import approx_tokens, project_lock, trim_to_tokens, utc_now
+from .vector import VectorIndex
 
 
 CONFIDENCE_WEIGHT = {"verified": 1.0, "generated": 0.8, "inferred": 0.3}
@@ -113,23 +114,42 @@ class KnowledgeAPI:
                 if feature_title and (feature_title in query or query in feature_title):
                     matches.append((record, 3.0))
                     seen_ids.add(record.id)
-            ranked: list[tuple[KnowledgeRecord, float, float]] = []
+            vector_matches, vector_diagnostics = VectorIndex(store, self.config).search(query, limit=limit * 2)
+            vector_scores = {item.record_id: item.similarity for item in vector_matches}
+            lexical_ids = {record.id for record, _ in matches}
+            for vector_match in vector_matches:
+                if vector_match.record_id in seen_ids:
+                    continue
+                record = store.get_knowledge(vector_match.record_id)
+                if record is None or (kinds and record.kind not in kinds):
+                    continue
+                if module and module not in record.tags and f"/{module}/" not in record.path:
+                    continue
+                matches.append((record, 0.0))
+                seen_ids.add(record.id)
+            ranked: list[tuple[KnowledgeRecord, float, float, float, bool]] = []
             for record, text_score in matches:
                 score = text_score + CONFIDENCE_WEIGHT.get(record.confidence, 0) + FRESHNESS_WEIGHT.get(record.status, -1)
                 if module and module in record.tags:
                     score += 0.5
                 if record.kind in {"feature-guide", "development-guide"}:
                     score += 2.0
-                ranked.append((record, score, text_score))
-            ranked.sort(key=lambda item: (-item[1], item[0].id))
+                vector_similarity = vector_scores.get(record.id, 0.0)
+                vector_boost = min(0.25, max(0.0, vector_similarity) * 0.25)
+                if record.id in lexical_ids:
+                    score += vector_boost
+                else:
+                    score = -1.0 + vector_boost
+                ranked.append((record, score, text_score, vector_similarity, record.id in lexical_ids))
+            ranked.sort(key=lambda item: (not item[4], -item[1], item[0].id))
             items = []
-            for record, score, text_score in ranked[:limit]:
+            for record, score, text_score, vector_similarity, _ in ranked[:limit]:
                 pending_sources = self._pending_sources(record, pending)
                 summary = (
                     f"[withheld: depends on pending source {', '.join(pending_sources)}]"
                     if pending_sources else self._summary(record.content)
                 )
-                breakdown = self._score_breakdown(record, text_score, module)
+                breakdown = self._score_breakdown(record, text_score, module, vector_similarity)
                 pending_draft = self._pending_guidance_draft(store, record)
                 items.append({
                     "id": record.id, "title": record.title, "kind": record.kind, "path": record.path,
@@ -145,7 +165,12 @@ class KnowledgeAPI:
                         or record.confidence == "inferred" or record.ownership == "draft"
                     ),
                 })
-            result = {"query": query, "results": items, "gaps": [] if items else ["No matching knowledge record; search live source."]}
+            result = {
+                "query": query,
+                "results": items,
+                "gaps": [] if items else ["No matching knowledge record; search live source."],
+                "vector_retrieval": vector_diagnostics,
+            }
             self._record_query(store, "knowledge_search", len(query), result, started)
             return result
 
@@ -267,6 +292,7 @@ class KnowledgeAPI:
                 "selected_records": [{"id": item["id"], "score": item["score"], "why_selected": item.get("why_selected", "")} for item in selected_results],
                 "reference_count": len(reference_implementations), "reference_implementations": [{"symbol": item.get("symbol", item.get("record")), "path": item.get("path")} for item in reference_implementations], "extension_point_count": len(extension_points), "extension_points": [{"symbol": item.get("symbol"), "path": item.get("path")} for item in extension_points], "unknown_count": len(unknowns), "unknowns": unknowns[:4],
                 "impact": {"modules": impact.get("affected_modules", [])[:8], "files": impact.get("affected_files", [])[:8], "tests": impact.get("affected_tests", [])[:8], "relations": len(impact.get("relations", []))},
+                "vector_retrieval": search.get("vector_retrieval", {}),
             }
             result = {
                 "task": task, "project": self.config.project_name,
@@ -302,6 +328,7 @@ class KnowledgeAPI:
                 "token_budget": budget,
                 "estimated_tokens": 0,
                 "guidance_workflow": status.get("guidance_workflow", {}),
+                "vector_retrieval": search.get("vector_retrieval", {}),
                 "fact_source": "codegraph",
                 "engine_limitations": self.service.engine.status().get("limitations", []),
             }
@@ -636,12 +663,13 @@ class KnowledgeAPI:
         return clean[:limit] + ("..." if len(clean) > limit else "")
 
     @staticmethod
-    def _score_breakdown(record: KnowledgeRecord, text_score: float, module: str | None) -> dict[str, float]:
+    def _score_breakdown(record: KnowledgeRecord, text_score: float, module: str | None, vector_similarity: float = 0.0) -> dict[str, float]:
         confidence = CONFIDENCE_WEIGHT.get(record.confidence, 0)
         freshness = FRESHNESS_WEIGHT.get(record.status, -1)
         kind_boost = 2.0 if record.kind in {"feature-guide", "development-guide"} else 0.0
         module_boost = 0.5 if module and module in record.tags else 0.0
-        return {"text_match": round(text_score, 4), "confidence": confidence, "freshness": freshness, "kind_boost": kind_boost, "module_boost": module_boost, "total": round(text_score + confidence + freshness + kind_boost + module_boost, 4)}
+        vector_boost = min(0.25, max(0.0, vector_similarity) * 0.25)
+        return {"text_match": round(text_score, 4), "confidence": confidence, "freshness": freshness, "kind_boost": kind_boost, "module_boost": module_boost, "vector_similarity": round(vector_similarity, 4), "vector_boost": round(vector_boost, 4), "total": round(text_score + confidence + freshness + kind_boost + module_boost + vector_boost, 4)}
 
     @staticmethod
     def _why_selected(record: KnowledgeRecord, breakdown: dict[str, float]) -> str:

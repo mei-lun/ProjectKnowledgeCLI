@@ -19,6 +19,7 @@ from .models import ChangeSet
 from .proposal import ProposalService
 from .schemas import CHANGE_SET_SCHEMA, all_schemas, validate_instance
 from .store import KnowledgeStore
+from .vector import VectorIndex
 from .util import (
     append_jsonl,
     atomic_json,
@@ -192,6 +193,7 @@ class ProjectService:
                     records = KnowledgeGenerator(
                         self.root, self.config, store, engine=self.engine
                     ).generate()
+                    VectorIndex(store, self.config).sync(records)
                 store.connection.execute("PRAGMA wal_checkpoint(TRUNCATE)")
                 counts = store.counts()
             os.replace(temporary, self.db_path)
@@ -252,6 +254,7 @@ class ProjectService:
                 ).generate(
                     refresh_generated=bool(changed or deleted or commit_changed)
                 )
+                VectorIndex(store, self.config).sync(records)
                 affected_modules = sorted({by_path[path].module for path in changed if path in by_path})
                 affected_knowledge = sorted(
                     record.id for record in records

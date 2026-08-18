@@ -10,7 +10,7 @@ from .engine import CodeIndexSnapshot
 from .models import KnowledgeRecord, SourceReference
 
 
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 4
 
 
 class KnowledgeStore:
@@ -54,7 +54,7 @@ class KnowledgeStore:
             raise RuntimeError(
                 f"数据库 Schema v{existing_version} 高于当前支持的 v{SCHEMA_VERSION}"
             )
-        if existing_version not in {0, 1, 2, SCHEMA_VERSION}:
+        if existing_version not in {0, 1, 2, 3, SCHEMA_VERSION}:
             raise RuntimeError(f"不支持从 Schema v{existing_version} 迁移")
 
         self.connection.commit()
@@ -163,6 +163,16 @@ class KnowledgeStore:
                 last_generated_at TEXT,
                 last_verified_at TEXT
             )""",
+            """CREATE TABLE IF NOT EXISTS vector_documents (
+                id TEXT PRIMARY KEY REFERENCES knowledge(id) ON DELETE CASCADE,
+                content_hash TEXT NOT NULL,
+                provider_id TEXT NOT NULL,
+                model_id TEXT NOT NULL,
+                dimension INTEGER NOT NULL,
+                vector_json TEXT NOT NULL,
+                updated_at REAL NOT NULL
+            )""",
+            "CREATE INDEX IF NOT EXISTS idx_vector_documents_provider ON vector_documents(provider_id, model_id, dimension)",
             """CREATE TABLE IF NOT EXISTS query_stats (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 created_at TEXT NOT NULL,

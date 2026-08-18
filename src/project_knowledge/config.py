@@ -275,9 +275,9 @@ class ProjectConfig:
                 "仅支持 generated_mode: auto。",
             ),
             (
-                self.embeddings != "disabled",
+                self.embeddings not in {"disabled", "local"},
                 "retrieval.embeddings", self.embeddings, "unsupported_embeddings",
-                "向量检索尚未实现；当前仅支持 embeddings: disabled。",
+                "向量检索仅支持 embeddings: disabled 或 embeddings: local；其他 provider 尚未实现。",
             ),
             (
                 not self.local_only,

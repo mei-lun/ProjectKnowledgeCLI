@@ -74,7 +74,7 @@ class ConfigTests(unittest.TestCase):
         fields = {item["field"] for item in config.capability_warnings()}
         self.assertNotIn("updates.curated_mode", fields)
         self.assertNotIn("updates.proposal_trigger", fields)
-        self.assertIn("retrieval.embeddings", fields)
+        self.assertNotIn("retrieval.embeddings", fields)
         self.assertIn("privacy.local_only", fields)
         self.assertIn("privacy.telemetry", fields)
 

@@ -458,7 +458,7 @@ PYTHONPATH=src python3 -m project_knowledge check . --json
 | --- | --- | --- | --- |
 | RT-001 | 五个只读 MCP 工具 | 已完成 | 基础协议兼容已实现 |
 | RT-002 | FTS/BM25 | 已完成基础版 | FTS 可用时启用 |
-| RT-003 | 可选向量检索 | 未完成 | 配置字段无行为 |
+| RT-003 | 可选向量检索 | 已完成基础版（0.1.33） | 默认 disabled；local provider、SQLite 向量索引、失效与 fallback、受约束 hybrid 召回已实现 |
 | RT-004 | 符号和路径精确检索 | 部分完成 | 名称 LIKE；无公开 trace/getSource |
 | RT-005 | 代码图遍历 | 部分完成 | 仅有限一跳扩展 |
 | RT-006 | 任务类型和模块过滤 | 部分完成 | module tag 和简单词项；无任务分类 |
@@ -1427,7 +1427,7 @@ gardenserver 的 CodeGraph 1.5.0 事实快照与业务文件指纹核验已完�
 | UP-005 | 已完成基础交付 | `ProjectService.install` 管理 `post-checkout/post-merge/post-rewrite/post-commit`，使用 marker 保留用户 hook 内容，并支持 linked worktree 的真实 hooks 目录。 |
 | UP-006 | 已完成基础状态机 | `git-event` 统一记录事件；支持 checkout、merge、rewrite、detached HEAD、非祖先 reset 的 sync/rebuild 补偿；失败状态暴露为 `reconciliation_required`。共享 daemon、复杂冲突自动恢复仍不在本版本范围。 |
 | IN-007 | 已完成基础交付（0.1.32） | `FrameworkIndex` 只消费 CodeGraph 公共契约；FastAPI、Flask、Django、Lua/Skynet profile 已输出入口、注册点、生命周期、confidence、逐条来源和 unknowns。 |
-| RT-003 | 未完成 | `embeddings` 仍是显式禁用/告警配置，没有 provider、向量索引和混合检索行为。 |
+| RT-003 | 已完成基础交付（0.1.33） | `embeddings: local` 使用确定性离线 provider 和 SQLite 向量索引；默认 disabled，网络 provider 不在本批范围。 |
 
 0.1.31 验收证据：`tests/test_watch_wp07.py` 覆盖 10 项 Git 生命周期、失败可观测性、用户 hook 保留和 linked worktree；全量 pytest 通过；`scripts/validate_ci_workflow.py` 通过。生成知识已在 main 工作区同步，curated knowledge 仍需在后续框架索引和向量检索实现后逐项复核。
 
@@ -1437,4 +1437,10 @@ IN-007 已完成基础交付。`FrameworkIndex` 只消费 CodeGraph 公共 `snap
 
 验收证据：`tests/test_frameworks.py` 包含四类框架正例、通用 route 负例、生成记录契约和真实 CodeGraph FastAPI 临时项目；检索、评测与单目录相关聚焦测试通过。动态注册、反射、运行时服务发现仍明确属于 unknown，不得视为静态事实。
 
-RT-003 仍未完成：当前只有 `embeddings` 禁用配置和能力告警，尚无真实 provider、向量索引、失效处理或混合排名链路。
+RT-003 的旧状态记录到 0.1.32 为未完成；以下 0.1.33 交付校正覆盖该历史结论。
+
+# 0.1.33 当前交付校正：RT-003 可选向量检索
+
+RT-003 已完成基础交付。`EmbeddingProvider`、`VectorIndex` 和确定性的 `DeterministicLocalProvider` 已接入 ProjectService 初始化/重建/同步生命周期；默认 `embeddings: disabled` 不加载 provider、不写向量表，`embeddings: local` 使用离线固定维度向量。SQLite Schema 从 v3 迁移到 v4，支持内容哈希、provider/model/维度失效、删除补偿、provider unavailable 与非法维度 fallback。
+
+`KnowledgeAPI.search/context` 暴露 `vector_retrieval` 诊断。向量候选只能补充 lexical 结果，明确 lexical 命中和 CodeGraph 文件/符号结构证据保持优先；未接入网络模型或第三方 embedding。测试覆盖 disabled 零加载、确定性、哈希/model/维度失效、删除、fallback、Schema 迁移和 hybrid 排序契约；0.1.33 全量 pytest 为 285 项通过。

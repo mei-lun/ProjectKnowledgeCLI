@@ -196,7 +196,7 @@ class IntegrationTests(unittest.TestCase):
             self.assertIn("guidance_workflow", response["result"]["structuredContent"])
 
         with KnowledgeStore(service.db_path, readonly=True) as store:
-            self.assertEqual(store.get_meta("schema_version"), "3")
+            self.assertEqual(store.get_meta("schema_version"), "4")
             self.assertEqual(store.counts()["knowledge"], existing_knowledge)
 
     def test_rebuild_preserves_complete_guidance_graph(self) -> None:
@@ -363,7 +363,7 @@ class IntegrationTests(unittest.TestCase):
         service = ProjectService(self.root)
         doctor = service.doctor()
         fields = {item["field"] for item in doctor["configuration_warnings"]}
-        self.assertIn("retrieval.embeddings", fields)
+        self.assertNotIn("retrieval.embeddings", fields)
         self.assertIn("privacy.local_only", fields)
         service.initialize()
         status, _ = service.check()

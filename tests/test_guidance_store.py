@@ -79,7 +79,7 @@ class GuidanceStoreTests(unittest.TestCase):
 
         with KnowledgeStore(self.db_path) as store:
             store.initialize()
-            self.assertEqual(store.get_meta("schema_version"), "3")
+            self.assertEqual(store.get_meta("schema_version"), "4")
             self.assertEqual(store.get_knowledge("existing.knowledge"), self._knowledge())
             tables = {
                 row[0]
@@ -295,13 +295,13 @@ class GuidanceStoreTests(unittest.TestCase):
         connection = sqlite3.connect(self.db_path)
         connection.executescript(
             "CREATE TABLE metadata(key TEXT PRIMARY KEY, value TEXT NOT NULL);"
-            "INSERT INTO metadata VALUES('schema_version', '4');"
+            "INSERT INTO metadata VALUES('schema_version', '5');"
         )
         connection.close()
         with KnowledgeStore(self.db_path) as store:
             with self.assertRaises(RuntimeError):
                 store.initialize()
-            self.assertEqual(store.get_meta("schema_version"), "4")
+            self.assertEqual(store.get_meta("schema_version"), "5")
 
     def test_failed_migration_rolls_back_schema_and_version(self) -> None:
         connection = sqlite3.connect(self.db_path)
