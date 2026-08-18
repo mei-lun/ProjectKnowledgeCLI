@@ -2,43 +2,43 @@
 
 # 项目地图：ProjectKnowledgeCLI
 
-生成时间：`2026-08-15T20:07:03+08:00`；来源提交：`0de42e056c98310ac3b82328ef5d8348ba664ecd`。
+生成时间：`2026-08-18T03:53:15+08:00`；来源提交：`0bd579ed4eda4503d8efd463249d286a6f93d8b8`。
 
 ## 概览
 
 | 指标 | 数量 |
 | --- | ---: |
-| 文件 | 77 |
-| 符号 | 921 |
-| 关系 | 8260 |
+| 文件 | 73 |
+| 符号 | 0 |
+| 关系 | 0 |
 | 模块 | 7 |
 | 路由 | 0 |
-| 未解析关系 | 5539 |
+| 未解析关系 | 0 |
 
 ## 语言分布
 
 | 语言 | 文件数 |
 | --- | ---: |
 | Python | 70 |
-| 配置 | 7 |
+| Yaml | 3 |
 
 ## 模块
 
 | 模块 | 文件数 |
 | --- | ---: |
 | [.github](modules/github.md) | 1 |
-| [evaluation](modules/evaluation.md) | 3 |
-| [plugins](modules/plugins.md) | 5 |
-| [project_knowledge](modules/project_knowledge.md) | 31 |
-| [root](modules/root.md) | 2 |
+| [evaluation](modules/evaluation.md) | 2 |
+| [plugins](modules/plugins.md) | 3 |
+| [project_knowledge](modules/project_knowledge.md) | 33 |
+| [root](modules/root.md) | 1 |
 | [scripts](modules/scripts.md) | 4 |
-| [tests](modules/tests.md) | 31 |
+| [tests](modules/tests.md) | 29 |
 
-## 静态分析边界
+## 代码事实边界
 
-- Python 符号和语法通过标准 AST 提取。
-- 其他语言使用保守的模式提取，因此可信度较低。
-- 动态分派、反射、运行时依赖注入以及运行时生成的路由可能无法被识别。
+- 文件快照和代码事实由 CodeGraph 公共 CLI 提供。
+- 符号、调用关系和影响范围在查询时实时读取，不由本地解析器生成。
+- CodeGraph 公共接口未提供的路由与入口点不会生成占位结论。
 
 ## 解析错误
 

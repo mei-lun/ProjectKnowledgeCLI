@@ -1,13 +1,13 @@
 # 项目级知识库最小需求审计与实施基线
 
-> 当前版本：0.1.28
-> 复核日期：2026-08-15  
-> 报告状态：0.1.28 WP-11-HF 审计问题已修复并完成发布复核
+> 当前版本：0.1.30
+> 复核日期：2026-08-18  
+> 报告状态：0.1.30 已移除 builtin engine，代码事实链路统一为真实 CodeGraph Adapter
 > 默认语言：中文
 
-## 当前交付复核：WP-11 / WP-11-HF
+## 当前交付复核：WP-13 / CG-ONLY（承接 WP-11 / WP-11-HF）
 
-本节是 0.1.28 的当前验收结论；下方较早版本的工作包和里程碑记录仅用于历史追溯。评测实测值只以 `evaluation/reports/latest.json` 为唯一来源，审计不复制可能随重跑漂移的指标快照。
+本节是 0.1.30 的当前验收结论；下方较早版本的工作包和里程碑记录仅用于历史追溯。评测实测值只以 `evaluation/reports/latest.json` 为唯一来源，审计不复制可能随重跑漂移的指标快照。
 
 | 需求 ID | 当前结论 | 验收边界 |
 | --- | --- | --- |
@@ -15,6 +15,7 @@
 | CG-001～CG-004 | 已完成 | CodeGraph 1.5 公共 CLI 响应被规范化为统一引擎契约；不可用或响应不合法时明确报错，绝不以 builtin 冒充 |
 | CG-005 | 已完成 | 临时四文件项目已通过真实 CodeGraph 1.5.0 的 `init/files/query/trace/impact/affected` 六项验证，源仓库未生成 `.codegraph` |
 | CG-006 | 已完成 | `KnowledgeAPI` 在 SQLite 符号和关系为空时仍通过所选 CodeGraph 引擎返回实时事实，并由正负测试覆盖 |
+| CG-ONLY-001～004 | 已完成 | 配置、Schema 和引擎工厂只接受 `codegraph`；BuiltinCodeIndexEngine 及本地 parser 已删除；旧 `engine: builtin` 返回结构化迁移错误；生成页不再发布本地路由或入口占位事实 |
 | RET-001～RET-005 | 已完成 | 已修正陈旧锚点并实施分阶段证据选择、依赖优先、核心文件上限、Markdown 引用约束和 `selection_reasons` 可解释输出 |
 | RET-006 | 已完成 | 40 题正式评测通过冻结绝对门槛；实测指标和可比回归结论见 `evaluation/reports/latest.json` |
 | REL-006 | 已完成 | 默认配置和本项目配置排除 `.worktrees/**`，真实发现测试证明内部 Git worktree 不进入索引 |
@@ -22,7 +23,9 @@
 | DOC-001 | 已完成 | 审计不再复制评测实测值，版本化 JSON 报告是唯一指标源；CI 校验器拒绝题集哈希不匹配的基线 |
 | KNOW-001 | 已完成 | 来源变化的 curated/decision 已逐条人工复核；`stale_knowledge=0`、`conflicted_knowledge=0`，`finalize --check` 返回 `ready` |
 
-当前限制：本仓库配置仍使用 builtin，因此自仓 codegraph 策略会明确报告 `adapter_unavailable`；真实 Adapter 能力由独立临时夹具证明。CodeGraph 仍不能证明动态分派、反射、运行时依赖注入等事实。真实业务项目覆盖率、查询性能和人工知识审核流程将在 WP-12 继续扩展，不能因本轮技术夹具通过而宣称最终产品目标已完成。
+当前限制：本仓库已切换为 `engine: codegraph`，运行时只接受真实 CodeGraph Adapter；CLI 不可用或项目未初始化时明确失败，不再回退到本地 parser。CodeGraph 仍不能证明动态分派、反射、运行时依赖注入等事实。真实业务项目覆盖率、查询性能和人工知识审核流程仍需继续扩展，不能因本轮 Adapter 通过而宣称最终产品目标已完成。
+
+0.1.30 的 50 题全策略绝对质量门仍未通过：hybrid/code 的文件召回和核心精确率、Markdown 的文件召回与精确率仍低于冻结阈值；所有可用策略的 `ranking_fallback_rate` 为 0。该缺口保留为后续检索质量工作，不通过降低阈值或恢复 builtin 规避。
 
 ## 0. 需求重新对齐决议（0.1.21 起的唯一有效实施基线）
 
@@ -463,6 +466,16 @@ PYTHONPATH=src python3 -m project_knowledge check . --json
 | RT-008 | 返回来源、缺口、下一步 | 已完成基础版 | 摘要和 next_step 仍较通用 |
 | RT-009 | 功能开发上下文 | 部分完成 | Feature Guide 可返回职责、流程、不变量、扩展点、Recipe、测试、陷阱和 unknowns | 缺参考实现、任务分类、多跳影响和真实 verified 功能指南 |
 | RT-010 | 紧凑准确 | 未达标 | 当前 precision 低 |
+
+### WP-12A：检索精确率与核心证据重排（0.1.29）
+
+**实施状态：实现与聚焦测试已完成；绝对质量门尚未完成。**
+
+本批次新增 50 条冻结评测（原 40 条答案逐项保护，新增 10 条 ranking hard-negative），并实现统一 `policy-v1` 文件排序、核心/辅助证据分区、fallback 质量门、严格 core 指标和 nDCG。`tests/test_evaluate.py`、`tests/test_ranking.py`、`tests/test_retrieval_wp06.py` 聚焦验证共 55 项通过。
+
+clean source 与 clean index 对齐后的 0.1.29 本地模块评测记录：hybrid file/core recall `0.818333/0.788333`、core precision `0.312`、平均上下文 `1055.12`；code file recall `0.791667`、成功率 `0.38`；Markdown file recall/precision `0.573333/0.12`；grep recall/precision `0.815/0.326762`，所有策略 fallback 均为 `0.0`。因此 RT-010 仍标记“未达标”，剩余 8 个质量门失败（hybrid 4 项、code 2 项、Markdown 2 项）。不得冻结失败报告为发布基线，也不能降低阈值宣称完成。
+
+审计结论：精确率改进已落地在统一排序与证据 provenance，而召回缺口仍主要来自候选覆盖和 Markdown 知识页来源质量；真实 CodeGraph Adapter 仍明确保持 `adapter_unavailable` 边界。
 
 ### 5.9 配置、并发、安全和可观测性
 

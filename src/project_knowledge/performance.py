@@ -81,9 +81,8 @@ def _run_size(size: int, repetitions: int) -> dict[str, Any]:
         )
         return {
             "file_count": size,
-            "indexed_files": initialization["files_scanned"],
-            "symbols": initialization["symbols"],
-            "relations": initialization["relations"],
+            "indexed_files": initialization["files_indexed"],
+            "fact_source": "codegraph",
             "initialization": {"cold_ms": round(initialization_ms, 3)},
             "status": _summary(status_samples),
             "context": _summary(context_samples),

@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from .errors import UnsupportedEngineError
 from .schemas import CONFIG_SCHEMA, validate_instance
 from .util import atomic_write
 
@@ -31,12 +32,14 @@ DEFAULT_EXCLUDES = [
     "evaluation/baselines/**",
 ]
 
+SUPPORTED_ENGINES: tuple[str, ...] = ("codegraph",)
+
 
 @dataclass(slots=True)
 class ProjectConfig:
     version: int = 1
     project_name: str = "project"
-    engine: str = "builtin"
+    engine: str = "codegraph"
     codegraph_command: str = ""
     codegraph_dir: str = ".codegraph"
     codegraph_timeout_seconds: int = 120
@@ -71,6 +74,10 @@ class ProjectConfig:
     provider_max_tokens: int = 12000
     provider_prompt_version: str = "feature-guide-v1"
     provider_output_schema_version: str = "semantic-draft-v1"
+
+    def __post_init__(self) -> None:
+        if self.engine not in SUPPORTED_ENGINES:
+            raise UnsupportedEngineError(self.engine)
 
     @staticmethod
     def load_raw(root: Path) -> dict[str, Any]:
@@ -150,7 +157,7 @@ class ProjectConfig:
         return cls(
             version=int(raw.get("version", 1)),
             project_name=str(project.get("name", root.name)),
-            engine=str(index.get("engine", "builtin")),
+            engine=str(index.get("engine", "codegraph")),
             codegraph_command=str(index.get("codegraph_command", "")),
             codegraph_dir=str(index.get("codegraph_dir", ".codegraph")),
             codegraph_timeout_seconds=int(index.get("codegraph_timeout_seconds", 120)),

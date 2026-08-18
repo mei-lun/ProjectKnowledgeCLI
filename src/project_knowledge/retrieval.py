@@ -10,6 +10,7 @@ from typing import Any
 from .config import ProjectConfig
 from .guidance_store import GuidanceStore
 from .models import KnowledgeRecord
+from .ranking import FileCandidate, fallback_rank_files, rank_files
 from .service import ProjectService
 from .store import SCHEMA_VERSION, KnowledgeStore
 from .util import approx_tokens, project_lock, trim_to_tokens, utc_now
@@ -154,143 +155,48 @@ class KnowledgeAPI:
         symbols = symbols or []
         max_hops = max(0, min(int(max_hops), 5))
         max_relations = max(1, min(int(max_relations), 5000))
-        if self.config.engine == "codegraph":
-            engine_result = dict(self.service.engine.impact(
-                self.root,
-                self.service.config,
-                files=files,
-                symbols=symbols,
-                max_hops=max_hops,
-                max_relations=max_relations,
-            ))
-            affected_files = set(engine_result.get("affected_files", []))
-            affected_symbols = set(engine_result.get("affected_symbols", []))
-            with KnowledgeStore(self.service.db_path) as store:
-                knowledge: list[dict[str, Any]] = []
-                for record in store.all_knowledge():
-                    source_keys = {source.path or source.id for source in record.sources}
-                    if source_keys.intersection(affected_files | affected_symbols):
-                        knowledge.append({
-                            "id": record.id,
-                            "title": record.title,
-                            "path": record.path,
-                            "freshness": record.status,
-                            "confidence": record.confidence,
-                        })
-                engine_result.update({
-                    "input": {"files": files, "symbols": symbols},
-                    "max_hops": max_hops,
-                    "max_relations": max_relations,
-                    "affected_knowledge": knowledge,
-                    "impact_explanation": self._impact_explanation(
-                        files,
-                        symbols,
-                        max_hops,
-                        list(engine_result.get("relations", [])),
-                        list(engine_result.get("affected_modules", [])),
-                        list(engine_result.get("affected_tests", [])),
-                    ),
-                    "truncated": len(engine_result.get("relations", [])) >= max_relations,
-                    "fact_source": "codegraph",
-                    "dependency_files": sorted(affected_files),
-                    "limitations": self.service.engine.status().get("limitations", []),
-                })
-                self._record_query(store, "knowledge_impact", len(json.dumps(engine_result["input"])), engine_result, started)
-            return engine_result
+        engine_result = dict(self.service.engine.impact(
+            self.root,
+            self.service.config,
+            files=files,
+            symbols=symbols,
+            max_hops=max_hops,
+            max_relations=max_relations,
+        ))
+        affected_files = set(engine_result.get("affected_files", []))
+        affected_symbols = set(engine_result.get("affected_symbols", []))
         with KnowledgeStore(self.service.db_path) as store:
-            symbol_ids = set(symbols)
-            if files:
-                placeholders = ",".join("?" for _ in files)
-                symbol_ids.update(row["id"] for row in store.rows(f"SELECT id FROM symbols WHERE path IN ({placeholders})", files))
-            expanded = set(symbol_ids)
-            dependency_symbols = set(symbol_ids)
-            relations: list[dict[str, Any]] = []
-            frontier = set(symbol_ids)
-            relation_seen: set[tuple[str, str, str, int]] = set()
-            for hop in range(1, max_hops + 1):
-                if not frontier or len(relations) >= max_relations:
-                    break
-                ordered_frontier = sorted(frontier)
-                placeholders = ",".join("?" for _ in ordered_frontier)
-                rows = store.rows(
-                    f"SELECT source, target, kind, path, line, confidence, resolved "
-                    f"FROM relations WHERE source IN ({placeholders}) OR target IN ({placeholders}) "
-                    f"ORDER BY CASE WHEN source IN ({placeholders}) THEN 0 ELSE 1 END, "
-                    f"confidence DESC, source, target LIMIT ?",
-                    [
-                        *ordered_frontier,
-                        *ordered_frontier,
-                        *ordered_frontier,
-                        max_relations - len(relations),
-                    ],
-                )
-                next_frontier: set[str] = set()
-                for relation in rows:
-                    key = (relation["source"], relation["target"], relation["kind"], hop)
-                    if key in relation_seen:
-                        continue
-                    relation_seen.add(key)
-                    relation["hop"] = hop
-                    relations.append(relation)
-                    expanded.add(relation["source"])
-                    if relation["resolved"]:
-                        expanded.add(relation["target"])
-                        if relation["source"] in frontier:
-                            dependency_symbols.add(relation["target"])
-                        if hop < max_hops and relation["source"] in frontier:
-                            next_frontier.add(relation["target"])
-                frontier = next_frontier
-            impacted_paths = set(files)
-            dependency_paths = set(files)
-            if expanded:
-                placeholders = ",".join("?" for _ in expanded)
-                impacted_paths.update(row["path"] for row in store.rows(f"SELECT DISTINCT path FROM symbols WHERE id IN ({placeholders})", expanded))
-            if dependency_symbols:
-                placeholders = ",".join("?" for _ in dependency_symbols)
-                dependency_paths.update(
-                    row["path"]
-                    for row in store.rows(
-                        f"SELECT DISTINCT path FROM symbols WHERE id IN ({placeholders})",
-                        dependency_symbols,
-                    )
-                )
-            modules: list[str] = []
-            tests: list[str] = []
-            if impacted_paths:
-                placeholders = ",".join("?" for _ in impacted_paths)
-                modules = [row["module"] for row in store.rows(f"SELECT DISTINCT module FROM files WHERE path IN ({placeholders}) ORDER BY module", impacted_paths)]
-                if modules:
-                    module_marks = ",".join("?" for _ in modules)
-                    tests = [row["path"] for row in store.rows(
-                        f"SELECT path FROM files WHERE module IN ({module_marks}) AND (path LIKE '%test%' OR path LIKE '%spec%') ORDER BY path", modules
-                    )]
             knowledge: list[dict[str, Any]] = []
             for record in store.all_knowledge():
                 source_keys = {source.path or source.id for source in record.sources}
-                if source_keys.intersection(impacted_paths | expanded):
+                if source_keys.intersection(affected_files | affected_symbols):
                     knowledge.append({
-                        "id": record.id, "title": record.title, "path": record.path,
-                        "freshness": record.status, "confidence": record.confidence,
+                        "id": record.id,
+                        "title": record.title,
+                        "path": record.path,
+                        "freshness": record.status,
+                        "confidence": record.confidence,
                     })
-            result = {
+            engine_result.update({
                 "input": {"files": files, "symbols": symbols},
                 "max_hops": max_hops,
                 "max_relations": max_relations,
-                "affected_files": sorted(impacted_paths),
-                "dependency_files": sorted(dependency_paths),
-                "affected_symbols": sorted(expanded),
-                "affected_modules": modules,
-                "affected_tests": tests,
                 "affected_knowledge": knowledge,
-                "relations": relations,
-                "relation_hops": {str(hop): sum(1 for relation in relations if relation.get("hop") == hop) for hop in range(1, max_hops + 1)},
-                "impact_explanation": self._impact_explanation(files, symbols, max_hops, relations, modules, tests),
-                "truncated": len(relations) >= max_relations,
-                "limitations": self.service.engine.status()["limitations"],
-                "fact_source": "builtin",
-            }
-            self._record_query(store, "knowledge_impact", len(json.dumps(result["input"])), result, started)
-            return result
+                "impact_explanation": self._impact_explanation(
+                    files,
+                    symbols,
+                    max_hops,
+                    list(engine_result.get("relations", [])),
+                    list(engine_result.get("affected_modules", [])),
+                    list(engine_result.get("affected_tests", [])),
+                ),
+                "truncated": len(engine_result.get("relations", [])) >= max_relations,
+                "fact_source": "codegraph",
+                "dependency_files": sorted(affected_files),
+                "limitations": self.service.engine.status().get("limitations", []),
+            })
+            self._record_query(store, "knowledge_impact", len(json.dumps(engine_result["input"])), engine_result, started)
+        return engine_result
 
     def context(self, task: str, max_tokens: int | None = None) -> dict[str, Any]:
         started = time.monotonic()
@@ -396,54 +302,202 @@ class KnowledgeAPI:
                 "token_budget": budget,
                 "estimated_tokens": 0,
                 "guidance_workflow": status.get("guidance_workflow", {}),
-                "fact_source": "codegraph" if self.config.engine == "codegraph" else "builtin",
-                "engine_limitations": (
-                    self.service.engine.status().get("limitations", [])
-                    if self.config.engine == "codegraph"
-                    else []
-                ),
+                "fact_source": "codegraph",
+                "engine_limitations": self.service.engine.status().get("limitations", []),
             }
+            candidates, allowed_paths = self._context_file_candidates(
+                task, intent, symbol_matches, impact, fragments
+            )
+            try:
+                ranked_files = rank_files(candidates, allowed_paths=allowed_paths)
+            except Exception:
+                ranked_files = fallback_rank_files(
+                    candidates,
+                    allowed_paths=allowed_paths,
+                    reason_code="ranking_error",
+                )
+            result.update(ranked_files.to_dict())
+            result["ranking_reason_code"] = ranked_files.reason_code
             self._fit_context(result, budget)
             self._record_query(store, "knowledge_context", len(task), result, started)
             return result
 
-    def _task_symbol_matches(self, task: str, terms: list[str]) -> list[dict[str, Any]]:
-        if self.config.engine == "codegraph":
-            matches: list[dict[str, Any]] = []
-            seen: set[str] = set()
-            for term in terms[:8]:
-                for symbol in self.service.engine.search_symbols(
-                    self.root, self.service.config, term, limit=3
-                ):
-                    item = asdict(symbol)
-                    if item["id"] not in seen:
-                        seen.add(item["id"])
-                        matches.append(item)
-            return matches[:12]
-        return self._store_symbol_matches(terms)
+    def _context_file_candidates(
+        self,
+        task: str,
+        intent: dict[str, Any],
+        symbol_matches: list[dict[str, Any]],
+        impact: dict[str, Any],
+        fragments: list[dict[str, Any]],
+    ) -> tuple[list[FileCandidate], set[str]]:
+        def normalized(path: object) -> str:
+            return str(path).replace("\\", "/").lstrip("./")
 
-    def _store_symbol_matches(self, terms: list[str]) -> list[dict[str, Any]]:
-        symbol_matches: list[dict[str, Any]] = []
+        snapshot = self.service.engine.snapshot(self.root, self.service.config)
+        allowed_paths = {normalized(item.path) for item in snapshot.files if normalized(item.path)}
+        modules = {normalized(item.path): item.module for item in snapshot.files}
+        pending_paths = {
+            normalized(path)
+            for path in self.service.status().get("pending_files", [])
+        }
+        terms = {term.lower() for term in self._symbol_terms(task)}
+        engine_status = self.service.engine.status()
+        capabilities = set(engine_status.get("capabilities", []))
+        unavailable_signals = {"graph"} if capabilities and "impact" not in capabilities else set()
+        relation_hops: dict[str, int] = {}
+        endpoint_hops: dict[str, int] = {}
+        for relation in impact.get("relations", []):
+            path = normalized(relation.get("path", ""))
+            hop = relation.get("hop")
+            if path and isinstance(hop, int):
+                relation_hops[path] = min(relation_hops.get(path, hop), hop)
+            if isinstance(hop, int):
+                for endpoint in (relation.get("source"), relation.get("target")):
+                    if endpoint:
+                        endpoint_id = str(endpoint)
+                        endpoint_hops[endpoint_id] = min(
+                            endpoint_hops.get(endpoint_id, hop), hop
+                        )
+                        # Public CodeGraph relation endpoints commonly use
+                        # ``path::symbol`` identifiers. Resolve that path
+                        # directly without consulting the removed SQLite symbol cache.
+                        endpoint_path = normalized(endpoint_id.split("::", 1)[0])
+                        if endpoint_path in allowed_paths:
+                            relation_hops[endpoint_path] = min(
+                                relation_hops.get(endpoint_path, hop), hop
+                            )
+        for item in symbol_matches:
+            symbol_id = str(item.get("id", ""))
+            path = normalized(item.get("path", ""))
+            if symbol_id in endpoint_hops and path:
+                hop = endpoint_hops[symbol_id]
+                relation_hops[path] = min(relation_hops.get(path, hop), hop)
+
+        candidates: list[FileCandidate] = []
+        task_explicitly_requests_tests = any(
+            term in task.lower() for term in ("test", "pytest", "unittest", "测试")
+        )
+
+        def matching_terms(value: str) -> set[str]:
+            lowered = value.lower()
+            return {term for term in terms if term in lowered}
+
+        def identity(path: str, symbol: str = "") -> dict[str, bool]:
+            lowered_path = path.lower()
+            filename = Path(path).name.lower()
+            stem = Path(path).stem.lower()
+            module = modules.get(path, self._module_from_path(path)).lower()
+            lowered_symbol = symbol.lower()
+            symbol_name = lowered_symbol.rsplit("::", 1)[-1].rsplit(".", 1)[-1]
+            return {
+                "exact_symbol": bool(symbol and any(term in {lowered_symbol, symbol_name} for term in terms)),
+                "qualified_symbol": bool(symbol and any(lowered_symbol.startswith(term) for term in terms)),
+                "exact_path": lowered_path in terms,
+                "exact_filename": filename in terms or stem in terms,
+                "exact_module": module in terms,
+            }
+
+        def add(
+            path: object,
+            *,
+            stage: str,
+            anchor: str = "",
+            symbol: str = "",
+            graph_hop: int | None = None,
+            affected_test: bool = False,
+            direct_knowledge_source: bool = False,
+            content: str = "",
+        ) -> None:
+            normalized_path = normalized(path)
+            if not normalized_path or normalized_path in pending_paths:
+                return
+            identities = identity(normalized_path, symbol)
+            is_test = "test" in Path(normalized_path).name.lower() or "test" in normalized_path.lower()
+            if is_test and not task_explicitly_requests_tests:
+                identities["exact_symbol"] = False
+                identities["qualified_symbol"] = False
+            candidates.append(FileCandidate(
+                path=normalized_path,
+                stages={stage},
+                anchors={anchor} if anchor else set(),
+                module=modules.get(normalized_path, self._module_from_path(normalized_path)),
+                path_terms=matching_terms(normalized_path),
+                symbol_terms=matching_terms(symbol),
+                content_terms=matching_terms(content),
+                graph_hop=graph_hop,
+                affected_test=affected_test,
+                direct_knowledge_source=direct_knowledge_source,
+                is_test=is_test,
+                task_role_match=bool(intent.get("task_type") != "investigation" and matching_terms(normalized_path)),
+                unavailable_signals=set(unavailable_signals),
+                original_order=len(candidates),
+                **identities,
+            ))
+
+        for match in symbol_matches:
+            symbol_id = str(match.get("id", match.get("name", "")))
+            symbol_name = str(match.get("name", ""))
+            add(
+                match.get("path", ""),
+                stage="direct_symbol",
+                anchor=symbol_id,
+                symbol=f"{symbol_id}::{symbol_name}",
+                graph_hop=relation_hops.get(normalized(match.get("path", ""))),
+            )
+        for key in ("dependency_files", "affected_files"):
+            for path in impact.get(key, []):
+                normalized_path = normalized(path)
+                add(path, stage="impact", graph_hop=relation_hops.get(normalized_path))
+        task_requests_tests = (
+            intent.get("task_type") in {"new_feature", "bug_fix", "impact_analysis"}
+            or any(term in task.lower() for term in ("test", "pytest", "unittest", "测试"))
+        )
+        affected_tests = sorted(
+            {normalized(path) for path in impact.get("affected_tests", []) if normalized(path)},
+            key=lambda path: (
+                -len(matching_terms(path)),
+                relation_hops.get(path, 99),
+                path,
+            ),
+        )[: 4 if task_requests_tests else 2]
+        for path in affected_tests:
+            add(path, stage="impact", graph_hop=1, affected_test=True)
+        for fragment in fragments:
+            if fragment.get("freshness") != "fresh" or fragment.get("requires_live_source"):
+                continue
+            fragment_content = str(fragment.get("content", ""))
+            lowered_content = fragment_content.lower()
+            for source in fragment.get("sources", []):
+                if source.get("path"):
+                    source_path = normalized(source["path"])
+                    source_id = str(source.get("id", ""))
+                    add(
+                        source_path,
+                        stage="knowledge_source",
+                        anchor=str(fragment.get("id", "")),
+                        direct_knowledge_source=(
+                            source_path.lower() in lowered_content
+                            or bool(source_id and source_id.lower() in lowered_content)
+                        ),
+                        content=fragment_content,
+                    )
+        for path in sorted(allowed_paths):
+            if matching_terms(path):
+                add(path, stage="fallback")
+        return candidates, allowed_paths
+
+    def _task_symbol_matches(self, task: str, terms: list[str]) -> list[dict[str, Any]]:
+        matches: list[dict[str, Any]] = []
         seen: set[str] = set()
-        with KnowledgeStore(self.service.db_path) as store:
-            for term in terms[:12]:
-                rows = store.rows(
-                    "SELECT id, name, kind, path, line, confidence, "
-                    "CASE WHEN name = ? OR id LIKE ? THEN 0 WHEN name LIKE ? THEN 1 ELSE 2 END AS match_rank "
-                    "FROM symbols "
-                    "WHERE name LIKE ? OR id LIKE ? "
-                    "ORDER BY match_rank, confidence DESC, LENGTH(name), id LIMIT 3",
-                    [term, f"%::{term}", f"{term}%", f"%{term}%", f"%{term}%"],
-                )
-                best_rank = min((row["match_rank"] for row in rows), default=2)
-                for row in rows:
-                    if best_rank == 0 and row["match_rank"] != 0:
-                        continue
-                    row.pop("match_rank", None)
-                    if row["id"] not in seen:
-                        seen.add(row["id"])
-                        symbol_matches.append(row)
-        return symbol_matches
+        for term in terms[:8]:
+            for symbol in self.service.engine.search_symbols(
+                self.root, self.service.config, term, limit=3
+            ):
+                item = asdict(symbol)
+                if item["id"] not in seen:
+                    seen.add(item["id"])
+                    matches.append(item)
+        return matches[:12]
 
     @staticmethod
     def _guidance_workflow_status(store: KnowledgeStore) -> dict[str, Any]:
@@ -608,14 +662,14 @@ class KnowledgeAPI:
 
     @classmethod
     def _reference_implementations(cls, symbol_matches: list[dict[str, Any]], selected_results: list[dict[str, Any]]) -> list[dict[str, Any]]:
-        references = [{"symbol": item["id"], "name": item["name"], "path": item["path"], "line": item.get("line"), "kind": item["kind"], "reason": "任务词与符号名称精确或前缀命中。"} for item in symbol_matches[:4]]
+        references = [{"symbol": item["name"], "symbol_id": item["id"], "name": item["name"], "path": item["path"], "line": item.get("line"), "kind": item["kind"], "reason": "任务词与符号名称精确或前缀命中。"} for item in symbol_matches[:4]]
         if not references: references = [{"record": item["id"], "path": item["path"], "kind": item["kind"], "reason": item.get("why_selected", "")} for item in selected_results[:4]]
         return references
 
     @staticmethod
     def _extension_points(symbol_matches: list[dict[str, Any]]) -> list[dict[str, Any]]:
         keywords = ("create", "add", "extend", "register", "save", "use", "新增", "扩展", "注册")
-        return [{"symbol": item["id"], "name": item["name"], "path": item["path"], "line": item.get("line"), "reason": "可作为新增功能的现有实现或扩展锚点。"} for item in symbol_matches if item.get("kind") in {"function", "method", "class"} or any(keyword in item.get("name", "").lower() for keyword in keywords)][:4]
+        return [{"symbol": item["name"], "symbol_id": item["id"], "name": item["name"], "path": item["path"], "line": item.get("line"), "reason": "可作为新增功能的现有实现或扩展锚点。"} for item in symbol_matches if item.get("kind") in {"function", "method", "class"} or any(keyword in item.get("name", "").lower() for keyword in keywords)][:4]
 
     @staticmethod
     def _pending_sources(record: KnowledgeRecord, pending: set[str]) -> list[str]:
@@ -648,14 +702,42 @@ class KnowledgeAPI:
     @staticmethod
     def _fit_context(result: dict[str, Any], budget: int) -> None:
         result["symbols"] = result["symbols"][:8]
+        result["withheld_files"] = [
+            item for item in result.get("withheld_files", [])
+            if item.get("reason_code") == "token_budget"
+        ]
+        result["rejected_files"] = []
+        for item in result.get("knowledge", []):
+            item["sources"] = item.get("sources", [])[:4]
+            item["withheld_sources"] = item.get("withheld_sources", [])[:4]
         for key, limit in [("affected_files", 8), ("affected_tests", 4), ("affected_knowledge", 4)]:
             result["impact"][key] = result["impact"][key][:limit]
         result["impact"]["affected_modules"] = result["impact"]["affected_modules"][:8]
-        result["reference_implementations"] = result.get("reference_implementations", [])[:2]
-        result["extension_points"] = result.get("extension_points", [])[:2]
+        result["reference_implementations"] = result.get("reference_implementations", [])[:1]
+        result["extension_points"] = result.get("extension_points", [])[:1]
         explanation = result.get("retrieval_explanation", {})
-        explanation["selected_records"] = explanation.get("selected_records", [])[:2]
-        explanation.get("impact", {}).update({"files": explanation.get("impact", {}).get("files", [])[:4], "tests": explanation.get("impact", {}).get("tests", [])[:4]})
+        explanation["selected_records"] = explanation.get("selected_records", [])[:1]
+        explanation["reference_implementations"] = result.get(
+            "reference_implementations", []
+        )[:1]
+        explanation["reference_implementations"] = [
+            {
+                "symbol": item.get("symbol", item.get("record", "")),
+                "path": item.get("path", ""),
+            }
+            for item in explanation["reference_implementations"]
+        ]
+        explanation["extension_points"] = [
+            {
+                "symbol": item.get("symbol", ""),
+                "path": item.get("path", ""),
+            }
+            for item in result.get("extension_points", [])[:1]
+        ]
+        explanation.get("impact", {}).update({
+            "files": explanation.get("impact", {}).get("files", [])[:2],
+            "tests": explanation.get("impact", {}).get("tests", [])[:2],
+        })
 
         def size() -> int:
             result["estimated_tokens"] = 0
@@ -666,6 +748,107 @@ class KnowledgeAPI:
         for _ in range(200):
             if size() <= budget:
                 return
+            rankings_with_breakdowns = [
+                item for item in result.get("file_rankings", [])
+                if item.get("score_breakdown")
+            ]
+            if rankings_with_breakdowns:
+                rankings_with_breakdowns[-1].pop("score_breakdown", None)
+                continue
+            for field in ("protected", "requires_live_source", "selection_stage", "score"):
+                ranking = next(
+                    (item for item in reversed(result.get("file_rankings", [])) if field in item),
+                    None,
+                )
+                if ranking is not None:
+                    ranking.pop(field)
+                    break
+            else:
+                ranking = None
+            if ranking is not None:
+                continue
+            if result.get("ranking_reason_code") is None and "ranking_reason_code" in result:
+                result.pop("ranking_reason_code")
+                continue
+            if result.get("protected_candidates_truncated") is False:
+                result.pop("protected_candidates_truncated")
+                continue
+            supporting_files = result.get("supporting_files", [])
+            if supporting_files:
+                path = supporting_files.pop()
+                result["files"] = [item for item in result.get("files", []) if item != path]
+                result["file_rankings"] = [
+                    item for item in result.get("file_rankings", [])
+                    if item.get("path") != path
+                ]
+                result.setdefault("withheld_files", []).append({
+                    "path": path,
+                    "reason_code": "token_budget",
+                })
+                continue
+            if result.get("rejected_files"):
+                result["rejected_files"].pop()
+                continue
+            optional_list = next(
+                (
+                    items for items in (
+                        result.get("reference_implementations", []),
+                        result.get("extension_points", []),
+                        explanation.get("reference_implementations", []),
+                        explanation.get("extension_points", []),
+                        explanation.get("selected_records", []),
+                        explanation.get("unknowns", []),
+                        explanation.get("impact", {}).get("files", []),
+                        explanation.get("impact", {}).get("tests", []),
+                        result.get("unknowns", []),
+                        result.get("likely_modules", []),
+                        result.get("verification_commands", []),
+                    )
+                    if items
+                ),
+                None,
+            )
+            if optional_list is not None:
+                optional_list.pop()
+                continue
+            optional_explanation_key = next(
+                (
+                    key for key in (
+                        "impact", "rationale", "signals", "reference_count",
+                        "extension_point_count", "unknown_count",
+                    )
+                    if key in explanation
+                ),
+                None,
+            )
+            if optional_explanation_key is not None:
+                explanation.pop(optional_explanation_key)
+                continue
+            empty_explanation_key = next(
+                (
+                    key for key in ("reference_implementations", "extension_points")
+                    if key in explanation and not explanation[key]
+                ),
+                None,
+            )
+            if empty_explanation_key is not None:
+                explanation.pop(empty_explanation_key)
+                continue
+            guidance = result.get("guidance_workflow")
+            if isinstance(guidance, dict) and set(guidance) != {"available"}:
+                result["guidance_workflow"] = {"available": bool(guidance.get("available"))}
+                continue
+            knowledge_sources = next(
+                (
+                    item.get("sources", [])
+                    for item in result.get("knowledge", [])
+                    if len(item.get("sources", [])) > 1
+                ),
+                None,
+            )
+            if knowledge_sources is not None:
+                knowledge_sources.pop()
+                continue
             contents = [item for item in result["knowledge"] if item.get("tokens", 0) > 60]
             if contents:
                 longest = max(contents, key=lambda item: len(item["content"]))
@@ -679,13 +862,13 @@ class KnowledgeAPI:
             if impact_lists:
                 max(impact_lists, key=len).pop()
                 continue
-            if result["symbols"]:
+            if len(result["symbols"]) > 1:
                 result["symbols"].pop()
                 continue
             if len(result["gaps"]) > 1:
                 result["gaps"].pop()
                 continue
-            result["summary"] = trim_to_tokens(result["summary"], 30)
+            result["summary"] = trim_to_tokens(result["summary"], 10)
             break
         size()
 

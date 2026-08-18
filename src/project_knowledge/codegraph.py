@@ -86,11 +86,20 @@ def _host_path(project: Path) -> str:
     return CodeGraphCommandResolver._windows_path(project.resolve())
 
 
-def _node_identity(node: dict[str, Any]) -> str:
-    value = node.get("id") or node.get("qualifiedName") or node.get("name")
-    if not str(value or "").strip():
+def _node_identity(node: dict[str, Any], root: Path | None = None) -> str:
+    raw_id = str(node.get("id", "") or "").strip()
+    public_name = str(node.get("qualifiedName") or node.get("name") or "").strip()
+    if root is not None and public_name:
+        path = _node_path(node, root)
+        if path:
+            return f"{path}::{public_name}"
+    if raw_id and "::" in raw_id:
+        return raw_id
+    if public_name:
+        return public_name
+    if not raw_id:
         raise CodeGraphError("CodeGraph node missing identity")
-    return str(value).strip()
+    return raw_id
 
 
 def _validated_project_path(value: str, root: Path) -> str:
@@ -274,12 +283,11 @@ class CodeGraphClient:
 
 
 class CodeGraphEngine:
-    """CodeGraph-backed engine with the existing local store as a compatibility cache."""
+    """Code facts provided exclusively by the public CodeGraph CLI."""
 
     def __init__(self, config: ProjectConfig) -> None:
         self.config = config
         self.client: CodeGraphClient | None = None
-        self._builtin = None
         self._diagnostic: dict[str, Any] | None = None
         self._symbol_references: dict[str, str] = {}
 
@@ -289,18 +297,13 @@ class CodeGraphEngine:
             self._symbol_references.clear()
         return self.client
 
-    def _builtin_engine(self):
-        if self._builtin is None:
-            from .engine import BuiltinCodeIndexEngine
-            self._builtin = BuiltinCodeIndexEngine()
-        return self._builtin
+    def snapshot(self, root: Path, config: ProjectConfig):
+        from .engine import CodeIndexSnapshot, IndexedFile, _module_for
 
-    def discover(self, root: Path, config: ProjectConfig):
-        from .engine import IndexedFile, _module_for
-        files = self._client(root).files()
+        payload = self._client(root).snapshot()
         result: list[IndexedFile] = []
-        for item in files:
-            path = str(item.get("path", "")).replace("\\", "/").lstrip("./")
+        for item in payload["files"]:
+            path = _validated_project_path(str(item.get("path", "")), root)
             if not path:
                 continue
             language = str(item.get("language", "unknown")).lower()
@@ -308,18 +311,16 @@ class CodeGraphEngine:
             source = root / path
             try:
                 stat = source.stat()
-                content_hash = str(item.get("contentHash", "")) or "sha256:" + __import__("hashlib").sha256(source.read_bytes()).hexdigest()
+                content_hash = str(item.get("content_hash", ""))
                 size = int(item.get("size", stat.st_size) or stat.st_size)
                 mtime_ns = stat.st_mtime_ns
             except OSError:
                 continue
             result.append(IndexedFile(path, language_names.get(language, language.title()), _module_for(path), size, mtime_ns, content_hash))
-        return sorted(result, key=lambda item: item.path)
-
-    def parse(self, root: Path, indexed_file):
-        # The SQLite store remains a compatibility cache; CodeGraph is authoritative
-        # for guidance evidence and graph queries.
-        return self._builtin_engine().parse(root, indexed_file)
+        return CodeIndexSnapshot(
+            snapshot_id=str(payload["snapshot_id"]),
+            files=tuple(sorted(result, key=lambda item: item.path)),
+        )
 
     def initialize(self, root: Path, config: ProjectConfig):
         return self._client(root).init()
@@ -375,13 +376,13 @@ class CodeGraphEngine:
             "command": command,
             "details": details,
             "capabilities": [
-                "initialize", "sync", "symbols", "search_symbols", "get_source",
+                "initialize", "sync", "snapshot", "symbols", "search_symbols", "get_source",
                 "trace", "impact", "affected_tests", "calls",
             ],
             "limitations": [
                 "requires an initialized CodeGraph project",
                 "uses only the public CodeGraph CLI contract",
-                "SQLite remains a compatibility cache for generated knowledge",
+                "does not fall back to local source parsing",
             ],
         }
 
@@ -390,7 +391,7 @@ class CodeGraphEngine:
         symbols = []
         for item in self._client(root).query(query, limit=limit):
             node = item.get("node", item)
-            identity = _node_identity(node)
+            identity = _node_identity(node, root)
             self._symbol_references[identity] = str(
                 node.get("qualifiedName") or node.get("name") or identity
             )
@@ -419,7 +420,7 @@ class CodeGraphEngine:
             payload = self._client(root).callers(name, limit=limit) if direction == "callers" else self._client(root).callees(name, limit=limit)
             for item in payload.get(payload_key, []) if isinstance(payload, dict) else []:
                 node = item.get("node", item)
-                node_id = _node_identity(node)
+                node_id = _node_identity(node, root)
                 source, target = (
                     (node_id, symbol_id) if direction == "callers" else (symbol_id, node_id)
                 )
@@ -442,7 +443,7 @@ class CodeGraphEngine:
             nodes = payload.get("affected", []) if isinstance(payload, dict) else []
             for item in nodes:
                 node = item.get("node", item) if isinstance(item, dict) else {}
-                target = _node_identity(node)
+                target = _node_identity(node, root)
                 path = _node_path(node, root)
                 affected_symbols.add(target)
                 if path:
@@ -496,5 +497,3 @@ class CodeGraphEngine:
                 break
         return sorted(set(tests))
 
-    def entrypoints(self, root: Path, config: ProjectConfig, limit=200):
-        return [{"source": item, "kind": "codegraph"} for item in self._client(root).query("main", limit=limit)]

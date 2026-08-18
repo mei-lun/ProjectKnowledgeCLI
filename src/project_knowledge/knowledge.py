@@ -36,7 +36,9 @@ class KnowledgeGenerator:
     def generate(self, refresh_generated: bool = True) -> list[KnowledgeRecord]:
         self._ensure_curated_templates()
         if refresh_generated:
-            generated = [self._project_map(), *self._module_maps(), self._routes(), self._entrypoints(), self._test_map()]
+            for obsolete in ("routes.md", "entrypoints.md"):
+                (self.generated_root / obsolete).unlink(missing_ok=True)
+            generated = [self._project_map(), *self._module_maps(), self._test_map()]
             generated = [record for record in generated if record is not None]
             for record in generated:
                 self.store.upsert_knowledge(record)
@@ -68,11 +70,7 @@ class KnowledgeGenerator:
             key = source.id or source.path
             if not key:
                 continue
-            if source.type == "symbol":
-                row = self.store.connection.execute("SELECT hash FROM symbols WHERE id = ?", (source.id,)).fetchone()
-                if row:
-                    values[key] = row["hash"]
-            elif source.path:
+            if source.path:
                 row = self.store.connection.execute("SELECT hash FROM files WHERE path = ?", (source.path,)).fetchone()
                 if row:
                     values[key] = row["hash"]
@@ -145,11 +143,11 @@ class KnowledgeGenerator:
 | --- | ---: |
 {module_rows}
 
-## 静态分析边界
+## 代码事实边界
 
-- Python 符号和语法通过标准 AST 提取。
-- 其他语言使用保守的模式提取，因此可信度较低。
-- 动态分派、反射、运行时依赖注入以及运行时生成的路由可能无法被识别。
+- 文件快照和代码事实由 CodeGraph 公共 CLI 提供。
+- 符号、调用关系和影响范围在查询时实时读取，不由本地解析器生成。
+- CodeGraph 公共接口未提供的路由与入口点不会生成占位结论。
 
 ## 解析错误
 
@@ -168,22 +166,10 @@ class KnowledgeGenerator:
         for module_row in modules:
             module = module_row["module"]
             files = self.store.rows("SELECT path, language FROM files WHERE module = ? ORDER BY path", [module])
-            symbols = self.store.rows(
-                "SELECT id, name, kind, path, line, confidence FROM symbols WHERE path IN (SELECT path FROM files WHERE module = ?) AND kind != 'module' ORDER BY path, line LIMIT 300",
-                [module],
-            )
-            relations = self.store.rows(
-                "SELECT source, target, kind, confidence, resolved FROM relations WHERE path IN (SELECT path FROM files WHERE module = ?) ORDER BY confidence DESC LIMIT 150",
-                [module],
-            )
-            symbol_total = self.store.connection.execute(
-                "SELECT COUNT(*) FROM symbols WHERE path IN (SELECT path FROM files WHERE module = ?) AND kind != 'module'",
-                (module,),
-            ).fetchone()[0]
-            relation_total = self.store.connection.execute(
-                "SELECT COUNT(*) FROM relations WHERE path IN (SELECT path FROM files WHERE module = ?)",
-                (module,),
-            ).fetchone()[0]
+            symbols: list[dict[str, object]] = []
+            relations: list[dict[str, object]] = []
+            symbol_total = 0
+            relation_total = 0
             file_lines = "\n".join(
                 f"- `{item['path']}`（{LANGUAGE_TITLES.get(item['language'], item['language'])}）"
                 for item in files
@@ -233,10 +219,7 @@ class KnowledgeGenerator:
         return records
 
     def _entrypoints(self) -> KnowledgeRecord:
-        relations = self.store.rows(
-            "SELECT source, target, kind, path, line, confidence FROM relations "
-            "WHERE kind IN ('service_start', 'dispatch') ORDER BY path, line, kind"
-        )
+        relations: list[dict[str, object]] = []
         rows: list[str] = []
         sources: list[SourceReference] = []
         for item in relations:
@@ -246,12 +229,7 @@ class KnowledgeGenerator:
                 f"{item['path']}:{item['line']} | {item['confidence']:.2f} |"
             )
             sources.append(SourceReference(type="file", path=item["path"], line=item["line"]))
-        filename_rows = self.store.rows(
-            "SELECT path FROM files WHERE language = 'Lua' "
-            "AND (lower(path) LIKE '%/main.lua' OR lower(path) LIKE 'main.lua' "
-            "OR lower(path) LIKE '%/bootstrap.lua' OR lower(path) LIKE 'bootstrap.lua' "
-            "OR lower(path) LIKE '%/start.lua' OR lower(path) LIKE 'start.lua') ORDER BY path"
-        )
+        filename_rows: list[dict[str, object]] = []
         known_paths = {item["path"] for item in relations}
         for item in filename_rows:
             if item["path"] in known_paths:
@@ -287,7 +265,7 @@ class KnowledgeGenerator:
         )
 
     def _routes(self) -> KnowledgeRecord:
-        routes = self.store.rows("SELECT method, route, handler, path, line FROM routes ORDER BY route, method")
+        routes: list[dict[str, object]] = []
         rows = "\n".join(
             f"| {item['method']} | `{item['route']}` | `{item['handler']}` | `{item['path']}:{item['line']}` |"
             for item in routes
@@ -315,9 +293,7 @@ class KnowledgeGenerator:
         )
         rows: list[str] = []
         for item in files:
-            symbols = self.store.connection.execute(
-                "SELECT COUNT(*) FROM symbols WHERE path = ? AND (name LIKE 'test%' OR name LIKE '%Test%')", (item["path"],)
-            ).fetchone()[0]
+            symbols = 0
             rows.append(f"| `{item['path']}` | {item['module']} | {symbols} |")
         body = "\n".join(rows) or "| 未检测到测试 | - | 0 |"
         content = f"""{GENERATED_NOTICE}
@@ -333,6 +309,70 @@ class KnowledgeGenerator:
             record_id="generated.test-map", kind="test", title="测试地图",
             relative_path=f"{self.config.generated_root}/test-map.md", content=content,
             sources=sources, tags=["tests", "verification"],
+        )
+
+    # These definitions intentionally supersede the historical local-symbol
+    # implementations above. Generated pages describe only the CodeGraph file
+    # snapshot; live symbol and relationship facts stay behind the adapter.
+    def _module_maps(self) -> list[KnowledgeRecord]:
+        records: list[KnowledgeRecord] = []
+        for module_row in self.store.rows("SELECT DISTINCT module FROM files ORDER BY module"):
+            module = module_row["module"]
+            files = self.store.rows(
+                "SELECT path, language FROM files WHERE module = ? ORDER BY path", [module]
+            )
+            file_lines = "\n".join(
+                f"- `{item['path']}`（{LANGUAGE_TITLES.get(item['language'], item['language'])}）"
+                for item in files
+            ) or "- 无"
+            content = f"""{GENERATED_NOTICE}
+
+# 模块：{module}
+
+## 文件
+
+{file_lines}
+
+## 代码事实
+
+符号、调用关系和影响范围由 CodeGraph 在查询时实时提供，本页不缓存或复制这些事实。
+"""
+            sources = [SourceReference(type="file", path=item["path"]) for item in files]
+            records.append(self._record(
+                record_id=f"generated.module.{slug(module)}",
+                kind="module",
+                title=f"模块：{module}",
+                relative_path=f"{self.config.generated_root}/modules/{slug(module)}.md",
+                content=content,
+                sources=sources,
+                tags=["module", module],
+            ))
+        return records
+
+    def _test_map(self) -> KnowledgeRecord:
+        files = self.store.rows(
+            "SELECT path, module FROM files WHERE path LIKE '%test%' OR path LIKE '%spec%' ORDER BY path"
+        )
+        body = "\n".join(
+            f"| `{item['path']}` | {item['module']} |" for item in files
+        ) or "| 未检测到测试 | - |"
+        content = f"""{GENERATED_NOTICE}
+
+# 测试地图
+
+| 测试文件 | 模块 |
+| --- | --- |
+{body}
+"""
+        sources = [SourceReference(type="file", path=item["path"]) for item in files]
+        return self._record(
+            record_id="generated.test-map",
+            kind="test",
+            title="测试地图",
+            relative_path=f"{self.config.generated_root}/test-map.md",
+            content=content,
+            sources=sources,
+            tags=["tests", "verification"],
         )
 
     def _ensure_curated_templates(self) -> None:

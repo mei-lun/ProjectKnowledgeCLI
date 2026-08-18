@@ -4,6 +4,7 @@ import unittest
 
 from project_knowledge.models import KnowledgeRecord
 from project_knowledge.schemas import (
+    CONFIG_SCHEMA,
     EVIDENCE_PACK_SCHEMA,
     KNOWLEDGE_RECORD_SCHEMA,
     PROPOSAL_SCHEMA,
@@ -13,6 +14,12 @@ from project_knowledge.schemas import (
 
 
 class SchemaTests(unittest.TestCase):
+    def test_config_schema_only_allows_codegraph_engine(self) -> None:
+        self.assertEqual(
+            CONFIG_SCHEMA["properties"]["index"]["properties"]["engine"]["enum"],
+            ["codegraph"],
+        )
+
     def test_required_empty_collections_are_preserved_and_validate(self) -> None:
         payload = KnowledgeRecord(
             id="generated.routes",

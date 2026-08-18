@@ -238,19 +238,3 @@ class Relation:
     resolved: bool = False
 
 
-@dataclass(slots=True)
-class Route:
-    method: str
-    route: str
-    handler: str
-    path: str
-    line: int
-
-
-@dataclass(slots=True)
-class ParseResult:
-    symbols: list[Symbol] = field(default_factory=list)
-    relations: list[Relation] = field(default_factory=list)
-    routes: list[Route] = field(default_factory=list)
-    parse_error: str | None = None
-    parser: str = "generic"

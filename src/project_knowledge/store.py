@@ -6,8 +6,8 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Iterable, Iterator
 
-from .engine import IndexedFile
-from .models import KnowledgeRecord, ParseResult, SourceReference
+from .engine import CodeIndexSnapshot
+from .models import KnowledgeRecord, SourceReference
 
 
 SCHEMA_VERSION = 3
@@ -399,42 +399,31 @@ class KnowledgeStore:
     def file_hashes(self) -> dict[str, str]:
         return {row["path"]: row["hash"] for row in self.connection.execute("SELECT path, hash FROM files")}
 
-    def replace_file(self, indexed: IndexedFile, parsed: ParseResult) -> None:
-        self.connection.execute("DELETE FROM files WHERE path = ?", (indexed.path,))
-        self.connection.execute(
+    def replace_code_snapshot(self, snapshot: CodeIndexSnapshot) -> None:
+        self.connection.execute("DELETE FROM routes")
+        self.connection.execute("DELETE FROM relations")
+        self.connection.execute("DELETE FROM symbols")
+        self.connection.execute("DELETE FROM files")
+        self.connection.executemany(
             "INSERT INTO files(path, language, module, size, mtime_ns, hash, parser, parse_error) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-            (indexed.path, indexed.language, indexed.module, indexed.size, indexed.mtime_ns, indexed.content_hash, parsed.parser, parsed.parse_error),
+            [
+                (
+                    item.path,
+                    item.language,
+                    item.module,
+                    item.size,
+                    item.mtime_ns,
+                    item.content_hash,
+                    "codegraph-snapshot",
+                    None,
+                )
+                for item in snapshot.files
+            ],
         )
-        self.connection.executemany(
-            "INSERT INTO symbols(id, name, kind, path, line, end_line, signature, hash, confidence) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            [(item.id, item.name, item.kind, item.path, item.line, item.end_line, item.signature, item.source_hash, item.confidence) for item in parsed.symbols],
-        )
-        self.connection.executemany(
-            "INSERT INTO relations(source, target, kind, path, line, confidence, resolved) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            [(item.source, item.target, item.kind, item.path, item.line, item.confidence, int(item.resolved)) for item in parsed.relations],
-        )
-        self.connection.executemany(
-            "INSERT INTO routes(method, route, handler, path, line) VALUES (?, ?, ?, ?, ?)",
-            [(item.method, item.route, item.handler, item.path, item.line) for item in parsed.routes],
-        )
+        self.set_meta("codegraph_snapshot_id", snapshot.snapshot_id)
 
     def delete_files(self, paths: Iterable[str]) -> None:
         self.connection.executemany("DELETE FROM files WHERE path = ?", [(path,) for path in paths])
-
-    def resolve_relations(self) -> None:
-        symbols = list(self.connection.execute("SELECT id, name FROM symbols"))
-        by_name: dict[str, list[str]] = {}
-        for symbol in symbols:
-            by_name.setdefault(symbol["name"], []).append(symbol["id"])
-        relations = list(self.connection.execute("SELECT id, target FROM relations WHERE resolved = 0"))
-        for relation in relations:
-            target_name = relation["target"].rsplit(".", 1)[-1]
-            candidates = by_name.get(target_name, [])
-            if len(candidates) == 1:
-                self.connection.execute(
-                    "UPDATE relations SET target = ?, resolved = 1, confidence = MIN(confidence, 0.9) WHERE id = ?",
-                    (candidates[0], relation["id"]),
-                )
 
     def upsert_knowledge(self, record: KnowledgeRecord) -> None:
         values = (
@@ -532,11 +521,18 @@ class KnowledgeStore:
         return [(self._knowledge(row), float(row["score"])) for row in rows]
 
     def counts(self) -> dict[str, int]:
-        tables = ["files", "symbols", "relations", "routes", "knowledge"]
-        counts = {table: int(self.connection.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]) for table in tables}
+        counts = {
+            "files": int(self.connection.execute("SELECT COUNT(*) FROM files").fetchone()[0]),
+            "knowledge": int(self.connection.execute("SELECT COUNT(*) FROM knowledge").fetchone()[0]),
+            # Legacy tables remain in the on-disk schema for upgrade compatibility,
+            # but CodeGraph is authoritative and runtime code never reads them.
+            "symbols": 0,
+            "relations": 0,
+            "routes": 0,
+        }
         counts["modules"] = int(self.connection.execute("SELECT COUNT(DISTINCT module) FROM files").fetchone()[0])
         counts["parse_errors"] = int(self.connection.execute("SELECT COUNT(*) FROM files WHERE parse_error IS NOT NULL").fetchone()[0])
-        counts["unresolved_relations"] = int(self.connection.execute("SELECT COUNT(*) FROM relations WHERE resolved = 0").fetchone()[0])
+        counts["unresolved_relations"] = 0
         counts["stale_knowledge"] = int(self.connection.execute("SELECT COUNT(*) FROM knowledge WHERE status IN ('stale', 'potentially_stale')").fetchone()[0])
         counts["conflicted_knowledge"] = int(self.connection.execute("SELECT COUNT(*) FROM knowledge WHERE status = 'conflicted'").fetchone()[0])
         return counts

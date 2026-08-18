@@ -1,11 +1,13 @@
 # 架构
 
+0.1.30 人工复核：代码事实边界已统一为真实 CodeGraph 公共 CLI；本地 parser、builtin engine 和 SQLite 事实读取均已移除；Adapter 将内部节点 ID 转换为 `path::公开符号名`。
+
 Project Knowledge CLI 是一个本地优先的 Python 应用，CLI 和 MCP 适配器共用同一套核心能力。运行时不依赖第三方软件包。
 
 ## 职责边界
 
 - `ProjectService` 负责初始化、同步、原子重建、文件监视、健康检查以及由标记边界保护的客户端集成。
-- `CodeIndexEngine` 是可替换的结构索引边界。内置实现使用 Python AST 提取和保守的多语言模式匹配；CodeGraph Adapter 通过 1.5 公共 CLI 提供实时文件、符号、追踪、影响和受影响测试事实，不读取私有数据库且不回退 builtin。
+- `CodeIndexEngine` 是 CodeGraph 公共 CLI 的事实边界。运行时不再内置本地 parser，也不从 SQLite 旧符号表恢复代码事实；CodeGraph 不可用或项目未初始化时明确失败。
 - `KnowledgeStore` 负责私有 SQLite 架构、WAL 行为、一致性事务、全文检索和查询统计，其数据表不属于公共 API。
 - `KnowledgeGenerator` 负责生成 Markdown、清单记录、发现人工文档中的来源标记以及维护新鲜度状态，绝不覆盖现有人工维护文档。初始 curated 模板带有未审阅标记，在删除标记前只能作为 `inferred` 信息，不能冒充已验证的项目意图。面向人的生成标题、说明、表头和索引状态默认使用中文，底层记录 ID 与接口枚举保持稳定。
 - 原子重建会将人工知识和决策记录的哈希基线带入替换数据库。仅来源发生变化时，过期状态会跨重建保留；编辑人工维护正文是接受当前哈希的显式验证事件。
@@ -54,9 +56,14 @@ Project Knowledge CLI 是一个本地优先的 Python 应用，CLI 和 MCP 适�
 <!-- project-kb:source file="src/project_knowledge/real_project.py" -->
 <!-- project-kb:source file="src/project_knowledge/knowledge.py" -->
 <!-- project-kb:source file="evaluation/real_project_harness.py" -->
-<!-- project-kb:source file="tests/test_wp02_evidence.py" -->
 - 0.1.15 WP-09：only-Markdown 仍限制三页；仅当非测试源码模块候选得分至少达到当前第三页的 0.8 时才替换低优先页面，防止新增 generated 页面挤掉代码来源且避免为 recall 牺牲 precision。不得增加页数或降低阈值。
 <!-- project-kb:source file="src/project_knowledge/evaluate.py" -->
 <!-- project-kb:source file="tests/test_evaluate.py" -->
-<!-- project-kb:source file="tests/test_wp02_knowledge.py" -->
 <!-- /project-kb:generated -->
+
+## WP-12A 检索证据边界（0.1.29）
+
+候选生成与文件排序是两个独立阶段：`src/project_knowledge/retrieval.py` 负责任务、符号、知识来源和影响关系候选，`src/project_knowledge/ranking.py` 负责确定性的 `policy-v1` 评分、`core_files`/`supporting_files` 分区和 fallback 状态。`KnowledgeAPI.context()` 在 stale/pending 屏蔽之后才排序，并返回有序文件证据和 `file_rankings`；排序分数不能把知识页引用的全部文件自动提升为核心证据。
+
+<!-- project-kb:source file="src/project_knowledge/ranking.py" -->
+<!-- project-kb:source file="src/project_knowledge/retrieval.py" -->

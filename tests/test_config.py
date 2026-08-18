@@ -5,10 +5,32 @@ import unittest
 from pathlib import Path
 
 from project_knowledge.config import ProjectConfig
+from project_knowledge.errors import UnsupportedEngineError
 from project_knowledge.util import approx_tokens, marker_update, trim_to_tokens
 
 
 class ConfigTests(unittest.TestCase):
+    def test_default_engine_is_codegraph(self) -> None:
+        self.assertEqual(ProjectConfig().engine, "codegraph")
+
+    def test_legacy_builtin_config_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / ".project-kb.yml").write_text(
+                "version: 1\nindex:\n  engine: builtin\n", encoding="utf-8"
+            )
+            with self.assertRaises(UnsupportedEngineError) as raised:
+                ProjectConfig.load(root)
+            self.assertEqual(
+                raised.exception.to_dict(),
+                {
+                    "error": "unsupported_engine",
+                    "configured_engine": "builtin",
+                    "supported_engines": ["codegraph"],
+                    "migration": "set index.engine to codegraph and initialize CodeGraph for this project",
+                },
+            )
+
     def test_config_round_trip(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

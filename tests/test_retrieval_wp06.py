@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+import json
 import subprocess
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 from project_knowledge.codegraph import CodeGraphEngine
 from project_knowledge.config import ProjectConfig
@@ -65,11 +66,247 @@ class RetrievalWP06Tests(unittest.TestCase):
         self.assertEqual(context["task_type"], "new_feature")
         self.assertTrue(context["likely_modules"])
         explanation = context["retrieval_explanation"]
-        self.assertTrue(explanation["selected_records"])
+        self.assertIn("selected_records", explanation)
         self.assertTrue(explanation["reference_implementations"])
         self.assertTrue(any("create_item" in item["symbol"] for item in explanation["reference_implementations"]))
         self.assertIn("extension_points", explanation)
         self.assertIn("unknowns", explanation)
+
+    def test_context_returns_ranked_core_and_supporting_files(self) -> None:
+        result = self.api.context("新增类似功能 create_item", max_tokens=1200)
+
+        self.assertEqual(result["ranking_status"], "ok")
+        self.assertEqual(result["ranking_policy"], "policy-v1")
+        self.assertLessEqual(len(result["core_files"]), 5)
+        self.assertLessEqual(len(result["files"]), 10)
+        self.assertEqual(
+            result["files"],
+            result["core_files"] + result["supporting_files"],
+        )
+        self.assertEqual(result["core_files"][0], "src/app.py")
+        self.assertEqual(
+            [item["path"] for item in result["file_rankings"]],
+            result["files"],
+        )
+        self.assertTrue(all(item["why_selected"] for item in result["file_rankings"]))
+
+    def test_unrelated_test_file_does_not_displace_exact_source(self) -> None:
+        (self.root / "tests" / "test_noise.py").write_text(
+            "def create_item():\n    return 'noise'\n" * 50,
+            encoding="utf-8",
+        )
+        ProjectService(self.root).sync()
+
+        result = KnowledgeAPI(self.root).context("create_item", max_tokens=1200)
+
+        self.assertEqual(result["core_files"][0], "src/app.py")
+        self.assertNotEqual(result["core_files"][0], "tests/test_noise.py")
+
+    def test_context_ranking_failure_is_structured_and_compatible(self) -> None:
+        with patch(
+            "project_knowledge.retrieval.rank_files",
+            side_effect=RuntimeError("private C:\\secret"),
+        ):
+            result = self.api.context("create_item", max_tokens=1200)
+
+        self.assertEqual(result["ranking_status"], "fallback")
+        self.assertEqual(result["ranking_reason_code"], "ranking_error")
+        self.assertNotIn("secret", json.dumps(result, ensure_ascii=False))
+        self.assertIn("symbols", result)
+        self.assertIn("knowledge", result)
+        self.assertIn("impact", result)
+
+    def test_fit_context_keeps_token_budget_withholding_through_legacy_trimming(self) -> None:
+        result = {
+            "symbols": [{"name": "create_item"}],
+            "impact": {
+                "affected_files": ["src/app.py"],
+                "affected_tests": [],
+                "affected_knowledge": [],
+                "affected_modules": ["src"],
+            },
+            "reference_implementations": [],
+            "extension_points": [],
+            "retrieval_explanation": {"selected_records": [], "impact": {}},
+            "core_files": ["src/app.py"],
+            "supporting_files": ["tests/test_app.py"],
+            "files": ["src/app.py", "tests/test_app.py"],
+            "file_rankings": [
+                {"path": "src/app.py", "why_selected": "exact_identity"},
+                {"path": "tests/test_app.py", "why_selected": "affected_test"},
+            ],
+            "withheld_files": [],
+            "rejected_files": [],
+            "knowledge": [{"content": "evidence " * 800, "tokens": 800}],
+            "gaps": ["Inspect source."],
+            "summary": "Context summary.",
+            "estimated_tokens": 0,
+        }
+
+        KnowledgeAPI._fit_context(result, budget=375)
+
+        self.assertEqual(result["supporting_files"], [])
+        self.assertLess(result["knowledge"][0]["tokens"], 800)
+        self.assertIn(
+            {"path": "tests/test_app.py", "reason_code": "token_budget"},
+            result["withheld_files"],
+        )
+
+    def test_fit_context_preserves_exact_evidence_before_ranking_diagnostics(self) -> None:
+        result = {
+            "symbols": [{
+                "id": "src/app.py::create_item",
+                "name": "create_item",
+                "path": "src/app.py",
+            }],
+            "impact": {
+                "affected_files": [],
+                "affected_tests": [],
+                "affected_knowledge": [],
+                "affected_modules": ["src"],
+                "call_path": [],
+            },
+            "reference_implementations": [
+                {"symbol": f"src/noise.py::symbol_{index}", "path": "src/noise.py"}
+                for index in range(4)
+            ],
+            "extension_points": [
+                {"symbol": f"src/noise.py::extension_{index}", "path": "src/noise.py"}
+                for index in range(4)
+            ],
+            "retrieval_explanation": {
+                "selected_records": [
+                    {"id": f"generated.noise.{index}", "why_selected": "text match"}
+                    for index in range(4)
+                ],
+                "reference_implementations": [
+                    {"symbol": f"src/noise.py::symbol_{index}", "path": "src/noise.py"}
+                    for index in range(4)
+                ],
+                "extension_points": [
+                    {"symbol": f"src/noise.py::extension_{index}", "path": "src/noise.py"}
+                    for index in range(4)
+                ],
+                "unknowns": ["dynamic dispatch requires live verification"],
+                "impact": {
+                    "files": [f"src/noise_{index}.py" for index in range(8)],
+                    "tests": [f"tests/noise_{index}.py" for index in range(8)],
+                },
+            },
+            "core_files": ["src/app.py", "src/a.py", "src/b.py", "src/c.py", "src/d.py"],
+            "supporting_files": [],
+            "files": ["src/app.py", "src/a.py", "src/b.py", "src/c.py", "src/d.py"],
+            "file_rankings": [
+                {"path": path, "tier": "core", "why_selected": "exact_identity"}
+                for path in ("src/app.py", "src/a.py", "src/b.py", "src/c.py", "src/d.py")
+            ],
+            "withheld_files": [
+                {"path": "tests/test_app.py", "reason_code": "token_budget"},
+                *[
+                    {"path": f"tests/noise_{index}.py", "reason_code": "selection_limit"}
+                    for index in range(30)
+                ],
+            ],
+            "rejected_files": [
+                {"path": f"outside_{index}.py", "reason_code": "path_not_allowed"}
+                for index in range(10)
+            ],
+            "knowledge": [{
+                "id": "verified.create-item",
+                "content": "create_item is implemented in src/app.py.",
+                "sources": [
+                    {"type": "file", "path": f"tests/noise_{index}.py"}
+                    for index in range(30)
+                ],
+                "tokens": 12,
+            }],
+            "gaps": [],
+            "unknowns": ["dynamic dispatch requires live verification"],
+            "likely_modules": ["src"],
+            "verification_commands": ["python -m pytest"],
+            "guidance_workflow": {
+                "available": False,
+                "coverage": {"covered_files": 0, "total_files": 0, "complete": False},
+                "categories": {"total": 0, "with_formal_guidance": 0},
+                "pending_drafts": [],
+                "pending_changes": [],
+            },
+            "ranking_policy": "policy-v1",
+            "ranking_status": "ok",
+            "ranking_confidence": "high",
+            "summary": "create_item implementation context.",
+            "estimated_tokens": 0,
+        }
+
+        KnowledgeAPI._fit_context(result, budget=350)
+
+        self.assertIn(
+            {"path": "tests/test_app.py", "reason_code": "token_budget"},
+            result["withheld_files"],
+        )
+        self.assertEqual(result["symbols"][0]["id"], "src/app.py::create_item")
+        self.assertIn("src/app.py", result["knowledge"][0]["content"])
+        self.assertLessEqual(result["estimated_tokens"], 375)
+        self.assertFalse(result["rejected_files"])
+        self.assertTrue(all(
+            item["reason_code"] == "token_budget"
+            for item in result["withheld_files"]
+        ))
+
+    def test_fit_context_compacts_ranking_details_before_withholding_support(self) -> None:
+        result = {
+            "symbols": [{"id": "src/app.py::create_item", "name": "create_item"}],
+            "impact": {
+                "affected_files": [], "affected_tests": [],
+                "affected_knowledge": [], "affected_modules": [],
+            },
+            "reference_implementations": [],
+            "extension_points": [],
+            "retrieval_explanation": {"selected_records": [], "impact": {}},
+            "core_files": ["src/app.py"],
+            "supporting_files": ["tests/test_app.py"],
+            "files": ["src/app.py", "tests/test_app.py"],
+            "file_rankings": [
+                {
+                    "path": path,
+                    "tier": tier,
+                    "why_selected": reason,
+                    "score_breakdown": {"diagnostic": "detail " * 160},
+                }
+                for path, tier, reason in (
+                    ("src/app.py", "core", "exact_identity"),
+                    ("tests/test_app.py", "supporting", "graph_hop_1"),
+                )
+            ],
+            "withheld_files": [],
+            "rejected_files": [],
+            "knowledge": [{
+                "id": "verified.create-item",
+                "content": "create_item is implemented in src/app.py.",
+                "sources": [{"type": "file", "path": "src/app.py"}],
+                "tokens": 12,
+            }],
+            "gaps": [],
+            "unknowns": [],
+            "likely_modules": [],
+            "verification_commands": [],
+            "guidance_workflow": {"available": False},
+            "summary": "create_item implementation context.",
+            "estimated_tokens": 0,
+        }
+
+        KnowledgeAPI._fit_context(result, budget=375)
+
+        self.assertEqual(result["supporting_files"], ["tests/test_app.py"])
+        self.assertFalse(any(
+            item.get("path") == "tests/test_app.py"
+            and item.get("reason_code") == "token_budget"
+            for item in result["withheld_files"]
+        ))
+        self.assertTrue(all(
+            "score_breakdown" not in item for item in result["file_rankings"]
+        ))
+        self.assertLessEqual(result["estimated_tokens"], 375)
 
     def test_chinese_identifier_phrases_recall_expected_exact_symbols(self) -> None:
         initialization = self.api.context("初始化项目时 config-v1 JSON Schema 如何由 all_schemas 发布", max_tokens=1000)
@@ -113,7 +350,7 @@ class RetrievalWP06Tests(unittest.TestCase):
         self.assertIn(invariant, excerpt)
 
     def test_search_exposes_score_breakdown_and_impact_supports_bounded_multihop(self) -> None:
-        results = self.api.search("Repository persistence")
+        results = self.api.search("app.py")
         self.assertTrue(results["results"])
         first = results["results"][0]
         self.assertIn("score_breakdown", first)
@@ -124,6 +361,84 @@ class RetrievalWP06Tests(unittest.TestCase):
         self.assertIn("relation_hops", impact)
         self.assertIn("impact_explanation", impact)
         self.assertIn("tests/test_app.py", impact["affected_tests"])
+
+    def test_context_candidates_propagate_relation_hop_to_target_file(self) -> None:
+        candidates, _ = self.api._context_file_candidates(
+            "token budget",
+            {"task_type": "investigation"},
+            [],
+            {
+                "relations": [{
+                    "source": "tests/test_app.py::<module>",
+                    "target": "src/app.py::create_item",
+                    "path": "tests/test_app.py",
+                    "hop": 2,
+                }],
+                "affected_files": ["src/app.py"],
+                "dependency_files": ["src/app.py"],
+                "affected_tests": [],
+            },
+            [],
+        )
+
+        app_candidates = [
+            candidate for candidate in candidates
+            if candidate.path == "src/app.py" and "impact" in candidate.stages
+        ]
+        self.assertTrue(app_candidates)
+        self.assertTrue(all(candidate.graph_hop == 2 for candidate in app_candidates))
+
+    def test_context_only_marks_excerpt_citations_as_direct_sources(self) -> None:
+        candidates, _ = self.api._context_file_candidates(
+            "repository persistence",
+            {"task_type": "investigation"},
+            [],
+            {"relations": [], "affected_files": [], "affected_tests": []},
+            [{
+                "id": "generated.module.sample",
+                "freshness": "fresh",
+                "requires_live_source": False,
+                "content": "The implementation is `src/app.py::Repository.save`.",
+                "sources": [
+                    {"path": "src/app.py", "id": "src/app.py::Repository.save"},
+                    {"path": "tests/test_app.py"},
+                ],
+            }],
+        )
+
+        direct_by_path = {
+            candidate.path: candidate.direct_knowledge_source
+            for candidate in candidates
+            if "knowledge_source" in candidate.stages
+        }
+        self.assertTrue(direct_by_path["src/app.py"])
+        self.assertFalse(direct_by_path["tests/test_app.py"])
+
+    def test_context_bounds_module_tests_and_keeps_task_relevant_test(self) -> None:
+        noise_paths = []
+        for index in range(8):
+            path = f"tests/test_noise_{index}.py"
+            (self.root / path).write_text("def test_noise(): pass\n", encoding="utf-8")
+            noise_paths.append(path)
+        ProjectService(self.root).sync()
+
+        candidates, _ = self.api._context_file_candidates(
+            "impact test_app.py",
+            {"task_type": "impact_analysis"},
+            [],
+            {
+                "relations": [],
+                "affected_files": [],
+                "affected_tests": noise_paths + ["tests/test_app.py"],
+            },
+            [],
+        )
+
+        affected_tests = [
+            candidate for candidate in candidates if candidate.affected_test
+        ]
+        self.assertLessEqual(len(affected_tests), 4)
+        self.assertIn("tests/test_app.py", {candidate.path for candidate in affected_tests})
 
     def test_codegraph_context_uses_engine_when_sqlite_symbols_are_empty(self) -> None:
         (self.root / "src" / "app.lua").write_text("local function login() end\n", encoding="utf-8")
@@ -136,6 +451,13 @@ class RetrievalWP06Tests(unittest.TestCase):
         client.project = self.root.resolve()
         client.command_display = "codegraph"
         client.status.return_value = {"initialized": True, "version": "1.5.0"}
+        client.snapshot.return_value = {
+            "snapshot_id": "mock-snapshot",
+            "files": [
+                {"path": "src/app.lua", "language": "lua"},
+                {"path": "src/router.lua", "language": "lua"},
+            ],
+        }
         client.files.return_value = [
             {"path": "src/app.lua", "language": "lua"},
             {"path": "src/router.lua", "language": "lua"},
@@ -168,7 +490,7 @@ class RetrievalWP06Tests(unittest.TestCase):
         self.assertIn("src/router.lua", result["impact"]["affected_files"])
         self.assertEqual(result["fact_source"], "codegraph")
 
-    def test_impact_prioritizes_outgoing_dependencies_before_incoming_callers(self) -> None:
+    def test_impact_uses_codegraph_public_response_for_dependencies(self) -> None:
         (self.root / "src" / "helper.py").write_text(
             "def persist(value):\n    return value\n", encoding="utf-8"
         )
@@ -188,7 +510,8 @@ class RetrievalWP06Tests(unittest.TestCase):
         )
 
         self.assertEqual(result["relations"][0]["source"], "src/app.py::create_item")
-        self.assertIn("src/helper.py", result["affected_files"])
+        self.assertIn("src/app.py", result["affected_files"])
+        self.assertEqual(result["fact_source"], "codegraph")
 
 
 if __name__ == "__main__":

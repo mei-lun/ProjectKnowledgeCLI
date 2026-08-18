@@ -22,7 +22,6 @@
 
 ## 自动生成
 
-- [Lua/Skynet 入口证据](generated/entrypoints.md) - 状态：`新鲜`；可信度：`自动生成`
 - [模块：evaluation](generated/modules/evaluation.md) - 状态：`新鲜`；可信度：`自动生成`
 - [模块：.github](generated/modules/github.md) - 状态：`新鲜`；可信度：`自动生成`
 - [模块：plugins](generated/modules/plugins.md) - 状态：`新鲜`；可信度：`自动生成`
@@ -31,5 +30,4 @@
 - [模块：scripts](generated/modules/scripts.md) - 状态：`新鲜`；可信度：`自动生成`
 - [模块：tests](generated/modules/tests.md) - 状态：`新鲜`；可信度：`自动生成`
 - [项目地图：ProjectKnowledgeCLI](generated/project-map.md) - 状态：`新鲜`；可信度：`自动生成`
-- [路由](generated/routes.md) - 状态：`新鲜`；可信度：`自动生成`
 - [测试地图](generated/test-map.md) - 状态：`新鲜`；可信度：`自动生成`

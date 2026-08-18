@@ -1,5 +1,7 @@
 # 功能开发指南生成约定
 
+0.1.30 人工复核：Feature Guide 的符号引用在生成与校验时使用 CodeGraph 实时查询和公开符号名；内部哈希 ID 不进入用户维护的证据引用。
+
 功能开发指导采用“确定性代码事实 + 受限模型语义组织 + 本地引用校验”的组合流程。静态分析负责候选范围、文件、符号和关系；模型负责把有限 EvidencePack 组织成 Feature Guide、Workflow 和 Recipe；系统在任何草案落库前验证 Schema、路径、符号、行号和哈希。
 
 <!-- project-kb:source file="src/project_knowledge/semantic.py" -->
@@ -38,8 +40,14 @@ Feature Guide 按功能独立写入 `docs/knowledge/drafts/features/`。`Knowled
 涉及 Lua/Skynet 功能开发时，context 可以引用生成的入口证据页和只读范围报告；静态启动/派发来源必须带路径与行号，动态服务发现、协议运行时名称和启动命令必须保留在 unknowns。
 <!-- project-kb:source file="src/project_knowledge/engine.py" -->
 <!-- project-kb:source file="src/project_knowledge/real_project.py" -->
-<!-- project-kb:source file="tests/test_wp02_knowledge.py" -->
 当项目没有 Lua/Skynet 入口时，入口知识页必须明确显示未检测到，并引用解析器/生成器实现作为来源；不得让空页降低 generated source coverage。Markdown 仅在源码模块相对相关性达到 0.8 时保留该模块页，避免宽泛来源降低 precision。
 <!-- project-kb:source file="src/project_knowledge/knowledge.py" -->
 <!-- project-kb:source file="src/project_knowledge/evaluate.py" -->
 <!-- /project-kb:generated -->
+
+## WP-12A 上下文契约（0.1.29）
+
+`KnowledgeAPI.context()` 暴露有序的 `core_files`、`supporting_files`、`files`、`file_rankings` 和结构化 `ranking_status`。候选在 stale/pending 来源屏蔽后才进入统一生产排序；在 token 预算不足时，先压缩可选诊断，再保留核心证据、精确符号、可用知识和 token-budget withholding 记录。当前 50 条绝对门仍需 clean-source 索引重建后复核，未通过的指标保持未达标。
+
+<!-- project-kb:source file="src/project_knowledge/retrieval.py" -->
+<!-- project-kb:source file="src/project_knowledge/evaluate.py" -->

@@ -1,12 +1,14 @@
 # 约定
 
+0.1.30 人工复核：项目和默认配置只允许 `codegraph`；不可用或未初始化时明确失败；公共符号引用使用 `path::公开符号名`，不得暴露内部哈希 ID。
+
 - 保持与 Python 3.11+ 兼容，不强制依赖网络服务或第三方运行时软件包。
 - 保持确定性生成事实与经过评审的人工意图相互分离。
 - 自动生成知识、知识索引和初始人工模板默认使用中文；代码标识、路径、记录 ID 和机器接口枚举不得为了显示翻译而改变。
 - 项目以 `0.1.0` 为版本基线。后续每批修改或新增内容都通过 `python scripts/bump_version.py "中文变更说明"` 更新版本和 `CHANGELOG.md`；同一批修改或新增内容只递增一次补丁版本，由该批变更触发的知识同步不重复递增。
 - 后续功能开发以 `docs/project-knowledge-system-audit.md` 的工作包、需求 ID 和验收条件为基线；没有实现证据、正负测试和相关评测的条目不得标记为完成。
 - 每个工作包必须更新相关评测问题和失败样本。冻结阈值不得为通过 CI 而降低；确需调整时必须记录新证据、原因和版本。
-- 不同检索策略使用独立阈值；codegraph 不可用时必须报告 `adapter_unavailable`，不得用 builtin 结果冒充。
+- 不同检索策略使用独立阈值；CodeGraph 不可用时必须报告 `adapter_unavailable`，不得用本地 parser 或 SQLite 旧表结果冒充。
 - CodeGraph Adapter 只使用公共 CLI/API；不透明内部 ID 必须在边界内转换为公共符号引用，SQLite 缓存为空不能阻断实时引擎查询。
 - 交付必须先提交源码和文档，再用 `project-kb finalize` 同步生成物；生成物提交后以 `finalize --check` 只读验证。该命令不得执行 `git add`、`git commit` 或 `git push`。
 - 真实项目评测默认使用临时只读镜像，并以源目录全树快照前后一致作为未写入证据。
@@ -78,9 +80,14 @@
 <!-- project-kb:source file="src/project_knowledge/engine.py" -->
 <!-- project-kb:source file="src/project_knowledge/real_project.py" -->
 <!-- project-kb:source file="src/project_knowledge/knowledge.py" -->
-<!-- project-kb:source file="tests/test_wp02_evidence.py" -->
 - 0.1.15 WP-09：空结果的 generated 页面仍必须引用生成器/解析器实现来源；Markdown 选页仅在源码模块候选达到第三页相对得分 0.8 时替换低优先页面，不得扩大三页上限或降低冻结阈值。
 <!-- project-kb:source file="src/project_knowledge/evaluate.py" -->
 <!-- project-kb:source file="tests/test_evaluate.py" -->
-<!-- project-kb:source file="tests/test_wp02_knowledge.py" -->
 <!-- /project-kb:generated -->
+
+## WP-12A 评测约定（0.1.29）
+
+严格 core 指标只使用数据集的 `expected_files` 与有序 `core_files`；`acceptable_supporting_files` 只产生诊断性的 supporting 精确率，不改变成功语义。正式评测要求 `ranking_fallback_rate == 0`。WP-12A 的 50 条数据、阈值和报告是唯一指标来源；dirty 工作树或 stale 索引运行只能作为诊断，不能宣称质量门通过。
+
+<!-- project-kb:source file="src/project_knowledge/evaluate.py" -->
+<!-- project-kb:source file="evaluation/thresholds.json" -->

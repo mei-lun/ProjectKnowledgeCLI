@@ -19,7 +19,7 @@ class GuidanceRetrievalTests(GuidanceWorkflowTests):
         record = api.get("guide.login")
         self.assertEqual(record["freshness"], "potentially_stale")
         self.assertEqual(record["draft_id"], pending["draft_id"])
-        self.assertNotIn("草稿中的秘密修订", record["content"])
+        self.assertNotIn("草稿中的秘密修订", record.get("content", ""))
 
         result = api.search("登录", limit=5)["results"][0]
         self.assertEqual(result["kind"], "development-guide")

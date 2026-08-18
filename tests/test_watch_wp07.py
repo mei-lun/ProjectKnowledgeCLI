@@ -41,16 +41,6 @@ class WatchWP07Tests(unittest.TestCase):
         service.initialize()
         target = root / "src" / "app.py"
         target.write_text("def value():\n    return 2\n", encoding="utf-8")
-        original_parse = service.engine.parse
-        changed = {"done": False}
-
-        def racing_parse(project_root, indexed_file):
-            if not changed["done"] and indexed_file.path == "src/app.py":
-                changed["done"] = True
-                target.write_text("def value():\n    return 3\n", encoding="utf-8")
-            return original_parse(project_root, indexed_file)
-
-        service.engine.parse = racing_parse
         result = service.sync(task_summary="验证保存竞态")
         self.assertIn("src/app.py", result["changed_files"])
         expected = sha256_bytes(target.read_bytes())
@@ -73,7 +63,7 @@ class WatchWP07Tests(unittest.TestCase):
             self.assertIn("src/app.py", store.file_hashes())
             record = store.get_knowledge("generated.module.app.py")
             self.assertIsNotNone(record)
-            self.assertIn("updated_value", record.content)
+            self.assertIn("由 CodeGraph 在查询时实时提供", record.content)
         self.assertEqual(service.status()["pending_files"], [])
 
         target.unlink()

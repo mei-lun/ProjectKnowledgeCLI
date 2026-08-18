@@ -5,10 +5,12 @@ import json
 import subprocess
 import tempfile
 import unittest
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 from unittest.mock import Mock
 
 from project_knowledge.codegraph import CodeGraphEngine, CodeGraphError
+from project_knowledge.cli import main
 from project_knowledge.config import ProjectConfig
 from project_knowledge.guidance_models import (
     GuidanceBatch,
@@ -70,22 +72,40 @@ class IntegrationTests(unittest.TestCase):
     def tearDown(self) -> None:
         self.temporary.cleanup()
 
+    def test_cli_reports_legacy_engine_as_structured_json_error(self) -> None:
+        (self.root / ".project-kb.yml").write_text(
+            "version: 1\nindex:\n  engine: builtin\n", encoding="utf-8"
+        )
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+        with redirect_stdout(stdout), redirect_stderr(stderr):
+            exit_code = main(["status", str(self.root), "--json"])
+        self.assertEqual(exit_code, 2)
+        self.assertEqual(json.loads(stdout.getvalue()), {
+            "error": "unsupported_engine",
+            "configured_engine": "builtin",
+            "supported_engines": ["codegraph"],
+            "migration": "set index.engine to codegraph and initialize CodeGraph for this project",
+        })
+        self.assertEqual(stderr.getvalue(), "")
+
     def test_init_sync_freshness_retrieval_and_mcp(self) -> None:
         service = ProjectService(self.root)
         report = service.initialize()
         self.assertEqual(report["action"], "init")
-        self.assertGreaterEqual(report["symbols"], 5)
+        self.assertGreaterEqual(report["files_indexed"], 2)
+        self.assertEqual(report["fact_source"], "codegraph")
         self.assertTrue((self.root / ".project-kb" / "index.db").exists())
         self.assertTrue((self.root / ".project-kb" / "mcp.json").exists())
         project_map = self.root / ".project-kb" / "generated" / "project-map.md"
         self.assertTrue(project_map.exists())
         project_map_content = project_map.read_text(encoding="utf-8")
         self.assertIn("# 项目地图：", project_map_content)
-        self.assertIn("| 配置 |", project_map_content)
+        self.assertIn("| 指标 |", project_map_content)
         self.assertIn("# 项目知识库：", (self.root / ".project-kb" / "index.md").read_text(encoding="utf-8"))
         self.assertIn("# 架构", (self.root / ".project-kb" / "curated" / "architecture.md").read_text(encoding="utf-8"))
         module_map = self.root / ".project-kb" / "generated" / "modules" / "app.py.md"
-        self.assertIn("：类，位于", module_map.read_text(encoding="utf-8"))
+        self.assertIn("src/app.py", module_map.read_text(encoding="utf-8"))
         self.assertEqual(service.status()["pending_files"], [])
         manifest = json.loads((self.root / ".project-kb" / "manifest.json").read_text(encoding="utf-8"))
         self.assertGreaterEqual(len(manifest["records"]), 6)
@@ -243,11 +263,14 @@ class IntegrationTests(unittest.TestCase):
 
     def test_dry_run_and_deleted_file_sync(self) -> None:
         service = ProjectService(self.root)
-        dry_run = service.initialize(dry_run=True)
+        with self.assertRaises(CodeGraphError):
+            service.initialize(dry_run=True)
         self.assertFalse((self.root / ".project-kb.yml").exists())
-        self.assertGreater(dry_run["files_to_index"], 0)
         service.initialize()
+        dry_run = service.rebuild(dry_run=True)
+        self.assertGreater(dry_run["files_to_index"], 0)
         (self.root / "tests" / "test_app.py").unlink()
+        service.engine.sync(self.root, service.config)
         preview = service.sync(dry_run=True)
         self.assertEqual(preview["deleted_files"], ["tests/test_app.py"])
         service.sync()
@@ -322,14 +345,14 @@ class IntegrationTests(unittest.TestCase):
         self.assertEqual(source_changed["commit_alignment"], "content_unvalidated_at_head")
         self.assertFalse(service.check()[1])
 
-    def test_large_module_reports_symbol_and_relation_truncation(self) -> None:
+    def test_large_module_does_not_cache_codegraph_symbol_or_relation_facts(self) -> None:
         functions = "\n".join(f"def function_{number}():\n    return helper()" for number in range(305))
         (self.root / "src" / "large.py").write_text("def helper():\n    return 1\n\n" + functions, encoding="utf-8")
         ProjectService(self.root).initialize()
         module = self.root / ".project-kb" / "generated" / "modules" / "large.py.md"
         content = module.read_text(encoding="utf-8")
-        self.assertIn("符号内容已截断", content)
-        self.assertIn("关系内容已截断", content)
+        self.assertIn("由 CodeGraph 在查询时实时提供", content)
+        self.assertNotIn("function_304", content)
 
     def test_doctor_and_check_report_unwired_configuration(self) -> None:
         from project_knowledge.config import ProjectConfig
@@ -353,7 +376,7 @@ class IntegrationTests(unittest.TestCase):
         client = Mock()
         client.project = self.root.resolve()
         client.command_display = "codegraph"
-        client.files.side_effect = CodeGraphError("project is not initialized")
+        client.snapshot.side_effect = CodeGraphError("project is not initialized")
         client.status.return_value = {"initialized": False, "version": "1.5.0"}
         engine.client = client
         service.engine = engine
