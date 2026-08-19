@@ -1,0 +1,20 @@
+{
+  "affected_knowledge": [
+    "curated.conventions",
+    "generated.frameworks",
+    "generated.module.project_knowledge",
+    "generated.project-map"
+  ],
+  "base_commit": "62e89e3face4f7c1f376c2e4198847d8d3c57197",
+  "changed_files": [
+    "src/project_knowledge/__init__.py"
+  ],
+  "changed_symbols": [],
+  "changeset_id": "change-20260819-112856",
+  "created_at": "2026-08-19T11:28:56+08:00",
+  "head_commit": "0036acd54042a0a1ce323a953b9578956065bb26",
+  "queue_id": "sq-62af8b011cdee3a2",
+  "schema_version": 1,
+  "status": "awaiting_semantic_generation",
+  "task_summary": "同步 README 0.1.35 CodeGraph 质量指标"
+}
