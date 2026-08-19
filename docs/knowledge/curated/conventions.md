@@ -108,3 +108,6 @@
 向量记录必须保存知识 ID、内容哈希、provider/model、维度和可复现向量；默认配置不得加载 provider 或写向量表。hybrid 只能把向量作为补充候选与有限加分，lexical 精确命中和 CodeGraph 结构证据始终优先。
 ## 0.1.34 CodeGraph 活动报告约定
 活动评测报告必须与当前包版本和提交 provenance 对齐；CodeGraph 策略必须使用 `codegraph-public-cli`，不可用状态或 Builtin fallback 只能保留在历史报告，不得作为当前交付依据。
+
+## 0.1.35 README 指标约定
+README 只引用当前活动报告中的 CodeGraph 指标，并明确区分 Adapter 可用性与检索质量门；指标更新必须同步报告版本、数据集样本数和 provenance，不得以历史 Builtin 或 `adapter_unavailable` 结果替代当前状态。
