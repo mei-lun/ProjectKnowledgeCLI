@@ -1,5 +1,23 @@
 # Project Knowledge CLI
 
+## 当前质量指标（0.1.35）
+
+当前真实 CodeGraph Adapter 已接入并可用：`codegraph-public-cli 1.5.0`。以下指标来自当前活动评测报告 `evaluation/reports/latest.json`，评测集包含 50 个样本：
+
+| 指标 | 当前值 |
+| --- | ---: |
+| 文件召回率 | 0.711667 |
+| 文件精确率 | 0.315571 |
+| 核心文件召回率 | 0.711667 |
+| 核心文件精确率 | 0.321667 |
+| 符号召回率 | 0.166667 |
+| 符号精确率 | 0.079048 |
+| 成功率 | 0.08 |
+| 平均上下文 | 147.74 tokens |
+| 平均工具调用 | 3 |
+
+Adapter 可用不等于检索质量门已通过：当前主要缺陷仍是候选覆盖、符号召回和排序精确率不足。Builtin engine 不属于当前运行时，也不会作为质量问题的回退方案。详细边界见 [当前 CodeGraph 评测状态](docs/codegraph-evaluation-current.md)，原始数据见 [活动评测报告](evaluation/reports/latest.json)。
+
 Project Knowledge CLI（PKS）是本地优先的项目知识工具。它从代码索引中获取事实，维护带来源和新鲜度状态的知识记录，并通过 MCP 为 AI 客户端提供项目上下文、影响分析和可审核的开发指导。
 
 ## 核心能力

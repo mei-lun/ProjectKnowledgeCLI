@@ -1,10 +1,10 @@
 {
   "dataset": "questions.jsonl",
   "dataset_sha256": "sha256:7bda6bc88db79dc84f57f75af99ba45a1586e0ff318561ec52ab4ae350d61de1",
-  "generated_at": "2026-08-19T02:58:17+08:00",
-  "index_commit": "1f2580406a54521a9466bc62f4e259bcb7d77f5a",
-  "package_version": "0.1.34",
-  "project_commit": "1322686ddcc15fb5c56448a9982ee9faa8a9bbdb",
+  "generated_at": "2026-08-19T11:27:09+08:00",
+  "index_commit": "62e89e3face4f7c1f376c2e4198847d8d3c57197",
+  "package_version": "0.1.35",
+  "project_commit": "7614631a76fa3bf2d52618d228bc2f6c7733b337",
   "quality_gate": {
     "evaluated": false,
     "failures": [],
@@ -12,7 +12,7 @@
     "warnings": []
   },
   "schema_version": 1,
-  "source_snapshot_sha256": "sha256:ddcacce6db90072223200bd73e8cd26133e56df57368591d0be560dd0f3965e7",
+  "source_snapshot_sha256": "sha256:988e6e72d76b8d51893d748d8115464120fadca3557659a1fce67bdae09619c1",
   "strategies": {
     "codegraph": {
       "available": true,
@@ -128,9 +128,9 @@
         "symbol_recall": 50
       },
       "metrics": {
-        "average_context_tokens": 147.0,
+        "average_context_tokens": 147.74,
         "average_core_files": 4.42,
-        "average_returned_files": 4.62,
+        "average_returned_files": 4.66,
         "average_tool_calls": 3.0,
         "call_path_precision": 0.0,
         "call_path_recall": 0.0,
@@ -139,14 +139,14 @@
         "design_reason_recall": 0.0,
         "extension_point_precision": 0.0,
         "extension_point_recall": 0.0,
-        "file_precision": 0.316071,
+        "file_precision": 0.315571,
         "file_recall": 0.711667,
         "generated_source_coverage": 1.0,
         "invariant_recall": 0.0,
         "ndcg_at_5": 0.745112,
-        "p50_latency_ms": 4940.298,
-        "p95_latency_ms": 5512.80765,
-        "p99_latency_ms": 5564.84461,
+        "p50_latency_ms": 5091.61,
+        "p95_latency_ms": 5633.3502,
+        "p99_latency_ms": 5965.68396,
         "ranking_fallback_rate": 0.0,
         "stale_detection": 1.0,
         "success_rate": 0.08,
@@ -175,9 +175,9 @@
           ],
           "codegraph": {
             "backend": "node-sqlite",
-            "dbSizeBytes": 6459392,
-            "edgeCount": 5179,
-            "fileCount": 77,
+            "dbSizeBytes": 6463488,
+            "edgeCount": 5222,
+            "fileCount": 79,
             "index": {
               "builtWithExtractionVersion": 24,
               "builtWithVersion": "1.5.0",
@@ -193,19 +193,19 @@
               "python",
               "yaml"
             ],
-            "lastIndexed": "2026-08-18T14:50:14.367Z",
-            "nodeCount": 1672,
+            "lastIndexed": "2026-08-18T19:00:58.574Z",
+            "nodeCount": 1694,
             "nodesByKind": {
-              "class": 126,
-              "file": 74,
-              "function": 150,
-              "import": 578,
-              "method": 649,
+              "class": 127,
+              "file": 76,
+              "function": 152,
+              "import": 589,
+              "method": 655,
               "variable": 95
             },
             "pendingChanges": {
               "added": 0,
-              "modified": 0,
+              "modified": 1,
               "removed": 0
             },
             "projectPath": "D:\\Github-Poj\\ProjectKnowledgeCLI",
@@ -222,17 +222,17 @@
           ],
           "reason_code": "available"
         },
-        "generated_at": "2026-08-19T02:58:17+08:00",
-        "head_commit": "1322686ddcc15fb5c56448a9982ee9faa8a9bbdb",
-        "index_commit": "1f2580406a54521a9466bc62f4e259bcb7d77f5a",
+        "generated_at": "2026-08-19T11:27:09+08:00",
+        "head_commit": "7614631a76fa3bf2d52618d228bc2f6c7733b337",
+        "index_commit": "62e89e3face4f7c1f376c2e4198847d8d3c57197",
         "platform": "Windows-11-10.0.26200-SP0",
         "processor": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
         "project": "ProjectKnowledgeCLI",
-        "project_files": 77,
+        "project_files": 79,
         "project_symbols": 0,
         "python": "3.14.6",
-        "source_snapshot_sha256": "sha256:ddcacce6db90072223200bd73e8cd26133e56df57368591d0be560dd0f3965e7",
-        "working_tree": "clean"
+        "source_snapshot_sha256": "sha256:988e6e72d76b8d51893d748d8115464120fadca3557659a1fce67bdae09619c1",
+        "working_tree": "dirty"
       },
       "results": [
         {
@@ -329,6 +329,21 @@
               "protected": true,
               "requires_live_source": false,
               "score": 114,
+              "score_breakdown": {
+                "identity": 104,
+                "penalties": 0,
+                "provenance": 0,
+                "reasons": [
+                  "exact_identity",
+                  "symbol_terms",
+                  "content_terms"
+                ],
+                "relation": 0,
+                "role": 0,
+                "text": 10,
+                "total": 114,
+                "unavailable_signals": []
+              },
               "selection_stage": "direct_symbol",
               "tier": "core",
               "why_selected": "exact_identity,symbol_terms,content_terms"
@@ -362,7 +377,7 @@
             }
           ],
           "id": "self-init-flow",
-          "latency_ms": 4579.2,
+          "latency_ms": 4685.058,
           "line": 1,
           "metrics": {
             "call_path_precision": 0.0,
@@ -519,7 +534,7 @@
             }
           ],
           "id": "self-incremental-sync",
-          "latency_ms": 4648.816,
+          "latency_ms": 4742.891,
           "line": 2,
           "metrics": {
             "core_file_precision": 0.4,
@@ -677,7 +692,7 @@
             }
           ],
           "id": "self-atomic-rebuild",
-          "latency_ms": 3563.936,
+          "latency_ms": 3656.812,
           "line": 3,
           "metrics": {
             "core_file_precision": 0.333333,
@@ -803,7 +818,7 @@
             }
           ],
           "id": "self-commit-alignment",
-          "latency_ms": 5464.067,
+          "latency_ms": 5561.151,
           "line": 4,
           "metrics": {
             "core_file_precision": 0.2,
@@ -944,7 +959,7 @@
             }
           ],
           "id": "self-template-confidence",
-          "latency_ms": 4622.135,
+          "latency_ms": 4701.038,
           "line": 5,
           "metrics": {
             "core_file_precision": 0.4,
@@ -1126,7 +1141,7 @@
             }
           ],
           "id": "self-module-truncation",
-          "latency_ms": 2648.665,
+          "latency_ms": 2739.688,
           "line": 6,
           "metrics": {
             "core_file_precision": 0.333333,
@@ -1221,7 +1236,7 @@
             }
           ],
           "id": "self-runtime-schema",
-          "latency_ms": 4261.039,
+          "latency_ms": 4310.115,
           "line": 7,
           "metrics": {
             "core_file_precision": 0.2,
@@ -1362,7 +1377,7 @@
             }
           ],
           "id": "self-config-capabilities",
-          "latency_ms": 4034.082,
+          "latency_ms": 4211.853,
           "line": 8,
           "metrics": {
             "core_file_precision": 0.4,
@@ -1505,7 +1520,7 @@
             }
           ],
           "id": "self-codegraph-failure",
-          "latency_ms": 4602.044,
+          "latency_ms": 4732.041,
           "line": 9,
           "metrics": {
             "core_file_precision": 0.2,
@@ -1621,75 +1636,24 @@
           "file_rankings": [
             {
               "path": "src/project_knowledge/provider.py",
-              "protected": true,
-              "requires_live_source": false,
               "score": 114,
-              "score_breakdown": {
-                "identity": 104,
-                "penalties": 0,
-                "provenance": 0,
-                "reasons": [
-                  "exact_identity",
-                  "symbol_terms",
-                  "content_terms"
-                ],
-                "relation": 0,
-                "role": 0,
-                "text": 10,
-                "total": 114,
-                "unavailable_signals": []
-              },
-              "selection_stage": "direct_symbol",
               "tier": "core",
               "why_selected": "exact_identity,symbol_terms,content_terms"
             },
             {
               "path": "tests/test_codegraph.py",
-              "protected": true,
-              "requires_live_source": false,
               "score": 30,
-              "score_breakdown": {
-                "identity": 0,
-                "penalties": 0,
-                "provenance": 0,
-                "reasons": [
-                  "graph_hop_1"
-                ],
-                "relation": 30,
-                "role": 0,
-                "text": 0,
-                "total": 30,
-                "unavailable_signals": []
-              },
-              "selection_stage": "impact",
               "tier": "core",
               "why_selected": "graph_hop_1"
             },
             {
               "path": "tests/test_codegraph_validation.py",
-              "protected": true,
-              "requires_live_source": false,
-              "score": 30,
-              "score_breakdown": {
-                "identity": 0,
-                "penalties": 0,
-                "provenance": 0,
-                "reasons": [
-                  "graph_hop_1"
-                ],
-                "relation": 30,
-                "role": 0,
-                "text": 0,
-                "total": 30,
-                "unavailable_signals": []
-              },
-              "selection_stage": "impact",
               "tier": "core",
               "why_selected": "graph_hop_1"
             }
           ],
           "id": "self-python-parser",
-          "latency_ms": 4056.545,
+          "latency_ms": 4256.263,
           "line": 10,
           "metrics": {
             "core_file_precision": 0.0,
@@ -1748,15 +1712,15 @@
           "selection_reasons": {
             "src/project_knowledge/provider.py": {
               "anchor": "exact_identity,symbol_terms,content_terms",
-              "stage": "direct_symbol"
+              "stage": "fallback"
             },
             "tests/test_codegraph.py": {
               "anchor": "graph_hop_1",
-              "stage": "impact"
+              "stage": "fallback"
             },
             "tests/test_codegraph_validation.py": {
               "anchor": "graph_hop_1",
-              "stage": "impact"
+              "stage": "fallback"
             }
           },
           "stale_detected": false,
@@ -1832,7 +1796,7 @@
             }
           ],
           "id": "self-generic-parser",
-          "latency_ms": 4115.279,
+          "latency_ms": 4170.674,
           "line": 11,
           "metrics": {
             "core_file_precision": 0.0,
@@ -1985,7 +1949,7 @@
             }
           ],
           "id": "self-context-budget",
-          "latency_ms": 5464.055,
+          "latency_ms": 5549.9,
           "line": 12,
           "metrics": {
             "core_file_precision": 0.25,
@@ -2121,7 +2085,7 @@
             }
           ],
           "id": "self-stale-shield",
-          "latency_ms": 4043.243,
+          "latency_ms": 4209.066,
           "line": 13,
           "metrics": {
             "core_file_precision": 0.2,
@@ -2372,7 +2336,7 @@
             }
           ],
           "id": "self-impact-analysis",
-          "latency_ms": 4312.727,
+          "latency_ms": 4450.827,
           "line": 14,
           "metrics": {
             "core_file_precision": 0.2,
@@ -2511,7 +2475,7 @@
             }
           ],
           "id": "self-mcp-dispatch",
-          "latency_ms": 5515.932,
+          "latency_ms": 5601.02,
           "line": 15,
           "metrics": {
             "core_file_precision": 0.5,
@@ -2643,7 +2607,7 @@
             }
           ],
           "id": "self-manifest-publication",
-          "latency_ms": 5548.009,
+          "latency_ms": 5629.047,
           "line": 16,
           "metrics": {
             "core_file_precision": 0.6,
@@ -2806,7 +2770,7 @@
             }
           ],
           "id": "self-version-bump",
-          "latency_ms": 4099.923,
+          "latency_ms": 4140.812,
           "line": 17,
           "metrics": {
             "core_file_precision": 0.5,
@@ -2903,7 +2867,7 @@
             }
           ],
           "id": "self-owned-integration",
-          "latency_ms": 4785.955,
+          "latency_ms": 4817.2,
           "line": 18,
           "metrics": {
             "core_file_precision": 0.5,
@@ -3032,7 +2996,7 @@
             }
           ],
           "id": "self-evaluation-gate",
-          "latency_ms": 4645.076,
+          "latency_ms": 4777.838,
           "line": 19,
           "metrics": {
             "core_file_precision": 0.5,
@@ -3203,7 +3167,7 @@
             }
           ],
           "id": "self-performance-harness",
-          "latency_ms": 4083.911,
+          "latency_ms": 4142.906,
           "line": 20,
           "metrics": {
             "core_file_precision": 0.333333,
@@ -3307,7 +3271,7 @@
             }
           ],
           "id": "self-evidence-pack",
-          "latency_ms": 5399.109,
+          "latency_ms": 5455.109,
           "line": 21,
           "metrics": {
             "core_file_precision": 0.5,
@@ -3435,7 +3399,7 @@
             }
           ],
           "id": "self-provider-authorization",
-          "latency_ms": 4606.669,
+          "latency_ms": 4738.11,
           "line": 22,
           "metrics": {
             "core_file_precision": 0.4,
@@ -3573,7 +3537,7 @@
             }
           ],
           "id": "self-provider-runtime",
-          "latency_ms": 5488.201,
+          "latency_ms": 5591.786,
           "line": 23,
           "metrics": {
             "core_file_precision": 0.2,
@@ -3711,7 +3675,7 @@
             }
           ],
           "id": "self-provider-preview",
-          "latency_ms": 5413.011,
+          "latency_ms": 5614.999,
           "line": 24,
           "metrics": {
             "core_file_precision": 0.2,
@@ -3851,7 +3815,7 @@
             }
           ],
           "id": "self-provider-extension",
-          "latency_ms": 5400.804,
+          "latency_ms": 5613.718,
           "line": 25,
           "metrics": {
             "core_file_precision": 0.2,
@@ -3987,7 +3951,7 @@
             }
           ],
           "id": "self-feature-guide-schema",
-          "latency_ms": 5453.125,
+          "latency_ms": 5832.27,
           "line": 26,
           "metrics": {
             "core_file_precision": 0.4,
@@ -4125,7 +4089,7 @@
             }
           ],
           "id": "self-semantic-generation",
-          "latency_ms": 5410.865,
+          "latency_ms": 5574.013,
           "line": 27,
           "metrics": {
             "core_file_precision": 0.4,
@@ -4227,11 +4191,11 @@
           "core_files": [
             "src/project_knowledge/semantic.py",
             "src/project_knowledge/models.py",
+            "scripts/validate_ci_workflow.py",
             "scripts/validate_codegraph_adapter.py",
-            "tests/test_codegraph.py",
-            "tests/test_codegraph_validation.py"
+            "tests/test_codegraph.py"
           ],
-          "estimated_context_tokens": 201,
+          "estimated_context_tokens": 221,
           "failed_metrics": [
             "file_recall",
             "symbol_recall"
@@ -4282,6 +4246,30 @@
               "selection_stage": "direct_symbol",
               "tier": "core",
               "why_selected": "exact_identity,symbol_terms"
+            },
+            {
+              "path": "scripts/validate_ci_workflow.py",
+              "protected": false,
+              "requires_live_source": false,
+              "score": 34,
+              "score_breakdown": {
+                "identity": 0,
+                "penalties": 0,
+                "provenance": 0,
+                "reasons": [
+                  "task_role_match",
+                  "path_terms",
+                  "symbol_terms"
+                ],
+                "relation": 0,
+                "role": 20,
+                "text": 14,
+                "total": 34,
+                "unavailable_signals": []
+              },
+              "selection_stage": "direct_symbol",
+              "tier": "core",
+              "why_selected": "task_role_match,path_terms,symbol_terms"
             },
             {
               "path": "scripts/validate_codegraph_adapter.py",
@@ -4348,7 +4336,7 @@
                 "unavailable_signals": []
               },
               "selection_stage": "impact",
-              "tier": "core",
+              "tier": "supporting",
               "why_selected": "graph_hop_1"
             },
             {
@@ -4396,6 +4384,30 @@
               "why_selected": "graph_hop_1"
             },
             {
+              "path": "scripts/validate_evaluation_provenance.py",
+              "protected": false,
+              "requires_live_source": false,
+              "score": 13,
+              "score_breakdown": {
+                "identity": 0,
+                "penalties": -15,
+                "provenance": 0,
+                "reasons": [
+                  "task_role_match",
+                  "path_terms",
+                  "fallback_only"
+                ],
+                "relation": 0,
+                "role": 20,
+                "text": 8,
+                "total": 13,
+                "unavailable_signals": []
+              },
+              "selection_stage": "fallback",
+              "tier": "supporting",
+              "why_selected": "task_role_match,path_terms,fallback_only"
+            },
+            {
               "path": "scripts/validate_gardenserver_guidance_workflow.py",
               "protected": false,
               "requires_live_source": false,
@@ -4421,12 +4433,12 @@
             }
           ],
           "id": "self-feature-source-validation",
-          "latency_ms": 5070.006,
+          "latency_ms": 5270.753,
           "line": 28,
           "metrics": {
             "core_file_precision": 0.2,
             "core_file_recall": 0.5,
-            "file_precision": 0.125,
+            "file_precision": 0.1,
             "file_recall": 0.5,
             "ndcg_at_5": 0.613147,
             "ranking_fallback": 0.0,
@@ -4468,7 +4480,9 @@
             "tests/test_semantic.py::test_source_change_marks_draft_stale_and_candidates_are_source_traceable"
           ],
           "returned_files": [
+            "scripts/validate_ci_workflow.py",
             "scripts/validate_codegraph_adapter.py",
+            "scripts/validate_evaluation_provenance.py",
             "scripts/validate_gardenserver_guidance_workflow.py",
             "src/project_knowledge/models.py",
             "src/project_knowledge/semantic.py",
@@ -4488,9 +4502,17 @@
             "src/project_knowledge/semantic.py::FeatureGuideValidator::validate"
           ],
           "selection_reasons": {
+            "scripts/validate_ci_workflow.py": {
+              "anchor": "task_role_match,path_terms,symbol_terms",
+              "stage": "direct_symbol"
+            },
             "scripts/validate_codegraph_adapter.py": {
               "anchor": "task_role_match,path_terms,symbol_terms",
               "stage": "direct_symbol"
+            },
+            "scripts/validate_evaluation_provenance.py": {
+              "anchor": "task_role_match,path_terms,fallback_only",
+              "stage": "fallback"
             },
             "scripts/validate_gardenserver_guidance_workflow.py": {
               "anchor": "task_role_match,path_terms,fallback_only",
@@ -4524,8 +4546,10 @@
           "stale_detected": false,
           "success": false,
           "supporting_files": [
+            "tests/test_codegraph_validation.py",
             "tests/test_config.py",
             "tests/test_delivery_reliability.py",
+            "scripts/validate_evaluation_provenance.py",
             "scripts/validate_gardenserver_guidance_workflow.py"
           ],
           "task": "FeatureGuideValidator.validate 如何确认来源属于 EvidencePack，并验证项目边界、文档候选权威、文件哈希、符号路径和定义行范围？",
@@ -4577,7 +4601,7 @@
             }
           ],
           "id": "self-draft-lifecycle",
-          "latency_ms": 4902.899,
+          "latency_ms": 5087.181,
           "line": 29,
           "metrics": {
             "core_file_precision": 0.6,
@@ -4719,7 +4743,7 @@
             }
           ],
           "id": "self-feature-retrieval",
-          "latency_ms": 5060.984,
+          "latency_ms": 5279.703,
           "line": 30,
           "metrics": {
             "core_file_precision": 0.4,
@@ -4848,7 +4872,7 @@
             }
           ],
           "id": "self-proposal-stable-id",
-          "latency_ms": 4821.214,
+          "latency_ms": 5010.089,
           "line": 31,
           "metrics": {
             "core_file_precision": 0.333333,
@@ -4968,7 +4992,7 @@
             }
           ],
           "id": "self-proposal-apply-conflict",
-          "latency_ms": 5128.761,
+          "latency_ms": 5401.117,
           "line": 32,
           "metrics": {
             "core_file_precision": 0.333333,
@@ -5099,7 +5123,7 @@
             }
           ],
           "id": "self-draft-proposal-promotion",
-          "latency_ms": 5581.02,
+          "latency_ms": 6093.866,
           "line": 33,
           "metrics": {
             "core_file_precision": 0.2,
@@ -5242,7 +5266,7 @@
             }
           ],
           "id": "self-proposal-delete-adr",
-          "latency_ms": 4802.012,
+          "latency_ms": 4879.956,
           "line": 34,
           "metrics": {
             "core_file_precision": 0.4,
@@ -5382,7 +5406,7 @@
             }
           ],
           "id": "self-semantic-update-queue",
-          "latency_ms": 4925.03,
+          "latency_ms": 4962.071,
           "line": 35,
           "metrics": {
             "core_file_precision": 0.4,
@@ -5607,7 +5631,7 @@
             }
           ],
           "id": "self-task-classification",
-          "latency_ms": 3882.827,
+          "latency_ms": 3998.789,
           "line": 36,
           "metrics": {
             "core_file_precision": 0.2,
@@ -5734,7 +5758,7 @@
             }
           ],
           "id": "self-retrieval-explanation",
-          "latency_ms": 4543.009,
+          "latency_ms": 4705.487,
           "line": 37,
           "metrics": {
             "core_file_precision": 0.25,
@@ -5869,7 +5893,7 @@
             }
           ],
           "id": "self-bounded-multihop",
-          "latency_ms": 5377.999,
+          "latency_ms": 5478.669,
           "line": 38,
           "metrics": {
             "core_file_precision": 0.2,
@@ -6009,7 +6033,7 @@
             }
           ],
           "id": "self-feature-development-context",
-          "latency_ms": 5401.889,
+          "latency_ms": 5494.878,
           "line": 39,
           "metrics": {
             "core_file_precision": 0.2,
@@ -6140,7 +6164,7 @@
             }
           ],
           "id": "self-context-unknowns",
-          "latency_ms": 4820.424,
+          "latency_ms": 5013.078,
           "line": 40,
           "metrics": {
             "core_file_precision": 0.25,
@@ -6275,7 +6299,7 @@
             }
           ],
           "id": "self-ranking-exact-over-test-noise",
-          "latency_ms": 4987.634,
+          "latency_ms": 5335.905,
           "line": 41,
           "metrics": {
             "core_file_precision": 0.0,
@@ -6370,7 +6394,7 @@
             }
           ],
           "id": "self-ranking-qualified-symbol",
-          "latency_ms": 5502.183,
+          "latency_ms": 5636.871,
           "line": 42,
           "metrics": {
             "core_file_precision": 0.2,
@@ -6432,10 +6456,10 @@
             "src/project_knowledge/ranking.py",
             "src/project_knowledge/codegraph.py",
             "src/project_knowledge/engine.py",
-            "src/project_knowledge/finalization.py",
-            "src/project_knowledge/retrieval.py"
+            "scripts/validate_evaluation_provenance.py",
+            "src/project_knowledge/finalization.py"
           ],
-          "estimated_context_tokens": 69,
+          "estimated_context_tokens": 71,
           "failed_metrics": [
             "symbol_recall"
           ],
@@ -6456,18 +6480,18 @@
               "why_selected": "qualified_identity,direct_knowledge_source,path_terms,symbol_terms,content_terms"
             },
             {
-              "path": "src/project_knowledge/finalization.py",
+              "path": "scripts/validate_evaluation_provenance.py",
               "tier": "core",
-              "why_selected": "file_or_module_identity,direct_knowledge_source,path_terms,content_terms"
+              "why_selected": "exact_identity,symbol_terms"
             },
             {
-              "path": "src/project_knowledge/retrieval.py",
+              "path": "src/project_knowledge/finalization.py",
               "tier": "core",
               "why_selected": "file_or_module_identity,direct_knowledge_source,path_terms,content_terms"
             }
           ],
           "id": "self-ranking-path-over-content-frequency",
-          "latency_ms": 4955.566,
+          "latency_ms": 5113.381,
           "line": 43,
           "metrics": {
             "core_file_precision": 0.2,
@@ -6484,16 +6508,20 @@
             "src/project_knowledge/ranking.py::src/project_knowledge/ranking.py"
           ],
           "returned_files": [
+            "scripts/validate_evaluation_provenance.py",
             "src/project_knowledge/codegraph.py",
             "src/project_knowledge/engine.py",
             "src/project_knowledge/finalization.py",
-            "src/project_knowledge/ranking.py",
-            "src/project_knowledge/retrieval.py"
+            "src/project_knowledge/ranking.py"
           ],
           "returned_symbols": [
             "src/project_knowledge/ranking.py::src/project_knowledge/ranking.py"
           ],
           "selection_reasons": {
+            "scripts/validate_evaluation_provenance.py": {
+              "anchor": "exact_identity,symbol_terms",
+              "stage": "fallback"
+            },
             "src/project_knowledge/codegraph.py": {
               "anchor": "qualified_identity,direct_knowledge_source,path_terms,symbol_terms,content_terms",
               "stage": "fallback"
@@ -6508,10 +6536,6 @@
             },
             "src/project_knowledge/ranking.py": {
               "anchor": "exact_identity,direct_knowledge_source,path_terms,symbol_terms,content_terms",
-              "stage": "fallback"
-            },
-            "src/project_knowledge/retrieval.py": {
-              "anchor": "file_or_module_identity,direct_knowledge_source,path_terms,content_terms",
               "stage": "fallback"
             }
           },
@@ -6562,7 +6586,7 @@
             }
           ],
           "id": "self-ranking-one-hop-over-two-hop",
-          "latency_ms": 3389.138,
+          "latency_ms": 3643.984,
           "line": 44,
           "metrics": {
             "core_file_precision": 0.2,
@@ -6655,7 +6679,7 @@
             }
           ],
           "id": "self-ranking-direct-knowledge-source",
-          "latency_ms": 5013.243,
+          "latency_ms": 5242.644,
           "line": 45,
           "metrics": {
             "core_file_precision": 0.5,
@@ -6752,7 +6776,7 @@
             }
           ],
           "id": "self-context-core-supporting-contract",
-          "latency_ms": 5344.849,
+          "latency_ms": 5464.206,
           "line": 46,
           "metrics": {
             "core_file_precision": 0.333333,
@@ -6854,7 +6878,7 @@
             }
           ],
           "id": "self-ranking-fallback-gate",
-          "latency_ms": 5025.9,
+          "latency_ms": 5096.039,
           "line": 47,
           "metrics": {
             "core_file_precision": 0.4,
@@ -6922,7 +6946,7 @@
             "tests/test_codegraph.py",
             "tests/test_codegraph_validation.py"
           ],
-          "estimated_context_tokens": 138,
+          "estimated_context_tokens": 153,
           "failed_metrics": [
             "symbol_recall"
           ],
@@ -6949,7 +6973,7 @@
             }
           ],
           "id": "self-ranking-stale-shield",
-          "latency_ms": 5437.074,
+          "latency_ms": 5481.948,
           "line": 48,
           "metrics": {
             "core_file_precision": 0.5,
@@ -6965,6 +6989,7 @@
           "ranking_status": "ok",
           "returned_call_path": [
             "src/project_knowledge/retrieval.py::KnowledgeAPI",
+            "src/project_knowledge/retrieval.py::KnowledgeAPI::__init__",
             "src/project_knowledge/retrieval.py::KnowledgeAPI::_context_file_candidates::identity",
             "src/project_knowledge/retrieval.py::KnowledgeAPI::_context_file_candidates::matching_terms",
             "src/project_knowledge/retrieval.py::KnowledgeAPI::_context_file_candidates::normalized",
@@ -6978,6 +7003,7 @@
           ],
           "returned_symbols": [
             "src/project_knowledge/retrieval.py::KnowledgeAPI",
+            "src/project_knowledge/retrieval.py::KnowledgeAPI::__init__",
             "src/project_knowledge/retrieval.py::KnowledgeAPI::_context_file_candidates::identity",
             "src/project_knowledge/retrieval.py::KnowledgeAPI::_context_file_candidates::matching_terms",
             "src/project_knowledge/retrieval.py::KnowledgeAPI::_context_file_candidates::normalized",
@@ -7042,7 +7068,7 @@
             }
           ],
           "id": "self-evaluation-production-ranker",
-          "latency_ms": 5484.997,
+          "latency_ms": 5478.9,
           "line": 49,
           "metrics": {
             "core_file_precision": 0.5,
@@ -7131,7 +7157,7 @@
             }
           ],
           "id": "self-ranking-token-core-protection",
-          "latency_ms": 5508.989,
+          "latency_ms": 5525.744,
           "line": 50,
           "metrics": {
             "core_file_precision": 0.333333,
@@ -7181,5 +7207,5 @@
       "strategy": "codegraph"
     }
   },
-  "working_tree": "clean"
+  "working_tree": "dirty"
 }
