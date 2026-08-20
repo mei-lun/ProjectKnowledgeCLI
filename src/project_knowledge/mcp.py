@@ -23,7 +23,7 @@ TOOLS: list[dict[str, Any]] = [
         "description": "Return compact, source-traceable project context for a development task.",
         "inputSchema": {
             "type": "object",
-            "properties": {"task": {"type": "string", "minLength": 1}, "projectPath": {"type": "string", "minLength": 1}, "maxTokens": {"type": "integer", "minimum": 256}},
+            "properties": {"task": {"type": "string", "minLength": 1}, "projectPath": {"type": "string", "minLength": 1}, "maxTokens": {"type": "integer", "minimum": 256}, "debug": {"type": "boolean"}},
             "required": ["task"],
             "additionalProperties": False,
         },
@@ -39,6 +39,7 @@ TOOLS: list[dict[str, Any]] = [
                 "query": {"type": "string", "minLength": 1}, "kinds": {"type": "array", "items": {"type": "string"}},
                 "module": {"type": "string"}, "limit": {"type": "integer", "minimum": 1, "maximum": 100},
                 "projectPath": {"type": "string", "minLength": 1},
+                "debug": {"type": "boolean"},
             },
             "required": ["query"],
             "additionalProperties": False,
@@ -64,6 +65,7 @@ TOOLS: list[dict[str, Any]] = [
                 "maxHops": {"type": "integer", "minimum": 0, "maximum": 5},
                 "maxRelations": {"type": "integer", "minimum": 1, "maximum": 5000},
                 "projectPath": {"type": "string", "minLength": 1},
+                "debug": {"type": "boolean"},
             },
             "additionalProperties": False,
         },
@@ -274,12 +276,27 @@ class MCPServer:
         if name in read_tools:
             api = KnowledgeAPI(project) if project_path or self.api is None else self.api
         if name == "knowledge_context":
+            if arguments.get("debug", False):
+                return api.context(str(arguments["task"]), arguments.get("maxTokens"), True)
             return api.context(str(arguments["task"]), arguments.get("maxTokens"))
         if name == "knowledge_search":
-            return api.search(str(arguments["query"]), arguments.get("kinds"), arguments.get("module"), int(arguments.get("limit", 10)))
+            if arguments.get("debug", False):
+                return api.search(
+                    str(arguments["query"]), arguments.get("kinds"),
+                    arguments.get("module"), int(arguments.get("limit", 10)), True,
+                )
+            return api.search(
+                str(arguments["query"]), arguments.get("kinds"),
+                arguments.get("module"), int(arguments.get("limit", 10)),
+            )
         if name == "knowledge_get":
             return api.get(str(arguments["id"]))
         if name == "knowledge_impact":
+            if arguments.get("debug", False):
+                return api.impact(
+                    arguments.get("files"), arguments.get("symbols"),
+                    arguments.get("maxHops", 1), arguments.get("maxRelations", 500), True,
+                )
             return api.impact(
                 arguments.get("files"), arguments.get("symbols"),
                 arguments.get("maxHops", 1), arguments.get("maxRelations", 500),

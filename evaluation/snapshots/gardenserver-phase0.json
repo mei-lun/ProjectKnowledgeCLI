@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "captured_at": "2026-08-20T03:00:00+08:00",
+  "project": "gardenserver",
+  "source_path": "D:/Github-Poj/gardenserver",
+  "revision": {
+    "mode": "file_hash_only",
+    "value": "sha256:6e3c64aabc8456e5a5bd05a620998902f8a01be10f2ab86eec337d3c528ab70b"
+  },
+  "codegraph": {
+    "adapter": "codegraph-public-cli",
+    "version": "1.5.0",
+    "file_count": 1296,
+    "node_count": 17550,
+    "edge_count": 44169,
+    "index_state": "complete",
+    "pending_changes": 0
+  },
+  "pks_scope": {
+    "file_count": 1270,
+    "snapshot_sha256": "fa78b23ff6ba789ea9ab2e8742ffbb4058c59aaefa844ec8f37cd3e62a6d98ef",
+    "source_sha256": "sha256:55b1774b257079af6511b1ac51418b3049f10d33c3787db3a4431d2ff8a277c1",
+    "pending_files": 0,
+    "stale_knowledge": 0,
+    "conflicted_knowledge": 0
+  },
+  "dataset": {
+    "path": "evaluation/questions-gardenserver-phase0.jsonl",
+    "samples": 12,
+    "status": "phase0_seed",
+    "production_gate_ready": false,
+    "note": "Phase 0 seed only; the final acceptance target remains at least 300 verified samples across stable repositories or snapshots."
+  }
+}

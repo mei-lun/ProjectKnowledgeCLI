@@ -9,7 +9,7 @@ from typing import Any
 
 from .config import ProjectConfig
 from .guidance_store import GuidanceStore
-from .models import KnowledgeRecord
+from .models import CanonicalFile, CanonicalSymbol, KnowledgeRecord, RetrievalCandidate
 from .ranking import FileCandidate, fallback_rank_files, rank_files
 from .service import ProjectService
 from .store import SCHEMA_VERSION, KnowledgeStore
@@ -97,7 +97,14 @@ class KnowledgeAPI:
             )
             return result
 
-    def search(self, query: str, kinds: list[str] | None = None, module: str | None = None, limit: int = 10) -> dict[str, Any]:
+    def search(
+        self,
+        query: str,
+        kinds: list[str] | None = None,
+        module: str | None = None,
+        limit: int = 10,
+        debug: bool = False,
+    ) -> dict[str, Any]:
         started = time.monotonic()
         pending = set(self.service.status().get("pending_files", []))
         with KnowledgeStore(self.service.db_path) as store:
@@ -171,10 +178,38 @@ class KnowledgeAPI:
                 "gaps": [] if items else ["No matching knowledge record; search live source."],
                 "vector_retrieval": vector_diagnostics,
             }
+            if debug:
+                result["retrieval_trace"] = {
+                    "schema_version": 1,
+                    "operation": "knowledge_search",
+                    "query": {"raw": query, "terms": self._symbol_terms(query)},
+                    "channels": {
+                        "lexical": len(lexical_ids),
+                        "vector": len(vector_matches),
+                    },
+                    "candidate_count": len(ranked),
+                    "deduplicated_count": len(seen_ids),
+                    "returned_count": len(items),
+                    "ranking": [
+                        {
+                            "candidate_id": item["id"],
+                            "score": item["score"],
+                            "score_breakdown": item["score_breakdown"],
+                        }
+                        for item in items
+                    ],
+                }
             self._record_query(store, "knowledge_search", len(query), result, started)
             return result
 
-    def impact(self, files: list[str] | None = None, symbols: list[str] | None = None, max_hops: int = 1, max_relations: int = 500) -> dict[str, Any]:
+    def impact(
+        self,
+        files: list[str] | None = None,
+        symbols: list[str] | None = None,
+        max_hops: int = 1,
+        max_relations: int = 500,
+        debug: bool = False,
+    ) -> dict[str, Any]:
         started = time.monotonic()
         files = [Path(path).as_posix().lstrip("./") for path in (files or [])]
         symbols = symbols or []
@@ -220,15 +255,34 @@ class KnowledgeAPI:
                 "dependency_files": sorted(affected_files),
                 "limitations": self.service.engine.status().get("limitations", []),
             })
+            if debug:
+                engine_result["retrieval_trace"] = {
+                    "schema_version": 1,
+                    "operation": "knowledge_impact",
+                    "anchors": {"files": files, "symbols": symbols},
+                    "max_hops": max_hops,
+                    "max_relations": max_relations,
+                    "relation_count": len(engine_result.get("relations", [])),
+                    "affected_file_count": len(engine_result.get("affected_files", [])),
+                    "affected_symbol_count": len(engine_result.get("affected_symbols", [])),
+                    "affected_knowledge_count": len(knowledge),
+                    "truncated": engine_result["truncated"],
+                    "fact_source": "codegraph",
+                }
             self._record_query(store, "knowledge_impact", len(json.dumps(engine_result["input"])), engine_result, started)
         return engine_result
 
-    def context(self, task: str, max_tokens: int | None = None) -> dict[str, Any]:
+    def context(
+        self,
+        task: str,
+        max_tokens: int | None = None,
+        debug: bool = False,
+    ) -> dict[str, Any]:
         started = time.monotonic()
         budget = max(256, min(max_tokens or self.config.max_tokens, 50_000))
         status = self.status()
         intent = self.classify_task(task)
-        search = self.search(task, limit=10)
+        search = self.search(task, limit=10, debug=debug)
         broad_project_requested = any(
             phrase in task.lower()
             for phrase in ["project map", "repository overview", "project overview", "项目地图", "项目概览"]
@@ -345,9 +399,241 @@ class KnowledgeAPI:
                 )
             result.update(ranked_files.to_dict())
             result["ranking_reason_code"] = ranked_files.reason_code
+            prefit_files = list(result["files"])
+            prefit_core_files = list(result["core_files"])
             self._fit_context(result, budget)
+            if debug:
+                result["retrieval_trace"] = self._context_retrieval_trace(
+                    task=task,
+                    intent=intent,
+                    status=status,
+                    search_trace=search.get("retrieval_trace", {}),
+                    symbol_matches=symbol_matches,
+                    candidates=candidates,
+                    allowed_paths=allowed_paths,
+                    ranked_files=ranked_files.to_dict(),
+                    prefit_files=prefit_files,
+                    prefit_core_files=prefit_core_files,
+                    result=result,
+                    budget=budget,
+                )
             self._record_query(store, "knowledge_context", len(task), result, started)
             return result
+
+    def _context_retrieval_trace(
+        self,
+        *,
+        task: str,
+        intent: dict[str, Any],
+        status: dict[str, Any],
+        search_trace: dict[str, Any],
+        symbol_matches: list[dict[str, Any]],
+        candidates: list[FileCandidate],
+        allowed_paths: set[str],
+        ranked_files: dict[str, Any],
+        prefit_files: list[str],
+        prefit_core_files: list[str],
+        result: dict[str, Any],
+        budget: int,
+    ) -> dict[str, Any]:
+        snapshot = self.service.engine.snapshot(self.root, self.service.config)
+        snapshot_files = {item.path.replace("\\", "/"): item for item in snapshot.files}
+        repository_id = self.config.project_name or self.root.name
+        source_revision = str(status.get("head_commit") or snapshot.snapshot_id)
+        pending = {str(path).replace("\\", "/") for path in status.get("pending_files", [])}
+
+        canonical_files: dict[str, CanonicalFile] = {}
+        for path in sorted(allowed_paths):
+            indexed = snapshot_files.get(path)
+            if indexed is None:
+                continue
+            lowered = path.lower()
+            canonical_files[path] = CanonicalFile(
+                repository_id=repository_id,
+                commit=source_revision,
+                path=path,
+                language=indexed.language,
+                module=indexed.module,
+                file_hash=indexed.content_hash,
+                status="potentially_stale" if path in pending else "fresh",
+                metadata={
+                    "is_test": "test" in Path(path).name.lower() or "/test" in lowered,
+                    "is_generated": "/generated/" in f"/{lowered}/",
+                    "is_vendor": any(part in lowered.split("/") for part in ("vendor", "node_modules")),
+                },
+            )
+
+        canonical_symbols = [
+            self._canonical_symbol(item, repository_id, source_revision, canonical_files)
+            for item in symbol_matches
+            if str(item.get("path", "")).replace("\\", "/") in canonical_files
+        ]
+        trace_candidates = self._canonical_trace_candidates(candidates, canonical_files)
+        channel_counts: dict[str, int] = {}
+        for candidate in trace_candidates:
+            for channel in candidate.channels:
+                channel_counts[channel] = channel_counts.get(channel, 0) + 1
+        unique_paths = {candidate.file for candidate in trace_candidates}
+        final_files = list(result.get("files", []))
+        final_core = list(result.get("core_files", []))
+        token_withheld = [
+            item for item in result.get("withheld_files", [])
+            if item.get("reason_code") == "token_budget"
+        ]
+        return {
+            "schema_version": 1,
+            "operation": "knowledge_context",
+            "query": {
+                "raw": task,
+                "intent": intent.get("task_type", "investigation"),
+                "entities": self._symbol_terms(task),
+                "relations": self._intent_relations(str(intent.get("task_type", "investigation"))),
+                "constraints": {"freshness": "exclude_pending"},
+            },
+            "source": {
+                "repository_id": repository_id,
+                "snapshot_id": snapshot.snapshot_id,
+                "revision": source_revision,
+                "fact_source": "codegraph",
+                "file_count": len(snapshot.files),
+            },
+            "stages": {
+                "knowledge_recall": search_trace,
+                "symbol_recall": {
+                    "candidate_count": len(canonical_symbols),
+                    "candidates": [item.to_dict() for item in canonical_symbols[:50]],
+                },
+                "file_recall": {
+                    "candidate_count": len(candidates),
+                    "channel_counts": channel_counts,
+                    "candidates": [item.to_dict() for item in trace_candidates[:100]],
+                },
+                "canonical_dedup": {
+                    "input_count": len(candidates),
+                    "unique_count": len(unique_paths),
+                    "duplicates_removed": max(0, len(candidates) - len(unique_paths)),
+                    "pending_filtered": len(pending.intersection(allowed_paths)),
+                },
+                "ranking": {
+                    "policy": ranked_files.get("ranking_policy"),
+                    "status": ranked_files.get("ranking_status"),
+                    "confidence": ranked_files.get("ranking_confidence"),
+                    "candidates": ranked_files.get("file_rankings", []),
+                    "withheld": ranked_files.get("withheld_files", []),
+                    "rejected": ranked_files.get("rejected_files", []),
+                },
+                "context_assembly": {
+                    "core_files": final_core,
+                    "supporting_files": list(result.get("supporting_files", [])),
+                    "selected_before_budget": prefit_files,
+                },
+                "token_budget": {
+                    "budget": budget,
+                    "estimated_tokens_without_trace": result.get("estimated_tokens", 0),
+                    "withheld": token_withheld,
+                    "context_incomplete": not set(prefit_core_files).issubset(final_core),
+                },
+            },
+        }
+
+    @staticmethod
+    def _intent_relations(intent: str) -> list[str]:
+        return {
+            "new_feature": ["implements", "calls", "tests", "configures"],
+            "bug_fix": ["callers", "callees", "tests"],
+            "refactor": ["callers", "callees", "imports", "tests"],
+            "impact_analysis": ["callers", "callees", "implements", "tests"],
+        }.get(intent, ["defines", "calls"])
+
+    @staticmethod
+    def _canonical_symbol(
+        item: dict[str, Any],
+        repository_id: str,
+        source_revision: str,
+        files: dict[str, CanonicalFile],
+    ) -> CanonicalSymbol:
+        path = str(item.get("path", "")).replace("\\", "/")
+        public_id = str(item.get("id", ""))
+        qualified = public_id.split("::", 1)[1] if "::" in public_id else str(item.get("name", ""))
+        parts = qualified.split("::")
+        line = max(1, int(item.get("line") or 1))
+        end_line = max(line, int(item.get("end_line") or line))
+        file = files[path]
+        return CanonicalSymbol(
+            symbol_id=f"repo://{repository_id}/{source_revision}/{path}#{qualified}@{line}",
+            qualified_name=qualified,
+            short_name=str(item.get("name", parts[-1] if parts else qualified)),
+            kind=str(item.get("kind", "unknown")),
+            path=path,
+            signature=str(item.get("signature", "")),
+            span={"start": line, "end": end_line},
+            parent="::".join(parts[:-1]),
+            aliases=(),
+            source_commit=source_revision,
+            source_hash=file.file_hash,
+            freshness=file.status,
+        )
+
+    @staticmethod
+    def _canonical_trace_candidates(
+        candidates: list[FileCandidate],
+        files: dict[str, CanonicalFile],
+    ) -> list[RetrievalCandidate]:
+        grouped: dict[str, list[FileCandidate]] = {}
+        for candidate in candidates:
+            path = candidate.path.replace("\\", "/")
+            if path in files:
+                grouped.setdefault(path, []).append(candidate)
+        result: list[RetrievalCandidate] = []
+        channel_names = {
+            "direct_symbol": "symbol_exact",
+            "knowledge_source": "knowledge",
+            "impact": "graph_direct",
+            "fallback": "lexical",
+        }
+        for path, rows in grouped.items():
+            file = files[path]
+            channels = {
+                channel_names.get(stage, stage)
+                for row in rows
+                for stage in row.stages
+            }
+            if any(row.graph_hop == 2 for row in rows):
+                channels.add("graph_multihop")
+            anchors = sorted({anchor for row in rows for anchor in row.anchors})
+            features: dict[str, float | int | bool | str] = {
+                "exact_symbol": any(row.exact_symbol for row in rows),
+                "exact_path": any(row.exact_path for row in rows),
+                "relation_hop": min(
+                    (row.graph_hop for row in rows if row.graph_hop is not None),
+                    default=0,
+                ),
+                "path_term_count": len({term for row in rows for term in row.path_terms}),
+                "symbol_term_count": len({term for row in rows for term in row.symbol_terms}),
+                "is_test": file.metadata.get("is_test", False),
+                "freshness": file.status,
+            }
+            evidence = [f"file:{path}", f"hash:{file.file_hash}"]
+            evidence.extend(f"anchor:{anchor}" for anchor in anchors[:8])
+            edge_type = (
+                "defines" if "direct_symbol" in {stage for row in rows for stage in row.stages}
+                else "documents" if "knowledge_source" in {stage for row in rows for stage in row.stages}
+                else "depends_on" if "impact" in {stage for row in rows for stage in row.stages}
+                else "lexical_match"
+            )
+            result.append(RetrievalCandidate(
+                candidate_id=file.file_id,
+                file=path,
+                channels=tuple(sorted(channels)),
+                graph_paths=tuple(
+                    {"from": anchor, "edge": edge_type, "to": file.file_id}
+                    for anchor in anchors[:8]
+                ),
+                features=features,
+                evidence=tuple(evidence),
+                stage="canonicalized",
+            ))
+        return result
 
     def _context_file_candidates(
         self,

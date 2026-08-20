@@ -1,11 +1,106 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
+from pathlib import Path
 from typing import Any, Literal
 
 
 Confidence = Literal["verified", "generated", "inferred"]
 Freshness = Literal["fresh", "potentially_stale", "stale", "conflicted"]
+CanonicalFreshness = Literal["fresh", "potentially_stale", "stale", "deleted"]
+
+
+def _canonical_relative_path(value: str) -> str:
+    normalized = value.replace("\\", "/")
+    while normalized.startswith("./"):
+        normalized = normalized[2:]
+    candidate = Path(normalized)
+    if (
+        not normalized
+        or candidate.is_absolute()
+        or ":" in normalized.split("/", 1)[0]
+        or ".." in candidate.parts
+    ):
+        raise ValueError(f"canonical path must stay inside the repository: {value}")
+    return normalized
+
+
+@dataclass(slots=True, frozen=True)
+class CanonicalFile:
+    """Commit-bound file identity used inside the retrieval pipeline."""
+
+    repository_id: str
+    commit: str
+    path: str
+    language: str
+    module: str
+    file_hash: str
+    status: CanonicalFreshness = "fresh"
+    metadata: dict[str, bool] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "path", _canonical_relative_path(self.path))
+
+    @property
+    def file_id(self) -> str:
+        return f"repo://{self.repository_id}/{self.commit}/{self.path}"
+
+    def to_dict(self) -> dict[str, Any]:
+        return {"file_id": self.file_id, **asdict(self)}
+
+
+@dataclass(slots=True, frozen=True)
+class CanonicalSymbol:
+    """Public CodeGraph symbol identity enriched with snapshot provenance."""
+
+    symbol_id: str
+    qualified_name: str
+    short_name: str
+    kind: str
+    path: str
+    signature: str
+    span: dict[str, int]
+    parent: str = ""
+    aliases: tuple[str, ...] = ()
+    source_commit: str = ""
+    source_hash: str = ""
+    freshness: CanonicalFreshness = "fresh"
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "path", _canonical_relative_path(self.path))
+        start = self.span.get("start")
+        end = self.span.get("end", start)
+        if not isinstance(start, int) or start < 1 or not isinstance(end, int) or end < start:
+            raise ValueError("canonical symbol span must contain positive start/end lines")
+
+    def to_dict(self) -> dict[str, Any]:
+        result = asdict(self)
+        result["aliases"] = list(self.aliases)
+        return result
+
+
+@dataclass(slots=True, frozen=True)
+class RetrievalCandidate:
+    """Explainable candidate shared by recall, ranking, and debug traces."""
+
+    candidate_id: str
+    file: str
+    symbol: str = ""
+    channels: tuple[str, ...] = ()
+    graph_paths: tuple[dict[str, str], ...] = ()
+    features: dict[str, float | int | bool | str] = field(default_factory=dict)
+    evidence: tuple[str, ...] = ()
+    stage: str = "recalled"
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "file", _canonical_relative_path(self.file))
+
+    def to_dict(self) -> dict[str, Any]:
+        result = asdict(self)
+        result["channels"] = list(self.channels)
+        result["graph_paths"] = list(self.graph_paths)
+        result["evidence"] = list(self.evidence)
+        return result
 
 
 @dataclass(slots=True)

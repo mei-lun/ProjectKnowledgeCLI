@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "report_kind": "retrieval_quality_baseline",
+  "phase": "phase0",
+  "work_package": "WP-RQ-01",
+  "generated_at": "2026-08-20T23:00:17+08:00",
+  "strategy": "codegraph",
+  "available": true,
+  "samples": 12,
+  "dataset": {
+    "path": "evaluation/questions-gardenserver-phase0.jsonl",
+    "sha256": "sha256:c81a04af69dcf917531682258fe0e84c2a6f016f6a2a6ce79fc84cb98f9f79ac",
+    "status": "phase0_seed",
+    "production_gate_ready": false
+  },
+  "source": {
+    "project": "gardenserver",
+    "source_snapshot_sha256": "sha256:55b1774b257079af6511b1ac51418b3049f10d33c3787db3a4431d2ff8a277c1",
+    "pks_snapshot_id": "fa78b23ff6ba789ea9ab2e8742ffbb4058c59aaefa844ec8f37cd3e62a6d98ef",
+    "pks_file_count": 1270,
+    "codegraph": {
+      "adapter": "codegraph-public-cli",
+      "version": "1.5.0",
+      "file_count": 1296,
+      "node_count": 17550,
+      "edge_count": 44169,
+      "index_state": "complete"
+    }
+  },
+  "metrics": {
+    "core_file_precision": 0.127778,
+    "core_file_recall": 0.583333,
+    "file_precision": 0.112037,
+    "file_recall": 0.583333,
+    "ndcg_at_5": 0.53589,
+    "symbol_precision": 0.163452,
+    "symbol_recall": 0.7,
+    "success_rate": 0.583333,
+    "average_context_tokens": 116.916667,
+    "average_tool_calls": 3.0,
+    "average_core_files": 3.75,
+    "average_returned_files": 4.333333,
+    "ranking_fallback_rate": 0.0,
+    "p50_latency_ms": 10433.2665,
+    "p95_latency_ms": 12211.57575,
+    "p99_latency_ms": 12592.37595,
+    "generated_source_coverage": 1.0
+  },
+  "category_success": {
+    "call_path": {"samples": 2, "success_rate": 1.0},
+    "configuration": {"samples": 2, "success_rate": 0.5},
+    "extension_point": {"samples": 2, "success_rate": 0.5},
+    "invariant": {"samples": 2, "success_rate": 0.0},
+    "workflow": {"samples": 4, "success_rate": 0.75}
+  },
+  "failure_samples": [
+    "garden-role-create",
+    "garden-resident-order-strict",
+    "garden-customer-first-order",
+    "garden-avatar-component-registry",
+    "garden-table-configuration"
+  ],
+  "trace_probe": {
+    "query": "GardenCom.start_cultivation",
+    "snapshot_id": "fa78b23ff6ba789ea9ab2e8742ffbb4058c59aaefa844ec8f37cd3e62a6d98ef",
+    "knowledge_candidates": 0,
+    "symbol_candidates": 5,
+    "file_candidates": 19,
+    "canonical_files": 8,
+    "duplicates_removed": 11,
+    "pending_filtered": 0,
+    "ranking_policy": "policy-v1",
+    "ranking_status": "ok",
+    "core_files": [
+      "src/app/game/magent/com/garden_com.lua",
+      "src/app/game/magent/system/garden_sys.lua",
+      "src/app/robot/robot/com/garden_com.lua",
+      "src_dev/unittest/base/simulate.lua",
+      "src_dev/unittest/magent/case/test_arch_farm.lua"
+    ],
+    "token_budget": 1800,
+    "context_incomplete": false
+  },
+  "quality_gate": {
+    "phase1_file_recall": 0.85,
+    "phase1_core_file_recall": 0.85,
+    "phase1_symbol_recall": 0.6,
+    "phase1_precision_at_5": 0.5,
+    "phase1_ndcg_at_5": 0.7,
+    "stale_result_rate": 0.0,
+    "adapter_fallback_rate": 0.0,
+    "status": "not_evaluable_until_dataset_reaches_300_samples",
+    "observations": [
+      "Phase 0 seed is intentionally below the final acceptance sample count.",
+      "Candidate and symbol coverage are measurable, but current seed recall and precision are below Phase 1 thresholds.",
+      "p95 latency is above the eventual production target; this baseline does not change runtime defaults."
+    ]
+  }
+}
