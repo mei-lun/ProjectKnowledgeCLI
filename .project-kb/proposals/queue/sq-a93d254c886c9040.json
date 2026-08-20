@@ -1,0 +1,24 @@
+{
+  "affected_knowledge": [
+    "curated.conventions",
+    "generated.frameworks",
+    "generated.module.scripts",
+    "generated.module.tests",
+    "generated.project-map",
+    "generated.test-map"
+  ],
+  "base_commit": "e108c5d00d6d7158c848a64f670f50b15514247c",
+  "changed_files": [
+    "scripts/validate_evaluation_provenance.py",
+    "tests/test_documentation_roadmap.py",
+    "tests/test_evaluation_provenance.py"
+  ],
+  "changed_symbols": [],
+  "changeset_id": "change-20260821-030611",
+  "created_at": "2026-08-21T03:06:11+08:00",
+  "head_commit": "5d9cb119472dadabb235aa094efb7147b5d1ca79",
+  "queue_id": "sq-a93d254c886c9040",
+  "schema_version": 1,
+  "status": "awaiting_semantic_generation",
+  "task_summary": "manual synchronization"
+}

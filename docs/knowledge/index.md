@@ -8,17 +8,17 @@
 
 ## 人工维护
 
-- [架构](curated/architecture.md) - 状态：`可能过期`；可信度：`已验证`
-- [约定](curated/conventions.md) - 状态：`可能过期`；可信度：`已验证`
-- [功能开发指南生成约定](curated/feature-guide-generation.md) - 状态：`可能过期`；可信度：`已验证`
-- [术语表](curated/glossary.md) - 状态：`可能过期`；可信度：`已验证`
-- [Provider 与 EvidencePack](curated/provider-and-evidence.md) - 状态：`可能过期`；可信度：`已验证`
+- [架构](curated/architecture.md) - 状态：`新鲜`；可信度：`已验证`
+- [约定](curated/conventions.md) - 状态：`新鲜`；可信度：`已验证`
+- [功能开发指南生成约定](curated/feature-guide-generation.md) - 状态：`新鲜`；可信度：`已验证`
+- [术语表](curated/glossary.md) - 状态：`新鲜`；可信度：`已验证`
+- [Provider 与 EvidencePack](curated/provider-and-evidence.md) - 状态：`新鲜`；可信度：`已验证`
 
 ## 架构决策
 
-- [ADR 0001：本地优先、无依赖的 MVP 核心](decisions/0001-local-first-core.md) - 状态：`可能过期`；可信度：`已验证`
-- [ADR-0002：CodeGraph Adapter 边界与本地替代方案](decisions/0002-codegraph-adapter-boundary.md) - 状态：`可能过期`；可信度：`已验证`
-- [ADR 0003：Lua/Skynet 入口证据与只读 revision 边界](decisions/0003-lua-skynet-entry-evidence.md) - 状态：`可能过期`；可信度：`已验证`
+- [ADR 0001：本地优先、无依赖的 MVP 核心](decisions/0001-local-first-core.md) - 状态：`新鲜`；可信度：`已验证`
+- [ADR-0002：CodeGraph Adapter 边界与本地替代方案](decisions/0002-codegraph-adapter-boundary.md) - 状态：`新鲜`；可信度：`已验证`
+- [ADR 0003：Lua/Skynet 入口证据与只读 revision 边界](decisions/0003-lua-skynet-entry-evidence.md) - 状态：`新鲜`；可信度：`已验证`
 
 ## 自动生成
 
