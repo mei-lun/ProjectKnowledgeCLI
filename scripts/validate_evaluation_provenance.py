@@ -33,6 +33,9 @@ def validate_evaluation_report(
     if package_version != __version__:
         errors.append(f"report package version {package_version or '<missing>'} does not match {__version__}")
 
+    if payload.get("working_tree") != "clean":
+        errors.append("active report must be generated from a clean working tree")
+
     strategies = payload.get("strategies")
     codegraph = strategies.get("codegraph") if isinstance(strategies, dict) else None
     if not isinstance(codegraph, dict):

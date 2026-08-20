@@ -7,7 +7,7 @@
 - `project-kb status`：`engine=codegraph`、`adapter=codegraph-public-cli`、`adapter_version=1.5.0`、`available=true`。
 - `create_engine()` 只创建 `CodeGraphEngine`；运行时不再导出或回退到 `BuiltinCodeIndexEngine`、Python/Lua/Generic parser。
 - 真实 Adapter 验证已通过 `init/files/query/trace/impact/affected` 六项检查。
-- `evaluation/reports/latest.json` 已按 0.1.34 重新生成，覆盖 50 题 CodeGraph 策略，报告元数据为 `available=true`、`adapter=codegraph-public-cli`。
+- `evaluation/reports/latest.json` 已按 0.1.39 重新生成，覆盖 50 题 CodeGraph 策略，报告元数据为 `available=true`、`adapter=codegraph-public-cli`。
 
 ## 历史报告边界
 
@@ -15,6 +15,6 @@
 
 ## 质量结论
 
-当前 CodeGraph Adapter 已接入且可用；当前 CodeGraph 策略的质量门仍未达标，主要表现为候选覆盖、符号召回和排序精确率不足。这是检索质量问题，不是 Adapter 不可用，也不应通过恢复 Builtin fallback 解决。
+当前 CodeGraph Adapter 已接入且可用；0.1.39 活动报告的文件召回率为 `0.801667`、核心文件精确率为 `0.323667`、符号召回率为 `0.193333`、成功率为 `0.10`、P95 延迟为 `5690.74 ms`。冻结质量门仍未通过，这是检索质量问题，不是 Adapter 不可用，也不应通过恢复 Builtin fallback 或降低阈值解决。
 
 CI 会拒绝以下活动报告：包版本过期、CodeGraph 不可用、非 `codegraph-public-cli` Adapter、`adapter_unavailable` 元数据或 Builtin engine 元数据。

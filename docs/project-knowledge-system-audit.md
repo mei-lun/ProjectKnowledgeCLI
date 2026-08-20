@@ -9,7 +9,7 @@
 
 当前有效实施基线为 `docs/retrieval-quality-work-package.md`。WP-RQ-01～03 已完成 Phase 0～2 的数据模型、可观测性、多路召回和确定性符号优先排序；WP-RQ-04 按原技术方案登记 Phase 3 上下文生产化需求，不以已有字段或局部测试代替最终验收。
 
-当前仍未通过最终质量门：专项数据只有 gardenserver 单一稳定快照的 32 题，核心精确率未达到 `0.50`，端到端 P95 超过 12 秒。活动评测报告、README 和 CodeGraph 状态文档必须由 RQ-REL-001 与当前版本重新对齐，随后才能继续 Phase 3、300 题多快照评测和生产门禁。
+当前仍未通过最终质量门：专项数据只有 gardenserver 单一稳定快照的 32 题，核心精确率未达到 `0.50`，端到端 P95 超过 12 秒。RQ-REL-001 已将 0.1.39 活动报告、README、CodeGraph 状态文档和版本重新对齐；50 题全策略报告已真实执行且未通过冻结质量门，失败项保留在 `evaluation/reports/latest.json`，不通过降低阈值或恢复 builtin 规避。下一步继续 Phase 3、300 题多快照评测和生产门禁。
 
 ## 当前交付复核：WP-13 / CG-ONLY（承接 WP-11 / WP-11-HF）
 

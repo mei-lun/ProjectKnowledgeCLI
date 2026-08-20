@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import unittest
 from pathlib import Path
 
@@ -61,6 +62,23 @@ class DocumentationRoadmapTests(unittest.TestCase):
         self.assertIn(f"当前质量指标（{__version__}）", self.readme)
         self.assertIn(f"当前版本：{__version__}", audit)
         self.assertIn(f"当前 CodeGraph 评测状态（{__version__}）", codegraph)
+
+    def test_readme_quality_summary_matches_active_codegraph_report(self) -> None:
+        report = json.loads(
+            (self.root / "evaluation" / "reports" / "latest.json").read_text(encoding="utf-8")
+        )
+        metrics = report["strategies"]["codegraph"]["metrics"]
+
+        for metric in (
+            "file_recall",
+            "file_precision",
+            "core_file_recall",
+            "core_file_precision",
+            "symbol_recall",
+            "symbol_precision",
+        ):
+            self.assertIn(f"{metrics[metric]:.6f}", self.readme)
+        self.assertIn(f"{metrics['p95_latency_ms']:.2f} ms", self.readme)
 
     def test_retrieval_work_package_tracks_phase3_requirements(self) -> None:
         work_package = (self.root / "docs" / "retrieval-quality-work-package.md").read_text(

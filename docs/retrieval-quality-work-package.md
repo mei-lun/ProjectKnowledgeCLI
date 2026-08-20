@@ -55,7 +55,7 @@ Release evidence is maintained separately from Phase 3 behavior so that regenera
 
 | Requirement | Deliverable | Evidence | Status |
 | --- | --- | --- | --- |
-| RQ-REL-001 | Keep the active evaluation report, README quality summary, CodeGraph status document, audit header, package version, and CI provenance validation aligned | `evaluation/reports/latest.json`, `README.md`, `docs/codegraph-evaluation-current.md`, `scripts/validate_evaluation_provenance.py`, `tests/test_evaluation_provenance.py`, `tests/test_documentation_roadmap.py` | in progress |
+| RQ-REL-001 | Keep the active evaluation report, README quality summary, CodeGraph status document, audit header, package version, and CI provenance validation aligned | `evaluation/reports/latest.json`, `README.md`, `docs/codegraph-evaluation-current.md`, `scripts/validate_evaluation_provenance.py`, `tests/test_evaluation_provenance.py`, `tests/test_documentation_roadmap.py` | complete |
 
 ## WP-RQ-04 — Phase 3 context production and release gates
 

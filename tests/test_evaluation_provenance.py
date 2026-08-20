@@ -19,6 +19,7 @@ class EvaluationProvenanceTests(unittest.TestCase):
     def _valid_payload(self) -> dict:
         return {
             "package_version": __version__,
+            "working_tree": "clean",
             "quality_gate": {"warnings": []},
             "strategies": {
                 "codegraph": {
@@ -63,6 +64,18 @@ class EvaluationProvenanceTests(unittest.TestCase):
 
         self.assertFalse(valid)
         self.assertIn("package version", " ".join(errors))
+
+    def test_dirty_worktree_report_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            payload = self._valid_payload()
+            payload["working_tree"] = "dirty"
+            report = self._write_report(root, payload)
+
+            valid, errors = validate_evaluation_report(report, root)
+
+        self.assertFalse(valid)
+        self.assertIn("clean working tree", " ".join(errors))
 
     def test_unavailable_codegraph_report_is_rejected(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

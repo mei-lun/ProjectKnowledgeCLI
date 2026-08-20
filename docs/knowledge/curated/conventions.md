@@ -111,3 +111,10 @@
 
 ## 0.1.35 README 指标约定
 README 只引用当前活动报告中的 CodeGraph 指标，并明确区分 Adapter 可用性与检索质量门；指标更新必须同步报告版本、数据集样本数和 provenance，不得以历史 Builtin 或 `adapter_unavailable` 结果替代当前状态。
+
+## 0.1.39 活动报告发布约定
+
+活动评测报告必须与唯一版本源一致，并从干净工作区生成；`scripts/validate_evaluation_provenance.py` 同时拒绝旧版本、dirty worktree、不可用 CodeGraph、非 `codegraph-public-cli` Adapter、`adapter_unavailable` 和 builtin 元数据。质量门失败必须保留真实失败项，README 和当前 CodeGraph 状态文档只引用该活动报告，不得降低冻结阈值或用专项小样本替代正式报告。
+
+<!-- project-kb:source file="scripts/validate_evaluation_provenance.py" -->
+<!-- project-kb:source file="evaluation/reports/latest.json" -->
