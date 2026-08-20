@@ -42,6 +42,16 @@ class EvaluationProvenanceTests(unittest.TestCase):
 
         self.assertTrue(valid, errors)
 
+    def test_repository_active_report_matches_current_release(self) -> None:
+        root = Path(__file__).resolve().parents[1]
+
+        valid, errors = validate_evaluation_report(
+            root / "evaluation" / "reports" / "latest.json",
+            root,
+        )
+
+        self.assertTrue(valid, errors)
+
     def test_stale_package_report_is_rejected(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

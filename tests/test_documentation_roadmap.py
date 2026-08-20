@@ -3,6 +3,8 @@ from __future__ import annotations
 import unittest
 from pathlib import Path
 
+from project_knowledge import __version__
+
 
 class DocumentationRoadmapTests(unittest.TestCase):
     @classmethod
@@ -51,6 +53,30 @@ class DocumentationRoadmapTests(unittest.TestCase):
 
     def test_readme_documents_release_finalization(self) -> None:
         self.assertIn("project-kb finalize", self.readme)
+
+    def test_current_release_documents_match_package_version(self) -> None:
+        audit = (self.root / "docs" / "project-knowledge-system-audit.md").read_text(encoding="utf-8")
+        codegraph = (self.root / "docs" / "codegraph-evaluation-current.md").read_text(encoding="utf-8")
+
+        self.assertIn(f"当前质量指标（{__version__}）", self.readme)
+        self.assertIn(f"当前版本：{__version__}", audit)
+        self.assertIn(f"当前 CodeGraph 评测状态（{__version__}）", codegraph)
+
+    def test_retrieval_work_package_tracks_phase3_requirements(self) -> None:
+        work_package = (self.root / "docs" / "retrieval-quality-work-package.md").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("WP-RQ-04", work_package)
+        for requirement in (
+            "RQ-P3-001",
+            "RQ-P3-002",
+            "RQ-P3-003",
+            "RQ-P3-004",
+            "RQ-P3-005",
+        ):
+            self.assertIn(requirement, work_package)
+        self.assertNotIn("This Phase 0 batch", work_package)
 
     def test_codegraph_decision_preserves_evaluated_failure_reason(self) -> None:
         decision = (

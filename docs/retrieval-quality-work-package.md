@@ -49,6 +49,26 @@ On the locked 12-question seed, `policy-v2` reaches `1.000000` file recall, core
 
 The result validates deterministic symbol-first ranking on the frozen gardenserver snapshot, not the production gate. Core precision remains below the final `0.50` target, P95 end-to-end latency remains above 12 seconds, and the dataset still has only 32 questions from one stable snapshot. Optional model reranking is deliberately left pending until an offline provider and independent samples can demonstrate a real gain without weakening local-first behavior.
 
+## Release evidence alignment
+
+Release evidence is maintained separately from Phase 3 behavior so that regenerating an active report is not misreported as context-production functionality.
+
+| Requirement | Deliverable | Evidence | Status |
+| --- | --- | --- | --- |
+| RQ-REL-001 | Keep the active evaluation report, README quality summary, CodeGraph status document, audit header, package version, and CI provenance validation aligned | `evaluation/reports/latest.json`, `README.md`, `docs/codegraph-evaluation-current.md`, `scripts/validate_evaluation_provenance.py`, `tests/test_evaluation_provenance.py`, `tests/test_documentation_roadmap.py` | in progress |
+
+## WP-RQ-04 — Phase 3 context production and release gates
+
+Phase 3 follows the original technical plan. Existing partial behavior is recorded as partial and remains incomplete until positive and negative tests, real-project evaluation, documentation, versioning, and knowledge synchronization all pass.
+
+| Requirement | Deliverable | Evidence | Status |
+| --- | --- | --- | --- |
+| RQ-P3-001 | Return explicit `core`, `supporting`, and `optional` tiers with stable ordering and explainable tier transitions | Current `core/supporting` baseline in `src/project_knowledge/ranking.py`; Phase 3 tests and evaluation samples still required | partial |
+| RQ-P3-002 | Rework token-budget trimming so optional and supporting evidence are removed before required Core symbols and required relation paths | Current withholding behavior in `src/project_knowledge/retrieval.py`; required-Core and relation-path acceptance still required | partial |
+| RQ-P3-003 | Expose low-confidence, `context_incomplete`, and `needs_source_check` states without presenting uncertain results as verified facts | Current `ranking_confidence` and `context_incomplete` fields; `needs_source_check` contract still required | partial |
+| RQ-P3-004 | Persist complete debug traces and publish separate lexical, CodeGraph, ranking, and context-assembly P50/P95/P99 measurements | Current opt-in trace and aggregate latency reports; per-stage production evidence still required | partial |
+| RQ-P3-005 | Block regressions in CI using the locked multi-snapshot dataset, stale/branch/worktree checks, token-budget tests, and performance smoke tests | Current quick evaluation and scheduled performance workflow; final 300-question gate still required | partial |
+
 ## Acceptance boundary
 
-The final plan requires at least 300 questions, at least 30 samples per query type, at least 3 stable repositories or snapshots, locked source and CodeGraph hashes, and clean-environment reproducibility. This Phase 0 batch intentionally does not claim that gate is complete.
+The final plan requires at least 300 questions, at least 30 samples per query type, at least 3 stable repositories or snapshots, locked source and CodeGraph hashes, and clean-environment reproducibility. The current Phase 0–2 baseline intentionally does not claim that gate is complete.
