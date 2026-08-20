@@ -1444,3 +1444,11 @@ RT-003 的旧状态记录到 0.1.32 为未完成；以下 0.1.33 交付校正覆
 RT-003 已完成基础交付。`EmbeddingProvider`、`VectorIndex` 和确定性的 `DeterministicLocalProvider` 已接入 ProjectService 初始化/重建/同步生命周期；默认 `embeddings: disabled` 不加载 provider、不写向量表，`embeddings: local` 使用离线固定维度向量。SQLite Schema 从 v3 迁移到 v4，支持内容哈希、provider/model/维度失效、删除补偿、provider unavailable 与非法维度 fallback。
 
 `KnowledgeAPI.search/context` 暴露 `vector_retrieval` 诊断。向量候选只能补充 lexical 结果，明确 lexical 命中和 CodeGraph 文件/符号结构证据保持优先；未接入网络模型或第三方 embedding。测试覆盖 disabled 零加载、确定性、哈希/model/维度失效、删除、fallback、Schema 迁移和 hybrid 排序契约；0.1.33 全量 pytest 为 285 项通过。
+
+# 0.1.37 当前交付校正：WP-RQ-02 多路候选召回
+
+WP-RQ-02 已完成候选召回层实现，但最终检索质量计划仍未完成。原查询词被完整保留，并增加可审计的确定性别名；路径精确、符号精确、符号别名、词法、知识、直接图关系、多跳图关系、测试/配置八类召回通道分别限流，候选在 debug trace 中保留通道来源。待同步文件不会进入候选集。
+
+gardenserver 冻结的 12 题 Phase 0 集上，文件召回由 0.583333 提升至 0.833333，核心文件召回由 0.583333 提升至 0.791667，符号召回由 0.700000 提升至 0.800000，nDCG@5 由 0.535890 提升至 0.687006。新增 20 题挑战集的文件召回为 0.841667、核心文件召回为 0.816667、符号召回为 0.708333、nDCG@5 为 0.654721。
+
+本批不宣称通过最终质量门：样本量仍少于 300，稳定仓库/快照仍少于 3，且业务不变量与同域组件排序仍存在失败样本；平均返回文件数上升也需要由 WP-RQ-03 排序阶段治理。完整复现证据见 `evaluation/reports/gardenserver-phase1-0.1.37.json`，需求状态见 `docs/retrieval-quality-work-package.md`。

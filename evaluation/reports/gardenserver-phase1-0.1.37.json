@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "report_kind": "retrieval_quality_candidate_recall",
+  "phase": "phase1",
+  "work_package": "WP-RQ-02",
+  "generated_at": "2026-08-20T23:57:54+08:00",
+  "strategy": "codegraph",
+  "available": true,
+  "source": {
+    "project": "gardenserver",
+    "source_snapshot_sha256": "sha256:55b1774b257079af6511b1ac51418b3049f10d33c3787db3a4431d2ff8a277c1",
+    "pks_snapshot_id": "fa78b23ff6ba789ea9ab2e8742ffbb4058c59aaefa844ec8f37cd3e62a6d98ef",
+    "pks_file_count": 1270,
+    "codegraph": {
+      "adapter": "codegraph-public-cli",
+      "version": "1.5.0",
+      "file_count": 1296,
+      "node_count": 17550,
+      "edge_count": 44169,
+      "index_state": "complete"
+    }
+  },
+  "phase0_seed_comparison": {
+    "dataset": "evaluation/questions-gardenserver-phase0.jsonl",
+    "dataset_sha256": "sha256:c81a04af69dcf917531682258fe0e84c2a6f016f6a2a6ce79fc84cb98f9f79ac",
+    "samples": 12,
+    "before": {
+      "core_file_precision": 0.127778,
+      "core_file_recall": 0.583333,
+      "file_precision": 0.112037,
+      "file_recall": 0.583333,
+      "ndcg_at_5": 0.535890,
+      "symbol_recall": 0.700000,
+      "success_rate": 0.583333,
+      "average_returned_files": 4.333333
+    },
+    "after": {
+      "core_file_precision": 0.191667,
+      "core_file_recall": 0.791667,
+      "file_precision": 0.125000,
+      "file_recall": 0.833333,
+      "ndcg_at_5": 0.687006,
+      "symbol_precision": 0.150000,
+      "symbol_recall": 0.800000,
+      "success_rate": 0.750000,
+      "average_returned_files": 8.083333,
+      "ranking_fallback_rate": 0.0,
+      "p95_latency_ms": 12030.066900
+    },
+    "failure_samples": [
+      "garden-resident-order-strict",
+      "garden-customer-first-order",
+      "garden-avatar-component-registry"
+    ]
+  },
+  "phase1_challenge": {
+    "dataset": "evaluation/questions-gardenserver-phase1.jsonl",
+    "dataset_sha256": "sha256:e002e57ab4fb2060cc8c9120ca0353174b40ed91ed89690c87247e3369a4c3df",
+    "samples": 20,
+    "metrics": {
+      "acceptable_supporting_precision": 0.100000,
+      "core_file_precision": 0.260000,
+      "core_file_recall": 0.816667,
+      "file_precision": 0.150000,
+      "file_recall": 0.841667,
+      "ndcg_at_5": 0.654721,
+      "symbol_precision": 0.121528,
+      "symbol_recall": 0.708333,
+      "success_rate": 0.650000,
+      "average_returned_files": 9.250000,
+      "ranking_fallback_rate": 0.0,
+      "p95_latency_ms": 12016.435650,
+      "generated_source_coverage": 1.0
+    },
+    "failure_samples": [
+      "garden-alias-login",
+      "garden-alias-resident",
+      "garden-alias-customer",
+      "garden-path-avatar-def",
+      "garden-knowledge-login",
+      "garden-test-garden",
+      "garden-alias-order-en"
+    ]
+  },
+  "quality_gate": {
+    "required_samples": 300,
+    "required_repositories_or_snapshots": 3,
+    "phase1_file_recall": 0.85,
+    "phase1_core_file_recall": 0.85,
+    "phase1_symbol_recall": 0.60,
+    "phase1_precision_at_5": 0.50,
+    "phase1_ndcg_at_5": 0.70,
+    "stale_result_rate": 0.0,
+    "adapter_fallback_rate": 0.0,
+    "status": "not_passed",
+    "observations": [
+      "The 12-question seed and 20-question challenge set are below the final acceptance sample count.",
+      "Multi-channel recall materially improves the locked seed without adapter fallback.",
+      "Returned-file volume increased as expected for a recall-first phase.",
+      "Business-invariant and same-domain component ordering remain Phase 2 ranking work.",
+      "The frozen thresholds were not lowered."
+    ]
+  }
+}

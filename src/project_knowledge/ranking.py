@@ -18,6 +18,7 @@ STAGE_PRIORITY = {
 class FileCandidate:
     path: str
     stages: set[str] = field(default_factory=set)
+    channels: set[str] = field(default_factory=set)
     anchors: set[str] = field(default_factory=set)
     exact_symbol: bool = False
     qualified_symbol: bool = False
@@ -242,6 +243,7 @@ def _copy_candidate(candidate: FileCandidate, *, path: str) -> FileCandidate:
     return FileCandidate(
         path=path,
         stages=set(candidate.stages),
+        channels=set(candidate.channels),
         anchors=set(candidate.anchors),
         exact_symbol=candidate.exact_symbol,
         qualified_symbol=candidate.qualified_symbol,
@@ -268,6 +270,7 @@ def _merge_candidates(left: FileCandidate, right: FileCandidate) -> FileCandidat
     return FileCandidate(
         path=left.path,
         stages=left.stages | right.stages,
+        channels=left.channels | right.channels,
         anchors=left.anchors | right.anchors,
         exact_symbol=left.exact_symbol or right.exact_symbol,
         qualified_symbol=left.qualified_symbol or right.qualified_symbol,

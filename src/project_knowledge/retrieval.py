@@ -37,6 +37,34 @@ IDENTIFIER_PHRASE_TOKENS = (
 )
 
 
+RECALL_CHANNEL_LIMITS = {
+    "path_exact": 20,
+    "symbol_exact": 50,
+    "symbol_alias": 50,
+    "lexical": 100,
+    "knowledge": 30,
+    "graph_direct": 100,
+    "graph_multihop": 100,
+    "test_config": 50,
+}
+
+# Deterministic, reviewable seed aliases. Project-specific identifiers still come
+# from the live CodeGraph symbol index; aliases only add queries and never facts.
+QUERY_ALIAS_GROUPS = (
+    (("物品", "道具", "item"), ("item", "create_item", "add_item")),
+    (("登录", "认证", "login"), ("account_component", "account_api", "do_login", "login", "account", "authenticate")),
+    (("角色", "role"), ("do_role_create", "role_create", "avatar", "role")),
+    (("生命周期", "lifecycle"), ("avatar/base.lua", "on_login_handler", "avatar_def")),
+    (("花园", "garden"), ("garden_com", "garden_sys", "garden")),
+    (("种植", "培育", "cultivation"), ("start_cultivation", "claim_cultivation", "cultivation")),
+    (("订单", "order"), ("resident_order", "customer_order", "order")),
+    (("居民订单", "常驻订单", "resident order"), ("ResidentOrderCom", "resident_order")),
+    (("顾客订单", "customer order"), ("CustomerOrderCom", "customer_order")),
+    (("配置", "configuration", "config"), ("tblconf", "config", "conf")),
+    (("测试", "test"), ("src_test", "src_dev", "unittest", "test")),
+)
+
+
 class KnowledgeAPI:
     def __init__(self, project: str | Path = "."):
         self.service = ProjectService(project)
@@ -487,6 +515,7 @@ class KnowledgeAPI:
                 "raw": task,
                 "intent": intent.get("task_type", "investigation"),
                 "entities": self._symbol_terms(task),
+                "aliases": self._query_aliases(task, self._symbol_terms(task)),
                 "relations": self._intent_relations(str(intent.get("task_type", "investigation"))),
                 "constraints": {"freshness": "exclude_pending"},
             },
@@ -593,11 +622,13 @@ class KnowledgeAPI:
         }
         for path, rows in grouped.items():
             file = files[path]
-            channels = {
+            channels = {channel for row in rows for channel in row.channels}
+            channels.update({
                 channel_names.get(stage, stage)
                 for row in rows
                 for stage in row.stages
-            }
+                if stage in channel_names
+            })
             if any(row.graph_hop == 2 for row in rows):
                 channels.add("graph_multihop")
             anchors = sorted({anchor for row in rows for anchor in row.anchors})
@@ -653,7 +684,11 @@ class KnowledgeAPI:
             normalized(path)
             for path in self.service.status().get("pending_files", [])
         }
-        terms = {term.lower() for term in self._symbol_terms(task)}
+        original_terms = {term.lower() for term in self._symbol_terms(task)}
+        alias_terms = {
+            term.lower() for term in self._query_aliases(task, list(original_terms))
+        }
+        terms = original_terms | alias_terms
         engine_status = self.service.engine.status()
         capabilities = set(engine_status.get("capabilities", []))
         unavailable_signals = {"graph"} if capabilities and "impact" not in capabilities else set()
@@ -661,7 +696,7 @@ class KnowledgeAPI:
         endpoint_hops: dict[str, int] = {}
         for relation in impact.get("relations", []):
             path = normalized(relation.get("path", ""))
-            hop = relation.get("hop")
+            hop = relation.get("hop", 1)
             if path and isinstance(hop, int):
                 relation_hops[path] = min(relation_hops.get(path, hop), hop)
             if isinstance(hop, int):
@@ -703,17 +738,18 @@ class KnowledgeAPI:
             lowered_symbol = symbol.lower()
             symbol_name = lowered_symbol.rsplit("::", 1)[-1].rsplit(".", 1)[-1]
             return {
-                "exact_symbol": bool(symbol and any(term in {lowered_symbol, symbol_name} for term in terms)),
-                "qualified_symbol": bool(symbol and any(lowered_symbol.startswith(term) for term in terms)),
-                "exact_path": lowered_path in terms,
-                "exact_filename": filename in terms or stem in terms,
-                "exact_module": module in terms,
+                "exact_symbol": bool(symbol and any(term in {lowered_symbol, symbol_name} for term in original_terms)),
+                "qualified_symbol": bool(symbol and any(lowered_symbol.startswith(term) for term in original_terms)),
+                "exact_path": lowered_path in original_terms,
+                "exact_filename": filename in original_terms or stem in original_terms,
+                "exact_module": module in original_terms,
             }
 
         def add(
             path: object,
             *,
             stage: str,
+            channel: str,
             anchor: str = "",
             symbol: str = "",
             graph_hop: int | None = None,
@@ -732,6 +768,7 @@ class KnowledgeAPI:
             candidates.append(FileCandidate(
                 path=normalized_path,
                 stages={stage},
+                channels={channel},
                 anchors={anchor} if anchor else set(),
                 module=modules.get(normalized_path, self._module_from_path(normalized_path)),
                 path_terms=matching_terms(normalized_path),
@@ -753,6 +790,7 @@ class KnowledgeAPI:
             add(
                 match.get("path", ""),
                 stage="direct_symbol",
+                channel=str(match.get("recall_channel", "symbol_exact")),
                 anchor=symbol_id,
                 symbol=f"{symbol_id}::{symbol_name}",
                 graph_hop=relation_hops.get(normalized(match.get("path", ""))),
@@ -760,7 +798,13 @@ class KnowledgeAPI:
         for key in ("dependency_files", "affected_files"):
             for path in impact.get(key, []):
                 normalized_path = normalized(path)
-                add(path, stage="impact", graph_hop=relation_hops.get(normalized_path))
+                hop = relation_hops.get(normalized_path, 1)
+                add(
+                    path,
+                    stage="impact",
+                    channel="graph_direct" if hop <= 1 else "graph_multihop",
+                    graph_hop=hop,
+                )
         task_requests_tests = (
             intent.get("task_type") in {"new_feature", "bug_fix", "impact_analysis"}
             or any(term in task.lower() for term in ("test", "pytest", "unittest", "测试"))
@@ -774,7 +818,13 @@ class KnowledgeAPI:
             ),
         )[: 4 if task_requests_tests else 2]
         for path in affected_tests:
-            add(path, stage="impact", graph_hop=1, affected_test=True)
+            add(
+                path,
+                stage="impact",
+                channel="test_config",
+                graph_hop=1,
+                affected_test=True,
+            )
         for fragment in fragments:
             if fragment.get("freshness") != "fresh" or fragment.get("requires_live_source"):
                 continue
@@ -787,6 +837,7 @@ class KnowledgeAPI:
                     add(
                         source_path,
                         stage="knowledge_source",
+                        channel="knowledge",
                         anchor=str(fragment.get("id", "")),
                         direct_knowledge_source=(
                             source_path.lower() in lowered_content
@@ -795,22 +846,81 @@ class KnowledgeAPI:
                         content=fragment_content,
                     )
         for path in sorted(allowed_paths):
+            lowered_path = path.lower()
+            filename = Path(path).name.lower()
+            stem = Path(path).stem.lower()
+            module = modules.get(path, self._module_from_path(path)).lower()
+            if any(
+                term in {lowered_path, filename, stem, module}
+                for term in original_terms
+            ):
+                add(path, stage="fallback", channel="path_exact")
             if matching_terms(path):
-                add(path, stage="fallback")
-        return candidates, allowed_paths
+                add(path, stage="fallback", channel="lexical")
+            if (
+                any(marker in lowered_path for marker in ("/config/", "/conf/", "test", "spec"))
+                and matching_terms(path)
+            ):
+                add(path, stage="impact", channel="test_config")
+        return self._limit_recall_candidates(candidates, RECALL_CHANNEL_LIMITS), allowed_paths
+
+    @staticmethod
+    def _limit_recall_candidates(
+        candidates: list[FileCandidate],
+        limits: dict[str, int],
+    ) -> list[FileCandidate]:
+        """Apply independent per-channel caps before canonical path deduplication."""
+        counts: dict[str, int] = {}
+        limited: list[FileCandidate] = []
+        for candidate in candidates:
+            channels = candidate.channels or {"lexical"}
+            accepted = {
+                channel
+                for channel in channels
+                if counts.get(channel, 0) < max(0, limits.get(channel, 0))
+            }
+            if not accepted:
+                continue
+            candidate.channels = accepted
+            limited.append(candidate)
+            for channel in accepted:
+                counts[channel] = counts.get(channel, 0) + 1
+        return limited
 
     def _task_symbol_matches(self, task: str, terms: list[str]) -> list[dict[str, Any]]:
         matches: list[dict[str, Any]] = []
         seen: set[str] = set()
-        for term in terms[:8]:
+        structured = [
+            term for term in terms
+            if any(marker in term for marker in ("_", ".", "::", "/"))
+        ]
+        plain = [term for term in terms if term not in structured]
+        aliases = self._query_aliases(task, terms)
+        aliases.sort(
+            key=lambda term: (
+                not any(marker in term for marker in ("_", ".", "::", "/")),
+                -len(term),
+                term,
+            )
+        )
+        query_terms = [(term, "symbol_exact") for term in structured[:8]]
+        query_terms.extend((term, "symbol_alias") for term in aliases[:12])
+        query_terms.extend((term, "symbol_exact") for term in plain[:8])
+        channel_counts = {"symbol_exact": 0, "symbol_alias": 0}
+        for term, channel in query_terms:
+            if channel_counts[channel] >= RECALL_CHANNEL_LIMITS[channel]:
+                continue
             for symbol in self.service.engine.search_symbols(
                 self.root, self.service.config, term, limit=3
             ):
                 item = asdict(symbol)
                 if item["id"] not in seen:
                     seen.add(item["id"])
+                    item["recall_channel"] = channel
+                    item["matched_term"] = term
                     matches.append(item)
-        return matches[:12]
+                    channel_counts[channel] += 1
+        return matches[:24]
 
     @staticmethod
     def _guidance_workflow_status(store: KnowledgeStore) -> dict[str, Any]:
@@ -894,6 +1004,23 @@ class KnowledgeAPI:
         for term in re.findall(r"[\u4e00-\u9fff]{2,}", task):
             add(term)
         return terms[:24]
+
+    @staticmethod
+    def _query_aliases(task: str, original_terms: list[str] | None = None) -> list[str]:
+        """Return deterministic query expansions while preserving original terms."""
+        lowered = task.lower()
+        original = {term.lower() for term in (original_terms or [])}
+        aliases: list[str] = []
+        for triggers, expansions in QUERY_ALIAS_GROUPS:
+            if not any(trigger.lower() in lowered for trigger in triggers):
+                continue
+            for expansion in expansions:
+                if expansion.lower() not in original and expansion not in aliases:
+                    aliases.append(expansion)
+                elif expansion not in aliases:
+                    # Keep explicit business identifiers visible in trace provenance.
+                    aliases.append(expansion)
+        return aliases[:24]
 
     @classmethod
     def _relevant_excerpt(cls, content: str, task: str, budget: int) -> str:
