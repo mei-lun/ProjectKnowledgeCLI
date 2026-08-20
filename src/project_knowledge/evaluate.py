@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 from . import __version__
-from .ranking import DEFAULT_RANKING_POLICY, FileCandidate, rank_files
+from .ranking import DEFAULT_RANKING_POLICY, LEGACY_RANKING_POLICY, FileCandidate, rank_files
 from .retrieval import KnowledgeAPI
 from .store import KnowledgeStore
 from .util import approx_tokens, hash_file, hash_text, read_text, trim_to_tokens, utc_now
@@ -20,7 +20,7 @@ from .util import approx_tokens, hash_file, hash_text, read_text, trim_to_tokens
 
 SCHEMA_VERSION = 1
 STRATEGIES = {"hybrid", "grep_read", "code", "markdown", "codegraph"}
-GREP_RANKING_POLICY = replace(DEFAULT_RANKING_POLICY, full_limit=7)
+GREP_RANKING_POLICY = replace(LEGACY_RANKING_POLICY, full_limit=7)
 EXPECTED_LIST_FIELDS = {
     "expected_files",
     "expected_symbols",

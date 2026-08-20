@@ -47,6 +47,16 @@ class ConfigTests(unittest.TestCase):
             self.assertEqual(actual.provider_max_tokens, 12000)
             self.assertEqual(actual.drafts_root, ".project-kb/drafts")
             self.assertEqual(actual.codegraph_dir, ".codegraph")
+            self.assertEqual(actual.ranking_policy, "policy-v2")
+
+    def test_ranking_policy_round_trip_supports_policy_v1_rollback(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            ProjectConfig(ranking_policy="policy-v1").write(root)
+
+            actual = ProjectConfig.load(root)
+
+            self.assertEqual(actual.ranking_policy, "policy-v1")
 
     def test_default_excludes_keep_evaluation_outputs_out_of_the_test_index(self) -> None:
         config = ProjectConfig()

@@ -33,6 +33,7 @@ DEFAULT_EXCLUDES = [
 ]
 
 SUPPORTED_ENGINES: tuple[str, ...] = ("codegraph",)
+SUPPORTED_RANKING_POLICIES: tuple[str, ...] = ("policy-v1", "policy-v2")
 
 
 @dataclass(slots=True)
@@ -57,6 +58,7 @@ class ProjectConfig:
     proposal_trigger: str = "commit"
     max_tokens: int = 6000
     embeddings: str = "disabled"
+    ranking_policy: str = "policy-v2"
     local_only: bool = True
     telemetry: bool = False
     provider_id: str = "disabled"
@@ -78,6 +80,11 @@ class ProjectConfig:
     def __post_init__(self) -> None:
         if self.engine not in SUPPORTED_ENGINES:
             raise UnsupportedEngineError(self.engine)
+        if self.ranking_policy not in SUPPORTED_RANKING_POLICIES:
+            raise ValueError(
+                f"不支持 ranking_policy={self.ranking_policy!r}；"
+                f"支持值：{', '.join(SUPPORTED_RANKING_POLICIES)}"
+            )
 
     @staticmethod
     def load_raw(root: Path) -> dict[str, Any]:
@@ -175,6 +182,7 @@ class ProjectConfig:
             proposal_trigger=str(updates.get("proposal_trigger", "commit")),
             max_tokens=int(retrieval.get("max_tokens", 6000)),
             embeddings=str(retrieval.get("embeddings", "disabled")),
+            ranking_policy=str(retrieval.get("ranking_policy", "policy-v2")),
             local_only=bool(privacy.get("local_only", True)),
             telemetry=bool(privacy.get("telemetry", False)),
             provider_id=str(provider.get("id", "disabled")),
@@ -232,6 +240,7 @@ class ProjectConfig:
             "retrieval:",
             f"  max_tokens: {self.max_tokens}",
             f"  embeddings: {self.embeddings}",
+            f"  ranking_policy: {self.ranking_policy}",
             "",
             "privacy:",
             f"  local_only: {str(self.local_only).lower()}",

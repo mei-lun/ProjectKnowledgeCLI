@@ -10,7 +10,13 @@ from typing import Any
 from .config import ProjectConfig
 from .guidance_store import GuidanceStore
 from .models import CanonicalFile, CanonicalSymbol, KnowledgeRecord, RetrievalCandidate
-from .ranking import FileCandidate, fallback_rank_files, rank_files
+from .ranking import (
+    DEFAULT_RANKING_POLICY,
+    LEGACY_RANKING_POLICY,
+    FileCandidate,
+    fallback_rank_files,
+    rank_files,
+)
 from .service import ProjectService
 from .store import SCHEMA_VERSION, KnowledgeStore
 from .util import approx_tokens, project_lock, trim_to_tokens, utc_now
@@ -52,17 +58,26 @@ RECALL_CHANNEL_LIMITS = {
 # from the live CodeGraph symbol index; aliases only add queries and never facts.
 QUERY_ALIAS_GROUPS = (
     (("物品", "道具", "item"), ("item", "create_item", "add_item")),
-    (("登录", "认证", "login"), ("account_component", "account_api", "do_login", "login", "account", "authenticate")),
+    (("登录", "认证", "login"), ("AccountApi.login", "AccountComponent.do_login", "account_component", "account_api", "do_login", "login", "account", "authenticate")),
     (("角色", "role"), ("do_role_create", "role_create", "avatar", "role")),
     (("生命周期", "lifecycle"), ("avatar/base.lua", "on_login_handler", "avatar_def")),
-    (("花园", "garden"), ("garden_com", "garden_sys", "garden")),
-    (("种植", "培育", "cultivation"), ("start_cultivation", "claim_cultivation", "cultivation")),
+    (("花园", "garden"), ("garden_com", "garden_sys", "garden", "farm")),
+    (("种植", "培育", "cultivation"), ("start_cultivation", "claim_cultivation", "cultivation", "farm")),
     (("订单", "order"), ("resident_order", "customer_order", "order")),
-    (("居民订单", "常驻订单", "resident order"), ("ResidentOrderCom", "resident_order")),
-    (("顾客订单", "customer order"), ("CustomerOrderCom", "customer_order")),
+    (("居民订单", "常驻订单", "resident order"), ("get_order_strict", "set_order", "ResidentOrderCom", "resident_order")),
+    (("顾客订单", "顾客首单", "首单", "customer order"), ("mark_first_order_generated", "CustomerOrderCom", "customer_order")),
+    (("组件注册", "注册到", "在哪里注册", "注册表", "component registry"), ("avatar_def", "registry", "register")),
     (("配置", "configuration", "config"), ("tblconf", "config", "conf")),
     (("测试", "test"), ("src_test", "src_dev", "unittest", "test")),
 )
+
+GENERIC_SYMBOL_NAMES = {
+    "add", "call", "check", "close", "create", "delete", "get", "handle",
+    "init", "load", "main", "new", "open", "process", "read", "run", "save",
+    "send", "set", "start", "stop", "test", "update", "write",
+}
+VENDOR_PATH_PREFIXES = ("modules/", "vendor/", "third_party/", "deps/", "external/")
+GENERATED_PATH_MARKERS = ("/generated/", "/dist/", "/build/", ".generated.")
 
 
 class KnowledgeAPI:
@@ -382,7 +397,14 @@ class KnowledgeAPI:
                 "index": {"commit": status.get("index_commit"), "pending_files": status.get("pending_files", [])},
                 "summary": self._context_summary(fragments, impact),
                 "knowledge": fragments,
-                "symbols": symbol_matches[:30],
+                "symbols": [
+                    {
+                        key: value
+                        for key, value in item.items()
+                        if key not in {"symbol_score", "symbol_score_breakdown"}
+                    }
+                    for item in symbol_matches[:30]
+                ],
                 "impact": {
                     **{
                         key: impact.get(key, [])[:limit]
@@ -417,15 +439,29 @@ class KnowledgeAPI:
             candidates, allowed_paths = self._context_file_candidates(
                 task, intent, symbol_matches, impact, fragments
             )
+            query_profile = self._query_profile(task)
+            ranking_policy = (
+                LEGACY_RANKING_POLICY
+                if self.config.ranking_policy == "policy-v1"
+                else DEFAULT_RANKING_POLICY
+            )
             try:
-                ranked_files = rank_files(candidates, allowed_paths=allowed_paths)
+                ranked_files = rank_files(
+                    candidates,
+                    allowed_paths=allowed_paths,
+                    policy=ranking_policy,
+                    query_type=query_profile,
+                )
             except Exception:
                 ranked_files = fallback_rank_files(
                     candidates,
                     allowed_paths=allowed_paths,
                     reason_code="ranking_error",
+                    policy=ranking_policy,
+                    query_type=query_profile,
                 )
             result.update(ranked_files.to_dict())
+            result["query_profile"] = query_profile
             result["ranking_reason_code"] = ranked_files.reason_code
             prefit_files = list(result["files"])
             prefit_core_files = list(result["core_files"])
@@ -487,7 +523,8 @@ class KnowledgeAPI:
                 metadata={
                     "is_test": "test" in Path(path).name.lower() or "/test" in lowered,
                     "is_generated": "/generated/" in f"/{lowered}/",
-                    "is_vendor": any(part in lowered.split("/") for part in ("vendor", "node_modules")),
+                    "is_vendor": lowered.startswith(VENDOR_PATH_PREFIXES)
+                    or any(part in lowered.split("/") for part in ("vendor", "node_modules")),
                 },
             )
 
@@ -514,6 +551,7 @@ class KnowledgeAPI:
             "query": {
                 "raw": task,
                 "intent": intent.get("task_type", "investigation"),
+                "profile": self._query_profile(task),
                 "entities": self._symbol_terms(task),
                 "aliases": self._query_aliases(task, self._symbol_terms(task)),
                 "relations": self._intent_relations(str(intent.get("task_type", "investigation"))),
@@ -531,6 +569,16 @@ class KnowledgeAPI:
                 "symbol_recall": {
                     "candidate_count": len(canonical_symbols),
                     "candidates": [item.to_dict() for item in canonical_symbols[:50]],
+                    "ranking": [
+                        {
+                            "symbol_id": str(item.get("id", "")),
+                            "score": int(item.get("symbol_score", 0)),
+                            "score_breakdown": item.get("symbol_score_breakdown", {}),
+                            "matched_term": str(item.get("matched_term", "")),
+                            "channel": str(item.get("recall_channel", "")),
+                        }
+                        for item in symbol_matches[:50]
+                    ],
                 },
                 "file_recall": {
                     "candidate_count": len(candidates),
@@ -689,10 +737,12 @@ class KnowledgeAPI:
             term.lower() for term in self._query_aliases(task, list(original_terms))
         }
         terms = original_terms | alias_terms
+        query_profile = self._query_profile(task)
         engine_status = self.service.engine.status()
         capabilities = set(engine_status.get("capabilities", []))
         unavailable_signals = {"graph"} if capabilities and "impact" not in capabilities else set()
         relation_hops: dict[str, int] = {}
+        relation_degrees: dict[str, int] = {}
         endpoint_hops: dict[str, int] = {}
         for relation in impact.get("relations", []):
             path = normalized(relation.get("path", ""))
@@ -711,6 +761,7 @@ class KnowledgeAPI:
                         # directly without consulting the removed SQLite symbol cache.
                         endpoint_path = normalized(endpoint_id.split("::", 1)[0])
                         if endpoint_path in allowed_paths:
+                            relation_degrees[endpoint_path] = relation_degrees.get(endpoint_path, 0) + 1
                             relation_hops[endpoint_path] = min(
                                 relation_hops.get(endpoint_path, hop), hop
                             )
@@ -729,6 +780,11 @@ class KnowledgeAPI:
         def matching_terms(value: str) -> set[str]:
             lowered = value.lower()
             return {term for term in terms if term in lowered}
+
+        test_query_terms = {"test", "src_test", "src_dev", "unittest", "spec"}
+
+        def business_matching_terms(value: str) -> set[str]:
+            return matching_terms(value) - test_query_terms
 
         def identity(path: str, symbol: str = "") -> dict[str, bool]:
             lowered_path = path.lower()
@@ -756,6 +812,9 @@ class KnowledgeAPI:
             affected_test: bool = False,
             direct_knowledge_source: bool = False,
             content: str = "",
+            symbol_kind: str = "",
+            matched_term: str = "",
+            knowledge_confidence: str = "",
         ) -> None:
             normalized_path = normalized(path)
             if not normalized_path or normalized_path in pending_paths:
@@ -765,6 +824,27 @@ class KnowledgeAPI:
             if is_test and not task_explicitly_requests_tests:
                 identities["exact_symbol"] = False
                 identities["qualified_symbol"] = False
+            lowered_matched_term = matched_term.lower()
+            lowered_symbol_name = symbol.rsplit("::", 1)[-1].rsplit(".", 1)[-1].lower()
+            generic_symbol = bool(
+                identities["exact_symbol"]
+                and (
+                    lowered_symbol_name in GENERIC_SYMBOL_NAMES
+                    or lowered_matched_term in GENERIC_SYMBOL_NAMES
+                )
+            )
+            specific_symbol = bool(
+                channel in {"symbol_exact", "symbol_alias"}
+                and lowered_matched_term
+                and lowered_matched_term not in GENERIC_SYMBOL_NAMES
+                and ("_" in lowered_matched_term or len(lowered_matched_term) >= 8)
+            )
+            query_role_match = self._query_role_match(query_profile, normalized_path, symbol)
+            if query_profile == "test_config" and is_test:
+                query_role_match = bool(
+                    business_matching_terms(normalized_path)
+                    or business_matching_terms(symbol)
+                )
             candidates.append(FileCandidate(
                 path=normalized_path,
                 stages={stage},
@@ -777,8 +857,23 @@ class KnowledgeAPI:
                 graph_hop=graph_hop,
                 affected_test=affected_test,
                 direct_knowledge_source=direct_knowledge_source,
+                verified_knowledge=(knowledge_confidence == "verified"),
                 is_test=is_test,
                 task_role_match=bool(intent.get("task_type") != "investigation" and matching_terms(normalized_path)),
+                query_role_match=query_role_match,
+                definition_match=bool(
+                    channel in {"symbol_exact", "symbol_alias"}
+                    and symbol_kind in {"class", "function", "method", "file"}
+                ),
+                specific_symbol=specific_symbol,
+                generic_symbol=generic_symbol,
+                is_vendor=normalized_path.lower().startswith(VENDOR_PATH_PREFIXES),
+                is_generated=any(marker in f"/{normalized_path.lower()}" for marker in GENERATED_PATH_MARKERS),
+                high_degree_hub=relation_degrees.get(normalized_path, 0) >= 12,
+                auxiliary_source=(
+                    "/robot/" in f"/{normalized_path.lower()}"
+                    and "robot" not in task.lower()
+                ),
                 unavailable_signals=set(unavailable_signals),
                 original_order=len(candidates),
                 **identities,
@@ -793,6 +888,8 @@ class KnowledgeAPI:
                 channel=str(match.get("recall_channel", "symbol_exact")),
                 anchor=symbol_id,
                 symbol=f"{symbol_id}::{symbol_name}",
+                symbol_kind=str(match.get("kind", "")),
+                matched_term=str(match.get("matched_term", "")),
                 graph_hop=relation_hops.get(normalized(match.get("path", ""))),
             )
         for key in ("dependency_files", "affected_files"):
@@ -843,6 +940,7 @@ class KnowledgeAPI:
                             source_path.lower() in lowered_content
                             or bool(source_id and source_id.lower() in lowered_content)
                         ),
+                        knowledge_confidence=str(fragment.get("confidence", "")),
                         content=fragment_content,
                     )
         for path in sorted(allowed_paths):
@@ -896,8 +994,10 @@ class KnowledgeAPI:
         ]
         plain = [term for term in terms if term not in structured]
         aliases = self._query_aliases(task, terms)
+        query_profile = self._query_profile(task)
         aliases.sort(
             key=lambda term: (
+                not self._alias_matches_profile(query_profile, term),
                 not any(marker in term for marker in ("_", ".", "::", "/")),
                 -len(term),
                 term,
@@ -910,16 +1010,27 @@ class KnowledgeAPI:
         for term, channel in query_terms:
             if channel_counts[channel] >= RECALL_CHANNEL_LIMITS[channel]:
                 continue
+            symbol_limit = 8 if any(marker in term for marker in ("_", ".", "::", "/")) else 3
             for symbol in self.service.engine.search_symbols(
-                self.root, self.service.config, term, limit=3
+                self.root, self.service.config, term, limit=symbol_limit
             ):
                 item = asdict(symbol)
                 if item["id"] not in seen:
                     seen.add(item["id"])
                     item["recall_channel"] = channel
                     item["matched_term"] = term
+                    item["symbol_score"], item["symbol_score_breakdown"] = self._symbol_match_score(
+                        task, item
+                    )
                     matches.append(item)
                     channel_counts[channel] += 1
+        matches.sort(
+            key=lambda item: (
+                -int(item.get("symbol_score", 0)),
+                str(item.get("path", "")),
+                str(item.get("id", "")),
+            )
+        )
         return matches[:24]
 
     @staticmethod
@@ -1021,6 +1132,96 @@ class KnowledgeAPI:
                     # Keep explicit business identifiers visible in trace provenance.
                     aliases.append(expansion)
         return aliases[:24]
+
+    @staticmethod
+    def _query_profile(task: str) -> str:
+        """Infer a retrieval profile separately from development-task intent."""
+        lowered = task.lower()
+        profiles = (
+            ("call_path", ("调用链", "调用路径", "登录后", "生命周期", "从哪里进入", "call path", "call chain", "lifecycle")),
+            ("impact", ("影响哪些", "影响范围", "调用方", "依赖方", "依赖", "测试范围", "impact", "affected", "callers", "dependency", "scope")),
+            ("extension_point", ("扩展点", "注册到", "注册表", "在哪里注册", "registry", "register", "extension point", "factory", "plugin")),
+            ("invariant", ("不变量", "严格读取", "缺失", "首单", "状态", "检查", "记录", "strict read", "invariant", "missing", "state", "status", "save")),
+            ("design_reason", ("为什么", "设计原因", "决策", "adr", "design reason", "rationale")),
+            ("configuration", ("配置", "默认值", "环境变量", "configuration", "config", "default value", "environment variable")),
+            ("test_config", ("测试", "用例", "test", "unittest", "spec")),
+        )
+        for profile, signals in profiles:
+            if any(signal in lowered for signal in signals):
+                return profile
+        return "workflow"
+
+    @staticmethod
+    def _alias_matches_profile(query_profile: str, alias: str) -> bool:
+        lowered = alias.lower()
+        markers = {
+            "invariant": ("strict", "mark_", "set_", "get_", "validate", "assert"),
+            "extension_point": ("_def", "registry", "register", "factory", "plugin"),
+            "configuration": ("config", "conf", "tblconf", "env"),
+            "call_path": ("api", "component", "router", "handler"),
+            "impact": ("api", "component", "system", "_sys", "_com"),
+            "test_config": ("test", "unittest", "spec", "config"),
+            "workflow": ("api", "component", "router", "login", "handler"),
+        }
+        return any(marker in lowered for marker in markers.get(query_profile, ()))
+
+    @staticmethod
+    def _query_role_match(query_profile: str, path: str, symbol: str = "") -> bool:
+        lowered = f"{path}::{symbol}".lower()
+        markers = {
+            "invariant": ("/com/", "_com.", "strict", "validate", "assert", "check", "mark_", "set_", "get_"),
+            "extension_point": ("_def.", "/registry", "register", "registry", "factory", "plugin", "/routes/", "router", "/com/", "_com.", "/system/", "_sys."),
+            "configuration": ("/config/", "/conf/", "config", "tblconf", ".env"),
+            "call_path": ("/api/", "_api.", "component", "router", "/system/", "_sys.", "/avatar/", "avatar/base", "on_login_handler"),
+            "impact": ("/api/", "component", "/system/", "_sys.", "/com/", "_com."),
+            "test_config": ("test", "unittest", "/config/", "/conf/", "spec", "/api/", "_api.", "component", "/com/", "_com.", "/system/", "_sys."),
+            "design_reason": ("/docs/", "/decisions/", "adr", "architecture"),
+            "workflow": ("/api/", "_api.", "component", "router", "/system/", "_sys.", "/com/", "_com."),
+        }
+        return any(marker in lowered for marker in markers.get(query_profile, ()))
+
+    @classmethod
+    def _symbol_match_score(
+        cls,
+        task: str,
+        item: dict[str, Any],
+    ) -> tuple[int, dict[str, int]]:
+        name = str(item.get("name", "")).lower()
+        matched_term = str(item.get("matched_term", "")).lower()
+        path = str(item.get("path", "")).replace("\\", "/").lower()
+        kind = str(item.get("kind", "")).lower()
+        channel = str(item.get("recall_channel", ""))
+        exact = 100 if matched_term and name == matched_term else 0
+        normalized_identifier = matched_term.replace(".", "::")
+        symbol_id = str(item.get("id", ""))
+        qualified_value = str(item.get("qualified_name", "")) or (
+            symbol_id.split("::", 1)[1] if "::" in symbol_id else ""
+        )
+        qualified = (
+            120
+            if any(marker in matched_term for marker in (".", "::"))
+            and normalized_identifier in qualified_value.lower()
+            else 0
+        )
+        structured = 40 if any(marker in matched_term for marker in ("_", ".", "::", "/")) else 0
+        definition = 20 if kind in {"class", "function", "method", "file"} else 0
+        role = 80 if cls._query_role_match(cls._query_profile(task), path, name) else 0
+        path_match = 20 if matched_term and matched_term in path else 0
+        alias = 10 if channel == "symbol_alias" else 0
+        generic = -70 if name in GENERIC_SYMBOL_NAMES or matched_term in GENERIC_SYMBOL_NAMES else 0
+        vendor = -65 if path.startswith(VENDOR_PATH_PREFIXES) else 0
+        breakdown = {
+            "exact_name": exact,
+            "qualified_name": qualified,
+            "structured_term": structured,
+            "definition": definition,
+            "query_role": role,
+            "path_match": path_match,
+            "alias": alias,
+            "generic_symbol": generic,
+            "vendor_source": vendor,
+        }
+        return sum(breakdown.values()), breakdown
 
     @classmethod
     def _relevant_excerpt(cls, content: str, task: str, budget: int) -> str:

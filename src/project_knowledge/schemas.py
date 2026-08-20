@@ -545,7 +545,13 @@ CONFIG_SCHEMA: dict[str, Any] = {
         },
         "knowledge": {"type": "object", "additionalProperties": True},
         "updates": {"type": "object", "additionalProperties": True},
-        "retrieval": {"type": "object", "additionalProperties": True},
+        "retrieval": {
+            "type": "object",
+            "properties": {
+                "ranking_policy": {"enum": ["policy-v1", "policy-v2"]},
+            },
+            "additionalProperties": True,
+        },
         "privacy": {"type": "object", "additionalProperties": True},
         "provider": {"type": "object", "additionalProperties": True},
     },

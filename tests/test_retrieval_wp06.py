@@ -76,7 +76,7 @@ class RetrievalWP06Tests(unittest.TestCase):
         result = self.api.context("新增类似功能 create_item", max_tokens=1200)
 
         self.assertEqual(result["ranking_status"], "ok")
-        self.assertEqual(result["ranking_policy"], "policy-v1")
+        self.assertEqual(result["ranking_policy"], "policy-v2")
         self.assertLessEqual(len(result["core_files"]), 5)
         self.assertLessEqual(len(result["files"]), 10)
         self.assertEqual(

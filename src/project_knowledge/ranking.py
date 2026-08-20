@@ -25,15 +25,24 @@ class FileCandidate:
     exact_path: bool = False
     exact_filename: bool = False
     exact_module: bool = False
+    definition_match: bool = False
+    specific_symbol: bool = False
+    generic_symbol: bool = False
     direct_knowledge_source: bool = False
+    verified_knowledge: bool = False
     graph_hop: int | None = None
     module: str = ""
     task_role_match: bool = False
+    query_role_match: bool = False
     path_terms: set[str] = field(default_factory=set)
     symbol_terms: set[str] = field(default_factory=set)
     content_terms: set[str] = field(default_factory=set)
     is_test: bool = False
     affected_test: bool = False
+    is_generated: bool = False
+    is_vendor: bool = False
+    high_degree_hub: bool = False
+    auxiliary_source: bool = False
     requires_live_source: bool = False
     unavailable_signals: set[str] = field(default_factory=set)
     original_order: int = 0
@@ -41,19 +50,32 @@ class FileCandidate:
 
 @dataclass(frozen=True)
 class RankingPolicy:
-    name: str = "policy-v1"
+    name: str = "policy-v2"
     exact_identity: int = 104
     qualified_identity: int = 70
     file_or_module_identity: int = 40
     direct_knowledge_source: int = 35
     graph_hop_1: int = 30
     graph_hop_2: int = 12
-    task_role_match: int = 20
+    task_role_match: int = 0
+    query_role_match: int = 80
+    definition_match: int = 24
+    specific_symbol_match: int = 10
+    verified_knowledge: int = 12
+    channel_consensus: int = 4
+    requested_test_boost: int = 24
     path_term: int = 8
     symbol_term: int = 6
     content_term: int = 2
     irrelevant_test_penalty: int = -25
     fallback_only_penalty: int = -15
+    generic_symbol_penalty: int = -70
+    vendor_penalty: int = -65
+    generated_penalty: int = -18
+    high_degree_hub_penalty: int = -10
+    profile_mismatch_penalty: int = -35
+    generic_test_penalty: int = -40
+    auxiliary_source_penalty: int = -25
     core_min_score: int = 30
     supporting_min_score: int = 12
     core_limit: int = 5
@@ -126,6 +148,23 @@ def _json_compatible(value: object) -> object:
 
 
 DEFAULT_RANKING_POLICY = RankingPolicy()
+LEGACY_RANKING_POLICY = RankingPolicy(
+    name="policy-v1",
+    task_role_match=20,
+    query_role_match=0,
+    definition_match=0,
+    specific_symbol_match=0,
+    verified_knowledge=0,
+    channel_consensus=0,
+    requested_test_boost=0,
+    generic_symbol_penalty=0,
+    vendor_penalty=0,
+    generated_penalty=0,
+    high_degree_hub_penalty=0,
+    profile_mismatch_penalty=0,
+    generic_test_penalty=0,
+    auxiliary_source_penalty=0,
+)
 
 
 def rank_files(
@@ -133,15 +172,19 @@ def rank_files(
     *,
     allowed_paths: set[str],
     policy: RankingPolicy = DEFAULT_RANKING_POLICY,
+    query_type: str = "investigation",
 ) -> RankingResult:
     merged, rejected = _normalize_and_merge(candidates, allowed_paths)
     ranked = [
-        _to_ranked(candidate, score_candidate(candidate, policy))
+        _to_ranked(candidate, score_candidate(candidate, policy, query_type=query_type))
         for candidate in merged
     ]
     ranked.sort(key=lambda item: (-item.score, -STAGE_PRIORITY[item.selection_stage], item.path))
     eligible_core = [item for item in ranked if item.score >= policy.core_min_score]
     core = eligible_core[: min(policy.core_limit, policy.full_limit)]
+    if query_type == "test_config" and core:
+        test_paths = {candidate.path for candidate in merged if candidate.is_test}
+        core = _ensure_test_source_diversity(core, eligible_core, test_paths)
     confidence = "high"
     if not core and ranked:
         core = ranked[:1]
@@ -179,11 +222,12 @@ def fallback_rank_files(
     allowed_paths: set[str],
     reason_code: str,
     policy: RankingPolicy = DEFAULT_RANKING_POLICY,
+    query_type: str = "investigation",
 ) -> RankingResult:
     merged, rejected = _normalize_and_merge(candidates, allowed_paths)
     original_orders = {candidate.path: candidate.original_order for candidate in merged}
     ranked = [
-        _to_ranked(candidate, score_candidate(candidate, policy))
+        _to_ranked(candidate, score_candidate(candidate, policy, query_type=query_type))
         for candidate in merged
     ]
     ranked.sort(key=lambda item: (original_orders[item.path], item.path))
@@ -250,15 +294,24 @@ def _copy_candidate(candidate: FileCandidate, *, path: str) -> FileCandidate:
         exact_path=candidate.exact_path,
         exact_filename=candidate.exact_filename,
         exact_module=candidate.exact_module,
+        definition_match=candidate.definition_match,
+        specific_symbol=candidate.specific_symbol,
+        generic_symbol=candidate.generic_symbol,
         direct_knowledge_source=candidate.direct_knowledge_source,
+        verified_knowledge=candidate.verified_knowledge,
         graph_hop=candidate.graph_hop,
         module=candidate.module,
         task_role_match=candidate.task_role_match,
+        query_role_match=candidate.query_role_match,
         path_terms=set(candidate.path_terms),
         symbol_terms=set(candidate.symbol_terms),
         content_terms=set(candidate.content_terms),
         is_test=candidate.is_test,
         affected_test=candidate.affected_test,
+        is_generated=candidate.is_generated,
+        is_vendor=candidate.is_vendor,
+        high_degree_hub=candidate.high_degree_hub,
+        auxiliary_source=candidate.auxiliary_source,
         requires_live_source=candidate.requires_live_source,
         unavailable_signals=set(candidate.unavailable_signals),
         original_order=candidate.original_order,
@@ -277,15 +330,24 @@ def _merge_candidates(left: FileCandidate, right: FileCandidate) -> FileCandidat
         exact_path=left.exact_path or right.exact_path,
         exact_filename=left.exact_filename or right.exact_filename,
         exact_module=left.exact_module or right.exact_module,
+        definition_match=left.definition_match or right.definition_match,
+        specific_symbol=left.specific_symbol or right.specific_symbol,
+        generic_symbol=left.generic_symbol or right.generic_symbol,
         direct_knowledge_source=left.direct_knowledge_source or right.direct_knowledge_source,
+        verified_knowledge=left.verified_knowledge or right.verified_knowledge,
         graph_hop=min(graph_hops) if graph_hops else None,
         module=left.module or right.module,
         task_role_match=left.task_role_match or right.task_role_match,
+        query_role_match=left.query_role_match or right.query_role_match,
         path_terms=left.path_terms | right.path_terms,
         symbol_terms=left.symbol_terms | right.symbol_terms,
         content_terms=left.content_terms | right.content_terms,
         is_test=left.is_test or right.is_test,
         affected_test=left.affected_test or right.affected_test,
+        is_generated=left.is_generated or right.is_generated,
+        is_vendor=left.is_vendor or right.is_vendor,
+        high_degree_hub=left.high_degree_hub or right.high_degree_hub,
+        auxiliary_source=left.auxiliary_source or right.auxiliary_source,
         requires_live_source=left.requires_live_source or right.requires_live_source,
         unavailable_signals=left.unavailable_signals | right.unavailable_signals,
         original_order=min(left.original_order, right.original_order),
@@ -307,7 +369,7 @@ def _to_ranked(candidate: FileCandidate, breakdown: ScoreBreakdown) -> RankedFil
         why_selected=",".join(breakdown.reasons),
         requires_live_source=candidate.requires_live_source,
         protected=(
-            candidate.exact_symbol
+            (candidate.exact_symbol and (candidate.specific_symbol or not candidate.generic_symbol))
             or candidate.exact_path
             or candidate.direct_knowledge_source
             or candidate.graph_hop == 1
@@ -345,8 +407,13 @@ def _withheld_rows(
     ]
 
 
-def score_candidate(candidate: FileCandidate, policy: RankingPolicy) -> ScoreBreakdown:
-    identity = (
+def score_candidate(
+    candidate: FileCandidate,
+    policy: RankingPolicy,
+    *,
+    query_type: str = "investigation",
+) -> ScoreBreakdown:
+    identity_base = (
         policy.exact_identity
         if candidate.exact_symbol or candidate.exact_path
         else policy.qualified_identity
@@ -355,7 +422,16 @@ def score_candidate(candidate: FileCandidate, policy: RankingPolicy) -> ScoreBre
         if candidate.exact_filename or candidate.exact_module
         else 0
     )
-    provenance = policy.direct_knowledge_source if candidate.direct_knowledge_source else 0
+    identity = (
+        identity_base
+        + (policy.definition_match if candidate.definition_match else 0)
+        + (policy.specific_symbol_match if candidate.specific_symbol else 0)
+    )
+    provenance = (
+        (policy.direct_knowledge_source if candidate.direct_knowledge_source else 0)
+        + (policy.verified_knowledge if candidate.verified_knowledge else 0)
+        + max(0, min(3, len(candidate.channels) - 1)) * policy.channel_consensus
+    )
     relation = (
         policy.graph_hop_1
         if candidate.graph_hop == 1
@@ -363,7 +439,15 @@ def score_candidate(candidate: FileCandidate, policy: RankingPolicy) -> ScoreBre
         if candidate.graph_hop == 2
         else 0
     )
-    role = policy.task_role_match if candidate.task_role_match else 0
+    role = (
+        (policy.task_role_match if candidate.task_role_match else 0)
+        + (policy.query_role_match if candidate.query_role_match else 0)
+        + (
+            policy.requested_test_boost
+            if query_type == "test_config" and candidate.is_test and candidate.query_role_match
+            else 0
+        )
+    )
     text = (
         min(3, len(candidate.path_terms)) * policy.path_term
         + min(3, len(candidate.symbol_terms)) * policy.symbol_term
@@ -379,6 +463,24 @@ def score_candidate(candidate: FileCandidate, policy: RankingPolicy) -> ScoreBre
         penalties += policy.irrelevant_test_penalty
     if candidate.stages == {"fallback"} and not (identity or provenance or relation):
         penalties += policy.fallback_only_penalty
+    if candidate.generic_symbol and not candidate.specific_symbol:
+        penalties += policy.generic_symbol_penalty
+    if candidate.is_vendor:
+        penalties += policy.vendor_penalty
+    if candidate.is_generated:
+        penalties += policy.generated_penalty
+    if candidate.high_degree_hub:
+        penalties += policy.high_degree_hub_penalty
+    if (
+        query_type in {"extension_point", "configuration", "design_reason"}
+        and not candidate.query_role_match
+        and (candidate.exact_symbol or candidate.specific_symbol or candidate.definition_match)
+    ):
+        penalties += policy.profile_mismatch_penalty
+    if query_type == "test_config" and candidate.is_test and not candidate.query_role_match:
+        penalties += policy.generic_test_penalty
+    if candidate.auxiliary_source:
+        penalties += policy.auxiliary_source_penalty
     total = identity + provenance + relation + role + text + penalties
     return ScoreBreakdown(
         identity=identity,
@@ -388,7 +490,16 @@ def score_candidate(candidate: FileCandidate, policy: RankingPolicy) -> ScoreBre
         text=text,
         penalties=penalties,
         total=total,
-        reasons=_score_reasons(candidate, identity, provenance, relation, role, text, penalties),
+        reasons=_score_reasons(
+            candidate,
+            identity,
+            provenance,
+            relation,
+            role,
+            text,
+            penalties,
+            query_type=query_type,
+        ),
         unavailable_signals=tuple(sorted(candidate.unavailable_signals)),
     )
 
@@ -401,21 +512,36 @@ def _score_reasons(
     role: int,
     text: int,
     penalties: int,
+    *,
+    query_type: str = "investigation",
 ) -> tuple[str, ...]:
     reasons: list[str] = []
-    if identity:
-        if candidate.exact_symbol or candidate.exact_path:
-            reasons.append("exact_identity")
-        elif candidate.qualified_symbol:
-            reasons.append("qualified_identity")
-        else:
-            reasons.append("file_or_module_identity")
+    if candidate.exact_symbol or candidate.exact_path:
+        reasons.append("exact_identity")
+    elif candidate.qualified_symbol:
+        reasons.append("qualified_identity")
+    elif candidate.exact_filename or candidate.exact_module:
+        reasons.append("file_or_module_identity")
+    if candidate.definition_match:
+        reasons.append("symbol_definition")
+    if candidate.specific_symbol:
+        reasons.append("specific_symbol")
     if provenance:
-        reasons.append("direct_knowledge_source")
+        if candidate.direct_knowledge_source:
+            reasons.append("direct_knowledge_source")
+        if candidate.verified_knowledge:
+            reasons.append("verified_knowledge")
+        if len(candidate.channels) > 1:
+            reasons.append("channel_consensus")
     if relation:
         reasons.append("graph_hop_1" if candidate.graph_hop == 1 else "graph_hop_2")
     if role:
-        reasons.append("task_role_match")
+        if candidate.task_role_match:
+            reasons.append("task_role_match")
+        if candidate.query_role_match:
+            reasons.append("query_role_match")
+        if query_type == "test_config" and candidate.is_test and candidate.query_role_match:
+            reasons.append("requested_test")
     if text:
         if candidate.path_terms:
             reasons.append("path_terms")
@@ -433,4 +559,54 @@ def _score_reasons(
             reasons.append("irrelevant_test")
         if candidate.stages == {"fallback"} and not (identity or provenance or relation):
             reasons.append("fallback_only")
+        if candidate.generic_symbol and not candidate.specific_symbol:
+            reasons.append("generic_symbol")
+        if candidate.is_vendor:
+            reasons.append("vendor_source")
+        if candidate.is_generated:
+            reasons.append("generated_source")
+        if candidate.high_degree_hub:
+            reasons.append("high_degree_hub")
+        if (
+            query_type in {"extension_point", "configuration", "design_reason"}
+            and not candidate.query_role_match
+            and (candidate.exact_symbol or candidate.specific_symbol or candidate.definition_match)
+        ):
+            reasons.append("query_profile_mismatch")
+        if query_type == "test_config" and candidate.is_test and not candidate.query_role_match:
+            reasons.append("generic_test_noise")
+        if candidate.auxiliary_source:
+            reasons.append("auxiliary_source")
     return tuple(reasons)
+
+
+def _ensure_test_source_diversity(
+    core: list[RankedFile],
+    eligible: list[RankedFile],
+    test_paths: set[str],
+) -> list[RankedFile]:
+    """Keep at least one test and one source in Core for explicit test queries."""
+    has_test = any(item.path in test_paths for item in core)
+    has_source = any(item.path not in test_paths for item in core)
+    replacement: RankedFile | None = None
+    replace_test = False
+    if not has_test:
+        replacement = next((item for item in eligible if item.path in test_paths), None)
+    elif not has_source:
+        replacement = next((item for item in eligible if item.path not in test_paths), None)
+        replace_test = True
+    if replacement is None or replacement in core:
+        return core
+    replace_index = next(
+        (
+            index
+            for index in range(len(core) - 1, -1, -1)
+            if (core[index].path in test_paths) == replace_test
+        ),
+        len(core) - 1,
+    )
+    diversified = list(core)
+    diversified[replace_index] = replacement
+    order = {item.path: index for index, item in enumerate(eligible)}
+    diversified.sort(key=lambda item: order[item.path])
+    return diversified

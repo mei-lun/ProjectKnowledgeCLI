@@ -5,6 +5,7 @@ from dataclasses import FrozenInstanceError
 
 from project_knowledge.ranking import (
     DEFAULT_RANKING_POLICY,
+    LEGACY_RANKING_POLICY,
     FileCandidate,
     RankedFile,
     RankingPolicy,
@@ -33,7 +34,7 @@ class RankingTests(unittest.TestCase):
             content_terms={"account", "login", "service", "repo", "extra"},
         )
 
-        breakdown = score_candidate(candidate, DEFAULT_RANKING_POLICY)
+        breakdown = score_candidate(candidate, LEGACY_RANKING_POLICY)
 
         self.assertEqual(breakdown.identity, 104)
         self.assertEqual(breakdown.provenance, 35)
@@ -42,6 +43,128 @@ class RankingTests(unittest.TestCase):
         self.assertEqual(breakdown.text, 50)
         self.assertEqual(breakdown.penalties, 0)
         self.assertEqual(breakdown.total, 239)
+
+    def test_policy_v2_prefers_domain_definition_over_generic_vendor_hub(self) -> None:
+        noise = FileCandidate(
+            path="modules/skynet/lualib/socket.lua",
+            stages={"direct_symbol"},
+            channels={"symbol_exact", "graph_direct"},
+            exact_symbol=True,
+            generic_symbol=True,
+            is_vendor=True,
+            high_degree_hub=True,
+            symbol_terms={"read"},
+        )
+        target = FileCandidate(
+            path="src/app/game/magent/com/resident_order_com.lua",
+            stages={"direct_symbol", "impact"},
+            channels={"symbol_alias", "graph_direct", "lexical"},
+            definition_match=True,
+            specific_symbol=True,
+            query_role_match=True,
+            graph_hop=1,
+            path_terms={"resident", "order"},
+            symbol_terms={"get_order_strict"},
+        )
+
+        result = rank_files(
+            [noise, target],
+            allowed_paths={noise.path, target.path},
+            query_type="invariant",
+        )
+
+        self.assertEqual(result.ranking_policy, "policy-v2")
+        self.assertEqual(result.core_files[0], target.path)
+        noise_score = score_candidate(noise, DEFAULT_RANKING_POLICY, query_type="invariant")
+        self.assertIn("generic_symbol", noise_score.reasons)
+        self.assertIn("vendor_source", noise_score.reasons)
+        self.assertIn("high_degree_hub", noise_score.reasons)
+
+    def test_policy_v2_only_boosts_tests_when_query_requests_tests(self) -> None:
+        candidate = FileCandidate(
+            path="src_dev/unittest/test_order.lua",
+            stages={"impact"},
+            channels={"test_config"},
+            is_test=True,
+            affected_test=True,
+            query_role_match=True,
+        )
+
+        ordinary = score_candidate(candidate, DEFAULT_RANKING_POLICY, query_type="invariant")
+        requested = score_candidate(candidate, DEFAULT_RANKING_POLICY, query_type="test_config")
+
+        self.assertGreater(requested.total, ordinary.total)
+        self.assertIn("requested_test", requested.reasons)
+
+        generic = score_candidate(
+            FileCandidate(path="tests/simulate.lua", is_test=True),
+            DEFAULT_RANKING_POLICY,
+            query_type="test_config",
+        )
+        self.assertIn("generic_test_noise", generic.reasons)
+        self.assertLess(generic.total, ordinary.total)
+
+    def test_policy_v2_demotes_exact_symbol_that_misses_extension_role(self) -> None:
+        ordinary = FileCandidate(
+            path="src/console.lua",
+            exact_symbol=True,
+            specific_symbol=True,
+        )
+        registry = FileCandidate(
+            path="src/avatar/avatar_def.lua",
+            definition_match=True,
+            specific_symbol=True,
+            query_role_match=True,
+        )
+
+        result = rank_files(
+            [ordinary, registry],
+            allowed_paths={ordinary.path, registry.path},
+            query_type="extension_point",
+        )
+
+        self.assertEqual(result.core_files[0], registry.path)
+        ordinary_score = score_candidate(
+            ordinary,
+            DEFAULT_RANKING_POLICY,
+            query_type="extension_point",
+        )
+        self.assertIn("query_profile_mismatch", ordinary_score.reasons)
+
+    def test_legacy_policy_remains_available_for_rollback(self) -> None:
+        candidate = FileCandidate(path="src/app.py", exact_symbol=True)
+        result = rank_files(
+            [candidate],
+            allowed_paths={candidate.path},
+            policy=LEGACY_RANKING_POLICY,
+        )
+        self.assertEqual(result.ranking_policy, "policy-v1")
+
+    def test_test_query_core_keeps_both_source_and_test_roles(self) -> None:
+        sources = [
+            FileCandidate(
+                path=f"src/source_{index}.py",
+                exact_symbol=True,
+                query_role_match=True,
+            )
+            for index in range(5)
+        ]
+        test = FileCandidate(
+            path="tests/test_feature.py",
+            is_test=True,
+            affected_test=True,
+            query_role_match=True,
+            graph_hop=1,
+        )
+
+        result = rank_files(
+            [*sources, test],
+            allowed_paths={item.path for item in [*sources, test]},
+            query_type="test_config",
+        )
+
+        self.assertIn(test.path, result.core_files)
+        self.assertTrue(any(path.startswith("src/") for path in result.core_files))
 
     def test_irrelevant_test_and_fallback_only_penalties_are_explicit(self) -> None:
         candidate = FileCandidate(
@@ -223,7 +346,7 @@ class RankingTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            score_candidate(candidate, DEFAULT_RANKING_POLICY).reasons,
+            score_candidate(candidate, LEGACY_RANKING_POLICY).reasons,
             (
                 "file_or_module_identity",
                 "direct_knowledge_source",
@@ -235,7 +358,7 @@ class RankingTests(unittest.TestCase):
             ),
         )
         self.assertEqual(
-            score_candidate(penalty_candidate, DEFAULT_RANKING_POLICY).reasons,
+            score_candidate(penalty_candidate, LEGACY_RANKING_POLICY).reasons,
             ("path_terms", "content_terms", "irrelevant_test", "fallback_only"),
         )
 
