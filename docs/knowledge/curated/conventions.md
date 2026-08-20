@@ -116,5 +116,7 @@ README 只引用当前活动报告中的 CodeGraph 指标，并明确区分 Adap
 
 活动评测报告必须与唯一版本源一致，并从干净工作区生成；`scripts/validate_evaluation_provenance.py` 同时拒绝旧版本、dirty worktree、不可用 CodeGraph、非 `codegraph-public-cli` Adapter、`adapter_unavailable` 和 builtin 元数据。质量门失败必须保留真实失败项，README 和当前 CodeGraph 状态文档只引用该活动报告，不得降低冻结阈值或用专项小样本替代正式报告。
 
+0.1.39 最终活动报告绑定源码/知识快照提交 `42bd6b26bae780bab22525c0e00467ea5d047b4f`，记录 `working_tree=clean`、真实 CodeGraph Adapter 可用且冻结质量门未通过。该失败结论是后续检索修复的输入，不是发布为“质量达标”的依据。
+
 <!-- project-kb:source file="scripts/validate_evaluation_provenance.py" -->
 <!-- project-kb:source file="evaluation/reports/latest.json" -->
