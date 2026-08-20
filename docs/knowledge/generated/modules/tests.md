@@ -30,6 +30,7 @@
 - `tests/test_ranking.py`（Python）
 - `tests/test_retrieval_phase0.py`（Python）
 - `tests/test_retrieval_phase1.py`（Python）
+- `tests/test_retrieval_phase2.py`（Python）
 - `tests/test_retrieval_wp06.py`（Python）
 - `tests/test_schemas.py`（Python）
 - `tests/test_semantic.py`（Python）

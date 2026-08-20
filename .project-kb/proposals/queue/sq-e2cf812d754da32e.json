@@ -1,0 +1,38 @@
+{
+  "affected_knowledge": [
+    "curated.architecture",
+    "curated.conventions",
+    "curated.feature.guide.generation",
+    "curated.glossary",
+    "curated.provider.and.evidence",
+    "decision.0001.local.first.core",
+    "decision.0002.codegraph.adapter.boundary",
+    "decision.0003.lua.skynet.entry.evidence",
+    "generated.frameworks",
+    "generated.module.project_knowledge",
+    "generated.module.tests",
+    "generated.project-map",
+    "generated.test-map"
+  ],
+  "base_commit": "8f1089534e42a63a28a5988964082c318d43b1ab",
+  "changed_files": [
+    "src/project_knowledge/__init__.py",
+    "src/project_knowledge/config.py",
+    "src/project_knowledge/evaluate.py",
+    "src/project_knowledge/ranking.py",
+    "src/project_knowledge/retrieval.py",
+    "src/project_knowledge/schemas.py",
+    "tests/test_config.py",
+    "tests/test_ranking.py",
+    "tests/test_retrieval_phase2.py",
+    "tests/test_retrieval_wp06.py"
+  ],
+  "changed_symbols": [],
+  "changeset_id": "change-20260821-014231",
+  "created_at": "2026-08-21T01:42:31+08:00",
+  "head_commit": "3e7fad3ae99079a80428875ff2850f0b350a8e8e",
+  "queue_id": "sq-e2cf812d754da32e",
+  "schema_version": 1,
+  "status": "awaiting_semantic_generation",
+  "task_summary": "manual synchronization"
+}
