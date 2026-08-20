@@ -1,0 +1,32 @@
+{
+  "affected_knowledge": [
+    "curated.architecture",
+    "curated.conventions",
+    "curated.feature.guide.generation",
+    "curated.glossary",
+    "curated.provider.and.evidence",
+    "decision.0001.local.first.core",
+    "decision.0002.codegraph.adapter.boundary",
+    "generated.frameworks",
+    "generated.module.project_knowledge",
+    "generated.module.tests",
+    "generated.project-map",
+    "generated.test-map"
+  ],
+  "base_commit": "96db29b36664022df974bfdead315ad9ead3c78e",
+  "changed_files": [
+    "src/project_knowledge/__init__.py",
+    "src/project_knowledge/mcp.py",
+    "src/project_knowledge/models.py",
+    "src/project_knowledge/retrieval.py",
+    "tests/test_retrieval_phase0.py"
+  ],
+  "changed_symbols": [],
+  "changeset_id": "change-20260820-232442",
+  "created_at": "2026-08-20T23:24:42+08:00",
+  "head_commit": "47872260d9922cf68aaf42ea839b970b30e9f479",
+  "queue_id": "sq-7c6038937c9fb178",
+  "schema_version": 1,
+  "status": "awaiting_semantic_generation",
+  "task_summary": "manual synchronization"
+}
