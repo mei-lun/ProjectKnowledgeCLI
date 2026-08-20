@@ -29,6 +29,7 @@
 | `tests/test_provider.py` | tests |
 | `tests/test_ranking.py` | tests |
 | `tests/test_retrieval_phase0.py` | tests |
+| `tests/test_retrieval_phase1.py` | tests |
 | `tests/test_retrieval_wp06.py` | tests |
 | `tests/test_schemas.py` | tests |
 | `tests/test_semantic.py` | tests |
