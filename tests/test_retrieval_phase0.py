@@ -98,7 +98,7 @@ class RetrievalPhase0Tests(unittest.TestCase):
 
         debug = self.api.context("create_item", max_tokens=1000, debug=True)
         trace = debug["retrieval_trace"]
-        self.assertEqual(trace["schema_version"], 1)
+        self.assertEqual(trace["schema_version"], 2)
         self.assertEqual(trace["query"]["raw"], "create_item")
         self.assertEqual(trace["query"]["intent"], "investigation")
         for stage in [
