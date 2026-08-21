@@ -153,6 +153,7 @@ def evaluate(
         for item in api.service.engine.snapshot(api.root, api.config).files
     ))
     metrics, metric_counts = _aggregate(results)
+    stage_metrics = _aggregate_stage_metrics(results)
     with KnowledgeStore(api.service.db_path, readonly=True) as store:
         generated = [record for record in store.all_knowledge() if record.ownership == "generated"]
     sourced = sum(bool(record.sources) for record in generated)
@@ -165,6 +166,7 @@ def evaluate(
         "samples": len(results),
         "metrics": metrics,
         "metric_sample_counts": metric_counts,
+        "stage_metrics": stage_metrics,
         "category_success": _category_success(results),
         "failure_samples": [item["id"] for item in results if not item["success"]],
         "reproducibility": {
@@ -494,6 +496,7 @@ def _evaluate_sample(api: KnowledgeAPI, sample: dict[str, Any], strategy: str) -
         "stale_detected": returned["stale_detected"],
         "context_incomplete": bool(returned.get("context_incomplete", False)),
         "context_status": returned.get("context_status", {}),
+        "retrieval_trace": returned.get("retrieval_trace", {}),
         "pre_required_evidence": returned.get("pre_required_evidence", {}),
         "post_required_evidence": returned.get("post_required_evidence", {}),
     }
@@ -704,7 +707,7 @@ def _retrieve(api: KnowledgeAPI, sample: dict[str, Any], strategy: str) -> dict[
     task = sample["task"]
     budget = sample.get("max_tokens", 4000)
     if strategy in {"hybrid", "code", "codegraph"}:
-        context = api.context(task, budget)
+        context = api.context(task, budget, debug=True)
         direct_symbols = context["symbols"][:12]
         symbols = {item["id"] for item in direct_symbols}
         ranking_contract = _context_ranking_contract(
@@ -732,6 +735,7 @@ def _retrieve(api: KnowledgeAPI, sample: dict[str, Any], strategy: str) -> dict[
             "post_required_evidence": context.get("post_required_evidence", {}),
             "context_incomplete": bool(context.get("context_incomplete", False)),
             "context_status": context.get("context_status", {}),
+            "retrieval_trace": context.get("retrieval_trace", {}),
             "missing_required_evidence": context.get("missing_required_evidence", []),
             "budget_status": context.get("budget_status"),
             "minimum_required_tokens": context.get("minimum_required_tokens", 0),
@@ -954,6 +958,32 @@ def _aggregate(results: list[dict[str, Any]]) -> tuple[dict[str, float], dict[st
     })
     counts["ranking_fallback_rate"] = len(results)
     return metrics, counts
+
+
+def _aggregate_stage_metrics(results: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    """Summarize debug trace timings without mixing them into quality metrics."""
+    stages: dict[str, list[float]] = {}
+    statuses: dict[str, dict[str, int]] = {}
+    for result in results:
+        trace = result.get("retrieval_trace", {})
+        for name, sample in trace.get("stage_timings", {}).items():
+            if not isinstance(sample, dict):
+                continue
+            value = sample.get("duration_ms")
+            if isinstance(value, (int, float)):
+                stages.setdefault(name, []).append(float(value))
+            status = str(sample.get("status", "unknown"))
+            statuses.setdefault(name, {})[status] = statuses.setdefault(name, {}).get(status, 0) + 1
+    return {
+        name: {
+            "samples": len(values),
+            "p50_ms": round(_percentile(values, 50), 3),
+            "p95_ms": round(_percentile(values, 95), 3),
+            "p99_ms": round(_percentile(values, 99), 3),
+            "status_counts": statuses.get(name, {}),
+        }
+        for name, values in sorted(stages.items())
+    }
 
 
 def _category_success(results: list[dict[str, Any]]) -> dict[str, dict[str, float | int]]:

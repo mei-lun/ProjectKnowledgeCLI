@@ -1,6 +1,6 @@
 # Project Knowledge CLI
 
-## 当前质量指标（0.1.41）
+## 当前质量指标（0.1.42）
 
 当前真实 CodeGraph Adapter 已接入并可用：`codegraph-public-cli 1.5.0`。以下指标来自当前活动评测报告 `evaluation/reports/latest.json`，评测集包含 50 个样本：
 

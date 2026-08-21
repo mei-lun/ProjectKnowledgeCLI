@@ -138,6 +138,22 @@ class RetrievalWP06Tests(unittest.TestCase):
         self.assertTrue(result["context_status"]["needs_source_check"])
         self.assertIn("required_evidence_missing", result["context_status"]["reasons"])
 
+    def test_debug_trace_v2_contains_stage_timings_and_budget_state(self) -> None:
+        result = self.api.context("create_item 的调用链", max_tokens=1200, debug=True)
+
+        trace = result["retrieval_trace"]
+        self.assertEqual(trace["schema_version"], 2)
+        self.assertIn("stage_timings", trace)
+        for stage in ("lexical", "codegraph", "ranking", "context_assembly"):
+            self.assertIn(stage, trace["stage_timings"])
+            self.assertGreaterEqual(trace["stage_timings"][stage]["duration_ms"], 0)
+            self.assertIn(trace["stage_timings"][stage]["status"], {"ok", "partial", "error"})
+        self.assertIn("trim_events", trace["stages"]["context_assembly"])
+        self.assertIn("context_status", trace)
+
+    def test_context_does_not_emit_trace_by_default(self) -> None:
+        self.assertNotIn("retrieval_trace", self.api.context("create_item", max_tokens=1200))
+
     def test_context_returns_optional_files_as_a_separate_non_context_tier(self) -> None:
         result = self.api.context("ranking.py policy", max_tokens=1800)
 

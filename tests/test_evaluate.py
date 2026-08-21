@@ -580,6 +580,25 @@ class EvaluationTests(unittest.TestCase):
                 result["context_incomplete"], context["context_incomplete"]
             )
 
+    def test_evaluation_result_keeps_debug_trace_for_stage_measurements(self) -> None:
+        api = KnowledgeAPI(self.root)
+        sample = load_dataset(self.dataset)[0]
+
+        result = _retrieve(api, sample, "codegraph")
+
+        self.assertIn("retrieval_trace", result)
+        self.assertEqual(result["retrieval_trace"]["schema_version"], 2)
+        self.assertIn("stage_timings", result["retrieval_trace"])
+
+    def test_evaluation_report_aggregates_stage_percentiles_separately(self) -> None:
+        api = KnowledgeAPI(self.root)
+        sample = load_dataset(self.dataset)[0]
+        report = evaluate(self.root, self.dataset, "codegraph", limit=1)
+
+        self.assertIn("stage_metrics", report)
+        self.assertIn("ranking", report["stage_metrics"])
+        self.assertEqual(report["stage_metrics"]["ranking"]["samples"], 1)
+
     def test_markdown_and_grep_delegate_ordering_to_production_ranker(self) -> None:
         api = KnowledgeAPI(self.root)
         sample = load_dataset(self.dataset)[0]

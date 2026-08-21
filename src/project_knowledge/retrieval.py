@@ -328,6 +328,12 @@ class KnowledgeAPI:
         status = self.status()
         intent = self.classify_task(task)
         search = self.search(task, limit=10, debug=debug)
+        stage_timings: dict[str, dict[str, Any]] = {
+            "lexical": {"duration_ms": 0.0, "status": "ok"},
+            "codegraph": {"duration_ms": 0.0, "status": "ok"},
+            "ranking": {"duration_ms": 0.0, "status": "ok"},
+            "context_assembly": {"duration_ms": 0.0, "status": "ok"},
+        }
         broad_project_requested = any(
             phrase in task.lower()
             for phrase in ["project map", "repository overview", "project overview", "项目地图", "项目概览"]
@@ -339,6 +345,7 @@ class KnowledgeAPI:
         terms = self._symbol_terms(task)
         symbol_matches = self._task_symbol_matches(task, terms)
         with KnowledgeStore(self.service.db_path) as store:
+            codegraph_started = time.monotonic()
             impact = self.impact(
                 symbols=[item["id"] for item in symbol_matches[:10]],
                 max_hops=2,
@@ -346,6 +353,7 @@ class KnowledgeAPI:
             ) if symbol_matches else {
                 "affected_modules": [], "affected_tests": [], "affected_files": [], "affected_knowledge": []
             }
+            stage_timings["codegraph"]["duration_ms"] = round((time.monotonic() - codegraph_started) * 1000, 3)
             reference_implementations = self._reference_implementations(symbol_matches, selected_results)
             extension_points = self._extension_points(symbol_matches)
             verification = self._verification_commands()
@@ -447,6 +455,7 @@ class KnowledgeAPI:
                 if self.config.ranking_policy == "policy-v1"
                 else DEFAULT_RANKING_POLICY
             )
+            ranking_started = time.monotonic()
             try:
                 ranked_files = rank_files(
                     candidates,
@@ -462,6 +471,8 @@ class KnowledgeAPI:
                     policy=ranking_policy,
                     query_type=query_profile,
                 )
+            stage_timings["ranking"]["duration_ms"] = round((time.monotonic() - ranking_started) * 1000, 3)
+            stage_timings["ranking"]["status"] = "partial" if ranked_files.ranking_status == "fallback" else "ok"
             result.update(ranked_files.to_dict())
             result["query_profile"] = query_profile
             result["ranking_reason_code"] = ranked_files.reason_code
@@ -484,7 +495,10 @@ class KnowledgeAPI:
             result["minimum_required_tokens"] = 0
             prefit_files = list(result["files"])
             prefit_core_files = list(result["core_files"])
+            assembly_started = time.monotonic()
             self._fit_context(result, budget)
+            stage_timings["context_assembly"]["duration_ms"] = round((time.monotonic() - assembly_started) * 1000, 3)
+            stage_timings["context_assembly"]["status"] = "partial" if result.get("context_incomplete") else "ok"
             result["context_status"] = self._context_status(
                 result,
                 query_profile=query_profile,
@@ -509,6 +523,7 @@ class KnowledgeAPI:
                     prefit_core_files=prefit_core_files,
                     result=result,
                     budget=budget,
+                    stage_timings=stage_timings,
                 )
             self._record_query(store, "knowledge_context", len(task), result, started)
             return result
@@ -663,6 +678,7 @@ class KnowledgeAPI:
         prefit_core_files: list[str],
         result: dict[str, Any],
         budget: int,
+        stage_timings: dict[str, dict[str, Any]] | None = None,
     ) -> dict[str, Any]:
         snapshot = self.service.engine.snapshot(self.root, self.service.config)
         snapshot_files = {item.path.replace("\\", "/"): item for item in snapshot.files}
@@ -710,7 +726,7 @@ class KnowledgeAPI:
             if item.get("reason_code") == "token_budget"
         ]
         return {
-            "schema_version": 1,
+            "schema_version": 2,
             "operation": "knowledge_context",
             "query": {
                 "raw": task,
@@ -768,6 +784,7 @@ class KnowledgeAPI:
                     "supporting_files": list(result.get("supporting_files", [])),
                     "optional_files": list(result.get("optional_files", [])),
                     "selected_before_budget": prefit_files,
+                    "trim_events": list(result.get("withheld_files", [])),
                 },
                 "token_budget": {
                     "budget": budget,
@@ -779,6 +796,8 @@ class KnowledgeAPI:
                     "missing_required_evidence": result.get("missing_required_evidence", []),
                 },
             },
+            "stage_timings": stage_timings or {},
+            "context_status": result.get("context_status", {}),
         }
 
     @staticmethod
