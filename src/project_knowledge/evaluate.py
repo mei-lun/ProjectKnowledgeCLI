@@ -19,6 +19,7 @@ from .util import approx_tokens, hash_file, hash_text, read_text, trim_to_tokens
 
 
 SCHEMA_VERSION = 1
+SUPPORTED_DATASET_SCHEMA_VERSIONS = {1, 2}
 STRATEGIES = {"hybrid", "grep_read", "code", "markdown", "codegraph"}
 GREP_RANKING_POLICY = replace(LEGACY_RANKING_POLICY, full_limit=7)
 EXPECTED_LIST_FIELDS = {
@@ -71,7 +72,7 @@ def load_dataset(dataset: str | Path) -> list[dict[str, Any]]:
         for field in ["schema_version", "id", "task", "category"]:
             if field not in sample:
                 raise ValueError(f"dataset line {number}: 缺少必填字段 {field}")
-        if sample["schema_version"] != SCHEMA_VERSION:
+        if sample["schema_version"] not in SUPPORTED_DATASET_SCHEMA_VERSIONS:
             raise ValueError(f"dataset line {number}: 不支持 schema_version={sample['schema_version']}")
         for field in ["id", "task", "category"]:
             if not isinstance(sample[field], str) or not sample[field].strip():
@@ -89,7 +90,21 @@ def load_dataset(dataset: str | Path) -> list[dict[str, Any]]:
                 raise ValueError(
                     f"dataset line {number}: acceptable_supporting_files 必须是非空字符串数组"
                 )
-        if not any(sample.get(field) for field in EXPECTED_LIST_FIELDS) and "expected_stale" not in sample:
+        if sample["schema_version"] >= 2:
+            _validate_required_evidence(sample.get("required_evidence"), number)
+            if "expected_context_incomplete" in sample and not isinstance(
+                sample["expected_context_incomplete"], bool
+            ):
+                raise ValueError(f"dataset line {number}: expected_context_incomplete 必须是布尔值")
+        has_required_anchor = bool(
+            _evidence_symbol_ids(sample.get("required_evidence"))
+            or _evidence_path_keys(sample.get("required_evidence"))
+        )
+        if (
+            not any(sample.get(field) for field in EXPECTED_LIST_FIELDS)
+            and not has_required_anchor
+            and "expected_stale" not in sample
+        ):
             raise ValueError(f"dataset line {number}: 至少需要一个期望锚点或 expected_stale")
         if "expected_stale" in sample and not isinstance(sample["expected_stale"], bool):
             raise ValueError(f"dataset line {number}: expected_stale 必须是布尔值")
@@ -386,6 +401,73 @@ def _evaluate_sample(api: KnowledgeAPI, sample: dict[str, Any], strategy: str) -
         if not stale_match:
             failures.append("stale_detection")
 
+    if sample.get("schema_version", 1) >= 2:
+        required = sample.get("required_evidence", {})
+        oracle_symbols = _evidence_symbol_ids(required)
+        oracle_paths = _evidence_path_keys(required)
+        pre_evidence = returned.get("pre_required_evidence")
+        post_evidence = returned.get("post_required_evidence")
+        if pre_evidence is None:
+            pre_evidence = returned.get("required_evidence", {})
+        if post_evidence is None:
+            post_evidence = returned.get("required_evidence", {})
+        pre_symbols = _evidence_symbol_ids(pre_evidence)
+        post_symbols = _evidence_symbol_ids(post_evidence)
+        pre_paths = _evidence_path_keys(pre_evidence)
+        post_paths = _evidence_path_keys(post_evidence)
+        metrics["required_symbol_label_recall"] = (
+            len(oracle_symbols & pre_symbols) / len(oracle_symbols) if oracle_symbols else 1.0
+        )
+        metrics["required_relation_path_label_recall"] = (
+            len(oracle_paths & pre_paths) / len(oracle_paths) if oracle_paths else 1.0
+        )
+        metrics["pre_required_symbol_recall"] = metrics["required_symbol_label_recall"]
+        metrics["pre_required_relation_path_recall"] = metrics[
+            "required_relation_path_label_recall"
+        ]
+        metrics["post_required_symbol_recall"] = (
+            len(oracle_symbols & post_symbols) / len(oracle_symbols) if oracle_symbols else 1.0
+        )
+        metrics["post_required_relation_path_recall"] = (
+            len(oracle_paths & post_paths) / len(oracle_paths) if oracle_paths else 1.0
+        )
+        metrics["required_symbol_retention"] = (
+            len(pre_symbols & post_symbols) / len(pre_symbols) if pre_symbols else 1.0
+        )
+        pre_symbol_payloads = _evidence_symbol_payloads(pre_evidence)
+        post_symbol_payloads = _evidence_symbol_payloads(post_evidence)
+        retained_symbol_payloads = sum(
+            _symbol_payload_preserved(payload, post_symbol_payloads.get(symbol_id))
+            for symbol_id, payload in pre_symbol_payloads.items()
+        )
+        metrics["required_symbol_payload_retention"] = (
+            retained_symbol_payloads / len(pre_symbol_payloads)
+            if pre_symbol_payloads else 1.0
+        )
+        metrics["required_relation_path_retention"] = (
+            len(pre_paths & post_paths) / len(pre_paths) if pre_paths else 1.0
+        )
+        for metric in (
+            "required_symbol_label_recall",
+            "required_relation_path_label_recall",
+            "required_symbol_retention",
+            "required_symbol_payload_retention",
+            "required_relation_path_retention",
+        ):
+            if metrics[metric] < 1:
+                failures.append(metric)
+        actual_incomplete = bool(returned.get("context_incomplete", False))
+        evidence_incomplete = not pre_symbols.issubset(post_symbols) or not pre_paths.issubset(post_paths)
+        incomplete_consistent = actual_incomplete == evidence_incomplete
+        if "expected_context_incomplete" in sample:
+            incomplete_consistent = (
+                incomplete_consistent
+                and actual_incomplete == sample["expected_context_incomplete"]
+            )
+        metrics["context_incomplete_consistency"] = 1.0 if incomplete_consistent else 0.0
+        if not incomplete_consistent:
+            failures.append("context_incomplete_consistency")
+
     context_tokens = approx_tokens(returned["text"])
     return {
         "line": sample["line"],
@@ -410,7 +492,112 @@ def _evaluate_sample(api: KnowledgeAPI, sample: dict[str, Any], strategy: str) -
         "ranking_status": returned["ranking_status"],
         "selection_reasons": returned.get("selection_reasons", {}),
         "stale_detected": returned["stale_detected"],
+        "context_incomplete": bool(returned.get("context_incomplete", False)),
+        "pre_required_evidence": returned.get("pre_required_evidence", {}),
+        "post_required_evidence": returned.get("post_required_evidence", {}),
     }
+
+
+def _validate_required_evidence(value: Any, line: int) -> None:
+    if not isinstance(value, dict):
+        raise ValueError(f"dataset line {line}: required_evidence 必须是对象")
+    for field in ("symbols", "relation_paths"):
+        items = value.get(field, [])
+        if not isinstance(items, list):
+            raise ValueError(f"dataset line {line}: required_evidence.{field} 必须是数组")
+        for item in items:
+            if not isinstance(item, dict):
+                raise ValueError(f"dataset line {line}: required_evidence.{field} 项必须是对象")
+            if field == "symbols":
+                if not isinstance(item.get("id"), str) or not item["id"].strip():
+                    raise ValueError(f"dataset line {line}: required_evidence.symbols.id 必须是非空字符串")
+                for name in ("signature", "path"):
+                    if name in item and (not isinstance(item[name], str) or not item[name].strip()):
+                        raise ValueError(f"dataset line {line}: required_evidence.symbols.{name} 必须是非空字符串")
+                if "span" in item:
+                    span = item["span"]
+                    if (
+                        not isinstance(span, dict)
+                        or not span
+                        or any(
+                            key not in {"start", "end", "start_line", "end_line"}
+                            or not isinstance(value, int)
+                            or isinstance(value, bool)
+                            for key, value in span.items()
+                        )
+                    ):
+                        raise ValueError(
+                            f"dataset line {line}: required_evidence.symbols.span 必须包含整数行号"
+                        )
+            else:
+                edges = item.get("edges")
+                if not isinstance(edges, list) or not edges:
+                    raise ValueError(f"dataset line {line}: required_evidence.relation_paths.edges 不能为空")
+                previous_target: str | None = None
+                for edge in edges:
+                    if not isinstance(edge, dict) or any(
+                        not isinstance(edge.get(name), str) or not edge[name].strip()
+                        for name in ("source", "kind", "target")
+                    ):
+                        raise ValueError(f"dataset line {line}: relation_paths.edges 必须包含非空 source/kind/target")
+                    if previous_target is not None and edge["source"] != previous_target:
+                        raise ValueError(f"dataset line {line}: relation_paths 必须保持路径连续")
+                    previous_target = edge["target"]
+
+
+def _evidence_symbol_ids(value: Any) -> set[str]:
+    if not isinstance(value, dict):
+        return set()
+    result: set[str] = set()
+    for item in value.get("symbols", []):
+        if isinstance(item, str) and item:
+            result.add(item)
+        elif isinstance(item, dict) and isinstance(item.get("id"), str) and item["id"]:
+            result.add(item["id"])
+    return result
+
+
+def _evidence_symbol_payloads(value: Any) -> dict[str, dict[str, Any]]:
+    if not isinstance(value, dict):
+        return {}
+    result: dict[str, dict[str, Any]] = {}
+    for item in value.get("symbols", []):
+        if isinstance(item, str) and item:
+            result[item] = {"id": item}
+        elif isinstance(item, dict) and isinstance(item.get("id"), str) and item["id"]:
+            result[item["id"]] = item
+    return result
+
+
+def _symbol_payload_preserved(
+    expected: dict[str, Any], actual: dict[str, Any] | None
+) -> bool:
+    if actual is None:
+        return False
+    for field in ("signature", "span"):
+        value = expected.get(field)
+        if value not in (None, "", {}) and actual.get(field) != value:
+            return False
+    return True
+
+
+def _evidence_path_keys(value: Any) -> set[tuple[tuple[str, str, str], ...]]:
+    if not isinstance(value, dict):
+        return set()
+    result: set[tuple[tuple[str, str, str], ...]] = set()
+    for item in value.get("relation_paths", []):
+        if not isinstance(item, dict) or not isinstance(item.get("edges"), list):
+            continue
+        edges = item["edges"]
+        key = tuple(
+            (edge.get("source", ""), edge.get("kind", ""), edge.get("target", ""))
+            for edge in edges
+            if isinstance(edge, dict)
+        )
+        continuous = all(key[index - 1][2] == key[index][0] for index in range(1, len(key)))
+        if key and continuous and all(all(part for part in edge) for edge in key):
+            result.add(key)
+    return result
 
 
 def _select_markdown_pages(results: list[dict[str, Any]], limit: int = 3) -> list[dict[str, Any]]:

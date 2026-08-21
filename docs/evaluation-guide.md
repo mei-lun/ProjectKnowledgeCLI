@@ -30,6 +30,21 @@ python scripts/validate_codegraph_adapter.py --json
 
 空期望项不进入该指标分母，避免把“本题不要求符号”错误计算为符号召回失败。样本只有在其所有适用期望项均命中时才计为成功。
 
+## Required evidence（Dataset v2）
+
+需要验收裁剪完整性的样本可声明 `schema_version: 2` 和独立评测 Oracle
+`required_evidence`。其中 `symbols` 保存稳定符号 ID 及可选的
+`signature`/`span`，`relation_paths` 保存连续的有序边序列
+`{source, kind, target}`。Oracle 只由评测器读取，不会传入运行时查询，避免用标签反向驱动被测规划器。
+
+运行时在召回和排序完成后自行生成 `pre_required_evidence`，预算装配后生成
+`post_required_evidence`。评测分别报告规划召回、裁剪后符号/签名/行号保留、完整有序路径保留，
+以及 `context_incomplete` 与真实缺失集合的一致性；端点集合不能替代路径指标。
+
+当 `minimum_required_tokens <= max_tokens` 时，required evidence 的保留门槛为 1.0；
+预算不可行时必须遵守硬 Token 上限，并返回 `context_incomplete=true`、
+`missing_required_evidence` 和 `budget_status=insufficient_for_required`，不得静默删除后报告完整。
+
 ## 快速质量门
 
 ```bash

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 import time
@@ -8,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from .config import ProjectConfig
+from .context_evidence import RequiredEvidencePlanner
 from .guidance_store import GuidanceStore
 from .models import CanonicalFile, CanonicalSymbol, KnowledgeRecord, RetrievalCandidate
 from .ranking import (
@@ -463,6 +465,23 @@ class KnowledgeAPI:
             result.update(ranked_files.to_dict())
             result["query_profile"] = query_profile
             result["ranking_reason_code"] = ranked_files.reason_code
+            planned_evidence = RequiredEvidencePlanner().plan(
+                task=task,
+                query_profile=query_profile,
+                core_file_paths=result.get("core_files", []),
+                symbols=symbol_matches,
+                relations=self._required_relation_candidates(
+                    query_profile, symbol_matches
+                ),
+            )
+            result["pre_required_evidence"] = self._required_evidence_schema(planned_evidence)
+            result["required_evidence"] = result["pre_required_evidence"]
+            result["post_required_evidence"] = result["pre_required_evidence"]
+            result["relation_paths"] = list(result["pre_required_evidence"]["relation_paths"])
+            result["context_incomplete"] = False
+            result["missing_required_evidence"] = []
+            result["budget_status"] = "pending"
+            result["minimum_required_tokens"] = 0
             prefit_files = list(result["files"])
             prefit_core_files = list(result["core_files"])
             self._fit_context(result, budget)
@@ -483,6 +502,104 @@ class KnowledgeAPI:
                 )
             self._record_query(store, "knowledge_context", len(task), result, started)
             return result
+
+    @staticmethod
+    def _required_evidence_schema(planned: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
+        symbols = []
+        for item in planned.get("required_symbols", []):
+            payload = dict(item.get("payload", {}))
+            symbols.append({
+                key: value for key, value in {
+                    "id": payload.get("symbol_id"),
+                    "path": payload.get("path"),
+                    "qualified_name": payload.get("qualified_name"),
+                    "signature": payload.get("signature"),
+                    "span": payload.get("span"),
+                }.items() if value not in (None, "", {})
+            })
+        paths = []
+        for item in planned.get("required_relation_paths", []):
+            edges = []
+            for edge in item.get("payload", {}).get("edges", []):
+                edges.append({
+                    key: edge.get(key)
+                    for key in ("source", "kind", "target")
+                    if edge.get(key) not in (None, "")
+                })
+            if edges:
+                paths.append({"edges": edges})
+        return {"symbols": symbols, "relation_paths": paths}
+
+    def _required_relation_candidates(
+        self,
+        query_profile: str,
+        symbols: list[dict[str, Any]],
+    ) -> list[dict[str, Any]]:
+        """Return direct, typed CodeGraph edges for required-path planning.
+
+        ``impact()`` reports an affected-node projection whose ``kind`` is the
+        target node kind, so it cannot prove a call path.  The public trace
+        boundary returns resolved ``calls`` edges and is intentionally queried
+        only after recall/ranking, without a token-budget input.
+        """
+        if query_profile not in {"call_path", "impact"}:
+            return []
+        symbol_by_id = {
+            str(item.get("id")): item for item in symbols if item.get("id")
+        }
+        ids_by_path_name: dict[tuple[str, str], list[str]] = {}
+        for symbol_id, item in symbol_by_id.items():
+            key = (
+                str(item.get("path", "")).replace("\\", "/"),
+                str(item.get("name", "")),
+            )
+            ids_by_path_name.setdefault(key, []).append(symbol_id)
+
+        def canonical(endpoint: str, path: str) -> str:
+            if endpoint in symbol_by_id:
+                return endpoint
+            name = endpoint.rsplit("::", 1)[-1]
+            candidates = ids_by_path_name.get((path.replace("\\", "/"), name), [])
+            return max(candidates, key=len) if candidates else endpoint
+
+        relations: list[dict[str, Any]] = []
+        seen: set[tuple[str, str, str]] = set()
+        for symbol in symbols[:10]:
+            symbol_id = str(symbol.get("id", ""))
+            if not symbol_id:
+                continue
+            try:
+                traced = self.service.engine.trace(
+                    self.root, symbol_id, self.config, max_depth=1, limit=30
+                )
+            except Exception:
+                continue
+            for relation in traced:
+                edge = asdict(relation)
+                target_path = str(edge.get("path", "")).replace("\\", "/")
+                source_path = str(
+                    symbol_by_id.get(str(edge.get("source")), {}).get("path", "")
+                ).replace("\\", "/")
+                source = canonical(str(edge.get("source", "")), source_path)
+                target = canonical(str(edge.get("target", "")), target_path)
+                key = (source, str(edge.get("kind", "")), target)
+                if key in seen or key[1] != "calls" or not edge.get("resolved"):
+                    continue
+                seen.add(key)
+                relations.append({
+                    "source": source,
+                    "target": target,
+                    "kind": "calls",
+                    "direction": "outgoing",
+                    "order": 1,
+                    "path_id": "\u0000".join(key),
+                    "source_path": source_path,
+                    "target_path": target_path,
+                    "confidence": edge.get("confidence", 1.0),
+                    "resolved": True,
+                    "freshness": "fresh",
+                })
+        return relations
 
     def _context_retrieval_trace(
         self,
@@ -609,7 +726,10 @@ class KnowledgeAPI:
                     "budget": budget,
                     "estimated_tokens_without_trace": result.get("estimated_tokens", 0),
                     "withheld": token_withheld,
-                    "context_incomplete": not set(prefit_core_files).issubset(final_core),
+                    "context_incomplete": bool(result.get("context_incomplete")),
+                    "budget_status": result.get("budget_status", "within_budget"),
+                    "minimum_required_tokens": result.get("minimum_required_tokens", 0),
+                    "missing_required_evidence": result.get("missing_required_evidence", []),
                 },
             },
         }
@@ -1344,7 +1464,21 @@ class KnowledgeAPI:
 
     @staticmethod
     def _fit_context(result: dict[str, Any], budget: int) -> None:
-        result["symbols"] = result["symbols"][:8]
+        pre_required = result.get("pre_required_evidence", result.get("required_evidence", {}))
+        required_contract = bool(
+            isinstance(pre_required, dict)
+            and (pre_required.get("symbols") or pre_required.get("relation_paths"))
+        )
+        if required_contract and "relation_paths" not in result:
+            result["relation_paths"] = list(pre_required.get("relation_paths", []))
+        required_symbols = {
+            str(item.get("id")) for item in pre_required.get("symbols", [])
+            if isinstance(item, dict) and item.get("id")
+        }
+        symbols = list(result.get("symbols", []))
+        required_items = [item for item in symbols if str(item.get("id")) in required_symbols]
+        other_items = [item for item in symbols if str(item.get("id")) not in required_symbols]
+        result["symbols"] = required_items + other_items[:max(0, 8 - len(required_items))]
         result["withheld_files"] = [
             item for item in result.get("withheld_files", [])
             if item.get("reason_code") == "token_budget"
@@ -1390,7 +1524,19 @@ class KnowledgeAPI:
 
         for _ in range(200):
             if size() <= budget:
-                return
+                break
+            optional_files = result.get("optional_files", [])
+            if optional_files:
+                path = optional_files.pop()
+                result["file_rankings"] = [
+                    item for item in result.get("file_rankings", [])
+                    if item.get("path") != path
+                ]
+                result.setdefault("withheld_files", []).append({
+                    "path": path,
+                    "reason_code": "token_budget",
+                })
+                continue
             rankings_with_breakdowns = [
                 item for item in result.get("file_rankings", [])
                 if item.get("score_breakdown")
@@ -1416,21 +1562,20 @@ class KnowledgeAPI:
             if result.get("protected_candidates_truncated") is False:
                 result.pop("protected_candidates_truncated")
                 continue
-            optional_files = result.get("optional_files", [])
-            if optional_files:
-                path = optional_files.pop()
-                result["file_rankings"] = [
-                    item for item in result.get("file_rankings", [])
-                    if item.get("path") != path
-                ]
-                result.setdefault("withheld_files", []).append({
-                    "path": path,
-                    "reason_code": "token_budget",
-                })
-                continue
             supporting_files = result.get("supporting_files", [])
             if supporting_files:
-                path = supporting_files.pop()
+                ranking_by_path = {
+                    str(item.get("path")): item
+                    for item in result.get("file_rankings", [])
+                }
+                path = min(
+                    supporting_files,
+                    key=lambda candidate: (
+                        float(ranking_by_path.get(candidate, {}).get("score", 0.0)),
+                        supporting_files.index(candidate),
+                    ),
+                )
+                supporting_files.remove(path)
                 result["files"] = [item for item in result.get("files", []) if item != path]
                 result["file_rankings"] = [
                     item for item in result.get("file_rankings", [])
@@ -1447,17 +1592,16 @@ class KnowledgeAPI:
             optional_list = next(
                 (
                     items for items in (
-                        result.get("reference_implementations", []),
+                        result.get("reference_implementations", []) if not required_contract else [],
                         result.get("extension_points", []),
-                        explanation.get("reference_implementations", []),
+                        explanation.get("reference_implementations", []) if not required_contract else [],
                         explanation.get("extension_points", []),
                         explanation.get("selected_records", []),
                         explanation.get("unknowns", []),
                         explanation.get("impact", {}).get("files", []),
                         explanation.get("impact", {}).get("tests", []),
                         result.get("unknowns", []),
-                        result.get("likely_modules", []),
-                        result.get("verification_commands", []),
+                        result.get("likely_modules", []) if not required_contract else [],
                     )
                     if items
                 ),
@@ -1481,7 +1625,11 @@ class KnowledgeAPI:
                 continue
             empty_explanation_key = next(
                 (
-                    key for key in ("reference_implementations", "extension_points")
+                    key for key in (
+                        ("reference_implementations",)
+                        if required_contract
+                        else ("reference_implementations", "extension_points")
+                    )
                     if key in explanation and not explanation[key]
                 ),
                 None,
@@ -1518,14 +1666,140 @@ class KnowledgeAPI:
                 max(impact_lists, key=len).pop()
                 continue
             if len(result["symbols"]) > 1:
-                result["symbols"].pop()
-                continue
+                removable = next(
+                    (
+                        item for item in reversed(result["symbols"])
+                        if str(item.get("id")) not in required_symbols
+                    ),
+                    None,
+                )
+                if removable is not None:
+                    result["symbols"].remove(removable)
+                    continue
             if len(result["gaps"]) > 1:
                 result["gaps"].pop()
                 continue
+            if len(result.get("likely_modules", [])) > 1:
+                result["likely_modules"].pop()
+                continue
             result["summary"] = trim_to_tokens(result["summary"], 10)
             break
-        size()
+        measured = size()
+        if not required_contract:
+            return
+
+        def path_key(item: dict[str, Any]) -> tuple[tuple[str, str, str], ...]:
+            return tuple(
+                (str(edge.get("source", "")), str(edge.get("kind", "")), str(edge.get("target", "")))
+                for edge in item.get("edges", []) if isinstance(edge, dict)
+            )
+
+        current_symbol_ids = {str(item.get("id")) for item in result.get("symbols", []) if item.get("id")}
+        current_paths = result.get("relation_paths", [])
+        retained_paths: list[dict[str, Any]] = []
+        for item in pre_required.get("relation_paths", []):
+            if any(
+                path_key(item) == path_key(candidate)
+                for candidate in current_paths
+                if isinstance(candidate, dict)
+            ):
+                retained_paths.append(item)
+        retained_symbols = [item for item in pre_required.get("symbols", []) if str(item.get("id")) in current_symbol_ids]
+        post_required = {"symbols": retained_symbols, "relation_paths": retained_paths}
+        missing = [f"symbol:{item.get('id')}" for item in pre_required.get("symbols", []) if item not in retained_symbols]
+        missing.extend(
+            "relation_path:" + hashlib.sha256(
+                json.dumps(item, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+            ).hexdigest()[:16]
+            for item in pre_required.get("relation_paths", [])
+            if item not in retained_paths
+        )
+        result["post_required_evidence"] = post_required
+        result["required_evidence"] = post_required
+        result["missing_required_evidence"] = missing
+        result["context_incomplete"] = bool(missing)
+        result["budget_status"] = "insufficient_for_required" if missing else "within_budget"
+        minimum_required_response = {
+            "task": result.get("task", ""),
+            "token_budget": budget,
+            "estimated_tokens": 0,
+            "symbols": [
+                item for item in result.get("symbols", [])
+                if str(item.get("id")) in required_symbols
+            ],
+            "pre_required_evidence": pre_required,
+            "post_required_evidence": pre_required,
+            "required_evidence": pre_required,
+            "context_incomplete": False,
+            "missing_required_evidence": [],
+            "budget_status": "within_budget",
+            "minimum_required_tokens": 0,
+        }
+        minimum_required_tokens = approx_tokens(json.dumps(minimum_required_response, ensure_ascii=False))
+        result["minimum_required_tokens"] = minimum_required_tokens
+        measured = size()
+        if measured > budget:
+            # Keep a deterministic, strict-budget envelope when normal trimming
+            # cannot make the legacy response small enough.
+            minimal = {
+                "task": result.get("task", ""),
+                "token_budget": budget,
+                "estimated_tokens": 0,
+                "core_files": list(result.get("core_files", [])),
+                "supporting_files": list(result.get("supporting_files", [])),
+                "files": list(result.get("files", [])),
+                "likely_modules": list(result.get("likely_modules", [])),
+                "symbols": list(result.get("symbols", []))[:8],
+                "pre_required_evidence": pre_required,
+                "post_required_evidence": post_required,
+                "required_evidence": post_required,
+                "context_incomplete": bool(missing),
+                "missing_required_evidence": missing,
+                "budget_status": "insufficient_for_required" if missing else "within_budget",
+                "minimum_required_tokens": minimum_required_tokens,
+            }
+            if approx_tokens(json.dumps(minimal, ensure_ascii=False)) > budget:
+                minimal["symbols"] = []
+                minimal["post_required_evidence"] = {"symbols": [], "relation_paths": []}
+                minimal["required_evidence"] = minimal["post_required_evidence"]
+                minimal["context_incomplete"] = True
+                minimal["missing_required_evidence"] = [
+                    *[f"symbol:{item.get('id')}" for item in pre_required.get("symbols", [])],
+                    *[
+                        "relation_path:" + hashlib.sha256(
+                            json.dumps(item, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+                        ).hexdigest()[:16]
+                        for item in pre_required.get("relation_paths", [])
+                    ],
+                ]
+                minimal["budget_status"] = "insufficient_for_required"
+            result.clear()
+            result.update(minimal)
+            for _ in range(3):
+                measured_minimal = approx_tokens(json.dumps(result, ensure_ascii=False))
+                if result["estimated_tokens"] == measured_minimal:
+                    break
+                result["estimated_tokens"] = measured_minimal
+            if result["estimated_tokens"] > budget:
+                result["task"] = ""
+                for _ in range(3):
+                    measured_minimal = approx_tokens(json.dumps(result, ensure_ascii=False))
+                    if result["estimated_tokens"] == measured_minimal:
+                        break
+                    result["estimated_tokens"] = measured_minimal
+            if result["estimated_tokens"] > budget:
+                result["symbols"] = []
+                result["pre_required_evidence"] = {"symbols": [], "relation_paths": []}
+                result["post_required_evidence"] = {"symbols": [], "relation_paths": []}
+                result["required_evidence"] = {"symbols": [], "relation_paths": []}
+                result["context_incomplete"] = True
+                result["budget_status"] = "insufficient_for_required"
+                for _ in range(3):
+                    measured_minimal = approx_tokens(json.dumps(result, ensure_ascii=False))
+                    if result["estimated_tokens"] == measured_minimal:
+                        break
+                    result["estimated_tokens"] = measured_minimal
+            return
 
     @staticmethod
     def _record_query(store: KnowledgeStore, tool: str, input_size: int, result: dict[str, Any], started: float) -> None:

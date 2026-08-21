@@ -8,6 +8,7 @@
 | `tests/test_codegraph.py` | tests |
 | `tests/test_codegraph_validation.py` | tests |
 | `tests/test_config.py` | tests |
+| `tests/test_context_evidence.py` | tests |
 | `tests/test_delivery_reliability.py` | tests |
 | `tests/test_documentation_roadmap.py` | tests |
 | `tests/test_engine.py` | tests |

@@ -90,6 +90,30 @@ class RetrievalWP06Tests(unittest.TestCase):
         )
         self.assertTrue(all(item["why_selected"] for item in result["file_rankings"]))
 
+    def test_context_publishes_runtime_required_evidence_without_oracle_input(self) -> None:
+        result = self.api.context("create_item 的调用链", max_tokens=1800)
+
+        self.assertIn("pre_required_evidence", result)
+        self.assertIn("post_required_evidence", result)
+        self.assertIn("required_evidence", result)
+        symbol_ids = {
+            item["id"] for item in result["pre_required_evidence"]["symbols"]
+        }
+        self.assertIn("src/app.py::create_item", symbol_ids)
+        paths = result["pre_required_evidence"]["relation_paths"]
+        if paths:
+            self.assertTrue(all(edge["kind"] == "calls" for edge in paths[0]["edges"]))
+        self.assertEqual(result["post_required_evidence"], result["required_evidence"])
+        self.assertFalse(result["context_incomplete"])
+        self.assertEqual(result["missing_required_evidence"], [])
+        self.assertEqual(result["budget_status"], "within_budget")
+
+    def test_context_does_not_mark_ambiguous_symbol_as_required(self) -> None:
+        result = self.api.context("处理一个问题", max_tokens=1200)
+
+        self.assertEqual(result["pre_required_evidence"]["symbols"], [])
+        self.assertEqual(result["pre_required_evidence"]["relation_paths"], [])
+
     def test_context_returns_optional_files_as_a_separate_non_context_tier(self) -> None:
         result = self.api.context("ranking.py policy", max_tokens=1800)
 
@@ -161,6 +185,89 @@ class RetrievalWP06Tests(unittest.TestCase):
             {"path": "tests/test_app.py", "reason_code": "token_budget"},
             result["withheld_files"],
         )
+
+    def test_fit_context_atomically_preserves_required_symbol_and_ordered_path(self) -> None:
+        required = {
+            "symbols": [{
+                "id": "src/app.py::create_item",
+                "path": "src/app.py",
+                "signature": "def create_item(value)",
+                "span": {"start": 6, "end": 7},
+            }],
+            "relation_paths": [{"edges": [
+                {"source": "src/app.py::create_item", "kind": "calls", "target": "src/app.py::Repository.save"},
+            ]}],
+        }
+        result = {
+            "task": "create_item 调用链",
+            "symbols": [
+                {"id": "src/app.py::create_item", "signature": "def create_item(value)", "span": {"start": 6, "end": 7}},
+                *[{"id": f"noise::{index}"} for index in range(20)],
+            ],
+            "impact": {"affected_files": [], "affected_tests": [], "affected_knowledge": [], "affected_modules": [], "call_path": []},
+            "reference_implementations": [], "extension_points": [],
+            "retrieval_explanation": {"selected_records": [], "impact": {}},
+            "core_files": ["src/app.py"], "supporting_files": ["tests/test_app.py"],
+            "optional_files": ["docs/noise.md"],
+            "files": ["src/app.py", "tests/test_app.py"],
+            "file_rankings": [
+                {"path": "src/app.py", "tier": "core", "score": 100},
+                {"path": "tests/test_app.py", "tier": "supporting", "score": 1},
+                {
+                    "path": "docs/noise.md", "tier": "optional", "score": 0,
+                    "score_breakdown": {"noise": "detail " * 600},
+                },
+            ],
+            "withheld_files": [], "rejected_files": [],
+            "knowledge": [{"content": "noise " * 50, "tokens": 50, "sources": [{"path": "tests/test_app.py"}]}],
+            "gaps": [], "summary": "summary", "estimated_tokens": 0,
+            "pre_required_evidence": required,
+            "post_required_evidence": required,
+            "required_evidence": required,
+            "context_incomplete": False, "missing_required_evidence": [],
+            "budget_status": "pending", "minimum_required_tokens": 0,
+        }
+
+        KnowledgeAPI._fit_context(result, budget=1100)
+
+        self.assertEqual(result["post_required_evidence"], required)
+        self.assertEqual(result["required_evidence"], required)
+        self.assertFalse(result["context_incomplete"])
+        self.assertEqual(result["optional_files"], [])
+        self.assertEqual(result["supporting_files"], ["tests/test_app.py"])
+        self.assertLessEqual(result["estimated_tokens"], 1100)
+
+    def test_fit_context_reports_missing_atomic_evidence_when_budget_is_impossible(self) -> None:
+        path = {"edges": [
+            {"source": "symbol:A", "kind": "calls", "target": "symbol:B"},
+            {"source": "symbol:B", "kind": "calls", "target": "symbol:C"},
+        ]}
+        required = {
+            "symbols": [{"id": "symbol:A", "signature": "def a(value)", "span": {"start": 1, "end": 2}}],
+            "relation_paths": [path],
+        }
+        result = {
+            "task": "A call path", "symbols": [{"id": "symbol:A"}],
+            "impact": {"affected_files": [], "affected_tests": [], "affected_knowledge": [], "affected_modules": [], "call_path": []},
+            "reference_implementations": [], "extension_points": [],
+            "retrieval_explanation": {"selected_records": [], "impact": {}},
+            "core_files": ["src/a.py"], "supporting_files": [], "optional_files": [],
+            "files": ["src/a.py"], "file_rankings": [], "withheld_files": [], "rejected_files": [],
+            "knowledge": [], "gaps": [], "summary": "summary", "estimated_tokens": 0,
+            "pre_required_evidence": required, "post_required_evidence": required,
+            "required_evidence": required, "context_incomplete": False,
+            "missing_required_evidence": [], "budget_status": "pending", "minimum_required_tokens": 0,
+        }
+
+        KnowledgeAPI._fit_context(result, budget=256)
+
+        self.assertLessEqual(result["estimated_tokens"], 256)
+        self.assertTrue(result["context_incomplete"])
+        self.assertEqual(result["budget_status"], "insufficient_for_required")
+        self.assertGreater(result["minimum_required_tokens"], 256)
+        self.assertTrue(result["missing_required_evidence"])
+        self.assertNotEqual(result["post_required_evidence"], required)
+        self.assertNotIn(path, result["post_required_evidence"]["relation_paths"])
 
     def test_fit_context_preserves_exact_evidence_before_ranking_diagnostics(self) -> None:
         result = {

@@ -192,6 +192,92 @@ class EvaluationTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "line 1"):
             load_dataset(invalid)
 
+    def test_dataset_v2_validates_required_evidence_and_ordered_path_continuity(self) -> None:
+        sample = json.loads(self.dataset.read_text(encoding="utf-8"))
+        sample.update({
+            "schema_version": 2,
+            "required_evidence": {
+                "symbols": [
+                    {"id": "src/app.py::AccountService.login", "signature": "login(self)"},
+                ],
+                "relation_paths": [{
+                    "path_id": "login-save",
+                    "edges": [
+                        {"source": "src/app.py::AccountService.login", "kind": "calls",
+                         "target": "src/app.py::Repository.save"},
+                    ],
+                }],
+            },
+        })
+        self.dataset.write_text(json.dumps(sample, ensure_ascii=False) + "\n", encoding="utf-8")
+
+        loaded = load_dataset(self.dataset)
+        self.assertEqual(loaded[0]["schema_version"], 2)
+        self.assertEqual(loaded[0]["required_evidence"]["symbols"][0]["id"],
+                         "src/app.py::AccountService.login")
+
+        invalid = self.root / "invalid-v2.jsonl"
+        sample["required_evidence"]["relation_paths"][0]["edges"] = [
+            {"source": "A", "kind": "calls", "target": "B"},
+            {"source": "C", "kind": "calls", "target": "D"},
+        ]
+        invalid.write_text(json.dumps(sample, ensure_ascii=False) + "\n", encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "relation_paths.*连续"):
+            load_dataset(invalid)
+
+    def test_v2_metrics_report_required_retention_and_incomplete_consistency(self) -> None:
+        api = KnowledgeAPI(self.root)
+        sample = json.loads(self.dataset.read_text(encoding="utf-8"))
+        sample.update({
+            "schema_version": 2,
+            "expected_context_incomplete": True,
+            "required_evidence": {
+                "symbols": [{"id": "symbol:A"}, {"id": "symbol:B"}],
+                "relation_paths": [{
+                    "edges": [
+                        {"source": "symbol:A", "kind": "calls", "target": "symbol:B"},
+                    ],
+                }],
+            },
+            "line": 1,
+        })
+        returned = {
+            "files": ["src/app.py"], "core_files": ["src/app.py"], "supporting_files": [],
+            "optional_files": [], "symbols": {"symbol:A"}, "call_path": {"symbol:A"},
+            "text": "", "tool_calls": 1, "stale_detected": False,
+            "selection_reasons": {}, "file_rankings": [], "ranking_status": "ok",
+            "pre_required_evidence": {
+                "symbols": [
+                    {"id": "symbol:A", "signature": "def a()", "span": {"start_line": 1, "end_line": 2}},
+                    {"id": "symbol:B", "signature": "def b()", "span": {"start_line": 4, "end_line": 5}},
+                ],
+                "relation_paths": [{"edges": [
+                    {"source": "symbol:A", "kind": "calls", "target": "symbol:B"},
+                ]}],
+            },
+            "post_required_evidence": {
+                "symbols": [
+                    {"id": "symbol:A", "signature": "def a()", "span": {"start_line": 1, "end_line": 2}},
+                ],
+                "relation_paths": [],
+            },
+            "context_incomplete": True,
+        }
+        with patch("project_knowledge.evaluate._retrieve", return_value=returned):
+            result = _evaluate_sample(api, sample, "hybrid")
+
+        self.assertEqual(result["metrics"]["required_symbol_label_recall"], 1.0)
+        self.assertEqual(result["metrics"]["required_relation_path_label_recall"], 1.0)
+        self.assertEqual(result["metrics"]["pre_required_symbol_recall"], 1.0)
+        self.assertEqual(result["metrics"]["post_required_symbol_recall"], 0.5)
+        self.assertEqual(result["metrics"]["required_symbol_retention"], 0.5)
+        self.assertEqual(result["metrics"]["required_symbol_payload_retention"], 0.5)
+        self.assertEqual(result["metrics"]["required_relation_path_retention"], 0.0)
+        self.assertEqual(result["metrics"]["context_incomplete_consistency"], 1.0)
+        self.assertIn("required_symbol_retention", result["failed_metrics"])
+        self.assertIn("required_symbol_payload_retention", result["failed_metrics"])
+        self.assertIn("required_relation_path_retention", result["failed_metrics"])
+
     def test_core_metrics_are_strict_and_supporting_labels_are_diagnostic(self) -> None:
         api = KnowledgeAPI(self.root)
         sample = load_dataset(self.dataset)[0]

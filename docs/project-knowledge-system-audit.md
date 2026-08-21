@@ -1,6 +1,6 @@
 # 项目级知识库最小需求审计与实施基线
 
-> 当前版本：0.1.40
+> 当前版本：0.1.41
 > 复核日期：2026-08-21  
 > 报告状态：Phase 0～2 确定性检索基线已交付；发布证据正在重新对齐，最终生产质量门尚未通过
 > 默认语言：中文
@@ -9,7 +9,9 @@
 
 当前有效实施基线为 `docs/retrieval-quality-work-package.md`。WP-RQ-01～03 已完成 Phase 0～2 的数据模型、可观测性、多路召回和确定性符号优先排序；WP-RQ-04 的 RQ-P3-001 已完成显式 core/supporting/optional 分层契约，其他 Phase 3 需求仍按验收状态登记，不以已有字段或局部测试代替最终验收。
 
-当前仍未通过最终质量门：专项数据只有 gardenserver 单一稳定快照的 32 题，核心精确率未达到 `0.50`，端到端 P95 超过 12 秒。RQ-P3-001 与 RQ-REL-001 已将 0.1.40 活动报告、README、CodeGraph 状态文档和版本重新对齐；50 题全策略报告已真实执行且未通过冻结质量门，失败项保留在 `evaluation/reports/latest.json`，不通过降低阈值或恢复 builtin 规避。下一步继续 RQ-P3-002、300 题多快照评测和生产门禁。
+当前仍未通过最终质量门：专项数据只有 gardenserver 单一稳定快照的 32 题，核心精确率未达到 `0.50`，端到端 P95 超过 12 秒。RQ-P3-001、RQ-P3-002 与 RQ-REL-001 已将 0.1.41 活动报告、README、CodeGraph 状态文档和版本重新对齐；50 题全策略报告已真实执行且未通过冻结质量门，失败项保留在 `evaluation/reports/latest.json`，不通过降低阈值或恢复 builtin 规避。下一步继续 RQ-P3-003、300 题多快照评测和生产门禁。
+
+RQ-P3-002 采用“双源隔离”契约：运行时 `RequiredEvidencePlanner` 只消费已完成召回和排序的查询、Core 文件、符号及 CodeGraph `trace` 关系，不接收 Token 预算或评测标签；Dataset v2 的 `required_evidence` 仅作为评测 Oracle。关系路径按有序、连续的 `calls` 边整体匹配，符号保留稳定 ID、源码路径、签名和行号 span。预算组装依次裁剪 optional、低分 supporting、supporting 内容和其他 best-effort 诊断；最小 required 仍无法装入时严格不超预算，并返回 `context_incomplete=true`、稳定缺失 ID 和 `insufficient_for_required`。gardenserver 的真实 CodeGraph 1.5 索引已验证 `AccountApi.login -> AccountComponent.do_login` 的直接调用边能形成并保留 required path；动态或无法规范化的端点不会冒充必要路径。
 
 ## 当前交付复核：WP-13 / CG-ONLY（承接 WP-11 / WP-11-HF）
 
