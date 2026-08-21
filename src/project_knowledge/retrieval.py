@@ -620,7 +620,10 @@ class KnowledgeAPI:
             while current is not None and id(current) not in visited:
                 visited.add(id(current))
                 chain.append(current)
-                next_edges = [edge for edge in by_source.get(current["target"], []) if id(edge) not in visited]
+                next_edges = [
+                    edge for edge in by_source.get(current["target"], [])
+                    if id(edge) not in visited and edge["target"] in symbol_by_id
+                ]
                 current = next_edges[0] if next_edges else None
             if chain:
                 chains.append(chain)
