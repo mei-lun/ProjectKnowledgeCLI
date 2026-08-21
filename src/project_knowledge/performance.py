@@ -63,9 +63,9 @@ def _run_size(size: int, repetitions: int) -> dict[str, Any]:
         initialization_ms = (time.monotonic() - started) * 1000
         api = KnowledgeAPI(root)
         status_samples = _measure(repetitions, service.status)
-        context_samples = _measure(
+        context_samples, stage_samples = _measure_context(
             repetitions,
-            lambda: api.context(f"feature_{size // 2} 如何调用 helper_{size // 2}", max_tokens=1200),
+            lambda: api.context(f"feature_{size // 2} 如何调用 helper_{size // 2}", max_tokens=1200, debug=True),
         )
         sync_samples = _measure(repetitions, service.sync)
 
@@ -86,6 +86,10 @@ def _run_size(size: int, repetitions: int) -> dict[str, Any]:
             "initialization": {"cold_ms": round(initialization_ms, 3)},
             "status": _summary(status_samples),
             "context": _summary(context_samples),
+            "stage_metrics": {
+                name: _summary(values)
+                for name, values in sorted(stage_samples.items())
+            },
             "noop_sync": _summary(sync_samples),
             "stale_detection": {"passed": stale_passed, "latency_ms": round(stale_ms, 3)},
         }
@@ -98,6 +102,22 @@ def _measure(repetitions: int, operation: Callable[[], Any]) -> list[float]:
         operation()
         values.append((time.monotonic() - started) * 1000)
     return values
+
+
+def _measure_context(
+    repetitions: int,
+    operation: Callable[[], dict[str, Any]],
+) -> tuple[list[float], dict[str, list[float]]]:
+    values: list[float] = []
+    stages: dict[str, list[float]] = {}
+    for _ in range(repetitions):
+        started = time.monotonic()
+        result = operation()
+        values.append((time.monotonic() - started) * 1000)
+        for name, sample in result.get("retrieval_trace", {}).get("stage_timings", {}).items():
+            if isinstance(sample, dict) and isinstance(sample.get("duration_ms"), (int, float)):
+                stages.setdefault(name, []).append(float(sample["duration_ms"]))
+    return values, stages
 
 
 def _summary(values: list[float]) -> dict[str, float]:

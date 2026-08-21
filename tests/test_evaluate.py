@@ -893,6 +893,8 @@ class EvaluationTests(unittest.TestCase):
         self.assertEqual(result["file_count"], 10)
         self.assertIn("p95_ms", result["status"])
         self.assertIn("p95_ms", result["context"])
+        self.assertIn("ranking", result["stage_metrics"])
+        self.assertEqual(result["stage_metrics"]["ranking"]["samples"], 2)
         self.assertEqual(result["stale_detection"]["passed"], True)
 
     def test_real_project_harness_indexes_temporary_mirror_without_writing_source(self) -> None:
