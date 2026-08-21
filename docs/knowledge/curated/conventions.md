@@ -87,7 +87,7 @@
 
 ## WP-12A 评测约定（0.1.29）
 
-严格 core 指标只使用数据集的 `expected_files` 与有序 `core_files`；`acceptable_supporting_files` 只产生诊断性的 supporting 精确率，不改变成功语义。正式评测要求 `ranking_fallback_rate == 0`。WP-12A 的 50 条数据、阈值和报告是唯一指标来源；dirty 工作树或 stale 索引运行只能作为诊断，不能宣称质量门通过。
+严格 core 指标只使用数据集的 `expected_files` 与有序 `core_files`；`acceptable_supporting_files` 只产生诊断性的 supporting 精确率，不改变成功语义。`optional_files` 由 `optional_limit` 有界并保持稳定顺序，不计入兼容字段 `files`；预算裁剪可以优先将 optional/supporting 记为 `token_budget` withholding。正式评测要求 `ranking_fallback_rate == 0`。WP-12A 的 50 条数据、阈值和报告是唯一指标来源；dirty 工作树或 stale 索引运行只能作为诊断，不能宣称质量门通过。
 
 <!-- project-kb:source file="src/project_knowledge/evaluate.py" -->
 <!-- project-kb:source file="evaluation/thresholds.json" -->

@@ -63,7 +63,7 @@ Project Knowledge CLI 是一个本地优先的 Python 应用，CLI 和 MCP 适�
 
 ## WP-12A 检索证据边界（0.1.29）
 
-候选生成与文件排序是两个独立阶段：`src/project_knowledge/retrieval.py` 负责任务、符号、知识来源和影响关系候选，`src/project_knowledge/ranking.py` 负责确定性的 `policy-v1` 评分、`core_files`/`supporting_files` 分区和 fallback 状态。`KnowledgeAPI.context()` 在 stale/pending 屏蔽之后才排序，并返回有序文件证据和 `file_rankings`；排序分数不能把知识页引用的全部文件自动提升为核心证据。
+候选生成与文件排序是两个独立阶段：`src/project_knowledge/retrieval.py` 负责任务、符号、知识来源和影响关系候选，`src/project_knowledge/ranking.py` 负责确定性的策略评分、`core_files`/`supporting_files`/`optional_files` 分区和 fallback 状态。`KnowledgeAPI.context()` 在 stale/pending 屏蔽之后才排序，并返回有序文件证据和带 tier 的 `file_rankings`；向后兼容的 `files` 只包含 core 与 supporting，optional 仅作为受限的诊断候选，不会把知识页引用的全部文件自动提升为核心证据。
 
 <!-- project-kb:source file="src/project_knowledge/ranking.py" -->
 <!-- project-kb:source file="src/project_knowledge/retrieval.py" -->

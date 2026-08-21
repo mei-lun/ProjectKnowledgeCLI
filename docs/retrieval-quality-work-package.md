@@ -63,7 +63,7 @@ Phase 3 follows the original technical plan. Existing partial behavior is record
 
 | Requirement | Deliverable | Evidence | Status |
 | --- | --- | --- | --- |
-| RQ-P3-001 | Return explicit `core`, `supporting`, and `optional` tiers with stable ordering and explainable tier transitions | Current `core/supporting` baseline in `src/project_knowledge/ranking.py`; Phase 3 tests and evaluation samples still required | partial |
+| RQ-P3-001 | Return explicit `core`, `supporting`, and `optional` tiers with stable ordering and explainable tier transitions | `RankingPolicy.optional_limit`, `RankingResult.optional_files`, tiered `file_rankings`, fallback ordering, and positive/negative tests in `tests/test_ranking.py` and `tests/test_retrieval_wp06.py` | complete |
 | RQ-P3-002 | Rework token-budget trimming so optional and supporting evidence are removed before required Core symbols and required relation paths | Current withholding behavior in `src/project_knowledge/retrieval.py`; required-Core and relation-path acceptance still required | partial |
 | RQ-P3-003 | Expose low-confidence, `context_incomplete`, and `needs_source_check` states without presenting uncertain results as verified facts | Current `ranking_confidence` and `context_incomplete` fields; `needs_source_check` contract still required | partial |
 | RQ-P3-004 | Persist complete debug traces and publish separate lexical, CodeGraph, ranking, and context-assembly P50/P95/P99 measurements | Current opt-in trace and aggregate latency reports; per-stage production evidence still required | partial |

@@ -216,7 +216,66 @@ class RankingTests(unittest.TestCase):
         payload = result.to_dict()
 
         self.assertEqual(payload["core_files"], ["src/app.py"])
+        self.assertEqual(payload["optional_files"], [])
         self.assertEqual(payload["file_rankings"][0]["score_breakdown"]["reasons"], [])
+
+    def test_rank_files_publishes_stable_optional_tier_without_expanding_files(self) -> None:
+        candidates = [
+            FileCandidate(
+                path=f"src/core_{index}.py",
+                exact_symbol=True,
+                stages={"direct_symbol"},
+                original_order=index,
+            )
+            for index in range(5)
+        ]
+        candidates.extend(
+            [
+                FileCandidate(path="src/support.py", graph_hop=1, stages={"impact"}, original_order=5),
+                FileCandidate(path="src/optional.py", content_terms={"login"}, stages={"impact"}, original_order=6),
+                FileCandidate(path="src/optional_b.py", content_terms={"login"}, stages={"impact"}, original_order=7),
+                FileCandidate(path="src/withheld.py", original_order=8),
+            ]
+        )
+
+        result = rank_files(
+            candidates,
+            allowed_paths={candidate.path for candidate in candidates},
+        )
+
+        self.assertEqual(len(result.core_files), 5)
+        self.assertEqual(result.supporting_files, ("src/support.py",))
+        self.assertEqual(result.optional_files, ("src/optional.py", "src/optional_b.py"))
+        self.assertEqual(result.files, result.core_files + result.supporting_files)
+        self.assertEqual(
+            [item.tier for item in result.file_rankings],
+            ["core"] * 5 + ["supporting", "optional", "optional"],
+        )
+        self.assertNotIn("src/optional.py", {item["path"] for item in result.withheld_files})
+        self.assertEqual(result.withheld_files[-1]["reason_code"], "below_supporting_threshold")
+
+    def test_optional_tier_is_bounded_and_preserves_fallback_order(self) -> None:
+        candidates = [
+            FileCandidate(path=f"src/file_{index}.py", original_order=index)
+            for index in range(14)
+        ]
+        policy = RankingPolicy(optional_limit=2)
+
+        result = fallback_rank_files(
+            candidates,
+            allowed_paths={candidate.path for candidate in candidates},
+            reason_code="ranking_error",
+            policy=policy,
+        )
+
+        self.assertEqual(result.files, tuple(f"src/file_{index}.py" for index in range(10)))
+        self.assertEqual(result.optional_files, ("src/file_10.py", "src/file_11.py"))
+        self.assertEqual(result.file_rankings[-2].tier, "optional")
+        self.assertEqual(result.file_rankings[-1].tier, "optional")
+        self.assertEqual(
+            [item["path"] for item in result.withheld_files],
+            ["src/file_12.py", "src/file_13.py"],
+        )
 
     def test_external_ranking_contracts_are_frozen(self) -> None:
         breakdown = ScoreBreakdown(0, 0, 0, 0, 0, 0, 0, ())

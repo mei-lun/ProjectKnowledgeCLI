@@ -602,6 +602,7 @@ class KnowledgeAPI:
                 "context_assembly": {
                     "core_files": final_core,
                     "supporting_files": list(result.get("supporting_files", [])),
+                    "optional_files": list(result.get("optional_files", [])),
                     "selected_before_budget": prefit_files,
                 },
                 "token_budget": {
@@ -1414,6 +1415,18 @@ class KnowledgeAPI:
                 continue
             if result.get("protected_candidates_truncated") is False:
                 result.pop("protected_candidates_truncated")
+                continue
+            optional_files = result.get("optional_files", [])
+            if optional_files:
+                path = optional_files.pop()
+                result["file_rankings"] = [
+                    item for item in result.get("file_rankings", [])
+                    if item.get("path") != path
+                ]
+                result.setdefault("withheld_files", []).append({
+                    "path": path,
+                    "reason_code": "token_budget",
+                })
                 continue
             supporting_files = result.get("supporting_files", [])
             if supporting_files:

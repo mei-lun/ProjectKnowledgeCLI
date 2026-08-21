@@ -80,6 +80,7 @@ class RankingPolicy:
     supporting_min_score: int = 12
     core_limit: int = 5
     full_limit: int = 10
+    optional_limit: int = 5
 
 
 @dataclass(frozen=True)
@@ -126,6 +127,7 @@ class RankingResult:
     ranking_confidence: str
     reason_code: str | None = None
     protected_candidates_truncated: bool = False
+    optional_files: tuple[str, ...] = ()
 
     def to_dict(self) -> dict[str, object]:
         return _as_json_dict(asdict(self))
@@ -197,21 +199,33 @@ def rank_files(
         if not item.protected and item.score >= policy.supporting_min_score
     ]
     supporting = (protected + ordinary)[: max(0, policy.full_limit - len(core))]
-    selected_paths = {item.path for item in core + supporting}
+    optional = [
+        item for item in remaining
+        if item.path not in {candidate.path for candidate in supporting}
+        and item.selection_stage != "fallback"
+    ][: max(0, policy.optional_limit)]
+    selected_paths = {item.path for item in core + supporting + optional}
+    core_supporting_paths = core_paths | {item.path for item in supporting}
     withheld = _withheld_rows(ranked, selected_paths, policy)
     return RankingResult(
         core_files=tuple(item.path for item in core),
         supporting_files=tuple(item.path for item in supporting),
         files=tuple(item.path for item in core + supporting),
         file_rankings=tuple(
-            _with_tier(item, "core" if item.path in core_paths else "supporting")
-            for item in core + supporting
+            _with_tier(
+                item,
+                "core" if item.path in core_paths
+                else "supporting" if item.path in core_supporting_paths
+                else "optional",
+            )
+            for item in core + supporting + optional
         ),
         withheld_files=tuple(withheld),
         rejected_files=tuple(rejected),
         ranking_policy=policy.name,
         ranking_status="ok",
         ranking_confidence=confidence,
+        optional_files=tuple(item.path for item in optional),
         protected_candidates_truncated=len([item for item in ranked if item.protected]) > policy.full_limit,
     )
 
@@ -231,18 +245,25 @@ def fallback_rank_files(
         for candidate in merged
     ]
     ranked.sort(key=lambda item: (original_orders[item.path], item.path))
-    core = ranked[: min(policy.core_limit, policy.full_limit)]
-    supporting = ranked[policy.core_limit : policy.full_limit]
+    core_limit = min(policy.core_limit, policy.full_limit)
+    core = ranked[:core_limit]
+    supporting = ranked[core_limit : policy.full_limit]
+    optional = ranked[policy.full_limit : policy.full_limit + max(0, policy.optional_limit)]
     core_paths = {item.path for item in core}
     selected = core + supporting
-    selected_paths = {item.path for item in selected}
+    selected_paths = {item.path for item in selected + optional}
     return RankingResult(
         core_files=tuple(item.path for item in core),
         supporting_files=tuple(item.path for item in supporting),
         files=tuple(item.path for item in selected),
         file_rankings=tuple(
-            _with_tier(item, "core" if item.path in core_paths else "supporting")
-            for item in selected
+            _with_tier(
+                item,
+                "core" if item.path in core_paths
+                else "supporting" if item.path in {candidate.path for candidate in supporting}
+                else "optional",
+            )
+            for item in selected + optional
         ),
         withheld_files=tuple(_withheld_rows(ranked, selected_paths, policy)),
         rejected_files=tuple(rejected),
@@ -250,6 +271,7 @@ def fallback_rank_files(
         ranking_status="fallback",
         ranking_confidence="low",
         reason_code=reason_code,
+        optional_files=tuple(item.path for item in optional),
         protected_candidates_truncated=len([item for item in ranked if item.protected]) > policy.full_limit,
     )
 

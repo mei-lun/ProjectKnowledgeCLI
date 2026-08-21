@@ -47,7 +47,7 @@ Feature Guide 按功能独立写入 `docs/knowledge/drafts/features/`。`Knowled
 
 ## WP-12A 上下文契约（0.1.29）
 
-`KnowledgeAPI.context()` 暴露有序的 `core_files`、`supporting_files`、`files`、`file_rankings` 和结构化 `ranking_status`。候选在 stale/pending 来源屏蔽后才进入统一生产排序；在 token 预算不足时，先压缩可选诊断，再保留核心证据、精确符号、可用知识和 token-budget withholding 记录。当前 50 条绝对门仍需 clean-source 索引重建后复核，未通过的指标保持未达标。
+`KnowledgeAPI.context()` 暴露有序的 `core_files`、`supporting_files`、`optional_files`、`files`、`file_rankings` 和结构化 `ranking_status`。候选在 stale/pending 来源屏蔽后才进入统一生产排序；兼容字段 `files` 保持 core+supporting 语义，optional 仅提供有界的非上下文候选。在 token 预算不足时，先压缩 optional/supporting 排名并记录 `token_budget` withholding，再保留核心证据、精确符号和可用知识。当前 50 条绝对门仍需 clean-source 索引重建后复核，未通过的指标保持未达标。
 
 <!-- project-kb:source file="src/project_knowledge/retrieval.py" -->
 <!-- project-kb:source file="src/project_knowledge/evaluate.py" -->

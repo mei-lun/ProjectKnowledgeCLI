@@ -405,6 +405,7 @@ def _evaluate_sample(api: KnowledgeAPI, sample: dict[str, Any], strategy: str) -
         "returned_call_path": sorted(returned["call_path"]),
         "core_files": returned["core_files"],
         "supporting_files": returned["supporting_files"],
+        "optional_files": returned.get("optional_files", []),
         "file_rankings": returned["file_rankings"],
         "ranking_status": returned["ranking_status"],
         "selection_reasons": returned.get("selection_reasons", {}),
@@ -485,7 +486,7 @@ def _context_ranking_contract(
         return {
             key: context[key]
             for key in (
-                "core_files", "supporting_files", "files", "file_rankings",
+                "core_files", "supporting_files", "optional_files", "files", "file_rankings",
                 "ranking_status",
             )
         }
@@ -498,9 +499,13 @@ def _context_ranking_contract(
     supporting_files = [
         item["path"] for item in file_rankings if item.get("tier") == "supporting"
     ]
+    optional_files = [
+        item["path"] for item in file_rankings if item.get("tier") == "optional"
+    ]
     return {
         "core_files": core_files,
         "supporting_files": supporting_files,
+        "optional_files": optional_files,
         "files": list(dict.fromkeys(core_files + supporting_files)),
         "file_rankings": file_rankings,
         "ranking_status": context["ranking_status"],

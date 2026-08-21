@@ -90,6 +90,16 @@ class RetrievalWP06Tests(unittest.TestCase):
         )
         self.assertTrue(all(item["why_selected"] for item in result["file_rankings"]))
 
+    def test_context_returns_optional_files_as_a_separate_non_context_tier(self) -> None:
+        result = self.api.context("ranking.py policy", max_tokens=1800)
+
+        self.assertIn("optional_files", result)
+        self.assertEqual(result["files"], result["core_files"] + result["supporting_files"])
+        self.assertTrue(
+            all(item["tier"] == "optional" for item in result["file_rankings"] if item["path"] in result["optional_files"])
+        )
+        self.assertTrue(set(result["optional_files"]).isdisjoint(result["files"]))
+
     def test_unrelated_test_file_does_not_displace_exact_source(self) -> None:
         (self.root / "tests" / "test_noise.py").write_text(
             "def create_item():\n    return 'noise'\n" * 50,
