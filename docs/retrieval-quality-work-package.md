@@ -72,3 +72,5 @@ Phase 3 follows the original technical plan. Existing partial behavior is record
 ## Acceptance boundary
 
 The final plan requires at least 300 questions, at least 30 samples per query type, at least 3 stable repositories or snapshots, locked source and CodeGraph hashes, and clean-environment reproducibility. The current Phase 0–2 baseline intentionally does not claim that gate is complete.
+
+P3-005 remains blocked on approved evaluation data rather than implementation placeholders: the repository currently has 50 self-repo questions and a 12-question gardenserver Phase 0 seed, while the available Phase 1/2 reports reuse the same gardenserver snapshot. No synthetic questions or duplicated snapshots are counted toward the production gate.

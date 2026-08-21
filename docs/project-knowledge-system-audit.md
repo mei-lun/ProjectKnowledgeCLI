@@ -13,6 +13,8 @@
 
 RQ-P3-002 采用“双源隔离”契约：运行时 `RequiredEvidencePlanner` 只消费已完成召回和排序的查询、Core 文件、符号及 CodeGraph `trace` 关系，不接收 Token 预算或评测标签；Dataset v2 的 `required_evidence` 仅作为评测 Oracle。关系路径按有序、连续的 `calls` 边整体匹配，符号保留稳定 ID、源码路径、签名和行号 span。预算组装依次裁剪 optional、低分 supporting、supporting 内容和其他 best-effort 诊断；最小 required 仍无法装入时严格不超预算，并返回 `context_incomplete=true`、稳定缺失 ID 和 `insufficient_for_required`。gardenserver 的真实 CodeGraph 1.5 索引已验证 `AccountApi.login -> AccountComponent.do_login` 的直接调用边能形成并保留 required path；动态或无法规范化的端点不会冒充必要路径。
 
+RQ-P3-003 增加 `context_status` 状态契约，按 `context_incomplete`、`needs_source_check`、`low_confidence`、`complete` 优先级公开状态、置信度、复核原因和源码复核标志；RQ-P3-004 已增加 trace schema v2、阶段耗时/状态、裁剪事件以及 lexical/CodeGraph/ranking/context-assembly percentile 汇总。RQ-P3-005 仍等待负责人确认的 300 题、每类 30 题和 3 个独立稳定快照，不以重复同一快照或合成题目填充门禁。
+
 ## 当前交付复核：WP-13 / CG-ONLY（承接 WP-11 / WP-11-HF）
 
 本节是 0.1.30 的当前验收结论；下方较早版本的工作包和里程碑记录仅用于历史追溯。评测实测值只以 `evaluation/reports/latest.json` 为唯一来源，审计不复制可能随重跑漂移的指标快照。
