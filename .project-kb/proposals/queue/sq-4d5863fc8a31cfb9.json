@@ -1,0 +1,23 @@
+{
+  "affected_knowledge": [
+    "curated.architecture",
+    "curated.conventions",
+    "curated.feature.guide.generation",
+    "decision.0002.codegraph.adapter.boundary",
+    "generated.frameworks",
+    "generated.module.project_knowledge",
+    "generated.project-map"
+  ],
+  "base_commit": "592df6c27c4046e8f6ef99ec1ed1c6a8fb9db3c9",
+  "changed_files": [
+    "src/project_knowledge/retrieval.py"
+  ],
+  "changed_symbols": [],
+  "changeset_id": "change-20260821-153934",
+  "created_at": "2026-08-21T15:39:34+08:00",
+  "head_commit": "592df6c27c4046e8f6ef99ec1ed1c6a8fb9db3c9",
+  "queue_id": "sq-4d5863fc8a31cfb9",
+  "schema_version": 1,
+  "status": "awaiting_semantic_generation",
+  "task_summary": "manual synchronization"
+}
