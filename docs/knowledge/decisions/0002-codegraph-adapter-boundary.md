@@ -48,3 +48,7 @@
 运行项目必须安装并初始化 CodeGraph；CLI 或项目不可用时明确返回结构化错误，不执行本地解析回退。知识文档和检索结果必须标注 CodeGraph 事实来源。
 
 0.1.27 最终复核：`KnowledgeAPI` 的长文档片段相关性调整只影响证据文本排序，不改变 CodeGraph 实时事实来源、公共 CLI 边界或禁止回退 builtin 的决策。
+
+## 0.1.40 检索分层复核
+
+`KnowledgeAPI.context()` 新增 optional tier 仅对 Adapter 已返回的候选进行确定性分区；它不生成符号、调用或影响事实，也不改变 CodeGraph 公共 CLI 和禁止 builtin 回退的权威边界。本 ADR 继续有效。

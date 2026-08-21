@@ -65,6 +65,10 @@ CLI 可以立即离线运行且易于安装。在 MVP 中，Python 项目获得�
 <!-- project-kb:source file="src/project_knowledge/evaluate.py" -->
 <!-- project-kb:source file="evaluation/thresholds.json" -->
 
+## 0.1.40 检索分层复核
+
+显式 core/supporting/optional 分层只改变本地检索结果的结构化表达和预算裁剪顺序，不引入网络依赖，也不改变 CodeGraph 作为代码事实来源、SQLite/Markdown 作为本地知识资产的边界。本 ADR 的 local-first 结论继续成立。
+
 ## 0.1.33 Local-first 向量复核
 
 可选向量检索继续遵守 local-first：默认 disabled，唯一内置实现为确定性离线 provider；网络模型不属于默认能力，provider 失败时必须回到 lexical 结果并暴露 fallback。
