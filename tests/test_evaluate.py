@@ -570,6 +570,15 @@ class EvaluationTests(unittest.TestCase):
             self.assertEqual(result["ranking_status"], context["ranking_status"])
             self.assertEqual(result["selection_reasons"], expected_reasons)
             self.assertEqual(set(result["selection_reasons"]), set(result["files"]))
+            self.assertEqual(
+                result["pre_required_evidence"], context["pre_required_evidence"]
+            )
+            self.assertEqual(
+                result["post_required_evidence"], context["post_required_evidence"]
+            )
+            self.assertEqual(
+                result["context_incomplete"], context["context_incomplete"]
+            )
 
     def test_markdown_and_grep_delegate_ordering_to_production_ranker(self) -> None:
         api = KnowledgeAPI(self.root)

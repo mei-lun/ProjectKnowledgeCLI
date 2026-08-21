@@ -570,7 +570,7 @@ class KnowledgeAPI:
                 continue
             try:
                 traced = self.service.engine.trace(
-                    self.root, symbol_id, self.config, max_depth=1, limit=30
+                    self.root, symbol_id, self.config, max_depth=2, limit=60
                 )
             except Exception:
                 continue
@@ -599,6 +599,40 @@ class KnowledgeAPI:
                     "resolved": True,
                     "freshness": "fresh",
                 })
+        # Join adjacent direct edges into deterministic ordered paths.  The
+        # public trace API returns edges, so path identity is assembled here
+        # without treating an endpoint set as a path.
+        by_source: dict[str, list[dict[str, Any]]] = {}
+        incoming: set[str] = set()
+        for relation in relations:
+            by_source.setdefault(relation["source"], []).append(relation)
+            incoming.add(relation["target"])
+        chains: list[list[dict[str, Any]]] = []
+        visited: set[int] = set()
+        starts = [r for r in relations if r["source"] not in incoming]
+        starts.extend(r for r in relations if r not in starts)
+        for start in starts:
+            marker = id(start)
+            if marker in visited:
+                continue
+            chain: list[dict[str, Any]] = []
+            current = start
+            while current is not None and id(current) not in visited:
+                visited.add(id(current))
+                chain.append(current)
+                next_edges = [edge for edge in by_source.get(current["target"], []) if id(edge) not in visited]
+                current = next_edges[0] if next_edges else None
+            if chain:
+                chains.append(chain)
+        for chain in chains:
+            path_key = json.dumps(
+                [(edge["source"], edge["kind"], edge["target"]) for edge in chain],
+                ensure_ascii=False, separators=(",", ":"),
+            )
+            path_id = "path:" + hashlib.sha256(path_key.encode("utf-8")).hexdigest()[:16]
+            for order, edge in enumerate(chain, 1):
+                edge["path_id"] = path_id
+                edge["order"] = order
         return relations
 
     def _context_retrieval_trace(
@@ -1537,6 +1571,53 @@ class KnowledgeAPI:
                     "reason_code": "token_budget",
                 })
                 continue
+            supporting_files = result.get("supporting_files", [])
+            if supporting_files:
+                ranking_by_path = {
+                    str(item.get("path")): item
+                    for item in result.get("file_rankings", [])
+                }
+                path = min(
+                    supporting_files,
+                    key=lambda candidate: (
+                        float(ranking_by_path.get(candidate, {}).get("score", 0.0)),
+                        supporting_files.index(candidate),
+                    ),
+                )
+                supporting_files.remove(path)
+                result["files"] = [item for item in result.get("files", []) if item != path]
+                result["file_rankings"] = [
+                    item for item in result.get("file_rankings", [])
+                    if item.get("path") != path
+                ]
+                result.setdefault("withheld_files", []).append({
+                    "path": path,
+                    "reason_code": "token_budget",
+                })
+                continue
+            knowledge_sources = next(
+                (
+                    item.get("sources", [])
+                    for item in result.get("knowledge", [])
+                    if len(item.get("sources", [])) > 1
+                ),
+                None,
+            )
+            if knowledge_sources is not None:
+                knowledge_sources.pop()
+                continue
+            contents = [item for item in result["knowledge"] if item.get("tokens", 0) > 60]
+            if contents:
+                longest = max(contents, key=lambda item: len(item["content"]))
+                target_tokens = max(40, longest["tokens"] // 2)
+                original = longest["content"]
+                head = trim_to_tokens(original, max(20, target_tokens // 2))
+                tail_source = original[-max(160, target_tokens * 8):]
+                marker = "[truncated from beginning]\n"
+                tail = marker + tail_source[-max(400, target_tokens * 4):]
+                longest["content"] = head + "\n[summary continues]\n" + tail
+                longest["tokens"] = approx_tokens(longest["content"])
+                continue
             rankings_with_breakdowns = [
                 item for item in result.get("file_rankings", [])
                 if item.get("score_breakdown")
@@ -1561,30 +1642,6 @@ class KnowledgeAPI:
                 continue
             if result.get("protected_candidates_truncated") is False:
                 result.pop("protected_candidates_truncated")
-                continue
-            supporting_files = result.get("supporting_files", [])
-            if supporting_files:
-                ranking_by_path = {
-                    str(item.get("path")): item
-                    for item in result.get("file_rankings", [])
-                }
-                path = min(
-                    supporting_files,
-                    key=lambda candidate: (
-                        float(ranking_by_path.get(candidate, {}).get("score", 0.0)),
-                        supporting_files.index(candidate),
-                    ),
-                )
-                supporting_files.remove(path)
-                result["files"] = [item for item in result.get("files", []) if item != path]
-                result["file_rankings"] = [
-                    item for item in result.get("file_rankings", [])
-                    if item.get("path") != path
-                ]
-                result.setdefault("withheld_files", []).append({
-                    "path": path,
-                    "reason_code": "token_budget",
-                })
                 continue
             if result.get("rejected_files"):
                 result["rejected_files"].pop()
@@ -1640,23 +1697,6 @@ class KnowledgeAPI:
             guidance = result.get("guidance_workflow")
             if isinstance(guidance, dict) and set(guidance) != {"available"}:
                 result["guidance_workflow"] = {"available": bool(guidance.get("available"))}
-                continue
-            knowledge_sources = next(
-                (
-                    item.get("sources", [])
-                    for item in result.get("knowledge", [])
-                    if len(item.get("sources", [])) > 1
-                ),
-                None,
-            )
-            if knowledge_sources is not None:
-                knowledge_sources.pop()
-                continue
-            contents = [item for item in result["knowledge"] if item.get("tokens", 0) > 60]
-            if contents:
-                longest = max(contents, key=lambda item: len(item["content"]))
-                longest["content"] = trim_to_tokens(longest["content"], max(40, longest["tokens"] // 2))
-                longest["tokens"] = approx_tokens(longest["content"])
                 continue
             if len(result["knowledge"]) > 1:
                 result["knowledge"].pop()
@@ -1794,11 +1834,34 @@ class KnowledgeAPI:
                 result["required_evidence"] = {"symbols": [], "relation_paths": []}
                 result["context_incomplete"] = True
                 result["budget_status"] = "insufficient_for_required"
-                for _ in range(3):
+            # The impossible-budget response is itself subject to the hard
+            # limit.  Drop all best-effort fields before shortening the
+            # diagnostic identifiers; never return an over-budget envelope.
+            if result["estimated_tokens"] > budget:
+                keep = {
+                    "token_budget": result.get("token_budget", budget),
+                    "estimated_tokens": 0,
+                    "context_incomplete": True,
+                    "budget_status": "insufficient_for_required",
+                    "minimum_required_tokens": minimum_required_tokens,
+                    "missing_required_evidence": list(result.get("missing_required_evidence", [])),
+                }
+                result.clear()
+                result.update(keep)
+                for _ in range(8):
                     measured_minimal = approx_tokens(json.dumps(result, ensure_ascii=False))
-                    if result["estimated_tokens"] == measured_minimal:
+                    if measured_minimal <= budget:
+                        result["estimated_tokens"] = measured_minimal
                         break
-                    result["estimated_tokens"] = measured_minimal
+                    missing_items = result.get("missing_required_evidence", [])
+                    if missing_items:
+                        result["missing_required_evidence"] = [
+                            str(item)[: max(8, len(str(item)) // 2)]
+                            for item in missing_items[: max(1, len(missing_items) // 2)]
+                        ]
+                else:
+                    result["missing_required_evidence"] = []
+                    result["estimated_tokens"] = approx_tokens(json.dumps(result, ensure_ascii=False))
             return
 
     @staticmethod

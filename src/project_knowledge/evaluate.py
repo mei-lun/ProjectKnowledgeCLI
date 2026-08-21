@@ -727,6 +727,12 @@ def _retrieve(api: KnowledgeAPI, sample: dict[str, Any], strategy: str) -> dict[
             "text": "\n".join(text_parts), "stale_detected": stale_detected,
             "tool_calls": 4 if strategy == "hybrid" else 3,
             "selection_reasons": _selection_reasons(ranking_contract["file_rankings"]),
+            "pre_required_evidence": context.get("pre_required_evidence", {}),
+            "post_required_evidence": context.get("post_required_evidence", {}),
+            "context_incomplete": bool(context.get("context_incomplete", False)),
+            "missing_required_evidence": context.get("missing_required_evidence", []),
+            "budget_status": context.get("budget_status"),
+            "minimum_required_tokens": context.get("minimum_required_tokens", 0),
         }
 
     if strategy == "markdown":

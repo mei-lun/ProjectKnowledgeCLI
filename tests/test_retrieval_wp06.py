@@ -9,6 +9,7 @@ from unittest.mock import Mock, patch
 
 from project_knowledge.codegraph import CodeGraphEngine
 from project_knowledge.config import ProjectConfig
+from project_knowledge.models import Relation
 from project_knowledge.retrieval import KnowledgeAPI
 from project_knowledge.service import ProjectService
 from project_knowledge.store import KnowledgeStore
@@ -269,6 +270,51 @@ class RetrievalWP06Tests(unittest.TestCase):
         self.assertNotEqual(result["post_required_evidence"], required)
         self.assertNotIn(path, result["post_required_evidence"]["relation_paths"])
 
+    def test_fit_context_hard_limits_long_impossible_evidence_identifiers(self) -> None:
+        long_id = "src/" + "nested/" * 40 + "module.py::Qualified.symbol"
+        required = {
+            "symbols": [{"id": long_id, "signature": "def symbol(value)", "span": {"start": 1, "end": 2}}],
+            "relation_paths": [{"edges": [
+                {"source": long_id, "kind": "calls", "target": long_id + ".target"},
+            ]}],
+        }
+        result = {
+            "task": long_id, "symbols": [{"id": long_id}],
+            "impact": {"affected_files": [], "affected_tests": [], "affected_knowledge": [], "affected_modules": [], "call_path": []},
+            "reference_implementations": [], "extension_points": [],
+            "retrieval_explanation": {"selected_records": [], "impact": {}},
+            "core_files": [long_id], "supporting_files": [], "optional_files": [],
+            "files": [long_id], "file_rankings": [], "withheld_files": [], "rejected_files": [],
+            "knowledge": [], "gaps": [], "summary": "", "estimated_tokens": 0,
+            "pre_required_evidence": required, "post_required_evidence": required,
+            "required_evidence": required, "context_incomplete": False,
+            "missing_required_evidence": [], "budget_status": "pending", "minimum_required_tokens": 0,
+        }
+
+        KnowledgeAPI._fit_context(result, budget=256)
+
+        self.assertLessEqual(result["estimated_tokens"], 256)
+        self.assertTrue(result["context_incomplete"])
+        self.assertEqual(result["budget_status"], "insufficient_for_required")
+        self.assertGreater(result["minimum_required_tokens"], 256)
+
+    def test_runtime_relation_candidates_join_adjacent_edges_into_one_path(self) -> None:
+        symbols = [
+            {"id": "src/a.py::A", "path": "src/a.py", "name": "A"},
+            {"id": "src/b.py::B", "path": "src/b.py", "name": "B"},
+            {"id": "src/c.py::C", "path": "src/c.py", "name": "C"},
+        ]
+        traces = {
+            "src/a.py::A": [Relation("src/a.py::A", "src/b.py::B", "calls", "src/b.py", 2, 1.0, True)],
+            "src/b.py::B": [Relation("src/b.py::B", "src/c.py::C", "calls", "src/c.py", 3, 1.0, True)],
+            "src/c.py::C": [],
+        }
+        with patch.object(self.api.service.engine, "trace", side_effect=lambda _root, symbol_id, _config, **_kwargs: traces[symbol_id]):
+            relations = self.api._required_relation_candidates("call_path", symbols)
+
+        self.assertEqual([item["order"] for item in relations], [1, 2])
+        self.assertEqual(len({item["path_id"] for item in relations}), 1)
+
     def test_fit_context_preserves_exact_evidence_before_ranking_diagnostics(self) -> None:
         result = {
             "symbols": [{
@@ -370,7 +416,7 @@ class RetrievalWP06Tests(unittest.TestCase):
             for item in result["withheld_files"]
         ))
 
-    def test_fit_context_compacts_ranking_details_before_withholding_support(self) -> None:
+    def test_fit_context_withholds_supporting_before_compacting_ranking_details(self) -> None:
         result = {
             "symbols": [{"id": "src/app.py::create_item", "name": "create_item"}],
             "impact": {
@@ -414,8 +460,8 @@ class RetrievalWP06Tests(unittest.TestCase):
 
         KnowledgeAPI._fit_context(result, budget=375)
 
-        self.assertEqual(result["supporting_files"], ["tests/test_app.py"])
-        self.assertFalse(any(
+        self.assertEqual(result["supporting_files"], [])
+        self.assertTrue(any(
             item.get("path") == "tests/test_app.py"
             and item.get("reason_code") == "token_budget"
             for item in result["withheld_files"]
