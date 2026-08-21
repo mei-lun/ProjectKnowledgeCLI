@@ -493,6 +493,7 @@ def _evaluate_sample(api: KnowledgeAPI, sample: dict[str, Any], strategy: str) -
         "selection_reasons": returned.get("selection_reasons", {}),
         "stale_detected": returned["stale_detected"],
         "context_incomplete": bool(returned.get("context_incomplete", False)),
+        "context_status": returned.get("context_status", {}),
         "pre_required_evidence": returned.get("pre_required_evidence", {}),
         "post_required_evidence": returned.get("post_required_evidence", {}),
     }
@@ -730,6 +731,7 @@ def _retrieve(api: KnowledgeAPI, sample: dict[str, Any], strategy: str) -> dict[
             "pre_required_evidence": context.get("pre_required_evidence", {}),
             "post_required_evidence": context.get("post_required_evidence", {}),
             "context_incomplete": bool(context.get("context_incomplete", False)),
+            "context_status": context.get("context_status", {}),
             "missing_required_evidence": context.get("missing_required_evidence", []),
             "budget_status": context.get("budget_status"),
             "minimum_required_tokens": context.get("minimum_required_tokens", 0),

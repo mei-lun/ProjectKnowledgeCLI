@@ -485,6 +485,16 @@ class KnowledgeAPI:
             prefit_files = list(result["files"])
             prefit_core_files = list(result["core_files"])
             self._fit_context(result, budget)
+            result["context_status"] = self._context_status(
+                result,
+                query_profile=query_profile,
+                symbol_matches=symbol_matches,
+                fragments=fragments,
+                ranking_status=ranked_files.ranking_status,
+                ranking_confidence=ranked_files.ranking_confidence,
+                pending_files=status.get("pending_files", []),
+                impact=impact,
+            )
             if debug:
                 result["retrieval_trace"] = self._context_retrieval_trace(
                     task=task,
@@ -871,6 +881,55 @@ class KnowledgeAPI:
                 stage="canonicalized",
             ))
         return result
+
+    @staticmethod
+    def _context_status(
+        result: dict[str, Any],
+        *,
+        query_profile: str,
+        symbol_matches: list[dict[str, Any]],
+        fragments: list[dict[str, Any]],
+        ranking_status: str | None,
+        ranking_confidence: str | None,
+        pending_files: list[str],
+        impact: dict[str, Any],
+    ) -> dict[str, Any]:
+        reasons: list[str] = []
+        if ranking_status == "fallback":
+            reasons.append("ranking_fallback")
+        if ranking_confidence == "low":
+            reasons.append("low_ranking_confidence")
+        if pending_files:
+            reasons.append("index_pending_files")
+        if any(bool(item.get("requires_live_source")) for item in fragments):
+            reasons.append("stale_or_unverified_knowledge")
+        if not symbol_matches:
+            reasons.append("no_exact_symbol_anchor")
+        if query_profile in {"call_path", "impact"} and symbol_matches and not result.get("relation_paths"):
+            reasons.append("unresolved_relation_path")
+        if impact.get("limitations") and query_profile in {"call_path", "impact"}:
+            reasons.append("dynamic_relation_limitation")
+        if result.get("context_incomplete"):
+            reasons.append("required_evidence_missing")
+        reasons = list(dict.fromkeys(reasons))
+        confidence = "low" if ranking_status == "fallback" or ranking_confidence == "low" else (
+            "medium" if reasons else "high"
+        )
+        if result.get("context_incomplete"):
+            state = "context_incomplete"
+        elif reasons:
+            state = "needs_source_check" if any(
+                reason not in {"ranking_fallback", "low_ranking_confidence"}
+                for reason in reasons
+            ) else "low_confidence"
+        else:
+            state = "complete"
+        return {
+            "state": state,
+            "confidence": confidence,
+            "needs_source_check": state in {"needs_source_check", "context_incomplete"},
+            "reasons": reasons,
+        }
 
     def _context_file_candidates(
         self,

@@ -115,6 +115,29 @@ class RetrievalWP06Tests(unittest.TestCase):
         self.assertEqual(result["pre_required_evidence"]["symbols"], [])
         self.assertEqual(result["pre_required_evidence"]["relation_paths"], [])
 
+    def test_context_status_marks_unanchored_query_as_needs_source_check(self) -> None:
+        result = self.api.context("处理一个未命名的动态扩展问题", max_tokens=1200)
+
+        self.assertEqual(result["context_status"]["state"], "needs_source_check")
+        self.assertTrue(result["context_status"]["needs_source_check"])
+        self.assertIn("no_exact_symbol_anchor", result["context_status"]["reasons"])
+        self.assertNotEqual(result["context_status"]["state"], "complete")
+
+    def test_context_status_marks_ranking_fallback_as_low_confidence(self) -> None:
+        with patch("project_knowledge.retrieval.rank_files", side_effect=RuntimeError("ranking unavailable")):
+            result = self.api.context("create_item", max_tokens=1200)
+
+        self.assertEqual(result["context_status"]["state"], "low_confidence")
+        self.assertEqual(result["context_status"]["confidence"], "low")
+        self.assertIn("ranking_fallback", result["context_status"]["reasons"])
+
+    def test_context_status_prioritizes_incomplete_budget_over_other_states(self) -> None:
+        result = self.api.context("create_item 的调用链", max_tokens=256)
+
+        self.assertEqual(result["context_status"]["state"], "context_incomplete")
+        self.assertTrue(result["context_status"]["needs_source_check"])
+        self.assertIn("required_evidence_missing", result["context_status"]["reasons"])
+
     def test_context_returns_optional_files_as_a_separate_non_context_tier(self) -> None:
         result = self.api.context("ranking.py policy", max_tokens=1800)
 

@@ -45,6 +45,11 @@ python scripts/validate_codegraph_adapter.py --json
 预算不可行时必须遵守硬 Token 上限，并返回 `context_incomplete=true`、
 `missing_required_evidence` 和 `budget_status=insufficient_for_required`，不得静默删除后报告完整。
 
+上下文响应还包含 `context_status`：`state` 取 `complete`、`low_confidence`、
+`needs_source_check` 或 `context_incomplete`，并同时给出 `confidence`、
+`needs_source_check` 和可审计 `reasons`。状态按不完整优先级覆盖：预算导致 required 缺失时不能被高相关性或高排序分数掩盖；
+无精确符号锚点、索引待同步、陈旧/推断知识、动态关系限制和 fallback 排序都会显式要求源码复核。
+
 ## 快速质量门
 
 ```bash
