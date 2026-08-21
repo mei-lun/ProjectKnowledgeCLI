@@ -124,3 +124,5 @@ README 只引用当前活动报告中的 CodeGraph 指标，并明确区分 Adap
 ## 0.1.40 分层检索与活动报告复核
 
 `optional_files` 只承载有界、稳定排序的非上下文候选，`files` 继续保持 core+supporting 契约。0.1.40 活动报告由干净工作区生成并通过 provenance 校验；冻结质量门仍按真实失败项报告，未因新增 optional 层放宽。
+
+README、审计头和 CodeGraph 当前状态页必须直接对齐该活动报告的 0.1.40 版本与 CodeGraph 指标；文档不得保留上一版指标快照。
