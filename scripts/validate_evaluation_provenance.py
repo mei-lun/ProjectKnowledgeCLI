@@ -22,6 +22,30 @@ def _report_commit_matches_live(
     return bool(report_commit) and str(report_commit) in accepted
 
 
+def _is_commit_between_source_and_head(
+    root: Path,
+    report_commit: object,
+    source_commit: object,
+    live_head: str,
+) -> bool:
+    if not report_commit or not source_commit:
+        return False
+    for ancestor, descendant in (
+        (str(source_commit), str(report_commit)),
+        (str(report_commit), live_head),
+    ):
+        result = subprocess.run(
+            ["git", "merge-base", "--is-ancestor", ancestor, descendant],
+            cwd=root,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if result.returncode != 0:
+            return False
+    return True
+
+
 def validate_evaluation_report(
     report_path: str | Path,
     project_root: str | Path | None = None,
@@ -92,9 +116,20 @@ def validate_evaluation_report(
             except Exception as error:
                 errors.append(f"live project provenance cannot be read: {error}")
                 live_status = {}
-            if not _report_commit_matches_live(
+            report_commit_matches = _report_commit_matches_live(
                 payload.get("project_commit"), live_head, live_status
+            )
+            if (
+                not report_commit_matches
+                and live_status.get("commit_alignment") == "generated_outputs_only"
             ):
+                report_commit_matches = _is_commit_between_source_and_head(
+                    root,
+                    payload.get("project_commit"),
+                    live_status.get("index_commit"),
+                    live_head,
+                )
+            if not report_commit_matches:
                 errors.append("report project_commit does not match live source boundary")
             if payload.get("index_commit") != live_status.get("index_commit"):
                 errors.append("report index_commit does not match live CodeGraph index")
