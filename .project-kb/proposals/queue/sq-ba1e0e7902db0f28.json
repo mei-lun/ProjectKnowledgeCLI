@@ -1,0 +1,29 @@
+{
+  "affected_knowledge": [
+    "curated.architecture",
+    "curated.conventions",
+    "curated.feature.guide.generation",
+    "decision.0002.codegraph.adapter.boundary",
+    "generated.frameworks",
+    "generated.module.project_knowledge",
+    "generated.module.scripts",
+    "generated.module.tests",
+    "generated.project-map",
+    "generated.test-map"
+  ],
+  "base_commit": "7637f98af3ded117fa408fad7cb4c53ec2f08189",
+  "changed_files": [
+    "scripts/validate_evaluation_provenance.py",
+    "src/project_knowledge/retrieval.py",
+    "tests/test_evaluation_provenance.py",
+    "tests/test_retrieval_phase1.py"
+  ],
+  "changed_symbols": [],
+  "changeset_id": "change-20260824-044601",
+  "created_at": "2026-08-24T04:46:01+08:00",
+  "head_commit": "b290a55f46db1324278c1a46bef40cf682868cbe",
+  "queue_id": "sq-ba1e0e7902db0f28",
+  "schema_version": 1,
+  "status": "awaiting_semantic_generation",
+  "task_summary": "对齐 gardenserver 实践质量门并优化 CodeGraph 检索延迟"
+}

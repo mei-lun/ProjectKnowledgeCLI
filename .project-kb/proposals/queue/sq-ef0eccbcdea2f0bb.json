@@ -1,0 +1,23 @@
+{
+  "affected_knowledge": [
+    "curated.architecture",
+    "generated.frameworks",
+    "generated.module.project_knowledge",
+    "generated.module.tests",
+    "generated.project-map",
+    "generated.test-map"
+  ],
+  "base_commit": "7637f98af3ded117fa408fad7cb4c53ec2f08189",
+  "changed_files": [
+    "src/project_knowledge/ranking.py",
+    "tests/test_ranking.py"
+  ],
+  "changed_symbols": [],
+  "changeset_id": "change-20260824-043127",
+  "created_at": "2026-08-24T04:31:27+08:00",
+  "head_commit": "7637f98af3ded117fa408fad7cb4c53ec2f08189",
+  "queue_id": "sq-ef0eccbcdea2f0bb",
+  "schema_version": 1,
+  "status": "awaiting_semantic_generation",
+  "task_summary": "修正 gardenserver 测试排序并冻结 Phase 1 实践门"
+}
