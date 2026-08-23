@@ -15,6 +15,6 @@
 
 ## 质量结论
 
-当前 CodeGraph Adapter 已接入且可用；0.1.46 活动报告的文件召回率为 `0.808333`、核心文件精确率为 `0.332333`、符号召回率为 `0.153333`、符号精确率为 `0.077381`、成功率为 `0.08`、P95 延迟为 `4247.76 ms`。冻结质量门仍未通过，这是 self-repo 检索质量问题，不是 Adapter 不可用，也不应通过恢复 Builtin fallback 或降低阈值解决。
+当前 CodeGraph Adapter 已接入且可用；0.1.46 活动报告的文件召回率为 `0.808333`、核心文件精确率为 `0.332333`、符号召回率为 `0.153333`、符号精确率为 `0.077381`、成功率为 `0.08`。P95 延迟受执行环境影响，以活动 JSON 报告为准。冻结质量门仍未通过，这是 self-repo 检索质量问题，不是 Adapter 不可用，也不应通过恢复 Builtin fallback 或降低阈值解决。
 
 CI 会拒绝以下活动报告：包版本过期、CodeGraph 不可用、非 `codegraph-public-cli` Adapter、`adapter_unavailable` 元数据或 Builtin engine 元数据。

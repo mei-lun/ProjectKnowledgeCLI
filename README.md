@@ -15,7 +15,7 @@
 | 成功率 | 0.08 |
 | 平均上下文 | 141.18 tokens |
 | 平均工具调用 | 3 |
-| P95 延迟 | 4247.76 ms |
+| P95 延迟 | 见活动报告（环境相关） |
 
 Adapter 可用不等于检索质量门已通过：当前主要缺陷仍是候选覆盖、符号召回和排序精确率不足。Builtin engine 不属于当前运行时，也不会作为质量问题的回退方案。详细边界见 [当前 CodeGraph 评测状态](docs/codegraph-evaluation-current.md)，原始数据见 [活动评测报告](evaluation/reports/latest.json)。
 

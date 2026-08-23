@@ -78,7 +78,7 @@ class DocumentationRoadmapTests(unittest.TestCase):
             "symbol_precision",
         ):
             self.assertIn(f"{metrics[metric]:.6f}", self.readme)
-        self.assertIn(f"{metrics['p95_latency_ms']:.2f} ms", self.readme)
+        self.assertIn("P95 延迟 | 见活动报告（环境相关）", self.readme)
 
     def test_retrieval_work_package_tracks_phase3_requirements(self) -> None:
         work_package = (self.root / "docs" / "retrieval-quality-work-package.md").read_text(
