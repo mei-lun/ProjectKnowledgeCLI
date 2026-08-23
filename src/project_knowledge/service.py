@@ -386,28 +386,32 @@ class ProjectService:
             **fields,
         })
 
-    def status(self) -> dict[str, Any]:
+    def status(self, *, snapshot: CodeIndexSnapshot | None = None) -> dict[str, Any]:
         initialized = self.db_path.exists() and (self.root / ".project-kb.yml").exists()
         if not initialized:
             return {"initialized": False, "project_root": str(self.root)}
         started = time.monotonic()
-        with ThreadPoolExecutor(max_workers=2) as executor:
-            snapshot_future = executor.submit(self.engine.snapshot, self.root, self.config)
-            git_future = executor.submit(git_status, self.root)
-            with KnowledgeStore(self.db_path, readonly=True) as store:
-                previous = store.file_hashes()
-                knowledge_pending = self._pending_knowledge(store)
-                counts = store.counts()
-                metadata = store.metadata()
-                language_rows = store.rows("SELECT language, COUNT(*) AS count FROM files GROUP BY language ORDER BY count DESC")
-                errors = store.rows("SELECT path, parse_error FROM files WHERE parse_error IS NOT NULL ORDER BY path LIMIT 50")
-                query = store.rows("SELECT COUNT(*) AS count, COALESCE(AVG(output_tokens), 0) AS avg_tokens FROM query_stats")
-            try:
-                snapshot = snapshot_future.result()
-                discovered = list(snapshot.files)
-            except RuntimeError:
-                discovered = []
-            git = git_future.result()
+        with KnowledgeStore(self.db_path, readonly=True) as store:
+            previous = store.file_hashes()
+            knowledge_pending = self._pending_knowledge(store)
+            counts = store.counts()
+            metadata = store.metadata()
+            language_rows = store.rows("SELECT language, COUNT(*) AS count FROM files GROUP BY language ORDER BY count DESC")
+            errors = store.rows("SELECT path, parse_error FROM files WHERE parse_error IS NOT NULL ORDER BY path LIMIT 50")
+            query = store.rows("SELECT COUNT(*) AS count, COALESCE(AVG(output_tokens), 0) AS avg_tokens FROM query_stats")
+        if snapshot is None:
+            with ThreadPoolExecutor(max_workers=2) as executor:
+                snapshot_future = executor.submit(self.engine.snapshot, self.root, self.config)
+                git_future = executor.submit(git_status, self.root)
+                try:
+                    snapshot = snapshot_future.result()
+                    discovered = list(snapshot.files)
+                except RuntimeError:
+                    discovered = []
+                git = git_future.result()
+        else:
+            discovered = list(snapshot.files)
+            git = git_status(self.root)
         engine_status = self.engine.diagnose(self.root)
         current = {item.path: item.content_hash for item in discovered}
         pending = sorted(path for path, value in current.items() if previous.get(path) != value)

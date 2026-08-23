@@ -80,6 +80,9 @@ GENERIC_SYMBOL_NAMES = {
 }
 VENDOR_PATH_PREFIXES = ("modules/", "vendor/", "third_party/", "deps/", "external/")
 GENERATED_PATH_MARKERS = ("/generated/", "/dist/", "/build/", ".generated.")
+MAX_SYMBOL_QUERIES = 8
+MAX_IMPACT_ANCHORS = 2
+MAX_REQUIRED_PATH_ANCHORS = 3
 
 
 class KnowledgeAPI:
@@ -98,8 +101,8 @@ class KnowledgeAPI:
         with project_lock(self.root), KnowledgeStore(self.service.db_path) as store:
             store.initialize()
 
-    def status(self) -> dict[str, Any]:
-        status = self.service.status()
+    def status(self, *, _snapshot: Any | None = None) -> dict[str, Any]:
+        status = self.service.status(snapshot=_snapshot)
         with KnowledgeStore(self.service.db_path) as store:
             status["guidance_workflow"] = self._guidance_workflow_status(store)
         return status
@@ -149,9 +152,11 @@ class KnowledgeAPI:
         module: str | None = None,
         limit: int = 10,
         debug: bool = False,
+        *,
+        _status: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         started = time.monotonic()
-        pending = set(self.service.status().get("pending_files", []))
+        pending = set((_status or self.service.status()).get("pending_files", []))
         with KnowledgeStore(self.service.db_path) as store:
             matches = store.search_knowledge(query, max(1, min(limit * 2, 100)), kinds, module)
             seen_ids = {record.id for record, _ in matches}
@@ -360,13 +365,37 @@ class KnowledgeAPI:
         *,
         _diagnostics: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
+        request_scope = getattr(self.service.engine, "request_scope", None)
+        scope = request_scope(self.root) if callable(request_scope) else None
+        if scope is None or not hasattr(scope, "__enter__") or not hasattr(scope, "__exit__"):
+            snapshot = self.service.engine.snapshot(self.root, self.service.config)
+            return self._context(
+                task, max_tokens, debug, _diagnostics=_diagnostics, _snapshot=snapshot
+            )
+        with scope:
+            snapshot = self.service.engine.snapshot(self.root, self.service.config)
+            return self._context(
+                task, max_tokens, debug, _diagnostics=_diagnostics, _snapshot=snapshot
+            )
+
+    def _context(
+        self,
+        task: str,
+        max_tokens: int | None = None,
+        debug: bool = False,
+        *,
+        _diagnostics: dict[str, Any] | None = None,
+        _snapshot: Any,
+    ) -> dict[str, Any]:
         started = time.monotonic()
         budget = max(256, min(max_tokens or self.config.max_tokens, 50_000))
         diagnostics_requested = debug or _diagnostics is not None
-        status = self.status()
+        status = self.status(_snapshot=_snapshot)
         intent = self.classify_task(task)
         lexical_started = time.monotonic()
-        search = self.search(task, limit=10, debug=diagnostics_requested)
+        search = self.search(
+            task, limit=10, debug=diagnostics_requested, _status=status
+        )
         stage_timings: dict[str, dict[str, Any]] = {
             "lexical": {
                 "duration_ms": round((time.monotonic() - lexical_started) * 1000, 3),
@@ -386,10 +415,13 @@ class KnowledgeAPI:
         ][:4]
         terms = self._symbol_terms(task)
         symbol_matches = self._task_symbol_matches(task, terms)
+        graph_symbols = self._graph_symbol_anchors(
+            symbol_matches, limit=MAX_IMPACT_ANCHORS
+        )
         with KnowledgeStore(self.service.db_path) as store:
             codegraph_started = time.monotonic()
             impact = self.impact(
-                symbols=[item["id"] for item in symbol_matches[:10]],
+                symbols=[item["id"] for item in graph_symbols],
                 max_hops=2,
                 max_relations=200,
                 debug=diagnostics_requested,
@@ -490,7 +522,8 @@ class KnowledgeAPI:
                 "engine_limitations": self.service.engine.status().get("limitations", []),
             }
             candidates, allowed_paths = self._context_file_candidates(
-                task, intent, symbol_matches, impact, fragments
+                task, intent, symbol_matches, impact, fragments,
+                snapshot=_snapshot, status=status,
             )
             query_profile = self._query_profile(task)
             ranking_policy = (
@@ -525,7 +558,10 @@ class KnowledgeAPI:
                 core_file_paths=result.get("core_files", []),
                 symbols=symbol_matches,
                 relations=self._required_relation_candidates(
-                    query_profile, symbol_matches
+                    query_profile,
+                    self._graph_symbol_anchors(
+                        symbol_matches, limit=MAX_REQUIRED_PATH_ANCHORS
+                    ),
                 ),
             )
             result["pre_required_evidence"] = self._required_evidence_schema(planned_evidence)
@@ -568,6 +604,7 @@ class KnowledgeAPI:
                     result=result,
                     budget=budget,
                     stage_timings=stage_timings,
+                    snapshot=_snapshot,
                 )
                 stage_timings["context_assembly"]["duration_ms"] = round(
                     (time.monotonic() - assembly_started) * 1000, 3
@@ -740,8 +777,9 @@ class KnowledgeAPI:
         result: dict[str, Any],
         budget: int,
         stage_timings: dict[str, dict[str, Any]] | None = None,
+        snapshot: Any | None = None,
     ) -> dict[str, Any]:
-        snapshot = self.service.engine.snapshot(self.root, self.service.config)
+        snapshot = snapshot or self.service.engine.snapshot(self.root, self.service.config)
         snapshot_files = {item.path.replace("\\", "/"): item for item in snapshot.files}
         repository_id = self.config.project_name or self.root.name
         source_revision = str(status.get("head_commit") or snapshot.snapshot_id)
@@ -1040,16 +1078,19 @@ class KnowledgeAPI:
         symbol_matches: list[dict[str, Any]],
         impact: dict[str, Any],
         fragments: list[dict[str, Any]],
+        *,
+        snapshot: Any | None = None,
+        status: dict[str, Any] | None = None,
     ) -> tuple[list[FileCandidate], set[str]]:
         def normalized(path: object) -> str:
             return str(path).replace("\\", "/").lstrip("./")
 
-        snapshot = self.service.engine.snapshot(self.root, self.service.config)
+        snapshot = snapshot or self.service.engine.snapshot(self.root, self.service.config)
         allowed_paths = {normalized(item.path) for item in snapshot.files if normalized(item.path)}
         modules = {normalized(item.path): item.module for item in snapshot.files}
         pending_paths = {
             normalized(path)
-            for path in self.service.status().get("pending_files", [])
+            for path in (status or self.service.status()).get("pending_files", [])
         }
         original_terms = {term.lower() for term in self._symbol_terms(task)}
         alias_terms = {
@@ -1307,6 +1348,11 @@ class KnowledgeAPI:
     def _task_symbol_matches(self, task: str, terms: list[str]) -> list[dict[str, Any]]:
         matches: list[dict[str, Any]] = []
         seen: set[str] = set()
+        explicit_qualified = [
+            term
+            for term in re.findall(r"[A-Za-z_$][\w$.:/-]{2,}", task)
+            if any(marker in term for marker in (".", "::", "/"))
+        ]
         structured = [
             term for term in terms
             if any(marker in term for marker in ("_", ".", "::", "/"))
@@ -1322,9 +1368,28 @@ class KnowledgeAPI:
                 term,
             )
         )
-        query_terms = [(term, "symbol_exact") for term in structured[:8]]
-        query_terms.extend((term, "symbol_alias") for term in aliases[:12])
-        query_terms.extend((term, "symbol_exact") for term in plain[:8])
+        raw_query_terms = [
+            (term, "symbol_exact") for term in explicit_qualified
+        ]
+        raw_query_terms.extend(
+            (term, "symbol_exact")
+            for term in structured
+            if term not in explicit_qualified
+        )
+        raw_query_terms.extend((term, "symbol_alias") for term in aliases[:12])
+        raw_query_terms.extend((term, "symbol_exact") for term in plain[:8])
+        query_terms: list[tuple[str, str]] = []
+        seen_terms: set[str] = set()
+        for term, channel in raw_query_terms:
+            if term in seen_terms:
+                continue
+            seen_terms.add(term)
+            query_terms.append((term, channel))
+            if (
+                len(query_terms) >= MAX_SYMBOL_QUERIES
+                and all(explicit in seen_terms for explicit in explicit_qualified)
+            ):
+                break
         channel_counts = {"symbol_exact": 0, "symbol_alias": 0}
         for term, channel in query_terms:
             if channel_counts[channel] >= RECALL_CHANNEL_LIMITS[channel]:
@@ -1351,6 +1416,31 @@ class KnowledgeAPI:
             )
         )
         return matches[:24]
+
+    @staticmethod
+    def _graph_symbol_anchors(
+        symbols: list[dict[str, Any]], *, limit: int
+    ) -> list[dict[str, Any]]:
+        ordered = sorted(
+            symbols,
+            key=lambda item: (
+                str(item.get("name", "")).lower() in GENERIC_SYMBOL_NAMES,
+                -int(item.get("symbol_score", 0)),
+                str(item.get("path", "")),
+                str(item.get("id", "")),
+            ),
+        )
+        anchors: list[dict[str, Any]] = []
+        references: set[str] = set()
+        for item in ordered:
+            reference = str(item.get("name") or item.get("id", "")).strip()
+            if not reference or reference in references:
+                continue
+            references.add(reference)
+            anchors.append(item)
+            if len(anchors) >= max(0, limit):
+                break
+        return anchors
 
     @staticmethod
     def _guidance_workflow_status(store: KnowledgeStore) -> dict[str, Any]:

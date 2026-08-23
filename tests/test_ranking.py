@@ -104,6 +104,34 @@ class RankingTests(unittest.TestCase):
         self.assertIn("generic_test_noise", generic.reasons)
         self.assertLess(generic.total, ordinary.total)
 
+    def test_requested_relevant_test_is_not_demoted_as_high_degree_hub(self) -> None:
+        requested = FileCandidate(
+            path="tests/test_cultivation.lua",
+            stages={"impact"},
+            channels={"test_config", "graph_direct"},
+            is_test=True,
+            affected_test=True,
+            query_role_match=True,
+            high_degree_hub=True,
+            path_terms={"cultivation"},
+        )
+
+        requested_score = score_candidate(
+            requested, DEFAULT_RANKING_POLICY, query_type="test_config"
+        )
+        ordinary_score = score_candidate(
+            requested, DEFAULT_RANKING_POLICY, query_type="workflow"
+        )
+
+        self.assertNotIn("high_degree_hub", requested_score.reasons)
+        self.assertIn("requested_test", requested_score.reasons)
+        self.assertIn("high_degree_hub", ordinary_score.reasons)
+        self.assertEqual(
+            requested_score.total - ordinary_score.total,
+            DEFAULT_RANKING_POLICY.requested_test_boost
+            - DEFAULT_RANKING_POLICY.high_degree_hub_penalty,
+        )
+
     def test_policy_v2_demotes_exact_symbol_that_misses_extension_role(self) -> None:
         ordinary = FileCandidate(
             path="src/console.lua",

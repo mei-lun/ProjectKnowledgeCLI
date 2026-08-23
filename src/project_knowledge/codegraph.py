@@ -7,6 +7,9 @@ import os
 import shlex
 import shutil
 import subprocess
+from contextlib import contextmanager
+from contextvars import ContextVar
+from copy import deepcopy
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Sequence
@@ -123,16 +126,35 @@ def _node_path(node: dict[str, Any], root: Path) -> str:
 
 
 class CodeGraphClient:
+    _CACHEABLE_COMMANDS = frozenset({
+        "status", "files", "query", "callers", "callees", "impact", "affected", "node",
+    })
+
     def __init__(self, project: str | Path, config: ProjectConfig | None = None, *, runner=subprocess.run) -> None:
         self.project = Path(project).resolve()
         self.config = config or ProjectConfig()
         self.command = CodeGraphCommandResolver(getattr(self.config, "codegraph_command", "")).resolve()
         self.timeout = max(1, int(getattr(self.config, "codegraph_timeout_seconds", 120)))
         self._runner = runner
+        self._request_cache: ContextVar[dict[tuple[Any, ...], Any] | None] = ContextVar(
+            f"codegraph_request_cache_{id(self)}", default=None
+        )
 
     @property
     def command_display(self) -> str:
         return self.command.display
+
+    @contextmanager
+    def request_scope(self):
+        existing = self._request_cache.get()
+        if existing is not None:
+            yield self
+            return
+        token = self._request_cache.set({})
+        try:
+            yield self
+        finally:
+            self._request_cache.reset(token)
 
     def _effective_argv(self, argv: list[str]) -> list[str]:
         """Pass CODEGRAPH_DIR through WSL when invoking the bundled Windows Node."""
@@ -149,6 +171,11 @@ class CodeGraphClient:
         return [str(cmd), "/d", "/s", "/c", command_line]
 
     def _run(self, command: str, args: Sequence[str] = (), *, input_text: str | None = None, json_output: bool = False) -> Any:
+        cache = self._request_cache.get()
+        cache_key = (command, tuple(args), input_text, json_output)
+        cacheable = cache is not None and command in self._CACHEABLE_COMMANDS
+        if cacheable and cache_key in cache:
+            return deepcopy(cache[cache_key])
         argv = [*self.command.argv, command, *args]
         if json_output:
             argv.append("--json")
@@ -174,11 +201,15 @@ class CodeGraphClient:
             raise CodeGraphError(f"CodeGraph {command} 失败（退出码 {completed.returncode}）：{detail}")
         output = completed.stdout or ""
         if not json_output:
-            return output
-        try:
-            return json.loads(output) if output.strip() else {}
-        except json.JSONDecodeError as error:
-            raise CodeGraphError(f"CodeGraph {command} 返回无效 JSON：{output[:240]}") from error
+            result: Any = output
+        else:
+            try:
+                result = json.loads(output) if output.strip() else {}
+            except json.JSONDecodeError as error:
+                raise CodeGraphError(f"CodeGraph {command} 返回无效 JSON：{output[:240]}") from error
+        if cacheable:
+            cache[cache_key] = deepcopy(result)
+        return result
 
     def init(self, *, force: bool = False) -> dict[str, Any]:
         args = [_host_path(self.project)]
@@ -296,6 +327,17 @@ class CodeGraphEngine:
             self.client = CodeGraphClient(root, self.config)
             self._symbol_references.clear()
         return self.client
+
+    @contextmanager
+    def request_scope(self, root: Path):
+        client = self._client(root)
+        scope_factory = getattr(client, "request_scope", None)
+        scope = scope_factory() if callable(scope_factory) else None
+        if scope is None or not hasattr(scope, "__enter__") or not hasattr(scope, "__exit__"):
+            yield
+            return
+        with scope:
+            yield
 
     def snapshot(self, root: Path, config: ProjectConfig):
         from .engine import CodeIndexSnapshot, IndexedFile, _module_for

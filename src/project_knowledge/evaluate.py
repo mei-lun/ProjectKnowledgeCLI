@@ -90,6 +90,11 @@ def load_dataset(dataset: str | Path) -> list[dict[str, Any]]:
                 raise ValueError(
                     f"dataset line {number}: acceptable_supporting_files 必须是非空字符串数组"
                 )
+            overlap = set(value) & set(sample.get("expected_files", []))
+            if overlap:
+                raise ValueError(
+                    f"dataset line {number}: acceptable_supporting_files 不能与 expected_files 重叠"
+                )
         if sample["schema_version"] >= 2:
             _validate_required_evidence(sample.get("required_evidence"), number)
             if "expected_context_incomplete" in sample and not isinstance(
@@ -375,6 +380,8 @@ def _evaluate_sample(api: KnowledgeAPI, sample: dict[str, Any], strategy: str) -
             metrics[precision_metric] = len(matched) / max(1, len(actual[field]))
 
     expected_files = expected["expected_files"]
+    relevant_files = expected_files | set(sample.get("acceptable_supporting_files", []))
+    metrics["precision_at_5"] = _precision_at_k(returned["files"], relevant_files)
     pre_budget_files = set(returned.get("pre_budget_files", returned["files"]))
     pre_budget_core_files = set(
         returned.get("pre_budget_core_files", returned["core_files"])
@@ -697,6 +704,12 @@ def _ndcg_at_k(ranked: list[str], relevant: set[str], k: int = 5) -> float:
     ideal_hits = min(k, len(relevant))
     ideal = sum(1.0 / math.log2(index + 2) for index in range(ideal_hits))
     return dcg / ideal if ideal else 0.0
+
+
+def _precision_at_k(ranked: list[str], relevant: set[str], k: int = 5) -> float:
+    if k <= 0:
+        return 0.0
+    return len(set(ranked[:k]) & relevant) / k
 
 
 def _context_ranking_contract(

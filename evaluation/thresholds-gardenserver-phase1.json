@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "frozen_for_version": "0.1.46",
+  "dataset": "questions-gardenserver-phase1.jsonl",
+  "minimum_samples": 20,
+  "required_strategies": [
+    "hybrid"
+  ],
+  "allowed_unavailable_strategies": [],
+  "minimum": {},
+  "maximum": {},
+  "strategies": {
+    "hybrid": {
+      "minimum": {
+        "file_recall": 0.85,
+        "core_file_recall": 0.85,
+        "symbol_recall": 0.60,
+        "precision_at_5": 0.50,
+        "ndcg_at_5": 0.70
+      },
+      "maximum": {
+        "p95_latency_ms": 1500,
+        "ranking_fallback_rate": 0.0
+      }
+    }
+  },
+  "allowed_regression": {
+    "file_recall": 0.02,
+    "core_file_recall": 0.02,
+    "symbol_recall": 0.02,
+    "precision_at_5": 0.02,
+    "ndcg_at_5": 0.02,
+    "p95_latency_ms": 250,
+    "ranking_fallback_rate": 0.0
+  }
+}

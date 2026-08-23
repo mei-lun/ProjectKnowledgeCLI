@@ -11,6 +11,17 @@ from project_knowledge.service import ProjectService
 from project_knowledge.util import hash_file, hash_text
 
 
+def _report_commit_matches_live(
+    report_commit: object,
+    live_head: str,
+    live_status: dict[str, Any],
+) -> bool:
+    accepted = {live_head}
+    if live_status.get("commit_alignment") == "generated_outputs_only":
+        accepted.add(str(live_status.get("index_commit") or ""))
+    return bool(report_commit) and str(report_commit) in accepted
+
+
 def validate_evaluation_report(
     report_path: str | Path,
     project_root: str | Path | None = None,
@@ -76,13 +87,15 @@ def validate_evaluation_report(
             live_head = subprocess.run(
                 ["git", "rev-parse", "HEAD"], cwd=root, capture_output=True, text=True, check=False
             ).stdout.strip()
-            if payload.get("project_commit") != live_head:
-                errors.append("report project_commit does not match live HEAD")
             try:
                 live_status = ProjectService(root).status()
             except Exception as error:
                 errors.append(f"live project provenance cannot be read: {error}")
                 live_status = {}
+            if not _report_commit_matches_live(
+                payload.get("project_commit"), live_head, live_status
+            ):
+                errors.append("report project_commit does not match live source boundary")
             if payload.get("index_commit") != live_status.get("index_commit"):
                 errors.append("report index_commit does not match live CodeGraph index")
             dataset_name = payload.get("dataset") or reproducibility.get("dataset")

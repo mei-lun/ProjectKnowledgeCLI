@@ -491,7 +491,12 @@ def score_candidate(
         penalties += policy.vendor_penalty
     if candidate.is_generated:
         penalties += policy.generated_penalty
-    if candidate.high_degree_hub:
+    requested_test = (
+        query_type == "test_config"
+        and candidate.is_test
+        and candidate.query_role_match
+    )
+    if candidate.high_degree_hub and not requested_test:
         penalties += policy.high_degree_hub_penalty
     if (
         query_type in {"extension_point", "configuration", "design_reason"}
@@ -587,7 +592,12 @@ def _score_reasons(
             reasons.append("vendor_source")
         if candidate.is_generated:
             reasons.append("generated_source")
-        if candidate.high_degree_hub:
+        requested_test = (
+            query_type == "test_config"
+            and candidate.is_test
+            and candidate.query_role_match
+        )
+        if candidate.high_degree_hub and not requested_test:
             reasons.append("high_degree_hub")
         if (
             query_type in {"extension_point", "configuration", "design_reason"}

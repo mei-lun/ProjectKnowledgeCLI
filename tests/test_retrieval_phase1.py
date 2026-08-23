@@ -4,6 +4,7 @@ import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from project_knowledge.ranking import FileCandidate
 from project_knowledge.retrieval import KnowledgeAPI
@@ -49,6 +50,44 @@ class RetrievalPhase1Tests(unittest.TestCase):
         self.assertIn("item", aliases)
         self.assertIn("create_item", aliases)
         self.assertEqual(terms[0], "create_item")
+
+    def test_symbol_queries_and_graph_anchors_are_bounded_and_deduplicated(self) -> None:
+        queried: list[str] = []
+
+        def search_symbols(root, config, term, limit=20):
+            queried.append(term)
+            return []
+
+        with patch.object(self.api.service.engine, "search_symbols", side_effect=search_symbols):
+            terms = [f"symbol_{index}" for index in range(20)]
+            self.api._task_symbol_matches(" ".join(terms), terms)
+        self.assertLessEqual(len(queried), 8)
+        self.assertEqual(len(queried), len(set(queried)))
+
+        symbols = [
+            {"id": f"src/{index}.lua::Type{index}::main", "name": "main", "symbol_score": 100 - index}
+            for index in range(6)
+        ] + [
+            {"id": "src/api.lua::AccountApi::login", "name": "login", "symbol_score": 200},
+            {"id": "src/component.lua::AccountComponent::do_login", "name": "do_login", "symbol_score": 190},
+        ]
+        anchors = self.api._graph_symbol_anchors(symbols, limit=4)
+        self.assertEqual([item["name"] for item in anchors[:2]], ["login", "do_login"])
+        self.assertEqual(len({item["name"] for item in anchors}), len(anchors))
+        self.assertLessEqual(len(anchors), 4)
+
+    def test_explicit_qualified_symbols_are_not_displaced_by_query_budget(self) -> None:
+        explicit = [f"Service{index}.method" for index in range(10)]
+        queried: list[str] = []
+
+        def search_symbols(root, config, term, limit=20):
+            queried.append(term)
+            return []
+
+        with patch.object(self.api.service.engine, "search_symbols", side_effect=search_symbols):
+            self.api._task_symbol_matches(" ".join(explicit), [*explicit, "fallback"])
+
+        self.assertEqual(queried[:len(explicit)], explicit)
 
     def test_context_trace_reports_typed_recall_channels_and_limits(self) -> None:
         result = self.api.context("src/app.py create_item", max_tokens=1200, debug=True)

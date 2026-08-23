@@ -185,6 +185,13 @@ class EvaluationTests(unittest.TestCase):
         invalid.write_text('{"task":"missing metadata"}\n', encoding="utf-8")
         with self.assertRaisesRegex(ValueError, "line 1"):
             load_dataset(invalid)
+
+        invalid.write_text(json.dumps({
+            **labeled,
+            "acceptable_supporting_files": ["src/app.py"],
+        }, ensure_ascii=False) + "\n", encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "不能与 expected_files 重叠"):
+            load_dataset(invalid)
         invalid.write_text(json.dumps({
             **labeled,
             "acceptable_supporting_files": [""],
@@ -224,6 +231,37 @@ class EvaluationTests(unittest.TestCase):
         invalid.write_text(json.dumps(sample, ensure_ascii=False) + "\n", encoding="utf-8")
         with self.assertRaisesRegex(ValueError, "relation_paths.*连续"):
             load_dataset(invalid)
+
+    def test_gardenserver_practice_labels_are_explicit_and_disjoint(self) -> None:
+        dataset_paths = (
+            Path("evaluation/questions-gardenserver-phase0.jsonl"),
+            Path("evaluation/questions-gardenserver-phase1.jsonl"),
+        )
+
+        samples = [
+            sample
+            for dataset_path in dataset_paths
+            for sample in load_dataset(dataset_path)
+        ]
+
+        self.assertEqual(len(samples), 32)
+        self.assertTrue(all(sample.get("answer_status") == "verified" for sample in samples))
+        for sample in samples:
+            self.assertIn("acceptable_supporting_files", sample)
+            self.assertFalse(
+                set(sample["expected_files"])
+                & set(sample["acceptable_supporting_files"])
+            )
+
+        thresholds = json.loads(
+            Path("evaluation/thresholds-gardenserver-phase1.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        hybrid = thresholds["strategies"]["hybrid"]
+        self.assertEqual(thresholds["minimum_samples"], 20)
+        self.assertEqual(hybrid["minimum"]["precision_at_5"], 0.50)
+        self.assertEqual(hybrid["maximum"]["p95_latency_ms"], 1500)
 
     def test_v2_metrics_report_required_retention_and_incomplete_consistency(self) -> None:
         api = KnowledgeAPI(self.root)
@@ -303,12 +341,49 @@ class EvaluationTests(unittest.TestCase):
         self.assertEqual(result["metrics"]["core_file_precision"], 0.5)
         self.assertEqual(result["metrics"]["file_precision"], 0.333333)
         self.assertEqual(result["metrics"]["acceptable_supporting_precision"], 1.0)
+        self.assertEqual(result["metrics"]["precision_at_5"], 0.4)
         self.assertEqual(result["metrics"]["ndcg_at_5"], 0.63093)
         self.assertEqual(result["core_failed_metrics"], [])
         self.assertEqual(result["core_files"], returned["core_files"])
         self.assertEqual(result["supporting_files"], returned["supporting_files"])
         self.assertEqual(result["file_rankings"], returned["file_rankings"])
         self.assertEqual(result["ranking_status"], "ok")
+
+    def test_precision_at_5_uses_relevant_union_fixed_cutoff_and_denominator(self) -> None:
+        api = KnowledgeAPI(self.root)
+        sample = load_dataset(self.dataset)[0]
+        sample["acceptable_supporting_files"] = ["tests/test_app.py", "docs/guide.md"]
+        returned = {
+            "files": [
+                "src/app.py",
+                "tests/test_app.py",
+                "README.md",
+                "pyproject.toml",
+                "docs/changelog.md",
+                "docs/guide.md",
+            ],
+            "core_files": ["src/app.py", "tests/test_app.py"],
+            "supporting_files": [],
+            "symbols": {"src/app.py::AccountService.login"},
+            "call_path": set(sample["expected_call_path"]),
+            "text": "",
+            "tool_calls": 1,
+            "stale_detected": False,
+            "selection_reasons": {},
+            "file_rankings": [],
+            "ranking_status": "ok",
+        }
+
+        with patch("project_knowledge.evaluate._retrieve", return_value=returned):
+            result = _evaluate_sample(api, sample, "hybrid")
+
+        self.assertEqual(result["metrics"]["precision_at_5"], 0.4)
+        self.assertEqual(result["metrics"]["core_file_precision"], 0.5)
+
+        returned["files"] = ["src/app.py", "tests/test_app.py"]
+        with patch("project_knowledge.evaluate._retrieve", return_value=returned):
+            short_result = _evaluate_sample(api, sample, "hybrid")
+        self.assertEqual(short_result["metrics"]["precision_at_5"], 0.4)
 
     def test_core_metrics_are_zero_without_expected_files(self) -> None:
         api = KnowledgeAPI(self.root)

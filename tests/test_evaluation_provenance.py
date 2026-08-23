@@ -6,7 +6,10 @@ import unittest
 from pathlib import Path
 
 from project_knowledge import __version__
-from scripts.validate_evaluation_provenance import validate_evaluation_report
+from scripts.validate_evaluation_provenance import (
+    _report_commit_matches_live,
+    validate_evaluation_report,
+)
 
 
 class EvaluationProvenanceTests(unittest.TestCase):
@@ -113,6 +116,21 @@ class EvaluationProvenanceTests(unittest.TestCase):
 
         self.assertFalse(valid)
         self.assertTrue(any("project_commit" in error or "index_commit" in error for error in errors))
+
+    def test_report_commit_accepts_generated_outputs_only_boundary(self) -> None:
+        status = {
+            "commit_alignment": "generated_outputs_only",
+            "index_commit": "source-commit",
+        }
+
+        self.assertTrue(
+            _report_commit_matches_live(
+                "source-commit", "generated-commit", status
+            )
+        )
+        self.assertFalse(
+            _report_commit_matches_live("older-commit", "generated-commit", status)
+        )
 
 
 if __name__ == "__main__":

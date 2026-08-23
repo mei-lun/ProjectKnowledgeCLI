@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import subprocess
 import tempfile
+import threading
 import unittest
 from pathlib import Path
 from unittest.mock import Mock, patch
@@ -38,6 +39,47 @@ class CodeGraphTests(unittest.TestCase):
         self.assertEqual(status_kwargs["env"]["CODEGRAPH_DIR"], ".codegraph")
         self.assertEqual(status_kwargs["encoding"], "utf-8")
         self.assertEqual(status_kwargs["errors"], "replace")
+
+    def test_request_scope_caches_read_only_commands_and_isolates_return_values(self) -> None:
+        client, runner = self._client([
+            (0, json.dumps({"initialized": True, "nested": {"value": 1}}), ""),
+            (0, json.dumps({"initialized": False}), ""),
+        ])
+
+        with client.request_scope():
+            first = client.status()
+            first["nested"]["value"] = 99
+            second = client.status()
+            self.assertEqual(second["nested"]["value"], 1)
+        self.assertEqual(runner.call_count, 1)
+
+        self.assertFalse(client.status()["initialized"])
+        self.assertEqual(runner.call_count, 2)
+
+    def test_request_scope_does_not_cache_failures_or_cross_thread_results(self) -> None:
+        responses = [
+            subprocess.CompletedProcess([], 1, "", "temporary"),
+            subprocess.CompletedProcess([], 0, json.dumps({"initialized": True}), ""),
+            subprocess.CompletedProcess([], 0, json.dumps({"initialized": False}), ""),
+        ]
+        runner = Mock(side_effect=responses)
+        client = CodeGraphClient(
+            Path("/mnt/d/Github-Poj/gardenserver"),
+            ProjectConfig(codegraph_command="/usr/bin/codegraph"),
+            runner=runner,
+        )
+
+        with client.request_scope():
+            with self.assertRaises(CodeGraphError):
+                client.status()
+            self.assertTrue(client.status()["initialized"])
+
+        observed: list[bool] = []
+        thread = threading.Thread(target=lambda: observed.append(client.status()["initialized"]))
+        thread.start()
+        thread.join()
+        self.assertEqual(observed, [False])
+        self.assertEqual(runner.call_count, 3)
 
     def test_non_utf8_codegraph_output_does_not_crash_windows_cli(self) -> None:
         client, _ = self._client([(0, "{\"initialized\": true}", b"\\x80")])

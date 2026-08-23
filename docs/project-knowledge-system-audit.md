@@ -1,6 +1,6 @@
 # 项目级知识库最小需求审计与实施基线
 
-> 当前版本：0.1.45
+> 当前版本：0.1.46
 > 复核日期：2026-08-24  
 > 报告状态：Phase 0～2 确定性检索基线已交付；发布证据正在重新对齐，最终生产质量门尚未通过
 > 默认语言：中文
@@ -9,7 +9,9 @@
 
 当前有效实施基线为 `docs/retrieval-quality-work-package.md`。WP-RQ-01～03 已完成 Phase 0～2 的数据模型、可观测性、多路召回和确定性符号优先排序；WP-RQ-04 的 RQ-P3-001 已完成显式 core/supporting/optional 分层契约，其他 Phase 3 需求仍按验收状态登记，不以已有字段或局部测试代替最终验收。
 
-当前仍未通过最终质量门：专项数据共 95 题，但只有 77 题标记 `answer_status=verified`，且 gardenserver Phase 0/1/2 复用同一个稳定快照；核心精确率未达到 `0.50`，端到端 P95 超过 12 秒。RQ-P3-001、RQ-P3-002、RQ-P3-003、RQ-P3-004 与 RQ-REL-001 已在 0.1.45 代码中重新对齐；本次在真实 `D:\Github-Poj\gardenserver` 上重新通过只读验收，并修复评测器在预算裁剪后缺少 `file_rankings` 的契约回归。评测现在分别记录预算前排名与预算后上下文，仍不把预算前候选冒充最终交付；P3-004 已完成统一 trace schema v2、阶段 percentile、CodeGraph 证据、裁剪前后证据和逐步裁剪事件；P3-005 已增加 strict-live provenance、fail-closed 性能 smoke gate 和多快照数据集校验，但正式 300 题多快照数据仍未提供；活动报告失败项保留在 `evaluation/reports/latest.json`，不通过降低阈值或恢复 builtin 规避。
+当前结论分为实践门和最终生产门。对真实 `D:\Github-Poj\gardenserver` 的收窄实践范围，32 条 Phase 0/1 题全部 verified，并已逐条显式复核 `acceptable_supporting_files`；原方案 `precision@5` 按最终 Top-5 与 `expected_files ∪ acceptable_supporting_files` 计算，精确入口/路径占比较高的 Phase 0 种子集为 `0.45`，20 条 Phase 1 实践集达到门槛 `0.50`。文件、核心文件和符号召回均为 `1.00`，nDCG@5 为 `0.938488/0.832547`。`core_file_precision=0.241667/0.32` 是 Core 层宽度诊断，不是原方案 Top-5 门槛，不能再据此单独判定实践不可用。
+
+CodeGraph 调用优化通过请求级只读缓存、snapshot/status 复用、查询去重和高置信图锚点上限，将相同题集 hybrid P95 从 `19.93s/16.67s` 降至 `4.26s/4.48s`，且上述召回未下降。`evaluation/thresholds-gardenserver-phase1.json` 已按原方案执行机器门禁：召回、`precision@5`、nDCG@5 和 fallback 均通过，唯一失败项为 P95 高于 `1.5s`。因此当前版本可进入受控项目实践，但不能宣称正式性能门完成；主要剩余成本是公开 CLI 的进程启动和串行命令协议。最终生产门仍未通过：跨仓库专项数据仍只有 95 题、77 verified，gardenserver 仍只有一个独立快照；RQ-P2-007/RQ-P3-005 要求的 300 题、每类 30 题和 3 个稳定快照继续保留，不以此次实践结论冒充完成。
 
 RQ-P3-002 采用“双源隔离”契约：运行时 `RequiredEvidencePlanner` 只消费已完成召回和排序的查询、Core 文件、符号及 CodeGraph `trace` 关系，不接收 Token 预算或评测标签；Dataset v2 的 `required_evidence` 仅作为评测 Oracle。关系路径按有序、连续的 `calls` 边整体匹配，符号保留稳定 ID、源码路径、签名和行号 span。预算组装依次裁剪 optional、低分 supporting、supporting 内容和其他 best-effort 诊断；最小 required 仍无法装入时严格不超预算，并返回 `context_incomplete=true`、稳定缺失 ID 和 `insufficient_for_required`。gardenserver 的真实 CodeGraph 1.5 索引已验证 `AccountApi.login -> AccountComponent.do_login` 的直接调用边能形成并保留 required path；动态或无法规范化的端点不会冒充必要路径。
 
@@ -1469,4 +1471,4 @@ WP-RQ-03 的确定性排序基线已完成。默认 `policy-v2` 将开发任务�
 
 gardenserver 冻结 12 题集的文件召回、核心文件召回、符号召回和成功率均为 1.000000，nDCG@5 为 0.938488；20 题挑战集的文件召回、符号召回和成功率均为 1.000000，核心文件召回为 0.966667、核心文件精确率为 0.300000、nDCG@5 为 0.738156。两套评测均无排序回退。
 
-最终质量计划仍未完成：当前只有同一 gardenserver 快照的 32 题，核心精确率未达到 0.50，端到端 P95 仍超过 12 秒；可选模型重排也没有在缺少离线 provider 和独立样本的情况下做占位实现。复现证据见 `evaluation/reports/gardenserver-phase2-0.1.38.json`。
+0.1.38 当时的最终质量计划仍未完成：只有同一 gardenserver 快照的 32 题，且端到端 P95 超过 12 秒；当时尚未实现原方案 `precision@5`，不能用 `core_file_precision` 代替。该历史复现证据见 `evaluation/reports/gardenserver-phase2-0.1.38.json`；0.1.46 的实践门复核与正式门边界以本文开头的当前结论为准。
