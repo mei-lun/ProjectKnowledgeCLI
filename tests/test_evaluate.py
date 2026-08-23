@@ -580,6 +580,71 @@ class EvaluationTests(unittest.TestCase):
                 result["context_incomplete"], context["context_incomplete"]
             )
 
+    def test_evaluator_uses_out_of_band_ranking_when_budgeted_context_omits_it(self) -> None:
+        api = KnowledgeAPI(self.root)
+        sample = load_dataset(self.dataset)[0]
+        budgeted_context = {
+            "task": sample["task"],
+            "symbols": [],
+            "core_files": ["src/app.py"],
+            "supporting_files": [],
+            "optional_files": [],
+            "files": ["src/app.py"],
+            "context_incomplete": False,
+            "context_status": {"state": "complete"},
+        }
+        pre_budget_ranking = {
+            "core_files": ["src/app.py"],
+            "supporting_files": ["tests/test_app.py"],
+            "optional_files": [],
+            "files": ["src/app.py", "tests/test_app.py"],
+            "file_rankings": [
+                {
+                    "path": "src/app.py",
+                    "tier": "core",
+                    "selection_stage": "direct_symbol",
+                    "why_selected": "exact_identity",
+                },
+                {
+                    "path": "tests/test_app.py",
+                    "tier": "supporting",
+                    "selection_stage": "graph_expansion",
+                    "why_selected": "graph_hop_1",
+                },
+            ],
+            "ranking_status": "ok",
+        }
+        diagnostics = {
+            "ranking_contract": pre_budget_ranking,
+            "retrieval_trace": {
+                "schema_version": 2,
+                "operation": "knowledge_context",
+                "stage_timings": {"ranking": {"duration_ms": 1.0}},
+            },
+        }
+
+        with patch.object(
+            api,
+            "context_for_evaluation",
+            return_value=(budgeted_context, diagnostics),
+        ):
+            result = _retrieve(api, sample, "codegraph")
+
+        self.assertEqual(result["files"], ["src/app.py"])
+        self.assertEqual(
+            [item["path"] for item in result["file_rankings"]],
+            ["src/app.py"],
+        )
+        self.assertEqual(
+            result["pre_budget_files"],
+            ["src/app.py", "tests/test_app.py"],
+        )
+        self.assertEqual(
+            [item["path"] for item in result["pre_budget_file_rankings"]],
+            ["src/app.py", "tests/test_app.py"],
+        )
+        self.assertEqual(result["retrieval_trace"], diagnostics["retrieval_trace"])
+
     def test_evaluation_result_keeps_debug_trace_for_stage_measurements(self) -> None:
         api = KnowledgeAPI(self.root)
         sample = load_dataset(self.dataset)[0]

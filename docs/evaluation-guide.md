@@ -41,6 +41,11 @@ python scripts/validate_codegraph_adapter.py --json
 `post_required_evidence`。评测分别报告规划召回、裁剪后符号/签名/行号保留、完整有序路径保留，
 以及 `context_incomplete` 与真实缺失集合的一致性；端点集合不能替代路径指标。
 
+评测器对代码策略同时保留两层结果：`pre_budget_*` 来自预算装配前的排名诊断，
+用于衡量候选发现和排序；`files`、`core_files` 与 `file_rankings` 来自最终预算后的上下文，
+用于衡量实际交付内容。预算裁剪可以移除排名诊断字段，但不得因此让评测器把缺失字段当成零召回，
+也不得用预算前排名冒充最终上下文。
+
 当 `minimum_required_tokens <= max_tokens` 时，required evidence 的保留门槛为 1.0；
 预算不可行时必须遵守硬 Token 上限，并返回 `context_incomplete=true`、
 `missing_required_evidence` 和 `budget_status=insufficient_for_required`，不得静默删除后报告完整。

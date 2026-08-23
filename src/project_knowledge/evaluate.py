@@ -375,6 +375,28 @@ def _evaluate_sample(api: KnowledgeAPI, sample: dict[str, Any], strategy: str) -
             metrics[precision_metric] = len(matched) / max(1, len(actual[field]))
 
     expected_files = expected["expected_files"]
+    pre_budget_files = set(returned.get("pre_budget_files", returned["files"]))
+    pre_budget_core_files = set(
+        returned.get("pre_budget_core_files", returned["core_files"])
+    )
+    pre_budget_matched = expected_files & pre_budget_files
+    pre_budget_core_matched = expected_files & pre_budget_core_files
+    metrics["pre_budget_file_recall"] = (
+        len(pre_budget_matched) / len(expected_files) if expected_files else 0.0
+    )
+    metrics["pre_budget_file_precision"] = (
+        len(pre_budget_matched) / max(1, len(pre_budget_files))
+    )
+    metrics["pre_budget_core_file_recall"] = (
+        len(pre_budget_core_matched) / len(expected_files) if expected_files else 0.0
+    )
+    metrics["pre_budget_core_file_precision"] = (
+        len(pre_budget_core_matched) / max(1, len(pre_budget_core_files))
+    )
+    metrics["pre_budget_ndcg_at_5"] = _ndcg_at_k(
+        returned.get("pre_budget_core_files", returned["core_files"]),
+        expected_files,
+    )
     core_files = set(returned["core_files"])
     core_matched = expected_files & core_files
     core_recall = len(core_matched) / len(expected_files) if expected_files else 0.0
@@ -491,6 +513,13 @@ def _evaluate_sample(api: KnowledgeAPI, sample: dict[str, Any], strategy: str) -
         "supporting_files": returned["supporting_files"],
         "optional_files": returned.get("optional_files", []),
         "file_rankings": returned["file_rankings"],
+        "pre_budget_files": returned.get("pre_budget_files", returned["files"]),
+        "pre_budget_core_files": returned.get(
+            "pre_budget_core_files", returned["core_files"]
+        ),
+        "pre_budget_file_rankings": returned.get(
+            "pre_budget_file_rankings", returned["file_rankings"]
+        ),
         "ranking_status": returned["ranking_status"],
         "selection_reasons": returned.get("selection_reasons", {}),
         "stale_detected": returned["stale_detected"],
@@ -671,19 +700,38 @@ def _ndcg_at_k(ranked: list[str], relevant: set[str], k: int = 5) -> float:
 
 
 def _context_ranking_contract(
-    context: dict[str, Any], *, exclude_knowledge_sources: bool = False
+    context: dict[str, Any],
+    *,
+    exclude_knowledge_sources: bool = False,
+    ranking_fallback: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    fallback = ranking_fallback or {}
+    core_files = list(context.get("core_files", []))
+    supporting_files = list(context.get("supporting_files", []))
+    optional_files = list(context.get("optional_files", []))
+    files = list(context.get("files", core_files + supporting_files))
+    file_rankings = context.get("file_rankings")
+    if not isinstance(file_rankings, list):
+        selected_paths = set(core_files + supporting_files + optional_files)
+        file_rankings = [
+            item for item in fallback.get("file_rankings", [])
+            if item.get("path") in selected_paths
+        ]
+    ranking_status = context.get(
+        "ranking_status", fallback.get("ranking_status", "unavailable")
+    )
     if not exclude_knowledge_sources:
         return {
-            key: context[key]
-            for key in (
-                "core_files", "supporting_files", "optional_files", "files", "file_rankings",
-                "ranking_status",
-            )
+            "core_files": core_files,
+            "supporting_files": supporting_files,
+            "optional_files": optional_files,
+            "files": files,
+            "file_rankings": file_rankings,
+            "ranking_status": ranking_status,
         }
 
     file_rankings = [
-        item for item in context["file_rankings"]
+        item for item in file_rankings
         if item.get("selection_stage") != "knowledge_source"
     ]
     core_files = [item["path"] for item in file_rankings if item.get("tier") == "core"]
@@ -699,7 +747,7 @@ def _context_ranking_contract(
         "optional_files": optional_files,
         "files": list(dict.fromkeys(core_files + supporting_files)),
         "file_rankings": file_rankings,
-        "ranking_status": context["ranking_status"],
+        "ranking_status": ranking_status,
     }
 
 
@@ -707,20 +755,26 @@ def _retrieve(api: KnowledgeAPI, sample: dict[str, Any], strategy: str) -> dict[
     task = sample["task"]
     budget = sample.get("max_tokens", 4000)
     if strategy in {"hybrid", "code", "codegraph"}:
-        context = api.context(task, budget, debug=True)
-        direct_symbols = context["symbols"][:12]
+        context, diagnostics = api.context_for_evaluation(task, budget)
+        direct_symbols = context.get("symbols", [])[:12]
         symbols = {item["id"] for item in direct_symbols}
+        pre_budget_ranking = _context_ranking_contract(
+            diagnostics.get("ranking_contract", {}),
+            exclude_knowledge_sources=strategy == "code",
+        )
         ranking_contract = _context_ranking_contract(
-            context, exclude_knowledge_sources=strategy == "code"
+            context,
+            exclude_knowledge_sources=strategy == "code",
+            ranking_fallback=pre_budget_ranking,
         )
         text_parts: list[str] = []
         stale_detected = False
         if strategy == "hybrid":
-            for record in context["knowledge"]:
+            for record in context.get("knowledge", []):
                 text_parts.append(record.get("content", ""))
                 stale_detected = stale_detected or bool(record.get("requires_live_source"))
         call_path = set(symbols)
-        call_path.update(context["impact"].get("call_path", []))
+        call_path.update(context.get("impact", {}).get("call_path", []))
         compact = {"symbols": sorted(symbols), "files": ranking_contract["files"]}
         if strategy == "hybrid":
             compact["summary"] = context.get("summary")
@@ -731,11 +785,14 @@ def _retrieve(api: KnowledgeAPI, sample: dict[str, Any], strategy: str) -> dict[
             "text": "\n".join(text_parts), "stale_detected": stale_detected,
             "tool_calls": 4 if strategy == "hybrid" else 3,
             "selection_reasons": _selection_reasons(ranking_contract["file_rankings"]),
+            "pre_budget_files": pre_budget_ranking["files"],
+            "pre_budget_core_files": pre_budget_ranking["core_files"],
+            "pre_budget_file_rankings": pre_budget_ranking["file_rankings"],
             "pre_required_evidence": context.get("pre_required_evidence", {}),
             "post_required_evidence": context.get("post_required_evidence", {}),
             "context_incomplete": bool(context.get("context_incomplete", False)),
             "context_status": context.get("context_status", {}),
-            "retrieval_trace": context.get("retrieval_trace", {}),
+            "retrieval_trace": diagnostics.get("retrieval_trace", {}),
             "missing_required_evidence": context.get("missing_required_evidence", []),
             "budget_status": context.get("budget_status"),
             "minimum_required_tokens": context.get("minimum_required_tokens", 0),

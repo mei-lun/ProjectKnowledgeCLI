@@ -173,6 +173,16 @@ class RetrievalWP06Tests(unittest.TestCase):
     def test_context_does_not_emit_trace_by_default(self) -> None:
         self.assertNotIn("retrieval_trace", self.api.context("create_item", max_tokens=1200))
 
+    def test_context_for_evaluation_captures_trace_without_budgeting_it_into_context(self) -> None:
+        result, diagnostics = self.api.context_for_evaluation(
+            "create_item 的调用链", max_tokens=256
+        )
+
+        self.assertNotIn("retrieval_trace", result)
+        self.assertEqual(diagnostics["retrieval_trace"]["schema_version"], 2)
+        self.assertIn("file_rankings", diagnostics["ranking_contract"])
+        self.assertLessEqual(result["estimated_tokens"], 256)
+
     def test_debug_trace_respects_context_budget(self) -> None:
         result = self.api.context("create_item 的调用链", max_tokens=256, debug=True)
 

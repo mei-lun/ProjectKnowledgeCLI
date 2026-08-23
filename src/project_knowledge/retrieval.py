@@ -342,18 +342,31 @@ class KnowledgeAPI:
             self._record_query(store, "knowledge_impact", len(json.dumps(engine_result["input"])), engine_result, started)
         return engine_result
 
+    def context_for_evaluation(
+        self,
+        task: str,
+        max_tokens: int | None = None,
+    ) -> tuple[dict[str, Any], dict[str, Any]]:
+        """Return the budgeted context and unbudgeted evaluation diagnostics."""
+        diagnostics: dict[str, Any] = {}
+        result = self.context(task, max_tokens, _diagnostics=diagnostics)
+        return result, diagnostics
+
     def context(
         self,
         task: str,
         max_tokens: int | None = None,
         debug: bool = False,
+        *,
+        _diagnostics: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         started = time.monotonic()
         budget = max(256, min(max_tokens or self.config.max_tokens, 50_000))
+        diagnostics_requested = debug or _diagnostics is not None
         status = self.status()
         intent = self.classify_task(task)
         lexical_started = time.monotonic()
-        search = self.search(task, limit=10, debug=debug)
+        search = self.search(task, limit=10, debug=diagnostics_requested)
         stage_timings: dict[str, dict[str, Any]] = {
             "lexical": {
                 "duration_ms": round((time.monotonic() - lexical_started) * 1000, 3),
@@ -379,7 +392,7 @@ class KnowledgeAPI:
                 symbols=[item["id"] for item in symbol_matches[:10]],
                 max_hops=2,
                 max_relations=200,
-                debug=debug,
+                debug=diagnostics_requested,
             ) if symbol_matches else {
                 "affected_modules": [], "affected_tests": [], "affected_files": [], "affected_knowledge": []
             }
@@ -539,7 +552,7 @@ class KnowledgeAPI:
                 pending_files=status.get("pending_files", []),
                 impact=impact,
             )
-            if debug:
+            if diagnostics_requested:
                 trace = self._context_retrieval_trace(
                     task=task,
                     intent=intent,
@@ -562,6 +575,12 @@ class KnowledgeAPI:
                 trace["status"] = result["context_status"].get("state", "complete")
                 trace["duration_ms"] = round((time.monotonic() - started) * 1000, 3)
                 trace["stage_timings"] = stage_timings
+                if _diagnostics is not None:
+                    _diagnostics.update({
+                        "ranking_contract": ranked_files.to_dict(),
+                        "retrieval_trace": trace,
+                    })
+            if debug:
                 result["retrieval_trace"] = trace
                 self._fit_debug_trace(result, budget)
                 trace["duration_ms"] = round((time.monotonic() - started) * 1000, 3)

@@ -1,0 +1,31 @@
+{
+  "affected_knowledge": [
+    "curated.architecture",
+    "curated.conventions",
+    "curated.feature.guide.generation",
+    "decision.0001.local.first.core",
+    "decision.0002.codegraph.adapter.boundary",
+    "decision.0003.lua.skynet.entry.evidence",
+    "generated.frameworks",
+    "generated.module.project_knowledge",
+    "generated.module.tests",
+    "generated.project-map",
+    "generated.test-map"
+  ],
+  "base_commit": "2604b8e22f74f005f0eb1ceeb5b3de05980d9ba8",
+  "changed_files": [
+    "src/project_knowledge/__init__.py",
+    "src/project_knowledge/evaluate.py",
+    "src/project_knowledge/retrieval.py",
+    "tests/test_evaluate.py",
+    "tests/test_retrieval_wp06.py"
+  ],
+  "changed_symbols": [],
+  "changeset_id": "change-20260824-015831",
+  "created_at": "2026-08-24T01:58:31+08:00",
+  "head_commit": "3eae84ff2f404027c3192f6803541b385a7707e4",
+  "queue_id": "sq-53ec401e0836b516",
+  "schema_version": 1,
+  "status": "awaiting_semantic_generation",
+  "task_summary": "RQ-P3-004 评测预算前后排名契约与 gardenserver 实践复验"
+}
