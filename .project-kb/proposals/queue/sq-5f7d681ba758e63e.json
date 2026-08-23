@@ -1,0 +1,32 @@
+{
+  "affected_knowledge": [
+    "curated.conventions",
+    "generated.frameworks",
+    "generated.module.evaluation",
+    "generated.module.github",
+    "generated.module.project_knowledge",
+    "generated.module.scripts",
+    "generated.module.tests",
+    "generated.project-map",
+    "generated.test-map"
+  ],
+  "base_commit": "4e0ca7c12800ba70798c586b0230365550b601d4",
+  "changed_files": [
+    ".github/workflows/quality.yml",
+    "evaluation/performance_harness.py",
+    "scripts/validate_ci_workflow.py",
+    "scripts/validate_evaluation_dataset.py",
+    "scripts/validate_evaluation_provenance.py",
+    "src/project_knowledge/__init__.py",
+    "tests/test_delivery_reliability.py",
+    "tests/test_evaluation_provenance.py"
+  ],
+  "changed_symbols": [],
+  "changeset_id": "change-20260823-220610",
+  "created_at": "2026-08-23T22:06:11+08:00",
+  "head_commit": "2b07ab970f118893a83abdb14fcd4887c9b26377",
+  "queue_id": "sq-5f7d681ba758e63e",
+  "schema_version": 1,
+  "status": "awaiting_semantic_generation",
+  "task_summary": "manual synchronization"
+}
