@@ -1,0 +1,22 @@
+{
+  "affected_knowledge": [
+    "generated.frameworks",
+    "generated.module.scripts",
+    "generated.module.tests",
+    "generated.project-map",
+    "generated.test-map"
+  ],
+  "base_commit": "2b07ab970f118893a83abdb14fcd4887c9b26377",
+  "changed_files": [
+    "scripts/validate_evaluation_dataset.py",
+    "tests/test_delivery_reliability.py"
+  ],
+  "changed_symbols": [],
+  "changeset_id": "change-20260823-223233",
+  "created_at": "2026-08-23T22:32:33+08:00",
+  "head_commit": "2604b8e22f74f005f0eb1ceeb5b3de05980d9ba8",
+  "queue_id": "sq-17dc573dd091c738",
+  "schema_version": 1,
+  "status": "awaiting_semantic_generation",
+  "task_summary": "manual synchronization"
+}
