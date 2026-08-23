@@ -73,6 +73,6 @@ Phase 3 follows the original technical plan. Existing partial behavior is record
 
 The final plan requires at least 300 questions, at least 30 samples per query type, at least 3 stable repositories or snapshots, locked source and CodeGraph hashes, and clean-environment reproducibility. The current Phase 0–2 baseline intentionally does not claim that gate is complete.
 
-P3-005 remains blocked on approved evaluation data rather than implementation placeholders: the repository currently has 50 self-repo questions and a 12-question gardenserver Phase 0 seed, while the available Phase 1/2 reports reuse the same gardenserver snapshot. No synthetic questions or duplicated snapshots are counted toward the production gate.
+P3-005 remains blocked on approved evaluation data rather than implementation placeholders: the repository currently has 95 questions across six JSONL seeds, but only 77 carry `answer_status=verified`; all gardenserver Phase 0/1/2 reports reuse one stable snapshot, and no question carries a repository/snapshot identity. No synthetic questions or duplicated snapshots are counted toward the production gate.
 
 The production-data validator is `scripts/validate_evaluation_dataset.py`; it rejects fewer than 300 questions, fewer than 30 samples per query type, or fewer than 3 identified snapshots. The scheduled CI performance job now validates the CodeGraph adapter and uses `--enforce-gate`; active report provenance can be checked against live HEAD, index, dataset, and CodeGraph snapshot with `--strict-live`.

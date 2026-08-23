@@ -125,6 +125,23 @@ class DeliveryReliabilityTests(unittest.TestCase):
         self.assertTrue(valid, errors)
         self.assertEqual(report["questions"], 360)
 
+    def test_evaluation_manifest_rejects_unlocked_snapshot_set(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            dataset = root / "questions.jsonl"
+            dataset.write_text("\n".join(json.dumps({"query_type": "code", "snapshot_id": "a"}) for _ in range(300)) + "\n", encoding="utf-8")
+            digest = "sha256:" + __import__("hashlib").sha256(dataset.read_bytes()).hexdigest()
+            manifest = root / "manifest.json"
+            manifest.write_text(json.dumps({
+                "schema_version": 1,
+                "datasets": [{"path": str(dataset), "sha256": digest}],
+                "snapshots": [{"id": "a"}],
+            }), encoding="utf-8")
+            valid, errors, _ = validate_evaluation_dataset([dataset], manifest=manifest)
+
+        self.assertFalse(valid)
+        self.assertTrue(any("snapshots" in error for error in errors))
+
 
 if __name__ == "__main__":
     unittest.main()
