@@ -13,6 +13,7 @@ from project_knowledge.models import Relation
 from project_knowledge.retrieval import KnowledgeAPI
 from project_knowledge.service import ProjectService
 from project_knowledge.store import KnowledgeStore
+from project_knowledge.util import approx_tokens
 
 
 APP = """
@@ -131,6 +132,13 @@ class RetrievalWP06Tests(unittest.TestCase):
         self.assertEqual(result["context_status"]["confidence"], "low")
         self.assertIn("ranking_fallback", result["context_status"]["reasons"])
 
+    def test_debug_trace_marks_ranking_fallback_partial(self) -> None:
+        with patch("project_knowledge.retrieval.rank_files", side_effect=RuntimeError("ranking unavailable")):
+            result = self.api.context("create_item", max_tokens=1200, debug=True)
+
+        self.assertEqual(result["retrieval_trace"]["stage_timings"]["ranking"]["status"], "partial")
+        self.assertEqual(result["context_status"]["state"], "low_confidence")
+
     def test_context_status_prioritizes_incomplete_budget_over_other_states(self) -> None:
         result = self.api.context("create_item 的调用链", max_tokens=256)
 
@@ -148,11 +156,30 @@ class RetrievalWP06Tests(unittest.TestCase):
             self.assertIn(stage, trace["stage_timings"])
             self.assertGreaterEqual(trace["stage_timings"][stage]["duration_ms"], 0)
             self.assertIn(trace["stage_timings"][stage]["status"], {"ok", "partial", "error"})
+        self.assertIn("codegraph", trace["stages"])
+        self.assertIn("evidence", trace["stages"]["context_assembly"])
+        self.assertIn("pre", trace["stages"]["context_assembly"]["evidence"])
+        self.assertIn("post", trace["stages"]["context_assembly"]["evidence"])
         self.assertIn("trim_events", trace["stages"]["context_assembly"])
         self.assertIn("context_status", trace)
 
+        if trace["stages"]["context_assembly"]["trim_events"]:
+            event = trace["stages"]["context_assembly"]["trim_events"][0]
+            self.assertIn("action", event)
+            self.assertIn("reason_code", event)
+            self.assertIn("tokens_before", event)
+            self.assertIn("tokens_after", event)
+
     def test_context_does_not_emit_trace_by_default(self) -> None:
         self.assertNotIn("retrieval_trace", self.api.context("create_item", max_tokens=1200))
+
+    def test_debug_trace_respects_context_budget(self) -> None:
+        result = self.api.context("create_item 的调用链", max_tokens=256, debug=True)
+
+        self.assertLessEqual(result["estimated_tokens"], 256)
+        self.assertLessEqual(approx_tokens(json.dumps(result, ensure_ascii=False)), 256)
+        self.assertIn("status", result["retrieval_trace"])
+        self.assertIn("duration_ms", result["retrieval_trace"])
 
     def test_context_returns_optional_files_as_a_separate_non_context_tier(self) -> None:
         result = self.api.context("ranking.py policy", max_tokens=1800)

@@ -21,6 +21,15 @@ def feature_{number}(value):
     return helper_{number}(value)
 '''
 
+P3_STAGE_TARGETS_MS = {
+    "lexical": 100.0,
+    "codegraph": 500.0,
+    "ranking": 100.0,
+    "context_assembly": 1500.0,
+    "context": 1500.0,
+}
+P3_REQUIRED_STAGES = ("lexical", "codegraph", "ranking", "context_assembly")
+
 
 def run_performance_harness(sizes: list[int], repetitions: int = 5) -> dict[str, Any]:
     if not sizes or any(size < 1 for size in sizes):
@@ -90,6 +99,10 @@ def _run_size(size: int, repetitions: int) -> dict[str, Any]:
                 name: _summary(values)
                 for name, values in sorted(stage_samples.items())
             },
+            "performance_gate": _performance_gate(
+                _summary(context_samples),
+                {name: _summary(values) for name, values in sorted(stage_samples.items())},
+            ),
             "noop_sync": _summary(sync_samples),
             "stale_detection": {"passed": stale_passed, "latency_ms": round(stale_ms, 3)},
         }
@@ -138,3 +151,35 @@ def _percentile(values: list[float], percentile: int) -> float:
     upper = min(lower + 1, len(ordered) - 1)
     fraction = index - lower
     return ordered[lower] * (1 - fraction) + ordered[upper] * fraction
+
+
+def _performance_gate(
+    context_summary: dict[str, float],
+    stage_summaries: dict[str, dict[str, float]],
+) -> dict[str, Any]:
+    measurements = {"context": context_summary, **stage_summaries}
+    failures = [
+        {
+            "stage": name,
+            "metric": "p95_ms",
+            "actual_ms": summary.get("p95_ms"),
+            "target_ms": P3_STAGE_TARGETS_MS[name],
+        }
+        for name, summary in measurements.items()
+        if name in P3_STAGE_TARGETS_MS and summary.get("p95_ms", 0.0) > P3_STAGE_TARGETS_MS[name]
+    ]
+    for name in P3_REQUIRED_STAGES:
+        summary = stage_summaries.get(name)
+        if not isinstance(summary, dict) or not summary.get("samples"):
+            failures.append({
+                "stage": name,
+                "reason": "missing_samples",
+                "target_ms": P3_STAGE_TARGETS_MS[name],
+            })
+    return {
+        "schema_version": 1,
+        "passed": not failures,
+        "targets_ms": dict(P3_STAGE_TARGETS_MS),
+        "failures": failures,
+        "context_p95_ms": context_summary.get("p95_ms", 0.0),
+    }

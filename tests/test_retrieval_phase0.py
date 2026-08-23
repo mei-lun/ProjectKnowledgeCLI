@@ -120,14 +120,24 @@ class RetrievalPhase0Tests(unittest.TestCase):
 
     def test_search_and_impact_debug_traces_are_opt_in(self) -> None:
         search = self.api.search("app.py", debug=True)
-        self.assertEqual(search["retrieval_trace"]["operation"], "knowledge_search")
-        self.assertIn("lexical", search["retrieval_trace"]["channels"])
+        search_trace = search["retrieval_trace"]
+        self.assertEqual(search_trace["schema_version"], 2)
+        self.assertEqual(search_trace["operation"], "knowledge_search")
+        self.assertIn("lexical", search_trace["channels"])
+        self.assertGreaterEqual(search_trace["duration_ms"], 0)
+        self.assertEqual(search_trace["status"], "ok")
+        self.assertIn("candidate_count", search_trace["stages"]["lexical"])
         self.assertNotIn("retrieval_trace", self.api.search("app.py"))
 
         impact = self.api.impact(files=["src/app.py"], max_hops=2, debug=True)
-        self.assertEqual(impact["retrieval_trace"]["operation"], "knowledge_impact")
-        self.assertEqual(impact["retrieval_trace"]["max_hops"], 2)
-        self.assertIn("relation_count", impact["retrieval_trace"])
+        impact_trace = impact["retrieval_trace"]
+        self.assertEqual(impact_trace["schema_version"], 2)
+        self.assertEqual(impact_trace["operation"], "knowledge_impact")
+        self.assertEqual(impact_trace["max_hops"], 2)
+        self.assertIn("relation_count", impact_trace)
+        self.assertGreaterEqual(impact_trace["duration_ms"], 0)
+        self.assertEqual(impact_trace["status"], "ok")
+        self.assertIn("codegraph", impact_trace["stages"])
 
     def test_mcp_read_tools_accept_debug_without_relaxing_other_fields(self) -> None:
         schemas = {tool["name"]: tool["inputSchema"] for tool in TOOLS}

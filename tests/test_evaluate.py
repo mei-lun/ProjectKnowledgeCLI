@@ -895,7 +895,20 @@ class EvaluationTests(unittest.TestCase):
         self.assertIn("p95_ms", result["context"])
         self.assertIn("ranking", result["stage_metrics"])
         self.assertEqual(result["stage_metrics"]["ranking"]["samples"], 2)
+        self.assertIn("performance_gate", result)
+        self.assertIn("context_p95_ms", result["performance_gate"])
         self.assertEqual(result["stale_detection"]["passed"], True)
+
+    def test_performance_gate_fails_when_stage_samples_are_missing(self) -> None:
+        from project_knowledge.performance import _performance_gate
+
+        gate = _performance_gate(
+            {"p95_ms": 10.0},
+            {"lexical": {"p95_ms": 10.0}},
+        )
+
+        self.assertFalse(gate["passed"])
+        self.assertTrue(any(item["reason"] == "missing_samples" for item in gate["failures"]))
 
     def test_real_project_harness_indexes_temporary_mirror_without_writing_source(self) -> None:
         source = self.root / "real-source"

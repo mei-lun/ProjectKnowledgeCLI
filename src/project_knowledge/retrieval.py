@@ -224,13 +224,26 @@ class KnowledgeAPI:
                 "vector_retrieval": vector_diagnostics,
             }
             if debug:
+                duration_ms = round((time.monotonic() - started) * 1000, 3)
                 result["retrieval_trace"] = {
-                    "schema_version": 1,
+                    "schema_version": 2,
                     "operation": "knowledge_search",
+                    "status": "ok",
+                    "duration_ms": duration_ms,
                     "query": {"raw": query, "terms": self._symbol_terms(query)},
                     "channels": {
                         "lexical": len(lexical_ids),
                         "vector": len(vector_matches),
+                    },
+                    "stages": {
+                        "lexical": {
+                            "candidate_count": len(lexical_ids),
+                            "matched_ids": sorted(lexical_ids),
+                        },
+                        "vector": {
+                            "candidate_count": len(vector_matches),
+                            "status": "ok" if vector_diagnostics.get("available", True) else "partial",
+                        },
                     },
                     "candidate_count": len(ranked),
                     "deduplicated_count": len(seen_ids),
@@ -301,9 +314,12 @@ class KnowledgeAPI:
                 "limitations": self.service.engine.status().get("limitations", []),
             })
             if debug:
+                duration_ms = round((time.monotonic() - started) * 1000, 3)
                 engine_result["retrieval_trace"] = {
-                    "schema_version": 1,
+                    "schema_version": 2,
                     "operation": "knowledge_impact",
+                    "status": "partial" if engine_result["truncated"] else "ok",
+                    "duration_ms": duration_ms,
                     "anchors": {"files": files, "symbols": symbols},
                     "max_hops": max_hops,
                     "max_relations": max_relations,
@@ -313,6 +329,15 @@ class KnowledgeAPI:
                     "affected_knowledge_count": len(knowledge),
                     "truncated": engine_result["truncated"],
                     "fact_source": "codegraph",
+                    "stages": {
+                        "codegraph": {
+                            "relation_count": len(engine_result.get("relations", [])),
+                            "affected_file_count": len(engine_result.get("affected_files", [])),
+                            "affected_symbol_count": len(engine_result.get("affected_symbols", [])),
+                            "truncated": engine_result["truncated"],
+                            "status": "partial" if engine_result["truncated"] else "ok",
+                        },
+                    },
                 }
             self._record_query(store, "knowledge_impact", len(json.dumps(engine_result["input"])), engine_result, started)
         return engine_result
@@ -327,9 +352,13 @@ class KnowledgeAPI:
         budget = max(256, min(max_tokens or self.config.max_tokens, 50_000))
         status = self.status()
         intent = self.classify_task(task)
+        lexical_started = time.monotonic()
         search = self.search(task, limit=10, debug=debug)
         stage_timings: dict[str, dict[str, Any]] = {
-            "lexical": {"duration_ms": 0.0, "status": "ok"},
+            "lexical": {
+                "duration_ms": round((time.monotonic() - lexical_started) * 1000, 3),
+                "status": "ok",
+            },
             "codegraph": {"duration_ms": 0.0, "status": "ok"},
             "ranking": {"duration_ms": 0.0, "status": "ok"},
             "context_assembly": {"duration_ms": 0.0, "status": "ok"},
@@ -350,6 +379,7 @@ class KnowledgeAPI:
                 symbols=[item["id"] for item in symbol_matches[:10]],
                 max_hops=2,
                 max_relations=200,
+                debug=debug,
             ) if symbol_matches else {
                 "affected_modules": [], "affected_tests": [], "affected_files": [], "affected_knowledge": []
             }
@@ -510,10 +540,11 @@ class KnowledgeAPI:
                 impact=impact,
             )
             if debug:
-                result["retrieval_trace"] = self._context_retrieval_trace(
+                trace = self._context_retrieval_trace(
                     task=task,
                     intent=intent,
                     status=status,
+                    impact=impact,
                     search_trace=search.get("retrieval_trace", {}),
                     symbol_matches=symbol_matches,
                     candidates=candidates,
@@ -525,6 +556,16 @@ class KnowledgeAPI:
                     budget=budget,
                     stage_timings=stage_timings,
                 )
+                stage_timings["context_assembly"]["duration_ms"] = round(
+                    (time.monotonic() - assembly_started) * 1000, 3
+                )
+                trace["status"] = result["context_status"].get("state", "complete")
+                trace["duration_ms"] = round((time.monotonic() - started) * 1000, 3)
+                trace["stage_timings"] = stage_timings
+                result["retrieval_trace"] = trace
+                self._fit_debug_trace(result, budget)
+                trace["duration_ms"] = round((time.monotonic() - started) * 1000, 3)
+            result.pop("_trim_events", None)
             self._record_query(store, "knowledge_context", len(task), result, started)
             return result
 
@@ -669,6 +710,7 @@ class KnowledgeAPI:
         task: str,
         intent: dict[str, Any],
         status: dict[str, Any],
+        impact: dict[str, Any],
         search_trace: dict[str, Any],
         symbol_matches: list[dict[str, Any]],
         candidates: list[FileCandidate],
@@ -746,6 +788,20 @@ class KnowledgeAPI:
             },
             "stages": {
                 "knowledge_recall": search_trace,
+                "codegraph": impact.get("retrieval_trace", {
+                    "schema_version": 2,
+                    "operation": "knowledge_impact",
+                    "status": "ok",
+                    "duration_ms": stage_timings.get("codegraph", {}).get("duration_ms", 0.0),
+                    "stages": {
+                        "codegraph": {
+                            "relation_count": len(impact.get("relations", [])),
+                            "affected_file_count": len(impact.get("affected_files", [])),
+                            "affected_symbol_count": len(impact.get("affected_symbols", [])),
+                            "truncated": bool(impact.get("truncated")),
+                        },
+                    },
+                }),
                 "symbol_recall": {
                     "candidate_count": len(canonical_symbols),
                     "candidates": [item.to_dict() for item in canonical_symbols[:50]],
@@ -784,7 +840,11 @@ class KnowledgeAPI:
                     "supporting_files": list(result.get("supporting_files", [])),
                     "optional_files": list(result.get("optional_files", [])),
                     "selected_before_budget": prefit_files,
-                    "trim_events": list(result.get("withheld_files", [])),
+                    "trim_events": list(result.get("_trim_events", [])),
+                    "evidence": {
+                        "pre": result.get("pre_required_evidence", {}),
+                        "post": result.get("post_required_evidence", {}),
+                    },
                 },
                 "token_budget": {
                     "budget": budget,
@@ -798,6 +858,10 @@ class KnowledgeAPI:
             },
             "stage_timings": stage_timings or {},
             "context_status": result.get("context_status", {}),
+            "evidence": {
+                "pre": result.get("pre_required_evidence", {}),
+                "post": result.get("post_required_evidence", {}),
+            },
         }
 
     @staticmethod
@@ -1578,6 +1642,135 @@ class KnowledgeAPI:
         return commands
 
     @staticmethod
+    def _fit_debug_trace(result: dict[str, Any], budget: int) -> None:
+        """Keep opt-in diagnostics within the same hard response budget."""
+        trace = result.get("retrieval_trace")
+        if not isinstance(trace, dict):
+            return
+
+        def measured() -> int:
+            value = approx_tokens(json.dumps(result, ensure_ascii=False))
+            result["estimated_tokens"] = value
+            return value
+
+        if measured() <= budget:
+            return
+        trace["truncated"] = True
+        preserve_trace_summary = budget >= 900
+        stages = trace.get("stages", {})
+        if isinstance(stages, dict):
+            compact: dict[str, Any] = {}
+            for key in ("knowledge_recall", "symbol_recall", "file_recall", "canonical_dedup", "ranking", "codegraph"):
+                value = stages.get(key)
+                compact[key] = {
+                    "candidate_count": value.get("candidate_count", value.get("relation_count", 0))
+                    if isinstance(value, dict) else 0,
+                    "status": value.get("status", "ok") if isinstance(value, dict) else "ok",
+                }
+                if key == "file_recall" and isinstance(value, dict):
+                    compact[key]["channel_counts"] = value.get("channel_counts", {})
+                    compact[key]["candidates"] = [
+                        {
+                            "candidate_id": item.get("candidate_id", ""),
+                            "channels": item.get("channels", []),
+                            "features": item.get("features", {}),
+                        }
+                        for item in value.get("candidates", [])[:12]
+                        if isinstance(item, dict)
+                    ]
+            assembly = stages.get("context_assembly", {})
+            compact["context_assembly"] = {
+                "evidence": assembly.get("evidence", {}) if isinstance(assembly, dict) else {},
+                "trim_events": list(assembly.get("trim_events", []))[:4] if isinstance(assembly, dict) else [],
+            }
+            compact["token_budget"] = {
+                "budget": stages.get("token_budget", {}).get("budget", budget)
+                if isinstance(stages.get("token_budget"), dict) else budget,
+                "context_incomplete": bool(result.get("context_incomplete")),
+            }
+            trace["stages"] = compact
+        if not preserve_trace_summary:
+            trace.pop("query", None)
+        elif isinstance(trace.get("query"), dict):
+            trace["query"] = {
+                "raw": trace["query"].get("raw", ""),
+                "intent": trace["query"].get("intent", "investigation"),
+            }
+        if preserve_trace_summary and isinstance(trace.get("source"), dict):
+            trace["source"] = {"snapshot_id": trace["source"].get("snapshot_id", "")}
+        else:
+            trace.pop("source", None)
+        if measured() <= budget:
+            return
+        for key in (
+            "knowledge", "retrieval_explanation", "reference_implementations",
+            "extension_points", "unknowns", "gaps", "verification_commands",
+            "guidance_workflow", "vector_retrieval", "engine_limitations",
+            "impact", "file_rankings", "files", "core_files", "supporting_files",
+            "optional_files",
+        ):
+            result.pop(key, None)
+            if measured() <= budget:
+                return
+        evidence = trace.get("evidence", {})
+        stage_timings = trace.get("stage_timings", {})
+        minimal_trace = {
+            "schema_version": 2,
+            "operation": "knowledge_context",
+            "status": result.get("context_status", {}).get("state", "complete"),
+            "duration_ms": trace.get("duration_ms", 0.0),
+            "truncated": True,
+            "stage_timings": stage_timings,
+            "stages": trace.get("stages", {}),
+            "evidence": evidence,
+            "context_status": result.get("context_status", {}),
+        }
+        if preserve_trace_summary:
+            minimal_trace["query"] = {
+                "raw": trace.get("query", {}).get("raw", result.get("task", ""))
+                if isinstance(trace.get("query"), dict) else result.get("task", ""),
+                "intent": trace.get("query", {}).get("intent", "investigation")
+                if isinstance(trace.get("query"), dict) else "investigation",
+            }
+            minimal_trace["source"] = {"snapshot_id": trace.get("source", {}).get("snapshot_id", "")}
+        keep = {
+            "task": result.get("task", ""),
+            "token_budget": result.get("token_budget", budget),
+            "estimated_tokens": 0,
+            "pre_required_evidence": result.get("pre_required_evidence", {}),
+            "post_required_evidence": result.get("post_required_evidence", {}),
+            "required_evidence": result.get("required_evidence", {}),
+            "context_incomplete": bool(result.get("context_incomplete")),
+            "missing_required_evidence": list(result.get("missing_required_evidence", [])),
+            "budget_status": result.get("budget_status", "within_budget"),
+            "minimum_required_tokens": result.get("minimum_required_tokens", 0),
+            "context_status": result.get("context_status", {}),
+            "retrieval_trace": minimal_trace,
+        }
+        result.clear()
+        result.update(keep)
+        trace = minimal_trace
+        if measured() <= budget:
+            return
+        trace.pop("evidence", None)
+        if measured() > budget:
+            trace.pop("stages", None)
+        while measured() > budget and result.get("missing_required_evidence"):
+            items = result["missing_required_evidence"]
+            reduced = items[: len(items) // 2]
+            if len(reduced) == len(items):
+                break
+            result["missing_required_evidence"] = reduced
+        if measured() > budget:
+            for key in ("pre_required_evidence", "post_required_evidence", "required_evidence"):
+                result.pop(key, None)
+                if measured() <= budget:
+                    break
+        if measured() > budget:
+            result.pop("task", None)
+        measured()
+
+    @staticmethod
     def _fit_context(result: dict[str, Any], budget: int) -> None:
         pre_required = result.get("pre_required_evidence", result.get("required_evidence", {}))
         required_contract = bool(
@@ -1633,11 +1826,31 @@ class KnowledgeAPI:
 
         def size() -> int:
             result["estimated_tokens"] = 0
-            measured = approx_tokens(json.dumps(result, ensure_ascii=False))
+            measured = approx_tokens(json.dumps(
+                {key: value for key, value in result.items() if key != "_trim_events"},
+                ensure_ascii=False,
+            ))
             result["estimated_tokens"] = measured
-            return approx_tokens(json.dumps(result, ensure_ascii=False))
+            return approx_tokens(json.dumps(
+                {key: value for key, value in result.items() if key != "_trim_events"},
+                ensure_ascii=False,
+            ))
+
+        result.setdefault("_trim_events", [])
+
+        def record_trim_event(action: str, subject: str, before_tokens: int) -> None:
+            after_tokens = size()
+            result["_trim_events"].append({
+                "stage": "context_assembly",
+                "action": action,
+                "subject": subject,
+                "reason_code": "token_budget",
+                "tokens_before": before_tokens,
+                "tokens_after": after_tokens,
+            })
 
         for _ in range(200):
+            before_tokens = size()
             if size() <= budget:
                 break
             optional_files = result.get("optional_files", [])
@@ -1651,6 +1864,7 @@ class KnowledgeAPI:
                     "path": path,
                     "reason_code": "token_budget",
                 })
+                record_trim_event("remove_optional_file", path, before_tokens)
                 continue
             supporting_files = result.get("supporting_files", [])
             if supporting_files:
@@ -1675,6 +1889,7 @@ class KnowledgeAPI:
                     "path": path,
                     "reason_code": "token_budget",
                 })
+                record_trim_event("remove_supporting_file", path, before_tokens)
                 continue
             knowledge_sources = next(
                 (
@@ -1686,6 +1901,7 @@ class KnowledgeAPI:
             )
             if knowledge_sources is not None:
                 knowledge_sources.pop()
+                record_trim_event("remove_source", "knowledge", before_tokens)
                 continue
             contents = [item for item in result["knowledge"] if item.get("tokens", 0) > 60]
             if contents:
@@ -1698,6 +1914,7 @@ class KnowledgeAPI:
                 tail = marker + tail_source[-max(400, target_tokens * 4):]
                 longest["content"] = head + "\n[summary continues]\n" + tail
                 longest["tokens"] = approx_tokens(longest["content"])
+                record_trim_event("compress_supporting_content", str(longest.get("id", "")), before_tokens)
                 continue
             rankings_with_breakdowns = [
                 item for item in result.get("file_rankings", [])
@@ -1705,6 +1922,7 @@ class KnowledgeAPI:
             ]
             if rankings_with_breakdowns:
                 rankings_with_breakdowns[-1].pop("score_breakdown", None)
+                record_trim_event("drop_score_breakdown", str(rankings_with_breakdowns[-1].get("path", "")), before_tokens)
                 continue
             for field in ("protected", "requires_live_source", "selection_stage", "score"):
                 ranking = next(
@@ -1712,7 +1930,9 @@ class KnowledgeAPI:
                     None,
                 )
                 if ranking is not None:
+                    subject = str(ranking.get("path", ""))
                     ranking.pop(field)
+                    record_trim_event("drop_ranking_field", subject, before_tokens)
                     break
             else:
                 ranking = None
@@ -1720,12 +1940,15 @@ class KnowledgeAPI:
                 continue
             if result.get("ranking_reason_code") is None and "ranking_reason_code" in result:
                 result.pop("ranking_reason_code")
+                record_trim_event("drop_diagnostic_field", "ranking_reason_code", before_tokens)
                 continue
             if result.get("protected_candidates_truncated") is False:
                 result.pop("protected_candidates_truncated")
+                record_trim_event("drop_diagnostic_field", "protected_candidates_truncated", before_tokens)
                 continue
             if result.get("rejected_files"):
                 result["rejected_files"].pop()
+                record_trim_event("drop_rejected_file", "rejected_files", before_tokens)
                 continue
             optional_list = next(
                 (
@@ -1747,6 +1970,7 @@ class KnowledgeAPI:
             )
             if optional_list is not None:
                 optional_list.pop()
+                record_trim_event("drop_optional_diagnostic", "diagnostics", before_tokens)
                 continue
             optional_explanation_key = next(
                 (
@@ -1760,6 +1984,7 @@ class KnowledgeAPI:
             )
             if optional_explanation_key is not None:
                 explanation.pop(optional_explanation_key)
+                record_trim_event("drop_explanation_field", optional_explanation_key, before_tokens)
                 continue
             empty_explanation_key = next(
                 (
@@ -1774,17 +1999,21 @@ class KnowledgeAPI:
             )
             if empty_explanation_key is not None:
                 explanation.pop(empty_explanation_key)
+                record_trim_event("drop_empty_explanation", empty_explanation_key, before_tokens)
                 continue
             guidance = result.get("guidance_workflow")
             if isinstance(guidance, dict) and set(guidance) != {"available"}:
                 result["guidance_workflow"] = {"available": bool(guidance.get("available"))}
+                record_trim_event("reduce_guidance", "guidance_workflow", before_tokens)
                 continue
             if len(result["knowledge"]) > 1:
                 result["knowledge"].pop()
+                record_trim_event("remove_knowledge_fragment", "knowledge", before_tokens)
                 continue
             impact_lists = [value for value in result["impact"].values() if isinstance(value, list) and value]
             if impact_lists:
                 max(impact_lists, key=len).pop()
+                record_trim_event("remove_impact_item", "impact", before_tokens)
                 continue
             if len(result["symbols"]) > 1:
                 removable = next(
@@ -1796,14 +2025,18 @@ class KnowledgeAPI:
                 )
                 if removable is not None:
                     result["symbols"].remove(removable)
+                    record_trim_event("remove_best_effort_symbol", str(removable.get("id", "")), before_tokens)
                     continue
             if len(result["gaps"]) > 1:
                 result["gaps"].pop()
+                record_trim_event("remove_gap", "gaps", before_tokens)
                 continue
             if len(result.get("likely_modules", [])) > 1:
                 result["likely_modules"].pop()
+                record_trim_event("remove_module_hint", "likely_modules", before_tokens)
                 continue
             result["summary"] = trim_to_tokens(result["summary"], 10)
+            record_trim_event("compress_summary", "summary", before_tokens)
             break
         measured = size()
         if not required_contract:

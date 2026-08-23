@@ -3,7 +3,7 @@
   "dataset_sha256": "sha256:7bda6bc88db79dc84f57f75af99ba45a1586e0ff318561ec52ab4ae350d61de1",
   "generated_at": "2026-08-21T10:12:50+08:00",
   "index_commit": "aeb5533c3ec77f1880abf78c4ff2fbc388334d09",
-  "package_version": "0.1.42",
+  "package_version": "0.1.43",
   "project_commit": "5b4d3a65d53cb25d054493eb8ce1bc8e36bf10f0",
   "quality_gate": {
     "evaluated": true,
