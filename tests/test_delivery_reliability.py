@@ -8,6 +8,7 @@ from pathlib import Path
 from project_knowledge.evaluate import evaluate_quality_gate
 from project_knowledge.service import ProjectService
 from scripts.validate_ci_workflow import validate_quality_workflow
+from scripts.validate_evaluation_dataset import validate_evaluation_dataset
 
 
 class DeliveryReliabilityTests(unittest.TestCase):
@@ -38,6 +39,8 @@ class DeliveryReliabilityTests(unittest.TestCase):
                 "          project-kb evaluate evaluation/questions.jsonl\n"
                 "          --thresholds evaluation/thresholds.json\n"
                 "          --baseline evaluation/baselines/old.json\n"
+                "          --strict-live\n"
+                "          --enforce-gate\n"
                 "      - name: finalize\n"
                 "        run: project-kb finalize . --check --json\n",
                 encoding="utf-8",
@@ -97,6 +100,30 @@ class DeliveryReliabilityTests(unittest.TestCase):
             external = ProjectService(directory).doctor()["package_source"]
         self.assertIsNone(external["aligned"])
         self.assertEqual(external["scope"], "external_project")
+
+    def test_evaluation_dataset_gate_rejects_current_small_single_snapshot_seed(self) -> None:
+        valid, errors, report = validate_evaluation_dataset([
+            self.ROOT / "evaluation" / "questions-gardenserver-phase0.jsonl"
+        ])
+
+        self.assertFalse(valid)
+        self.assertLess(report["questions"], 300)
+        self.assertTrue(any("questions" in error for error in errors))
+
+    def test_evaluation_dataset_gate_accepts_stratified_multi_snapshot_fixture(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "questions.jsonl"
+            rows = [
+                {"id": f"{snapshot}-{query_type}-{index}", "query_type": query_type, "snapshot_id": snapshot}
+                for snapshot in ("repo-a", "repo-b", "repo-c")
+                for query_type in ("code", "impact", "invariant", "design")
+                for index in range(30)
+            ]
+            path.write_text("\n".join(json.dumps(row) for row in rows) + "\n", encoding="utf-8")
+            valid, errors, report = validate_evaluation_dataset([path])
+
+        self.assertTrue(valid, errors)
+        self.assertEqual(report["questions"], 360)
 
 
 if __name__ == "__main__":

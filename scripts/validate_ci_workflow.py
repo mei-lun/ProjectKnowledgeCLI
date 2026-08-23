@@ -48,6 +48,10 @@ def validate_quality_workflow(path: str | Path) -> tuple[bool, list[str]]:
         errors.append("quality job must pass evaluation thresholds")
     if not any("scripts/validate_evaluation_provenance.py" in line for line in lines):
         errors.append("quality job must validate active evaluation report provenance")
+    if not any("--strict-live" in line for line in lines):
+        errors.append("quality job must validate live report revisions and hashes")
+    if not any("--enforce-gate" in line for line in lines):
+        errors.append("scheduled performance job must enforce performance targets")
     command = " ".join(line.strip() for _, line in command_lines)
     try:
         arguments = shlex.split(command)

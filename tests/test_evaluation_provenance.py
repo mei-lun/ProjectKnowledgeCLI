@@ -104,6 +104,16 @@ class EvaluationProvenanceTests(unittest.TestCase):
         self.assertIn("adapter_unavailable", joined)
         self.assertIn("builtin", joined)
 
+    def test_strict_live_mode_rejects_missing_revision_provenance(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            report = self._write_report(root, self._valid_payload())
+
+            valid, errors = validate_evaluation_report(report, root, strict_live=True)
+
+        self.assertFalse(valid)
+        self.assertTrue(any("project_commit" in error or "index_commit" in error for error in errors))
+
 
 if __name__ == "__main__":
     unittest.main()

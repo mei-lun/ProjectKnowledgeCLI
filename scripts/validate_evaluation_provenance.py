@@ -1,16 +1,20 @@
 from __future__ import annotations
 
 import argparse
+import subprocess
 import json
 from pathlib import Path
 from typing import Any
 
 from project_knowledge import __version__
+from project_knowledge.service import ProjectService
+from project_knowledge.util import hash_file, hash_text
 
 
 def validate_evaluation_report(
     report_path: str | Path,
     project_root: str | Path | None = None,
+    strict_live: bool = False,
 ) -> tuple[bool, list[str]]:
     """Validate that the active evaluation report describes this release.
 
@@ -67,6 +71,38 @@ def validate_evaluation_report(
         expected_report = (root / "evaluation" / "reports" / "latest.json").resolve()
         if path.resolve() != expected_report:
             errors.append("active report path must be evaluation/reports/latest.json")
+        if strict_live:
+            reproducibility = payload.get("strategies", {}).get("codegraph", {}).get("reproducibility", {})
+            live_head = subprocess.run(
+                ["git", "rev-parse", "HEAD"], cwd=root, capture_output=True, text=True, check=False
+            ).stdout.strip()
+            if payload.get("project_commit") != live_head:
+                errors.append("report project_commit does not match live HEAD")
+            try:
+                live_status = ProjectService(root).status()
+            except Exception as error:
+                errors.append(f"live project provenance cannot be read: {error}")
+                live_status = {}
+            if payload.get("index_commit") != live_status.get("index_commit"):
+                errors.append("report index_commit does not match live CodeGraph index")
+            dataset_name = payload.get("dataset") or reproducibility.get("dataset")
+            if dataset_name:
+                dataset_path = root / "evaluation" / str(dataset_name)
+                if dataset_path.exists():
+                    live_dataset_hash = hash_file(dataset_path)
+                    if payload.get("dataset_sha256") != live_dataset_hash:
+                        errors.append("report dataset_sha256 does not match live dataset")
+                else:
+                    errors.append(f"report dataset is missing: {dataset_path}")
+            try:
+                snapshot = ProjectService(root).engine.snapshot(root, ProjectService(root).config)
+                live_source_hash = hash_text("\n".join(
+                    f"{item.path}\t{item.content_hash}" for item in snapshot.files
+                ))
+                if payload.get("source_snapshot_sha256") != live_source_hash:
+                    errors.append("report source_snapshot_sha256 does not match live CodeGraph snapshot")
+            except Exception as error:
+                errors.append(f"live CodeGraph snapshot cannot be read: {error}")
 
     return not errors, errors
 
@@ -76,8 +112,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--report", default="evaluation/reports/latest.json")
     parser.add_argument("--project", default=".")
     parser.add_argument("--json", action="store_true", dest="as_json")
+    parser.add_argument("--strict-live", action="store_true", help="compare report revisions and hashes with the live checkout")
     args = parser.parse_args(argv)
-    valid, errors = validate_evaluation_report(args.report, args.project)
+    valid, errors = validate_evaluation_report(args.report, args.project, strict_live=args.strict_live)
     result = {"passed": valid, "report": str(Path(args.report)), "errors": errors}
     if args.as_json:
         print(json.dumps(result, ensure_ascii=False, indent=2))

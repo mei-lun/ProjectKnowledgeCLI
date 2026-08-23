@@ -24,7 +24,7 @@ jobs:
       - name: Validate CodeGraph adapter
         run: python scripts/validate_codegraph_adapter.py
       - name: Validate active evaluation provenance
-        run: python scripts/validate_evaluation_provenance.py --json
+        run: python scripts/validate_evaluation_provenance.py --json --strict-live
       - name: 运行测试
         run: python -m unittest discover -s tests -v
       - name: 初始化知识库
@@ -53,13 +53,21 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install CodeGraph
+        run: npm install --global @colbymchenry/codegraph@1.5.0
       - name: 安装本地包
         run: python -m pip install -e .
+      - name: Validate CodeGraph adapter
+        run: python scripts/validate_codegraph_adapter.py
       - name: 运行 500/5000 文件性能评测
         run: >-
           python evaluation/performance_harness.py
           --sizes 500 5000
           --repetitions 5
+          --enforce-gate
           --output evaluation/reports/ci-performance.json
       - uses: actions/upload-artifact@v4
         if: always()
