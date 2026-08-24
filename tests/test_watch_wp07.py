@@ -101,8 +101,10 @@ class WatchWP07Tests(unittest.TestCase):
         self.assertTrue(result["hooks"])
         for name in ["post-checkout", "post-merge", "post-rewrite", "post-commit"]:
             hook = root / ".git" / "hooks" / name
-            self.assertIn("project-kb:hook:start", hook.read_text(encoding="utf-8"))
-            self.assertIn(f'--event "{name}"', hook.read_text(encoding="utf-8"))
+            hook_text = hook.read_text(encoding="utf-8")
+            self.assertTrue(hook_text.startswith("#!/bin/sh\n"))
+            self.assertIn("project-kb:hook:start", hook_text)
+            self.assertIn(f'--event "{name}"', hook_text)
         service.watch(once=True)
         state = json.loads((root / ".project-kb" / "state.json").read_text(encoding="utf-8"))
         self.assertEqual(state["watcher"], "stopped")

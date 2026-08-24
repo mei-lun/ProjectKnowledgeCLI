@@ -566,6 +566,9 @@ class ProjectService:
         if git_hooks.exists():
             for name in hook_names:
                 path = git_hooks / name
+                current_hook = read_text(path) if path.exists() else ""
+                if not current_hook.startswith("#!/bin/sh\n"):
+                    atomic_write(path, "#!/bin/sh\n" + current_hook)
                 script_marker_update(path, "hook", _hook_body(name))
                 path.chmod(path.stat().st_mode | 0o111)
                 hooks.append(str(path))

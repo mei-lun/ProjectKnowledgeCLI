@@ -1,0 +1,24 @@
+{
+  "affected_knowledge": [
+    "curated.architecture",
+    "curated.feature.guide.generation",
+    "generated.frameworks",
+    "generated.module.project_knowledge",
+    "generated.module.tests",
+    "generated.project-map",
+    "generated.test-map"
+  ],
+  "base_commit": "d52e582d5801280d524873a6e952b23e477b9d06",
+  "changed_files": [
+    "src/project_knowledge/service.py",
+    "tests/test_watch_wp07.py"
+  ],
+  "changed_symbols": [],
+  "changeset_id": "change-20260824-195258",
+  "created_at": "2026-08-24T19:52:58+08:00",
+  "head_commit": "f2846821f341edd9892dbb14697245b3533d614f",
+  "queue_id": "sq-e37d61d4d039673a",
+  "schema_version": 1,
+  "status": "awaiting_semantic_generation",
+  "task_summary": "manual synchronization"
+}
