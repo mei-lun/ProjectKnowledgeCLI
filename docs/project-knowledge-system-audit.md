@@ -7,7 +7,7 @@
 
 ## npm 一键安装交付复核：WP-NPM-01
 
-本工作包对应 `docs/superpowers/specs/2026-08-24-npm-bootstrap-design.md` 和 `docs/superpowers/plans/2026-08-24-npm-bootstrap.md`。Windows 首发实现、真实安装样本、0.1.48 版本递增和生成知识同步均已完成；同步后 `stale_knowledge=0`、`conflicted_knowledge=0`。
+本工作包对应 `docs/superpowers/specs/2026-08-24-npm-bootstrap-design.md` 和 `docs/superpowers/plans/2026-08-24-npm-bootstrap.md`。Windows 首发实现、真实安装样本、0.1.48 版本递增和生成知识同步均已完成；提交后 `curated.conventions` 因其引用的版本、Changelog、审计和活动评测来源变化而进入人工复核，`conflicted_knowledge=0`。该待审项不冒充已确认，也不阻断 npm 安装功能验收。
 
 | 需求 ID | 当前结论 | 验收证据与边界 |
 | --- | --- | --- |
