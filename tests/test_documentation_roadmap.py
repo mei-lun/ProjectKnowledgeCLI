@@ -13,14 +13,31 @@ class DocumentationRoadmapTests(unittest.TestCase):
         cls.root = Path(__file__).resolve().parents[1]
         cls.readme = (cls.root / "README.md").read_text(encoding="utf-8")
 
-    def test_readme_is_project_neutral_and_only_describes_current_workflows(self) -> None:
+    def test_readme_product_description_is_project_neutral(self) -> None:
         self.assertIn("CodeGraph", self.readme)
         self.assertIn(".project-kb/generated", self.readme)
         for obsolete_or_project_specific in (
-            "gardenserver", "普通活动", "普通玩家功能", "登录模块",
+            "普通活动", "普通玩家功能", "登录模块",
             "1,295", "0.1.22", "已完成基础版", "旧版", "下一版本计划",
         ):
             self.assertNotIn(obsolete_or_project_specific, self.readme)
+
+    def test_readme_records_gardenserver_controlled_practice_results(self) -> None:
+        self.assertIn("## gardenserver 受控实践结果", self.readme)
+        self.assertNotIn("D:\\Github-Poj", self.readme)
+        self.assertIn("19.93 s", self.readme)
+        self.assertIn("4.26 s", self.readme)
+        self.assertIn("16.67 s", self.readme)
+        self.assertIn("4.48 s", self.readme)
+        self.assertIn("precision@5", self.readme)
+        self.assertIn("0.45", self.readme)
+        self.assertIn("0.50", self.readme)
+        self.assertIn("文件、核心文件、符号召回率", self.readme)
+        self.assertIn("1.00", self.readme)
+        self.assertIn("受控项目实践", self.readme)
+        self.assertIn("P95 < 1.5 s", self.readme)
+        self.assertIn("evaluation/reports/gardenserver-phase0-0.1.46.json", self.readme)
+        self.assertIn("evaluation/reports/gardenserver-phase1-0.1.46.json", self.readme)
 
     def test_quick_start_does_not_recommend_legacy_watcher(self) -> None:
         quick_start = self.readme.split("## 快速开始", 1)[1].split("## 常用入口", 1)[0]

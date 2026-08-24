@@ -1,6 +1,6 @@
 # Project Knowledge CLI
 
-## 当前质量指标（0.1.46）
+## 当前质量指标（0.1.47）
 
 当前真实 CodeGraph Adapter 已接入并可用：`codegraph-public-cli 1.5.0`。以下指标来自当前活动评测报告 `evaluation/reports/latest.json`，评测集包含 50 个样本：
 
@@ -18,6 +18,22 @@
 | P95 延迟 | 见活动报告（环境相关） |
 
 Adapter 可用不等于检索质量门已通过：当前主要缺陷仍是候选覆盖、符号召回和排序精确率不足。Builtin engine 不属于当前运行时，也不会作为质量问题的回退方案。详细边界见 [当前 CodeGraph 评测状态](docs/codegraph-evaluation-current.md)，原始数据见 [活动评测报告](evaluation/reports/latest.json)。
+
+## gardenserver 受控实践结果
+
+`gardenserver` 是本轮检索优化的真实外部实践项目。Phase 0 与 Phase 1 使用同一稳定源码快照进行前后对照；结果只用于判断当前实现能否进入受控项目实践，不冒充跨仓库生产门。
+
+| 指标 | Phase 0 | Phase 1 | 当前结论 |
+| --- | ---: | ---: | --- |
+| 文件、核心文件、符号召回率 | 1.00 | 1.00 | 保持完整召回 |
+| precision@5 | 0.45 | 0.50 | Phase 1 达到原方案阶段门槛 |
+| nDCG@5 | 0.938488 | 0.832547 | 两阶段均高于 0.80 门槛 |
+| hybrid P95（优化前） | 19.93 s | 16.67 s | 基线 |
+| hybrid P95（优化后） | 4.26 s | 4.48 s | 明显下降，仍未达到 P95 < 1.5 s |
+
+当前结论是：检索召回、Top-5 相关性和排序质量已达到 gardenserver 的受控项目实践标准，可以接入真实开发任务观察；专用 Phase 1 质量门唯一仍失败的项目是 P95 延迟。正式生产规模验证仍按审计文档单独推进，不影响此次受控实践结论。
+
+冻结证据见 [Phase 0 报告](evaluation/reports/gardenserver-phase0-0.1.46.json)、[Phase 1 报告](evaluation/reports/gardenserver-phase1-0.1.46.json) 和 [Phase 1 门槛](evaluation/thresholds-gardenserver-phase1.json)。完整实现范围与未完成项见 [检索质量工作包](docs/retrieval-quality-work-package.md)。
 
 Project Knowledge CLI（PKS）是本地优先的项目知识工具。它从代码索引中获取事实，维护带来源和新鲜度状态的知识记录，并通过 MCP 为 AI 客户端提供项目上下文、影响分析和可审核的开发指导。
 
