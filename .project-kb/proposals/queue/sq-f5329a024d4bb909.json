@@ -1,0 +1,40 @@
+{
+  "affected_knowledge": [
+    "curated.architecture",
+    "curated.conventions",
+    "curated.feature.guide.generation",
+    "generated.frameworks",
+    "generated.module.github",
+    "generated.module.npm",
+    "generated.module.project_knowledge",
+    "generated.module.scripts",
+    "generated.module.tests",
+    "generated.project-map",
+    "generated.test-map"
+  ],
+  "base_commit": "d2428c92b289e41762d4bd1305ec378f52fdfcd7",
+  "changed_files": [
+    ".github/workflows/quality.yml",
+    "npm/bin/project-kb.js",
+    "npm/lib/runtime.js",
+    "npm/scripts/postinstall.js",
+    "npm/test/runtime.test.js",
+    "scripts/build_npm_package.py",
+    "scripts/validate_npm_bootstrap.py",
+    "src/project_knowledge/__init__.py",
+    "src/project_knowledge/codex.py",
+    "src/project_knowledge/service.py",
+    "tests/test_codex_bootstrap.py",
+    "tests/test_npm_bootstrap_validation.py",
+    "tests/test_npm_package_build.py",
+    "tests/test_watch_wp07.py"
+  ],
+  "changed_symbols": [],
+  "changeset_id": "change-20260824-205246",
+  "created_at": "2026-08-24T20:52:46+08:00",
+  "head_commit": "48996bff1d770e7d1964954b0fb0176d436c92de",
+  "queue_id": "sq-f5329a024d4bb909",
+  "schema_version": 1,
+  "status": "awaiting_semantic_generation",
+  "task_summary": "manual synchronization"
+}
