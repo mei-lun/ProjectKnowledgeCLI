@@ -1,6 +1,6 @@
 # Project Knowledge CLI
 
-## 当前质量指标（0.1.47）
+## 当前质量指标（0.1.48）
 
 当前真实 CodeGraph Adapter 已接入并可用：`codegraph-public-cli 1.5.0`。当前活动评测使用 50 个 self-repo 样本；精确指标和环境相关延迟以 [活动评测报告](evaluation/reports/latest.json) 为唯一来源，避免在 README 中复制会随 live 检索发生小幅波动的数据。
 
@@ -37,13 +37,25 @@ Project Knowledge CLI（PKS）是本地优先的项目知识工具。它从代�
 ## 环境要求
 
 - Python 3.11 或更高版本。
+- npm 安装路径要求 Node.js 20 或更高版本、npm 10 或更高版本。
 - Git，用于识别仓库、分支和提交状态。
-- 如启用 CodeGraph 引擎，需要可调用的 CodeGraph 公共 CLI。
+- npm 安装包自带并固定使用 `@colbymchenry/codegraph@1.5.0`；源码开发需要另行提供可调用的 CodeGraph 公共 CLI。
 - 默认本地运行，不要求联网，不发送遥测。
 
 ## 安装
 
-在源码目录执行：
+Windows 10/11 x64 推荐使用 npm 全局安装，然后在需要建立知识库的项目根目录初始化：
+
+```powershell
+npm install --global project-kb-cli
+project-kb init
+```
+
+npm 包会发现 Python 3.11+，在 `%LOCALAPPDATA%\ProjectKnowledgeCLI\runtimes\<版本>` 创建版本隔离的托管虚拟环境，并离线安装随 npm 包发布的同版本 Python wheel。可以用 `PROJECT_KB_PYTHON` 指定 Python，或用 `PROJECT_KB_RUNTIME_HOME` 改变托管运行时根目录。
+
+成功初始化后会保留用户原有内容，并写入工具拥有的 `AGENTS.md` 和 `.codex/config.toml` 标记块。Codex 重启并信任该项目后，即可使用 `knowledge_status`、`knowledge_context` 和 `knowledge_impact`；无需再手工配置全局 MCP。重复执行 `project-kb init` 是幂等的。
+
+源码开发仍可在源码目录执行：
 
 ```bash
 python -m venv .venv
@@ -142,6 +154,7 @@ KnowledgeStore 是正式知识来源；Markdown 是可阅读、可审核的投�
 | `.project-kb/index.db` | 代码索引、KnowledgeRecord 和指导版本 | PKS 管理 |
 | `.project-kb/manifest.json` | 文件、来源、新鲜度和生成元数据 | PKS 管理 |
 | `.project-kb/mcp.json` | 项目 MCP 启动配置 | PKS 管理 |
+| `.codex/config.toml` | Codex 项目级 stdio MCP 配置；只维护 `project-kb:codex-mcp` 区块 | PKS 管理 |
 | `.project-kb/generated/` | 项目地图、入口、测试地图等生成知识 | PKS 覆盖 |
 | `.project-kb/curated/` | 人工维护并审核的项目知识 | 用户维护 |
 | `.project-kb/decisions/` | 架构决策记录 | 用户审核 |

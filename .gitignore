@@ -11,6 +11,7 @@ dist/
 <!-- project-kb:gitignore:start -->
 .project-kb/index.db
 .project-kb/index.db-*
+.codex/config.toml
 .project-kb/state.json
 .project-kb/write.lock
 .project-kb/watcher.lock

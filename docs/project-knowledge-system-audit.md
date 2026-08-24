@@ -1,9 +1,25 @@
 # 项目级知识库最小需求审计与实施基线
 
-> 当前版本：0.1.47
+> 当前版本：0.1.48
 > 复核日期：2026-08-24  
 > 报告状态：Phase 0～2 确定性检索基线已交付；发布证据正在重新对齐，最终生产质量门尚未通过
 > 默认语言：中文
+
+## npm 一键安装交付复核：WP-NPM-01
+
+本工作包对应 `docs/superpowers/specs/2026-08-24-npm-bootstrap-design.md` 和 `docs/superpowers/plans/2026-08-24-npm-bootstrap.md`。Windows 首发实现、真实安装样本、0.1.48 版本递增和生成知识同步均已完成；同步后 `stale_knowledge=0`、`conflicted_knowledge=0`。
+
+| 需求 ID | 当前结论 | 验收证据与边界 |
+| --- | --- | --- |
+| NPM-001 | 已完成 | npm 包提供 `project-kb` Node 启动器，并透明转发 Python CLI 参数、stdio、退出码和信号 |
+| NPM-002 | 已完成 | 启动器发现 Python 3.11+，按版本创建原子托管 venv，失败清理临时目录并使用完成标记和进程锁 |
+| NPM-003 | 已完成 | npm 包内置同版本 Python wheel，并固定依赖 `@colbymchenry/codegraph@1.5.0`；`CODEGRAPH_COMMAND` 使用 npm 所有的绝对路径 |
+| NPM-004 | 已完成 | 成功 `init` 后自动写入 `AGENTS.md` 和 `.codex/config.toml` 自有块；CodeGraph 初始化失败时不写 Codex 集成 |
+| NPM-005 | 已完成 | 完整 TOML 在写入前后校验；用户自有 `mcp_servers.project_knowledge` 冲突明确失败；重复初始化幂等，卸载保留用户配置和知识数据 |
+| NPM-006 | 已完成 | `scripts/build_npm_package.py` 从 Python 唯一版本源生成 `project-kb-cli` manifest，拒绝错版 wheel；`npm pack --dry-run` 仅包含预期启动器、运行时、postinstall、manifest 和 wheel |
+| NPM-007 | 已完成 | `scripts/validate_npm_bootstrap.py` 在隔离 npm prefix/runtime 中完成真实 tarball 安装、两次 init、Codex TOML 解析、MCP `initialize/tools/list/knowledge_status` 和卸载；Windows CI 运行同一验证器 |
+
+首发支持边界为 Windows 10/11 x64、Node.js 20+、npm 10+、Python 3.11+。本批不自动下载 Python，不重写 Python 核心或 CodeGraph，也不宣称 macOS/Linux npm 路径已完成发布验收。
 
 ## 当前检索质量交付复核（WP-RQ-01～04）
 

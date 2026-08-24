@@ -7,6 +7,25 @@ on:
     - cron: "30 18 * * 0"
 
 jobs:
+  npm-bootstrap-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install local Python package for unit tests
+        run: python -m pip install -e .
+      - name: Run npm bootstrap unit tests
+        run: |
+          python -m unittest tests.test_codex_bootstrap tests.test_npm_package_build tests.test_npm_bootstrap_validation -v
+          node --test npm/test/runtime.test.js
+      - name: Validate installed npm package and MCP tools
+        run: python scripts/validate_npm_bootstrap.py --json
+
   quick-evaluation:
     runs-on: ubuntu-latest
     steps:

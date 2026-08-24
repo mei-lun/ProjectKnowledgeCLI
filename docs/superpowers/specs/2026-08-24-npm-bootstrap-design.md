@@ -12,7 +12,7 @@ Project Knowledge CLI 当前以 Python 包交付。用户必须创建虚拟环�
 本工作包只改变安装与接入路径，不重写 Python Core、CodeGraph Adapter、知识存储、检索、MCP 工具或数据模型。目标用户路径为：
 
 ```powershell
-npm install --global project-knowledge-cli
+npm install --global project-kb-cli
 cd D:\path\to\repository
 project-kb init
 ```
@@ -58,7 +58,7 @@ project-kb init
 ## 4. 总体架构
 
 ```text
-npm 全局包 project-knowledge-cli
+npm 全局包 project-kb-cli
   ├─ Node 启动器 project-kb
   ├─ Python wheel（构建时放入 vendor）
   └─ 固定版本 CodeGraph npm 依赖
@@ -90,7 +90,7 @@ npm/
 scripts/build_npm_package.py
 ```
 
-`package.template.json` 不包含 `version`。`scripts/build_npm_package.py` 从 `src/project_knowledge/__init__.py` 读取唯一版本，构建 wheel，生成临时 staging `package.json`，复制 Node 文件和 wheel，然后在 staging 目录执行 `npm pack`。正式 npm 包名固定为 `project-knowledge-cli`，命令名固定为 `project-kb`，Node 引擎要求为 `>=20`。
+`package.template.json` 不包含 `version`。`scripts/build_npm_package.py` 从 `src/project_knowledge/__init__.py` 读取唯一版本，构建 wheel，生成临时 staging `package.json`，复制 Node 文件和 wheel，然后在 staging 目录执行 `npm pack`。正式 npm 包名固定为 `project-kb-cli`，Python 分发名保持 `project-knowledge-cli`，命令名固定为 `project-kb`，Node 引擎要求为 `>=20`。原候选 npm 名 `project-knowledge-cli` 已被第三方占用（2026-08-24 查询版本为 1.0.8），因此不能用于本项目发布。
 
 npm 依赖固定到仓库已经验证的 `@colbymchenry/codegraph@1.5.0`。Node 启动器解析包内 CodeGraph CLI 的绝对路径，并通过 `CODEGRAPH_COMMAND` 传给 Python 进程；生成 Codex 配置时也保存该绝对路径，避免依赖 Codex 的 `PATH`。
 

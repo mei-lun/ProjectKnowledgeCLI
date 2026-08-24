@@ -1,0 +1,28 @@
+{
+  "name": "project-kb-cli",
+  "description": "Local-first, source-traceable project knowledge system",
+  "license": "Apache-2.0",
+  "type": "commonjs",
+  "bin": {
+    "project-kb": "bin/project-kb.js"
+  },
+  "files": [
+    "bin",
+    "lib",
+    "scripts",
+    "vendor"
+  ],
+  "scripts": {
+    "postinstall": "node scripts/postinstall.js"
+  },
+  "dependencies": {
+    "@colbymchenry/codegraph": "1.5.0"
+  },
+  "engines": {
+    "node": ">=20",
+    "npm": ">=10"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

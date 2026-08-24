@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from .config import ProjectConfig
+from .codex import codex_mcp_body, update_codex_config
 from .engine import CodeIndexEngine, CodeIndexSnapshot, IndexedFile, create_engine
 from .guidance import GuidanceService
 from .knowledge import KnowledgeGenerator
@@ -48,6 +49,7 @@ AGENTS_BODY = """Use the local Project Knowledge System before broad repository 
 
 GITIGNORE_BODY = """.project-kb/index.db
 .project-kb/index.db-*
+.codex/config.toml
 .project-kb/state.json
 .project-kb/write.lock
 .project-kb/watcher.lock
@@ -130,6 +132,7 @@ class ProjectService:
                 "files_to_create": [
                     ".project-kb.yml", ".project-kb/manifest.json",
                     ".project-kb/generated/项目地图.md", ".project-kb/generated/开发指导索引.md",
+                    "AGENTS.md", ".codex/config.toml",
                 ],
             }
         with project_lock(self.root):
@@ -139,6 +142,7 @@ class ProjectService:
             codegraph = self.engine.initialize(self.root, self.config)
             snapshot = self.engine.snapshot(self.root, self.config)
             result = self._atomic_rebuild(snapshot)
+            result["codex"] = self._install_codex_integration()
         result["action"] = "init"
         result["codegraph"] = codegraph
         return result
@@ -540,7 +544,7 @@ class ProjectService:
                 self._log_event("watch_stopped", once=once)
 
     def install(self, dry_run: bool = False, clients: list[str] | None = None) -> dict[str, Any]:
-        targets = [self.root / "AGENTS.md"]
+        targets = [self.root / "AGENTS.md", self.root / ".codex" / "config.toml"]
         selected = sorted(set(clients or self._client_targets()))
         unknown = sorted(set(selected) - set(self._client_targets()))
         if unknown:
@@ -555,7 +559,8 @@ class ProjectService:
                 "clients": selected,
                 "client_targets": [str(self._client_targets()[name][0]) for name in selected],
             }
-        changed = marker_update(targets[0], "instructions", AGENTS_BODY)
+        codex = self._install_codex_integration()
+        changed = codex["agents_updated"]
         self._write_mcp_config()
         hooks: list[str] = []
         if git_hooks.exists():
@@ -572,7 +577,7 @@ class ProjectService:
             installed_clients.append(name)
         return {
             "action": "install", "agents_updated": changed, "mcp_config": ".project-kb/mcp.json",
-            "hooks": hooks, "clients": installed_clients,
+            "codex": codex, "hooks": hooks, "clients": installed_clients,
         }
 
     def uninstall(self, dry_run: bool = False, clients: list[str] | None = None) -> dict[str, Any]:
@@ -585,11 +590,12 @@ class ProjectService:
         if dry_run:
             return {
                 "action": "uninstall", "dry_run": True,
-                "targets": ["AGENTS.md", ".project-kb/mcp.json"],
+                "targets": ["AGENTS.md", ".codex/config.toml", ".project-kb/mcp.json"],
                 "hooks": [str(git_hooks / name) for name in hook_names] if git_hooks.exists() else [],
                 "clients": selected,
                 "knowledge_preserved": True,
             }
+        codex_removed = update_codex_config(self.root / ".codex" / "config.toml", None)
         changed = marker_update(self.root / "AGENTS.md", "instructions", None)
         mcp_path = self.root / ".project-kb" / "mcp.json"
         mcp_removed = mcp_path.exists()
@@ -607,6 +613,7 @@ class ProjectService:
                 clients_removed.append(name)
         return {
             "action": "uninstall", "agents_updated": changed, "mcp_removed": mcp_removed,
+            "codex_removed": codex_removed,
             "hooks_removed": hooks_removed, "clients_removed": clients_removed,
             "knowledge_preserved": True,
         }
@@ -760,6 +767,16 @@ class ProjectService:
                 }
             }
         })
+
+    def _install_codex_integration(self) -> dict[str, Any]:
+        config_path = self.root / ".codex" / "config.toml"
+        config_changed = update_codex_config(config_path, codex_mcp_body(self.root))
+        agents_changed = marker_update(self.root / "AGENTS.md", "instructions", AGENTS_BODY)
+        return {
+            "config": ".codex/config.toml",
+            "config_updated": config_changed,
+            "agents_updated": agents_changed,
+        }
 
     def _pending_knowledge(self, store: KnowledgeStore) -> list[str]:
         indexed = {
