@@ -8,6 +8,7 @@
 - `src/project_knowledge/__main__.py`（Python）
 - `src/project_knowledge/cli.py`（Python）
 - `src/project_knowledge/codegraph.py`（Python）
+- `src/project_knowledge/codex.py`（Python）
 - `src/project_knowledge/config.py`（Python）
 - `src/project_knowledge/context_evidence.py`（Python）
 - `src/project_knowledge/engine.py`（Python）

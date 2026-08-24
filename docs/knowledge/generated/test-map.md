@@ -4,9 +4,11 @@
 
 | 测试文件 | 模块 |
 | --- | --- |
+| `npm/test/runtime.test.js` | npm |
 | `tests/__init__.py` | tests |
 | `tests/test_codegraph.py` | tests |
 | `tests/test_codegraph_validation.py` | tests |
+| `tests/test_codex_bootstrap.py` | tests |
 | `tests/test_config.py` | tests |
 | `tests/test_context_evidence.py` | tests |
 | `tests/test_delivery_reliability.py` | tests |
@@ -26,6 +28,8 @@
 | `tests/test_guidance_workflow.py` | tests |
 | `tests/test_initialization_workflow.py` | tests |
 | `tests/test_integration.py` | tests |
+| `tests/test_npm_bootstrap_validation.py` | tests |
+| `tests/test_npm_package_build.py` | tests |
 | `tests/test_proposal.py` | tests |
 | `tests/test_provider.py` | tests |
 | `tests/test_ranking.py` | tests |

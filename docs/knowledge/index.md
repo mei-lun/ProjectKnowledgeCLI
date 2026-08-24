@@ -11,8 +11,8 @@
 - [架构](curated/architecture.md) - 状态：`新鲜`；可信度：`已验证`
 - [约定](curated/conventions.md) - 状态：`可能过期`；可信度：`已验证`
 - [功能开发指南生成约定](curated/feature-guide-generation.md) - 状态：`新鲜`；可信度：`已验证`
-- [术语表](curated/glossary.md) - 状态：`可能过期`；可信度：`已验证`
-- [Provider 与 EvidencePack](curated/provider-and-evidence.md) - 状态：`可能过期`；可信度：`已验证`
+- [术语表](curated/glossary.md) - 状态：`新鲜`；可信度：`已验证`
+- [Provider 与 EvidencePack](curated/provider-and-evidence.md) - 状态：`新鲜`；可信度：`已验证`
 
 ## 架构决策
 
@@ -25,6 +25,7 @@
 - [框架感知结构索引](generated/frameworks.md) - 状态：`新鲜`；可信度：`自动生成`
 - [模块：evaluation](generated/modules/evaluation.md) - 状态：`新鲜`；可信度：`自动生成`
 - [模块：.github](generated/modules/github.md) - 状态：`新鲜`；可信度：`自动生成`
+- [模块：npm](generated/modules/npm.md) - 状态：`新鲜`；可信度：`自动生成`
 - [模块：plugins](generated/modules/plugins.md) - 状态：`新鲜`；可信度：`自动生成`
 - [模块：project_knowledge](generated/modules/project_knowledge.md) - 状态：`新鲜`；可信度：`自动生成`
 - [模块：root](generated/modules/root.md) - 状态：`新鲜`；可信度：`自动生成`
