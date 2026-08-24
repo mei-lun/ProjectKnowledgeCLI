@@ -2,22 +2,9 @@
 
 ## 当前质量指标（0.1.47）
 
-当前真实 CodeGraph Adapter 已接入并可用：`codegraph-public-cli 1.5.0`。以下指标来自当前活动评测报告 `evaluation/reports/latest.json`，评测集包含 50 个样本：
+当前真实 CodeGraph Adapter 已接入并可用：`codegraph-public-cli 1.5.0`。当前活动评测使用 50 个 self-repo 样本；精确指标和环境相关延迟以 [活动评测报告](evaluation/reports/latest.json) 为唯一来源，避免在 README 中复制会随 live 检索发生小幅波动的数据。
 
-| 指标 | 当前值 |
-| --- | ---: |
-| 文件召回率 | 0.791667 |
-| 文件精确率 | 0.311857 |
-| 核心文件召回率 | 0.791667 |
-| 核心文件精确率 | 0.320333 |
-| 符号召回率 | 0.153333 |
-| 符号精确率 | 0.067381 |
-| 成功率 | 0.08 |
-| 平均上下文 | 142.16 tokens |
-| 平均工具调用 | 3 |
-| P95 延迟 | 见活动报告（环境相关） |
-
-Adapter 可用不等于检索质量门已通过：当前主要缺陷仍是候选覆盖、符号召回和排序精确率不足。Builtin engine 不属于当前运行时，也不会作为质量问题的回退方案。详细边界见 [当前 CodeGraph 评测状态](docs/codegraph-evaluation-current.md)，原始数据见 [活动评测报告](evaluation/reports/latest.json)。
+Adapter 可用不等于检索质量门已通过：当前 self-repo 活动质量门尚未通过，主要缺陷仍是候选覆盖、符号召回和排序精确率不足。Builtin engine 不属于当前运行时，也不会作为质量问题的回退方案。详细边界见 [当前 CodeGraph 评测状态](docs/codegraph-evaluation-current.md)。
 
 ## gardenserver 受控实践结果
 

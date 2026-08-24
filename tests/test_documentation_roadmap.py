@@ -80,22 +80,14 @@ class DocumentationRoadmapTests(unittest.TestCase):
         self.assertIn(f"当前版本：{__version__}", audit)
         self.assertIn(f"当前 CodeGraph 评测状态（{__version__}）", codegraph)
 
-    def test_readme_quality_summary_matches_active_codegraph_report(self) -> None:
+    def test_readme_links_active_codegraph_report_and_discloses_gate(self) -> None:
         report = json.loads(
             (self.root / "evaluation" / "reports" / "latest.json").read_text(encoding="utf-8")
         )
-        metrics = report["strategies"]["codegraph"]["metrics"]
-
-        for metric in (
-            "file_recall",
-            "file_precision",
-            "core_file_recall",
-            "core_file_precision",
-            "symbol_recall",
-            "symbol_precision",
-        ):
-            self.assertIn(f"{metrics[metric]:.6f}", self.readme)
-        self.assertIn("P95 延迟 | 见活动报告（环境相关）", self.readme)
+        self.assertEqual(__version__, report["package_version"])
+        self.assertFalse(report["quality_gate"]["passed"])
+        self.assertIn("evaluation/reports/latest.json", self.readme)
+        self.assertIn("self-repo 活动质量门尚未通过", self.readme)
 
     def test_retrieval_work_package_tracks_phase3_requirements(self) -> None:
         work_package = (self.root / "docs" / "retrieval-quality-work-package.md").read_text(
