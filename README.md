@@ -44,16 +44,97 @@ Project Knowledge CLI（PKS）是本地优先的项目知识工具。它从代�
 
 ## 安装
 
-Windows 10/11 x64 推荐使用 npm 全局安装，然后在需要建立知识库的项目根目录初始化：
+当前 npm 首发验证范围是 Windows 10/11 x64。安装前确认本机命令满足最低版本：
+
+```powershell
+node --version       # 20+
+npm --version        # 10+
+py -3.11 --version   # 3.11+
+git --version
+```
+
+### 从 npm registry 安装
+
+包发布到 npm registry 后，全局安装只需要一条命令：
 
 ```powershell
 npm install --global project-kb-cli
+project-kb --version
+```
+
+如果 registry 返回 `E404`，表示该包或版本尚未公开发布。不要安装名称相近的第三方包，可等待正式发布，或按下一节从本仓库构建 tarball。
+
+### 从本仓库 tarball 安装
+
+维护者或发布前验收可以从干净源码构建同样的 npm 制品。以下命令在仓库根目录执行：
+
+```powershell
+.venv\Scripts\python.exe scripts\build_npm_package.py
+Push-Location dist\npm-package
+$package = npm pack --silent
+npm install --global ".\$package"
+Pop-Location
+project-kb --version
+```
+
+npm 包会发现 Python 3.11+，在 `%LOCALAPPDATA%\ProjectKnowledgeCLI\runtimes\<版本>` 创建版本隔离的托管虚拟环境，并离线安装包内同版本 Python wheel。它还会使用包内固定的 `@colbymchenry/codegraph@1.5.0`。可以用 `PROJECT_KB_PYTHON` 指定 Python，或用 `PROJECT_KB_RUNTIME_HOME` 改变托管运行时根目录。
+
+## 在项目中初始化
+
+进入需要接入 Codex 的 Git 项目根目录，然后初始化并检查状态：
+
+```powershell
+Set-Location D:\path\to\your-repository
+project-kb init
+project-kb status . --json
+project-kb doctor . --json
+```
+
+`init` 会初始化 CodeGraph 和项目知识库，并在保留用户原有内容的前提下写入工具拥有的 `AGENTS.md` 与 `.codex/config.toml` 标记块。重复执行是幂等的。
+
+初始化完成后：
+
+1. 在 Codex 中关闭并重新打开该项目，或重启 Codex。
+2. 信任该项目，使 Codex 加载项目级 `.codex/config.toml`。
+3. 在 Codex 的 MCP 列表中确认 `project_knowledge` 已启用。
+4. 新建任务并要求 Codex 先调用 `knowledge_status` 和 `knowledge_context`；跨模块修改前调用 `knowledge_impact`。
+
+这些 `knowledge_*` 名称是 Codex 调用的 MCP 工具，不是 PowerShell 命令。若它们在已经打开的旧任务中不可见，通常是因为该任务启动时尚未加载新 MCP 配置；重新打开项目并新建任务即可。
+
+## 日常使用
+
+代码发生变化后同步索引；需要完整重建或健康检查时使用对应命令：
+
+```powershell
+project-kb sync .
+project-kb status . --json
+project-kb check . --json
+project-kb rebuild .
+```
+
+升级 npm 包后，需要在每个已初始化项目根目录再次运行 `init`，让 Codex 配置切换到新版本托管运行时：
+
+```powershell
+npm install --global project-kb-cli@latest
 project-kb init
 ```
 
-npm 包会发现 Python 3.11+，在 `%LOCALAPPDATA%\ProjectKnowledgeCLI\runtimes\<版本>` 创建版本隔离的托管虚拟环境，并离线安装随 npm 包发布的同版本 Python wheel。可以用 `PROJECT_KB_PYTHON` 指定 Python，或用 `PROJECT_KB_RUNTIME_HOME` 改变托管运行时根目录。
+移除某个项目的 Codex/AGENTS 集成时先在该项目根目录执行 `uninstall`；它会保留 `.project-kb` 知识数据。随后可选择卸载全局 npm 包：
 
-成功初始化后会保留用户原有内容，并写入工具拥有的 `AGENTS.md` 和 `.codex/config.toml` 标记块。Codex 重启并信任该项目后，即可使用 `knowledge_status`、`knowledge_context` 和 `knowledge_impact`；无需再手工配置全局 MCP。重复执行 `project-kb init` 是幂等的。
+```powershell
+project-kb uninstall
+npm uninstall --global project-kb-cli
+```
+
+### 常见问题
+
+- `project-kb` 找不到：重新打开终端，并确认 npm 全局 bin 目录在 `PATH` 中。
+- Python 探测失败：安装 Python 3.11+，或设置 `PROJECT_KB_PYTHON` 为解释器绝对路径后重新安装/运行。
+- `knowledge_status` 等工具不可见：确认项目已受信任、`.codex/config.toml` 存在，然后重启 Codex 并新建任务。
+- 同名 MCP 配置冲突：`init` 不会覆盖用户自有的 `[mcp_servers.project_knowledge]`；先改名或迁移原配置再重试。
+- 诊断安装：在目标项目根目录运行 `project-kb doctor . --json`，并用 `project-kb status . --json` 检查索引状态。
+
+## 源码开发
 
 源码开发仍可在源码目录执行：
 
@@ -76,7 +157,7 @@ python -m pip install -e .
 python -m project_knowledge doctor . --json
 ```
 
-安装后应能执行：
+源码安装后应能执行：
 
 ```bash
 project-kb --version
@@ -84,16 +165,14 @@ project-kb --version
 
 源码开发应使用仓库独立 `.venv`，避免多个 Git 工作树的 editable install 相互覆盖。`doctor.package_source` 会在检查 PKS 源码仓库本身时报告实际导入位置是否与当前工作树一致。普通目标项目显示为 `external_project`，不会误报源码工作树冲突。
 
-如果终端找不到 `project-kb`，请使用虚拟环境中的 `python -m project_knowledge`，或激活该虚拟环境后再执行 `project-kb`。
-
 ## 快速开始
 
-初始化项目并检查状态：
+也可以显式传入项目路径，而不切换当前目录：
 
 ```bash
-project-kb init /path/to/repository
-project-kb status /path/to/repository
-project-kb check /path/to/repository
+project-kb init D:\path\to\repository
+project-kb status D:\path\to\repository
+project-kb check D:\path\to\repository
 ```
 
 启动 MCP 服务：

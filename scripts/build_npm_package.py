@@ -44,6 +44,11 @@ def stage_npm_package(root: Path, output: Path, wheel: Path) -> dict[str, str]:
             if not source.is_dir():
                 raise ValueError(f"missing npm package directory: {source}")
             shutil.copytree(source, temporary / directory)
+        for filename in ["README.md", "LICENSE"]:
+            source = root / filename
+            if not source.is_file():
+                raise ValueError(f"missing npm package file: {source}")
+            shutil.copy2(source, temporary / filename)
         vendor = temporary / "vendor"
         vendor.mkdir()
         shutil.copy2(wheel, vendor / wheel.name)

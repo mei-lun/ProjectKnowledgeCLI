@@ -63,7 +63,7 @@
 | Node/npm | Node.js 20+、npm 10+ |
 | Python | 3.11+；依次检查 `PROJECT_KB_PYTHON`、Windows `py -3.11`、`python`、`python3` |
 | CodeGraph | npm 依赖固定为 `@colbymchenry/codegraph@1.5.0`，启动器通过绝对 `CODEGRAPH_COMMAND` 传给 Python |
-| 托管运行时 | `%LOCALAPPDATA%\ProjectKnowledgeCLI\runtimes\<版本>`；无 `LOCALAPPDATA` 时回退 `%USERPROFILE%\.project-kb\runtimes\<版本>` |
+| 托管运行时 | `%LOCALAPPDATA%\ProjectKnowledgeCLI\runtimes\<版本>`；无 `LOCALAPPDATA` 时回退 `%USERPROFILE%\.project-kb\runtimes\<版本>`；完成标记验证包版本、wheel SHA-256 和完成时间，死亡 PID 陈旧锁可恢复 |
 | 更新 | 新 npm 版本创建新的版本目录；项目再次执行 `project-kb init` 后更新 `.codex/config.toml` 的绝对 Python 路径 |
 | 覆盖 | `PROJECT_KB_PYTHON` 指定解释器，`PROJECT_KB_RUNTIME_HOME` 指定运行时根目录，已有 `CODEGRAPH_COMMAND` 保持优先 |
 

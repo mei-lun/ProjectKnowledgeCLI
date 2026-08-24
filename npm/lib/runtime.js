@@ -1,6 +1,7 @@
 "use strict";
 
 const childProcess = require("node:child_process");
+const crypto = require("node:crypto");
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
@@ -103,14 +104,19 @@ function ensureRuntime(options) {
   const spawnSyncImpl = options.spawnSyncImpl || childProcess.spawnSync;
   const base = runtimeBase({ env, platform });
   const target = path.join(base, packageVersion);
-  if (runtimeReady(target, packageVersion, platform)) return runtimePython(target, platform);
-
   const wheel = findBundledWheel(packageRoot, packageVersion);
+  const wheelSha256 = sha256File(wheel);
+  if (runtimeReady(target, packageVersion, platform, wheelSha256)) {
+    return runtimePython(target, platform);
+  }
+
   const python = options.python || discoverPython({ env, platform, spawnSyncImpl });
   const lockPath = path.join(base, `${packageVersion}.lock`);
   fs.mkdirSync(base, { recursive: true });
-  const lock = acquireLock(lockPath, target, packageVersion, platform, {
+  const lock = acquireLock(lockPath, target, packageVersion, platform, wheelSha256, {
     timeoutMs: options.lockTimeoutMs ?? 120000,
+    staleMs: options.lockStaleMs ?? 5000,
+    processAliveImpl: options.processAliveImpl || processAlive,
   });
   if (lock === null) return runtimePython(target, platform);
 
@@ -119,7 +125,9 @@ function ensureRuntime(options) {
     `.${packageVersion}.${process.pid}.${Math.random().toString(16).slice(2)}`,
   );
   try {
-    if (runtimeReady(target, packageVersion, platform)) return runtimePython(target, platform);
+    if (runtimeReady(target, packageVersion, platform, wheelSha256)) {
+      return runtimePython(target, platform);
+    }
     fs.rmSync(temporary, { recursive: true, force: true });
     runChecked(
       "create managed Python environment",
@@ -134,9 +142,28 @@ function ensureRuntime(options) {
       ["-m", "pip", "install", "--disable-pip-version-check", "--no-index", "--find-links", path.dirname(wheel), wheel],
       { env, spawnSyncImpl },
     );
+    const versionCheck = runChecked(
+      "verify managed project-knowledge-cli version",
+      managedPython,
+      ["-m", "project_knowledge", "--version"],
+      { env, spawnSyncImpl },
+    );
+    const versionOutput = String(versionCheck.stdout || "").trim();
+    const installedVersion = versionOutput.split(/\s+/).at(-1);
+    if (installedVersion !== packageVersion) {
+      throw new Error(
+        `Managed project-knowledge-cli version mismatch: expected ${packageVersion}, got ${versionOutput || "no output"}`,
+      );
+    }
     fs.writeFileSync(
       path.join(temporary, ".complete"),
-      `${JSON.stringify({ packageVersion, pythonVersion: python.version })}\n`,
+      `${JSON.stringify({
+        packageVersion,
+        installedVersion,
+        pythonVersion: python.version,
+        wheelSha256,
+        completedAt: new Date().toISOString(),
+      })}\n`,
       "utf8",
     );
     if (fs.existsSync(target)) fs.rmSync(target, { recursive: true, force: true });
@@ -149,34 +176,81 @@ function ensureRuntime(options) {
 }
 
 
-function runtimeReady(target, packageVersion, platform) {
+function runtimeReady(target, packageVersion, platform, wheelSha256) {
   const marker = path.join(target, ".complete");
   const python = runtimePython(target, platform);
   if (!fs.existsSync(marker) || !fs.existsSync(python)) return false;
   try {
-    return JSON.parse(fs.readFileSync(marker, "utf8")).packageVersion === packageVersion;
+    const content = JSON.parse(fs.readFileSync(marker, "utf8"));
+    return content.packageVersion === packageVersion
+      && content.installedVersion === packageVersion
+      && content.wheelSha256 === wheelSha256
+      && typeof content.pythonVersion === "string"
+      && content.pythonVersion.length > 0
+      && Number.isFinite(Date.parse(content.completedAt));
   } catch (_error) {
     return false;
   }
 }
 
 
-function acquireLock(lockPath, target, packageVersion, platform, options) {
+function acquireLock(lockPath, target, packageVersion, platform, wheelSha256, options) {
   const started = Date.now();
   while (true) {
     try {
       const descriptor = fs.openSync(lockPath, "wx");
-      fs.writeFileSync(descriptor, `${process.pid}\n`, "utf8");
+      fs.writeFileSync(
+        descriptor,
+        `${JSON.stringify({ pid: process.pid, createdAt: new Date().toISOString() })}\n`,
+        "utf8",
+      );
       return descriptor;
     } catch (error) {
       if (error.code !== "EEXIST") throw error;
-      if (runtimeReady(target, packageVersion, platform)) return null;
+      if (runtimeReady(target, packageVersion, platform, wheelSha256)) return null;
+      if (staleLock(lockPath, options.staleMs, options.processAliveImpl)) {
+        fs.rmSync(lockPath, { force: true });
+        continue;
+      }
       if (Date.now() - started >= options.timeoutMs) {
         throw new Error(`another project-kb setup is running (${lockPath})`);
       }
       sleep(200);
     }
   }
+}
+
+
+function staleLock(lockPath, staleMs, processAliveImpl) {
+  let ageMs;
+  try {
+    ageMs = Math.max(0, Date.now() - fs.statSync(lockPath).mtimeMs);
+  } catch (error) {
+    return error.code === "ENOENT";
+  }
+  if (ageMs < staleMs) return false;
+  try {
+    const owner = JSON.parse(fs.readFileSync(lockPath, "utf8"));
+    return !Number.isInteger(owner.pid) || !processAliveImpl(owner.pid);
+  } catch (_error) {
+    return true;
+  }
+}
+
+
+function processAlive(pid) {
+  if (!Number.isInteger(pid) || pid <= 0) return false;
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (error) {
+    return error.code === "EPERM";
+  }
+}
+
+
+function sha256File(file) {
+  return crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex");
 }
 
 
@@ -200,7 +274,7 @@ function runChecked(label, command, args, options) {
     windowsHide: true,
     env: options.env,
   });
-  if (result.status === 0) return;
+  if (result.status === 0) return result;
   const detail = String(result.stderr || result.error?.message || `exit ${result.status}`).trim();
   throw new Error(`Failed to ${label}: ${detail}`);
 }

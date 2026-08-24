@@ -28,6 +28,8 @@ class NpmPackageBuildTests(unittest.TestCase):
             }),
             encoding="utf-8",
         )
+        (self.root / "README.md").write_text("# Test package\n", encoding="utf-8")
+        (self.root / "LICENSE").write_text("Apache-2.0 test license\n", encoding="utf-8")
 
     def tearDown(self) -> None:
         self.temporary.cleanup()
@@ -52,6 +54,11 @@ class NpmPackageBuildTests(unittest.TestCase):
         self.assertTrue((output / "bin" / "placeholder.js").exists())
         self.assertTrue((output / "lib" / "placeholder.js").exists())
         self.assertTrue((output / "scripts" / "placeholder.js").exists())
+        self.assertEqual((output / "README.md").read_text(encoding="utf-8"), "# Test package\n")
+        self.assertEqual(
+            (output / "LICENSE").read_text(encoding="utf-8"),
+            "Apache-2.0 test license\n",
+        )
 
     def test_stage_rejects_a_wheel_for_another_version_without_replacing_output(self) -> None:
         wheel = self.root / "project_knowledge_cli-1.2.2-py3-none-any.whl"
@@ -86,6 +93,10 @@ class NpmReleaseDocumentationTests(unittest.TestCase):
         self.assertIn("npm install --global project-kb-cli", readme)
         self.assertIn("project-kb init", readme)
         self.assertIn(".codex/config.toml", readme)
+        self.assertIn("npm install --global project-kb-cli@latest", readme)
+        self.assertIn("project-kb uninstall", readme)
+        self.assertIn("npm uninstall --global project-kb-cli", readme)
+        self.assertIn("E404", readme)
 
     def test_compatibility_matrix_records_the_windows_npm_release_gate(self) -> None:
         compatibility = (self.ROOT / "docs" / "compatibility-matrix.md").read_text(encoding="utf-8")

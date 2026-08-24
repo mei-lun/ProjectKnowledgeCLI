@@ -1,6 +1,7 @@
 "use strict";
 
 const assert = require("node:assert/strict");
+const crypto = require("node:crypto");
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
@@ -88,6 +89,9 @@ test("ensureRuntime installs once, writes completion marker, and reuses it", (t)
       fs.mkdirSync(path.join(target, "Scripts"), { recursive: true });
       fs.writeFileSync(path.join(target, "Scripts", "python.exe"), "python");
     }
+    if (args.includes("project_knowledge") && args.includes("--version")) {
+      return { status: 0, stdout: "project-kb 0.1.48\n", stderr: "" };
+    }
     return { status: 0, stdout: "", stderr: "" };
   };
   const options = {
@@ -103,10 +107,19 @@ test("ensureRuntime installs once, writes completion marker, and reuses it", (t)
   const second = ensureRuntime(options);
 
   assert.equal(first, second);
-  assert.equal(calls.length, 2);
+  assert.equal(calls.length, 3);
   assert.ok(fs.existsSync(path.join(runtimeHome, "0.1.48", ".complete")));
   assert.match(calls[1][1].join(" "), /--no-index/);
   assert.match(calls[1][1].join(" "), /project_knowledge_cli-0\.1\.48/);
+  const marker = JSON.parse(fs.readFileSync(path.join(runtimeHome, "0.1.48", ".complete"), "utf8"));
+  assert.equal(marker.packageVersion, "0.1.48");
+  assert.equal(marker.installedVersion, "0.1.48");
+  assert.match(marker.wheelSha256, /^[a-f0-9]{64}$/);
+  assert.equal(
+    marker.wheelSha256,
+    crypto.createHash("sha256").update("wheel").digest("hex"),
+  );
+  assert.ok(Number.isFinite(Date.parse(marker.completedAt)));
 });
 
 
@@ -155,6 +168,45 @@ test("ensureRuntime reports lock contention without damaging the owner", (t) => 
     /another project-kb setup is running/,
   );
   assert.equal(fs.readFileSync(path.join(runtimeHome, "0.1.48.lock"), "utf8"), "owner");
+});
+
+
+test("ensureRuntime recovers a stale lock owned by a dead process", (t) => {
+  const root = temporaryDirectory(t);
+  const packageRoot = path.join(root, "package");
+  const runtimeHome = path.join(root, "runtimes");
+  fs.mkdirSync(path.join(packageRoot, "vendor"), { recursive: true });
+  fs.mkdirSync(runtimeHome, { recursive: true });
+  fs.writeFileSync(path.join(packageRoot, "vendor", "project_knowledge_cli-0.1.48-py3-none-any.whl"), "wheel");
+  fs.writeFileSync(
+    path.join(runtimeHome, "0.1.48.lock"),
+    `${JSON.stringify({ pid: 424242, createdAt: "2026-08-24T00:00:00.000Z" })}\n`,
+  );
+  const spawnSyncImpl = (_command, args) => {
+    if (args[0] === "-m" && args[1] === "venv") {
+      const target = args.at(-1);
+      fs.mkdirSync(path.join(target, "Scripts"), { recursive: true });
+      fs.writeFileSync(path.join(target, "Scripts", "python.exe"), "python");
+    }
+    if (args.includes("project_knowledge") && args.includes("--version")) {
+      return { status: 0, stdout: "project-kb 0.1.48\n", stderr: "" };
+    }
+    return { status: 0, stdout: "", stderr: "" };
+  };
+
+  const python = ensureRuntime({
+    packageRoot,
+    packageVersion: "0.1.48",
+    env: { PROJECT_KB_RUNTIME_HOME: runtimeHome },
+    platform: "win32",
+    python: { command: "python", argsPrefix: [], version: "3.12.4" },
+    spawnSyncImpl,
+    lockStaleMs: 0,
+    processAliveImpl: () => false,
+  });
+
+  assert.equal(python, path.join(runtimeHome, "0.1.48", "Scripts", "python.exe"));
+  assert.equal(fs.existsSync(path.join(runtimeHome, "0.1.48.lock")), false);
 });
 
 

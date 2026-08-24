@@ -103,6 +103,18 @@ def validate_npm_bootstrap(root: Path = PROJECT_ROOT) -> dict[str, Any]:
         pack_payload = json.loads(packed.stdout)
         if not isinstance(pack_payload, list) or len(pack_payload) != 1:
             raise RuntimeError("npm pack did not produce exactly one artifact")
+        packed_files = {
+            item.get("path")
+            for item in pack_payload[0].get("files", [])
+            if isinstance(item, dict)
+        }
+        required_package_files = {"README.md", "LICENSE", "package.json"}
+        missing_package_files = sorted(required_package_files - packed_files)
+        if missing_package_files:
+            raise RuntimeError(
+                "npm artifact is missing release documentation: "
+                + ", ".join(missing_package_files)
+            )
         tarball = artifacts / str(pack_payload[0]["filename"])
 
         run_checked(
@@ -200,6 +212,7 @@ def validate_npm_bootstrap(root: Path = PROJECT_ROOT) -> dict[str, Any]:
             "status": "passed",
             "version": version,
             "npm_package": tarball.name,
+            "release_docs_packed": True,
             "runtime_created": (runtime_home / version / ".complete").is_file(),
             "exit_code_forwarded": True,
             "codex_config_valid": True,
