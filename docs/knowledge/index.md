@@ -9,7 +9,7 @@
 ## 人工维护
 
 - [架构](curated/architecture.md) - 状态：`新鲜`；可信度：`已验证`
-- [约定](curated/conventions.md) - 状态：`新鲜`；可信度：`已验证`
+- [约定](curated/conventions.md) - 状态：`可能过期`；可信度：`已验证`
 - [功能开发指南生成约定](curated/feature-guide-generation.md) - 状态：`新鲜`；可信度：`已验证`
 - [术语表](curated/glossary.md) - 状态：`可能过期`；可信度：`已验证`
 - [Provider 与 EvidencePack](curated/provider-and-evidence.md) - 状态：`可能过期`；可信度：`已验证`
