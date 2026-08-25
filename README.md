@@ -1,5 +1,68 @@
 # Project Knowledge CLI
 
+> **ProjectKnowledgeCLI (PKS) = CodeGraph + 可追溯项目知识 + AI 协作工作流**
+
+ProjectKnowledgeCLI 不是另一个代码解析器，而是建立在 CodeGraph 之上的项目知识层。CodeGraph 负责从源码提取文件、符号、调用关系和影响范围；PKS 负责把这些可计算事实与设计决策、模块职责、开发约束等语义知识组织起来，并通过 MCP 为 AI 提供可审查、可解释、可持续更新的项目上下文。
+
+## 与 CodeGraph 的关系
+
+两个项目职责互补，而不是相互替代：
+
+| 能力 | CodeGraph | ProjectKnowledgeCLI |
+| --- | --- | --- |
+| 核心定位 | 代码语义索引与知识图谱引擎 | 项目知识库、检索层与 AI 工作流 |
+| 主要负责 | 解析源码、提取符号、构建调用/依赖图、执行图查询 | 持久化项目知识、管理来源与新鲜度、生成和审核上下文 |
+| 数据边界 | `.codegraph`：文件、节点、边和索引 | `.project-kb`：知识记录、来源、提案、事件和生成物 |
+| 查询重点 | “谁调用了这个函数？改动会影响什么？” | “这个任务需要哪些证据？结论是否过期？哪些文件必须保留？” |
+| 典型接口 | `query`、`callers`、`callees`、`impact` | `knowledge_context`、`knowledge_search`、`knowledge_impact`、`knowledge_status` |
+| 质量目标 | 解析完整性、关系正确性和图查询性能 | 召回与排序质量、来源可追溯性、知识新鲜度和审核安全性 |
+
+推荐的组合方式是：**`.codegraph` 保存代码事实，`.project-kb` 保存经过追踪、排序和审核的项目知识。** 两个目录由各自的工具维护，不应手工合并或删除。
+
+## PKS 带来的进一步优化
+
+相比直接使用 CodeGraph，ProjectKnowledgeCLI 主要增加了以下项目级能力：
+
+### 1. 知识生命周期与审计
+
+- 区分可计算事实与需要人工确认的语义知识。
+- 支持 generated、draft、curated、decision 等知识类型。
+- 每条知识关联路径、符号、内容 hash、提交版本、来源和置信度。
+- 源码变化后自动标记 `fresh`、`potentially_stale`、`stale` 或 `conflicted`。
+- 草稿必须经过确认才会进入正式知识，不会静默覆盖人工维护内容。
+
+### 2. 面向任务的检索与上下文
+
+- 融合路径、符号、词法、知识、图关系、测试和配置等多通道候选。
+- 使用 `policy-v2` 的符号优先、查询类型感知排序策略。
+- 将上下文分为 `core`、`supporting` 和 `optional`，在 token 受限时优先保留定义、调用路径和关键关系。
+- 返回置信度、排序原因、被抑制候选和 `needs_source_check`，让 AI 知道结果为何可信以及哪里需要回看源码。
+- 可选使用本地确定性向量检索；默认仍保持 embeddings disabled 和 local-only。
+
+### 3. 增量更新与项目协作
+
+- 集成文件 watcher 以及 `post-checkout`、`post-merge`、`post-rewrite`、`post-commit` Git 事件。
+- 支持初始化、同步、原子重建、健康检查和最终发布检查。
+- 初始化按模块分批，可按文件 hash 复用已完成批次，并拒绝提交到错误 snapshot 的结果。
+- 通过锁、事务和原子写入保护 `.project-kb`，适合被多个 CLI/MCP 进程使用。
+
+### 4. 性能与可复现性
+
+- 对 CodeGraph CLI 的状态、文件、查询、调用方、影响分析等请求提供 request-scoped 缓存。
+- 复用 snapshot/status、去重重复查询，并限制高成本图锚点，降低混合检索开销。
+- 评估、排序策略和知识来源均可追踪，便于回归测试和定位检索质量变化。
+
+### 5. 面向 Codex 的产品化交付
+
+- 提供 `knowledge_status`、`knowledge_context`、`knowledge_search`、`knowledge_get`、`knowledge_impact` 等只读 MCP 工具。
+- 提供初始化、草稿保存、确认和更新提交流程，支持 AI 与人工共同维护知识库。
+- 通过 npm 包自动管理 Python 运行时和固定版本的 CodeGraph，降低 Windows 用户安装成本。
+- 默认不联网、不发送遥测，只通过 CodeGraph 公共 CLI/API 获取代码事实。
+
+## 当前状态与边界
+
+上述能力已经在代码中实现，但“功能可用”不等于所有检索质量门槛已经通过。当前正式评估报告仍显示候选覆盖、符号召回和调用路径召回存在不足；gardenserver 的受控实践数据表明排序和检索延迟已有明显改善，但生产规模验证仍在继续。PKS 优化的是知识管理、检索编排和工作流，不会替代 CodeGraph 底层的语言解析和关系抽取能力。
+
 ## 当前质量指标（0.1.48）
 
 当前真实 CodeGraph Adapter 已接入并可用：`codegraph-public-cli 1.5.0`。当前活动评测使用 50 个 self-repo 样本；精确指标和环境相关延迟以 [活动评测报告](evaluation/reports/latest.json) 为唯一来源，避免在 README 中复制会随 live 检索发生小幅波动的数据。
