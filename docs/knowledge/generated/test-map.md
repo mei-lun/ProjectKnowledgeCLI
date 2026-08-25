@@ -30,6 +30,7 @@
 | `tests/test_integration.py` | tests |
 | `tests/test_npm_bootstrap_validation.py` | tests |
 | `tests/test_npm_package_build.py` | tests |
+| `tests/test_progress.py` | tests |
 | `tests/test_proposal.py` | tests |
 | `tests/test_provider.py` | tests |
 | `tests/test_ranking.py` | tests |

@@ -29,6 +29,7 @@
 - `src/project_knowledge/mcp.py`（Python）
 - `src/project_knowledge/models.py`（Python）
 - `src/project_knowledge/performance.py`（Python）
+- `src/project_knowledge/progress.py`（Python）
 - `src/project_knowledge/proposal.py`（Python）
 - `src/project_knowledge/provider.py`（Python）
 - `src/project_knowledge/ranking.py`（Python）

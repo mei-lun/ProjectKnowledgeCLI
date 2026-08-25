@@ -16,6 +16,7 @@ from .mcp import serve
 from .models import PatchOperation
 from .proposal import ProposalService
 from .provider import ModelRuntime, ProviderConfig, create_preview_provider, create_provider
+from .progress import TerminalProgressRenderer
 from .schemas import FEATURE_GUIDE_DRAFT_SCHEMA
 from .semantic import SemanticKnowledgeService
 from .service import ProjectService
@@ -257,7 +258,14 @@ def main(argv: list[str] | None = None) -> int:
         else:
             service = ProjectService(args.path)
             if args.command == "init":
-                result = service.initialize(args.dry_run)
+                renderer = None
+                if not args.as_json and not args.quiet and sys.stderr.isatty():
+                    renderer = TerminalProgressRenderer(sys.stderr)
+                try:
+                    result = service.initialize(args.dry_run, progress=renderer)
+                finally:
+                    if renderer is not None:
+                        renderer.close()
             elif args.command == "sync":
                 result = service.sync(args.dry_run, args.task_summary)
             elif args.command == "rebuild":

@@ -18,6 +18,7 @@ from .guidance import GuidanceService
 from .knowledge import KnowledgeGenerator
 from .models import ChangeSet
 from .proposal import ProposalService
+from .progress import ProgressEvent
 from .schemas import CHANGE_SET_SCHEMA, all_schemas, validate_instance
 from .store import KnowledgeStore
 from .vector import VectorIndex
@@ -121,7 +122,12 @@ class ProjectService:
         self._watching = False
         self._watch_lease: dict[str, Any] | None = None
 
-    def initialize(self, dry_run: bool = False) -> dict[str, Any]:
+    def initialize(
+        self,
+        dry_run: bool = False,
+        *,
+        progress: Callable[[ProgressEvent], None] | None = None,
+    ) -> dict[str, Any]:
         if dry_run:
             snapshot = self.engine.snapshot(self.root, self.config)
             return {
@@ -136,13 +142,53 @@ class ProjectService:
                 ],
             }
         with project_lock(self.root):
-            self._prepare_project()
+            self._progress(progress, "prepare", "准备项目目录", "started", 1)
+            try:
+                self._prepare_project()
+            except Exception as error:
+                self._progress(progress, "prepare", "准备项目目录", "failed", 1, error=str(error))
+                raise
+            self._progress(progress, "prepare", "准备项目目录", "completed", 1)
             self.config = ProjectConfig.load(self.root)
             self.engine = self._engine_factory(self.config)
-            codegraph = self.engine.initialize(self.root, self.config)
-            snapshot = self.engine.snapshot(self.root, self.config)
-            result = self._atomic_rebuild(snapshot)
-            result["codex"] = self._install_codex_integration()
+            self._progress(progress, "codegraph", "CodeGraph 建图", "started", 2, detail="调用公开 CLI")
+            try:
+                codegraph = self.engine.initialize(self.root, self.config)
+            except Exception as error:
+                self._progress(progress, "codegraph", "CodeGraph 建图", "failed", 2, error=str(error))
+                raise
+            self._progress(progress, "codegraph", "CodeGraph 建图", "completed", 2, detail="代码图已完成")
+            self._progress(progress, "snapshot", "获取代码快照", "started", 3)
+            try:
+                snapshot = self.engine.snapshot(self.root, self.config)
+            except Exception as error:
+                self._progress(progress, "snapshot", "获取代码快照", "failed", 3, error=str(error))
+                raise
+            self._progress(
+                progress, "snapshot", "获取代码快照", "completed", 3,
+                current=len(snapshot.files), total=len(snapshot.files), detail=f"{len(snapshot.files)} 个文件",
+            )
+            self._progress(progress, "local_index", "写入本地知识索引", "started", 4)
+            try:
+                result = (
+                    self._atomic_rebuild(snapshot, progress=progress)
+                    if progress is not None
+                    else self._atomic_rebuild(snapshot)
+                )
+            except Exception as error:
+                self._progress(progress, "local_index", "写入本地知识索引", "failed", 4, error=str(error))
+                raise
+            self._progress(
+                progress, "local_index", "写入本地知识索引", "completed", 4,
+                current=5, total=5, detail=f"{result.get('files_indexed', len(snapshot.files))} 个文件",
+            )
+            self._progress(progress, "integration", "安装客户端集成", "started", 5)
+            try:
+                result["codex"] = self._install_codex_integration()
+            except Exception as error:
+                self._progress(progress, "integration", "安装客户端集成", "failed", 5, error=str(error))
+                raise
+            self._progress(progress, "integration", "安装客户端集成", "completed", 5)
         result["action"] = "init"
         result["codegraph"] = codegraph
         return result
@@ -169,7 +215,12 @@ class ProjectService:
         marker_update(self.root / ".gitignore", "gitignore", GITIGNORE_BODY)
         self._write_mcp_config()
 
-    def _atomic_rebuild(self, snapshot: CodeIndexSnapshot) -> dict[str, Any]:
+    def _atomic_rebuild(
+        self,
+        snapshot: CodeIndexSnapshot,
+        *,
+        progress: Callable[[ProgressEvent], None] | None = None,
+    ) -> dict[str, Any]:
         started = time.monotonic()
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         preserved_knowledge = []
@@ -188,19 +239,24 @@ class ProjectService:
         try:
             with KnowledgeStore(temporary) as store:
                 store.initialize()
+                self._progress(progress, "local_index", "写入本地知识索引", "updated", 4, current=1, total=5, detail="创建临时数据库")
                 with store.transaction():
                     for record in preserved_knowledge:
                         store.upsert_knowledge(record)
                     store.import_guidance_graph(preserved_guidance)
                     store.replace_code_snapshot(snapshot)
+                    self._progress(progress, "local_index", "写入本地知识索引", "updated", 4, current=2, total=5, detail="写入代码快照")
                     self._update_metadata(store, full=True, duration_ms=0)
                     records = KnowledgeGenerator(
                         self.root, self.config, store, engine=self.engine
                     ).generate()
+                    self._progress(progress, "local_index", "写入本地知识索引", "updated", 4, current=3, total=5, detail="生成知识页")
                     VectorIndex(store, self.config).sync(records)
+                    self._progress(progress, "local_index", "写入本地知识索引", "updated", 4, current=4, total=5, detail="同步向量索引")
                 store.connection.execute("PRAGMA wal_checkpoint(TRUNCATE)")
                 counts = store.counts()
             os.replace(temporary, self.db_path)
+            self._progress(progress, "local_index", "写入本地知识索引", "updated", 4, current=5, total=5, detail="原子替换数据库")
             Path(str(self.db_path) + "-wal").unlink(missing_ok=True)
             Path(str(self.db_path) + "-shm").unlink(missing_ok=True)
             for suffix in ["-wal", "-shm"]:
@@ -219,6 +275,23 @@ class ProjectService:
             temporary.unlink(missing_ok=True)
             Path(str(temporary) + "-wal").unlink(missing_ok=True)
             Path(str(temporary) + "-shm").unlink(missing_ok=True)
+
+    @staticmethod
+    def _progress(
+        callback: Callable[[ProgressEvent], None] | None,
+        stage: str,
+        label: str,
+        state: str,
+        index: int,
+        *,
+        current: int | None = None,
+        total: int | None = None,
+        detail: str = "",
+        error: str | None = None,
+    ) -> None:
+        if callback is None:
+            return
+        callback(ProgressEvent(stage, label, state, index, 5, current, total, detail, error))
 
     def sync(self, dry_run: bool = False, task_summary: str = "manual synchronization") -> dict[str, Any]:
         self._require_initialized()
