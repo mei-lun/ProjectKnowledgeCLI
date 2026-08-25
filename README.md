@@ -182,12 +182,91 @@ npm install --global project-kb-cli@latest
 project-kb init
 ```
 
-移除某个项目的 Codex/AGENTS 集成时先在该项目根目录执行 `uninstall`；它会保留 `.project-kb` 知识数据。随后可选择卸载全局 npm 包：
+### 卸载项目集成
+
+只移除当前项目中的 PKS 集成、保留知识库时，在项目根目录执行：
+
+```powershell
+project-kb uninstall
+```
+
+建议先预览将要移除的内容：
+
+```powershell
+project-kb uninstall --dry-run
+```
+
+也可以只移除某个客户端的集成标记：
+
+```powershell
+project-kb uninstall --client cursor
+```
+
+该命令只移除 PKS 自己写入的标记块、MCP 配置和 Git hooks，保留 `.project-kb`、`.codegraph` 以及用户在 `AGENTS.md` 和 `.codex/config.toml` 中维护的其他内容。
+
+### 完整卸载
+
+如果要同时移除项目集成和机器上的全局 CLI，在目标项目根目录执行：
 
 ```powershell
 project-kb uninstall
 npm uninstall --global project-kb-cli
 ```
+
+完整卸载不会自动删除项目中的 `.project-kb` 或 `.codegraph`。如果以后重新安装，知识库可以继续使用。
+
+### 重新安装
+
+重新安装全局 CLI 后，在每个需要接入的项目根目录重新运行 `init`：
+
+```powershell
+npm install --global project-kb-cli@latest
+project-kb --version
+project-kb init
+project-kb status --json
+```
+
+`init` 可以重复执行，会重新安装或更新 Codex/MCP 集成，并复用已有项目知识数据。
+
+### 彻底删除项目数据
+
+以下操作会永久删除当前项目的 PKS 知识库、CodeGraph 索引和 PKS 配置，不能通过 `project-kb init` 恢复原有索引内容。执行前请确认当前路径确实是目标项目根目录，并先备份需要保留的知识或配置。
+
+Windows PowerShell：
+
+```powershell
+# 进入目标项目根目录
+Set-Location D:\path\to\your-repository
+
+# 先移除 PKS 管理的集成标记、MCP 配置和 Git hooks
+project-kb uninstall
+
+# 卸载机器上的全局 CLI（可选）
+npm uninstall --global project-kb-cli
+
+# 删除 PKS、CodeGraph 和项目级 PKS 配置
+Remove-Item -LiteralPath .project-kb -Recurse -Force
+Remove-Item -LiteralPath .codegraph -Recurse -Force
+Remove-Item -LiteralPath .project-kb.yml -Force
+```
+
+Linux/macOS：
+
+```bash
+# 进入目标项目根目录
+cd /path/to/your-repository
+
+# 先移除 PKS 管理的集成标记、MCP 配置和 Git hooks
+project-kb uninstall
+
+# 卸载机器上的全局 CLI（可选）
+npm uninstall --global project-kb-cli
+
+# 删除 PKS、CodeGraph 和项目级 PKS 配置
+rm -rf -- .project-kb .codegraph .project-kb.yml
+```
+
+上述命令不会删除整个项目，也不会删除用户在 `AGENTS.md`、`.codex/config.toml` 或 Git hooks 中维护的非 PKS 内容。若要重新建立项目索引，重新安装 CLI 后运行 `project-kb init` 即可。
 
 ### 常见问题
 
