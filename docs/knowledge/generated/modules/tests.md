@@ -21,12 +21,14 @@
 - `tests/test_guidance.py`（Python）
 - `tests/test_guidance_e2e.py`（Python）
 - `tests/test_guidance_incremental.py`（Python）
+- `tests/test_guidance_initialization_loop.py`（Python）
 - `tests/test_guidance_mcp.py`（Python）
 - `tests/test_guidance_retrieval.py`（Python）
 - `tests/test_guidance_store.py`（Python）
 - `tests/test_guidance_workflow.py`（Python）
 - `tests/test_initialization_workflow.py`（Python）
 - `tests/test_integration.py`（Python）
+- `tests/test_knowledge_loop_status.py`（Python）
 - `tests/test_npm_bootstrap_validation.py`（Python）
 - `tests/test_npm_package_build.py`（Python）
 - `tests/test_progress.py`（Python）

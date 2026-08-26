@@ -42,7 +42,18 @@ class InitializationWorkflow:
                 (project_root, snapshot_id),
             ).fetchone()
             if row:
-                return self._status(guidance, str(row["run_id"]))
+                existing = guidance.get_run(str(row["run_id"]))
+                if existing is not None and existing.status != "failed":
+                    return self._status(guidance, existing.run_id)
+                with store.transaction():
+                    draft_rows = store.connection.execute(
+                        "SELECT draft_id FROM guidance_drafts WHERE run_id = ?", (str(row["run_id"]),)
+                    ).fetchall()
+                    for draft_row in draft_rows:
+                        store.delete_knowledge(f"draft.{draft_row['draft_id']}")
+                    store.connection.execute(
+                        "DELETE FROM guidance_runs WHERE run_id=?", (str(row["run_id"]),)
+                    )
             run_id = "run-" + hashlib.sha256(f"{project_root}\0{snapshot_id}".encode()).hexdigest()[:16]
             now = utc_now()
             groups: dict[str, list[dict[str, Any]]] = {}
@@ -98,6 +109,7 @@ class InitializationWorkflow:
             if run is None:
                 raise KeyError(f"运行不存在：{run_id}")
             if run.snapshot_id != snapshot["snapshot_id"]:
+                self._mark_failed(store, guidance, run, "CodeGraph 快照已变化")
                 raise ValueError("CodeGraph 快照已变化，请重新开始初始化")
             batch = guidance.next_pending_batch(run_id)
             if batch is None:
@@ -111,8 +123,16 @@ class InitializationWorkflow:
                 "source_hints": [{"path": path, "use": "按需调用 CodeGraph source"} for path in batch.files],
             }
 
-    def submit_batch(self, run_id: str, batch_id: str, snapshot_id: str,
-                     candidates: list[dict[str, Any]], *, error: str | None = None) -> dict[str, Any]:
+    def submit_batch(
+        self,
+        run_id: str,
+        batch_id: str,
+        snapshot_id: str,
+        candidates: list[dict[str, Any]],
+        *,
+        analyzed_files: list[str],
+        error: str | None = None,
+    ) -> dict[str, Any]:
         with self._open() as store:
             guidance = GuidanceStore(store)
             run = guidance.get_run(run_id)
@@ -121,12 +141,36 @@ class InitializationWorkflow:
             batch = next((item for item in guidance.list_batches(run_id) if item.batch_id == batch_id), None)
             if batch is None:
                 raise KeyError(f"批次不存在：{batch_id}")
-            if snapshot_id != run.snapshot_id or snapshot_id != batch.snapshot_id:
-                raise ValueError("提交快照与运行不一致")
             snapshot = self.client.snapshot()
             if snapshot["snapshot_id"] != run.snapshot_id:
+                self._mark_failed(store, guidance, run, "CodeGraph snapshot changed")
+                snapshot = self.client.snapshot()
+            if snapshot_id != run.snapshot_id or snapshot_id != batch.snapshot_id:
+                raise ValueError("提交快照与运行不一致")
+            if (
+                len(analyzed_files) != len(set(analyzed_files))
+                or set(analyzed_files) != set(batch.files)
+            ):
+                raise ValueError("analyzedFiles 必须与当前批次文件集合完全一致")
+            snapshot = self.client.snapshot()
+            if snapshot["snapshot_id"] != run.snapshot_id:
+                self._mark_failed(store, guidance, run, "CodeGraph 快照已变化")
                 raise ValueError("CodeGraph 快照已变化，请重新开始初始化")
             hashes = {item["path"]: item["content_hash"] for item in snapshot["files"]}
+            if error:
+                now = utc_now()
+                batch.status = "failed"
+                batch.result = {"candidates": candidates}
+                batch.error = error
+                batch.updated_at = now
+                with store.transaction():
+                    guidance.save_batch(batch)
+                    run.status = "failed"
+                    run.error = error
+                    run.uncovered_files = sorted(set(run.uncovered_files) | set(batch.files))
+                    run.updated_at = now
+                    guidance.create_run(run)
+                return self._status(guidance, run_id)
             for candidate in candidates:
                 self._validate_candidate(candidate, set(batch.files), hashes)
             now = utc_now()
@@ -149,12 +193,25 @@ class InitializationWorkflow:
                 guidance.create_run(run)
             return self._status(guidance, run_id)
 
+    @staticmethod
+    def _mark_failed(
+        store: KnowledgeStore,
+        guidance: GuidanceStore,
+        run: GuidanceRun,
+        error: str,
+    ) -> None:
+        run.status = "failed"
+        run.error = error
+        run.updated_at = utc_now()
+        with store.transaction():
+            guidance.create_run(run)
+
     def _status(self, guidance: GuidanceStore, run_id: str) -> dict[str, Any]:
         run = guidance.get_run(run_id)
         if run is None:
             raise KeyError(run_id)
         batches = guidance.list_batches(run_id)
-        return {
+        result = {
             **run.to_dict(),
             "batches": [item.to_dict() for item in batches],
             "ready_for_category_draft": (
@@ -163,6 +220,14 @@ class InitializationWorkflow:
                 and all(item.status == "completed" for item in batches)
             ),
         }
+        if result["ready_for_category_draft"] and not guidance.list_pending_drafts(run_id):
+            result["next_action"] = "create_category_draft"
+            result["category_candidates"] = [
+                candidate
+                for batch in batches
+                for candidate in (batch.result or {}).get("candidates", [])
+            ]
+        return result
 
     def _excluded(self, path: str) -> bool:
         if path == ".project-kb" or path.startswith((".project-kb/", ".codegraph/")):

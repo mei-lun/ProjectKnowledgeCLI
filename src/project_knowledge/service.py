@@ -31,6 +31,7 @@ from .util import (
     marker_update,
     process_alive,
     project_lock,
+    read_text,
     run_git,
     script_marker_update,
     utc_now,
@@ -304,6 +305,7 @@ class ProjectService:
             base_commit = readonly.get_meta("head_commit") or None
             base_branch = readonly.get_meta("branch") or None
             knowledge_changed = self._pending_knowledge(readonly)
+            guidance_managed = bool(readonly.get_meta("guidance_snapshot"))
         git = git_status(self.root)
         current_commit = git["head_commit"] or None
         current_branch = git["branch"] or None
@@ -347,7 +349,7 @@ class ProjectService:
             validate_instance(changeset_payload, CHANGE_SET_SCHEMA)
             atomic_json(self.root / ".project-kb" / "events" / f"{changeset.id}.json", changeset_payload)
             counts = store.counts()
-        semantic_paths = [
+        semantic_paths = [] if guidance_managed else [
             path for path in [*changed, *deleted]
             if not path.startswith((
                 ".github/", "docs/", "evaluation/", "tests/", ".project-kb/",

@@ -92,8 +92,8 @@ AI 在每次写入工具成功后重新调用 `knowledge_status`。基础循环�
 | --- | --- | --- |
 | `not_started` | 没有 guidance run | `start_initialization` |
 | `scanning` | 存在 pending batch | `analyze_next_batch` |
-| `draft_generation` | 批次完成，仍有类别草稿未生成 | `create_category_draft`、`create_methodology` 或 `create_guidance` |
-| `incremental` | 当前 snapshot 与 guidance baseline 不一致，或存在 pending change | `inspect_changes` 或 `classify_change` |
+| `draft_generation` | 批次完成，仍有类别草稿未生成；若草稿已存在则只提示可用，不强制审核 | `create_category_draft`、`create_methodology`、`create_guidance` 或 `draft_available` |
+| `incremental` | 当前 snapshot 与 guidance baseline 不一致，或存在 pending change | `inspect_changes` |
 | `ready` | 第 9 节所有门禁通过 | `none` |
 | `failed` | 当前 run 明确失败 | `restart_initialization` |
 

@@ -169,6 +169,9 @@ class GuidanceStore:
             )
         return [self._category(row) for row in rows]
 
+    def delete_categories(self, run_id: str) -> None:
+        self.connection.execute("DELETE FROM guidance_categories WHERE run_id = ?", (run_id,))
+
     def save_draft(self, draft: GuidanceDraft) -> GuidanceDraft:
         run = self._require_run(draft.run_id)
         if run.snapshot_id != draft.snapshot_id:
@@ -182,6 +185,8 @@ class GuidanceStore:
             category_run = self._require_run(category.run_id)
             if category_run.project_root != run.project_root:
                 raise ValueError("草稿类别与运行不属于同一项目")
+        if draft.category_id is not None and category.run_id != draft.run_id and not draft.payload.get("_change_id"):
+            raise ValueError("draft category is not owned by run")
         cursor = self.connection.execute(
             """
             INSERT INTO guidance_drafts(

@@ -102,9 +102,17 @@ class KnowledgeAPI:
             store.initialize()
 
     def status(self, *, _snapshot: Any | None = None) -> dict[str, Any]:
-        status = self.service.status(snapshot=_snapshot)
+        snapshot = _snapshot
+        if snapshot is None:
+            try:
+                snapshot = self.service.engine.snapshot(self.root, self.service.config)
+            except RuntimeError:
+                snapshot = None
+        status = self.service.status(snapshot=snapshot)
         with KnowledgeStore(self.service.db_path) as store:
-            status["guidance_workflow"] = self._guidance_workflow_status(store)
+            status["guidance_workflow"] = self._guidance_workflow_status(
+                store, current_snapshot_id=getattr(snapshot, "snapshot_id", None)
+            )
         return status
 
     @staticmethod
@@ -413,6 +421,16 @@ class KnowledgeAPI:
             item for item in search["results"]
             if broad_project_requested or item["kind"] != "project"
         ][:4]
+        review_gate = self._draft_review_gate(
+            task,
+            selected_results,
+            status.get("guidance_workflow", {}).get("pending_drafts", []),
+        )
+        review_ids = {
+            item.get("id") or item.get("draft_id")
+            for item in review_gate["drafts"]
+            if item.get("id") or item.get("draft_id")
+        }
         terms = self._symbol_terms(task)
         symbol_matches = self._task_symbol_matches(task, terms)
         graph_symbols = self._graph_symbol_anchors(
@@ -435,6 +453,8 @@ class KnowledgeAPI:
             fragments: list[dict[str, Any]] = []
             remaining = budget
             for item in selected_results:
+                if item["id"] in review_ids:
+                    continue
                 record = store.get_knowledge(item["id"])
                 if not record:
                     continue
@@ -446,6 +466,7 @@ class KnowledgeAPI:
                     continue
                 fragments.append({
                     "id": record.id, "title": record.title, "kind": record.kind,
+                    "ownership": record.ownership,
                     "confidence": record.confidence,
                     "freshness": "potentially_stale" if pending_sources else record.status,
                     "content": content, "sources": [source.to_dict() for source in record.sources],
@@ -482,6 +503,8 @@ class KnowledgeAPI:
                 "index": {"commit": status.get("index_commit"), "pending_files": status.get("pending_files", [])},
                 "summary": self._context_summary(fragments, impact),
                 "knowledge": fragments,
+                "review_required": review_gate["review_required"],
+                "review_drafts": review_gate["drafts"],
                 "symbols": [
                     {
                         key: value
@@ -588,6 +611,14 @@ class KnowledgeAPI:
                 pending_files=status.get("pending_files", []),
                 impact=impact,
             )
+            if review_gate["review_required"]:
+                result["context_status"] = {
+                    **result["context_status"],
+                    "state": "review_required",
+                    "reason": "task_matches_unreviewed_knowledge_draft",
+                }
+                result["gaps"].append("A matching knowledge draft is awaiting user review before it can be used as verified context.")
+                result["unknowns"].append("Review the listed draft and confirm or reject it, then rerun the task.")
             if diagnostics_requested:
                 trace = self._context_retrieval_trace(
                     task=task,
@@ -1443,22 +1474,55 @@ class KnowledgeAPI:
         return anchors
 
     @staticmethod
-    def _guidance_workflow_status(store: KnowledgeStore) -> dict[str, Any]:
+    def _guidance_workflow_status(
+        store: KnowledgeStore, *, current_snapshot_id: str | None = None
+    ) -> dict[str, Any]:
         guidance = GuidanceStore(store)
         row = store.connection.execute(
             "SELECT run_id FROM guidance_runs ORDER BY updated_at DESC, created_at DESC, run_id DESC LIMIT 1"
         ).fetchone()
         run = guidance.get_run(str(row["run_id"])) if row else None
-        drafts = guidance.list_pending_drafts()
+        batches = guidance.list_batches(run.run_id) if run else []
+        drafts = guidance.list_pending_drafts(run.run_id) if run else []
         changes = guidance.pending_changes()
-        categories = guidance.list_categories()
+        categories = guidance.list_categories(run.run_id) if run else []
         formal_guides = sum(1 for category in categories if guidance.current_version(category.category_id))
         formal_methodologies = sum(
             1 for category in categories
             if guidance.current_version(category.category_id, "methodology")
         )
+        formal_assets = {
+            (category.category_id, asset_type)
+            for category in categories
+            for asset_type in ("methodology", "project_guidance")
+            if guidance.current_version(category.category_id, asset_type)
+        }
+        baseline_mismatch = False
+        baseline_raw = store.get_meta("guidance_snapshot")
+        baseline_snapshot_id = run.snapshot_id if run else None
+        if baseline_raw:
+            try:
+                baseline_snapshot_id = json.loads(baseline_raw).get("snapshot_id")
+            except (TypeError, ValueError):
+                baseline_snapshot_id = None
+        if run and current_snapshot_id:
+            baseline_mismatch = baseline_snapshot_id != current_snapshot_id
+        workflow_state = KnowledgeAPI._workflow_state(
+            run, batches, drafts, changes, categories, baseline_mismatch, formal_assets
+        )
+        draft_counts = {
+            "total": len(drafts),
+            "awaiting_confirmation": sum(draft.status == "awaiting_confirmation" for draft in drafts),
+            "incomplete": sum(draft.status == "incomplete" for draft in drafts),
+        }
+        category_candidates = [
+            candidate
+            for batch in batches
+            for candidate in (batch.result or {}).get("candidates", [])
+        ]
         return {
             "available": run is not None,
+            **workflow_state,
             "run": run.to_dict() if run else None,
             "coverage": {
                 "covered_files": run.covered_files if run else 0,
@@ -1479,17 +1543,137 @@ class KnowledgeAPI:
                 }
                 for draft in drafts
             ],
+            "drafts": draft_counts,
+            "category_candidates": category_candidates,
             "pending_changes": [
                 {
                     "change_id": change.change_id, "level": change.update_level,
                     "changed_files": list(change.changed_files),
                     "affected_categories": list(change.affected_categories),
+                    "pending_categories": list(change.payload.get("pendingCategories", change.affected_categories)),
+                    "completed_categories": list(change.payload.get("completedCategories", [])),
+                    "category_levels": dict(change.payload.get("categoryLevels", {})),
                     "base_snapshot_id": change.base_snapshot_id,
                     "head_snapshot_id": change.head_snapshot_id,
                 }
                 for change in changes
             ],
         }
+
+    @staticmethod
+    def _workflow_state(
+        run: Any | None,
+        batches: list[Any],
+        drafts: list[Any],
+        changes: list[Any],
+        categories: list[Any],
+        baseline_mismatch: bool,
+        formal_assets: set[tuple[str, str]] | None = None,
+    ) -> dict[str, Any]:
+        """Map stored workflow facts to one stable state and next action."""
+        if run is None:
+            return {"state": "not_started", "next_action": "start_initialization"}
+        if run.status == "failed":
+            return {"state": "failed", "next_action": "restart_initialization"}
+        if any(batch.status == "pending" for batch in batches):
+            return {"state": "scanning", "next_action": "analyze_next_batch"}
+        if changes:
+            return {"state": "incremental", "next_action": "inspect_changes"}
+
+        if run.status == "category_review":
+            has_category_draft = any(draft.kind == "category_catalog" for draft in drafts)
+            return {
+                "state": "draft_generation",
+                "next_action": "draft_available" if has_category_draft else "create_category_draft",
+            }
+        if run.status in {"categories_confirmed", "guidance_generation", "guidance_review"}:
+            if not categories:
+                return {"state": "draft_generation", "next_action": "create_category_draft"}
+            missing_assets: list[tuple[str, str]] = []
+            formal_assets = formal_assets or set()
+            for category in categories:
+                has_methodology = any(
+                    draft.category_id == category.category_id and draft.kind == "methodology"
+                    for draft in drafts
+                ) or (category.category_id, "methodology") in formal_assets
+                has_guidance = any(
+                    draft.category_id == category.category_id and draft.kind == "guidance"
+                    for draft in drafts
+                ) or (category.category_id, "project_guidance") in formal_assets
+                if not has_methodology:
+                    missing_assets.append((category.category_id, "methodology"))
+                if not has_guidance:
+                    missing_assets.append((category.category_id, "guidance"))
+            if missing_assets:
+                category_id, kind = missing_assets[0]
+                return {
+                    "state": "draft_generation",
+                    "next_action": "create_methodology" if kind == "methodology" else "create_guidance",
+                    "next_draft": {"kind": kind, "category_id": category_id},
+                }
+            return {"state": "draft_generation", "next_action": "draft_available"}
+        if baseline_mismatch:
+            return {"state": "incremental", "next_action": "inspect_changes"}
+        return {"state": "ready", "next_action": "none"}
+
+    @staticmethod
+    def _draft_review_gate(
+        task: str,
+        selected_results: list[dict[str, Any]],
+        pending_drafts: list[dict[str, Any]],
+    ) -> dict[str, Any]:
+        """Return only task-relevant draft references; never expose draft text by default."""
+        def terms(value: object) -> set[str]:
+            text = str(value).lower()
+            result = {
+                term.lower()
+                for term in re.findall(r"[A-Za-z0-9]{3,}", text)
+            }
+            for sequence in re.findall(r"[\u3400-\u9fff]+", text):
+                result.update(
+                    sequence[index:index + 2]
+                    for index in range(max(0, len(sequence) - 1))
+                )
+            return result
+
+        task_terms = terms(task)
+        matches: list[dict[str, Any]] = []
+
+        def relevant(item: dict[str, Any]) -> bool:
+            haystack = " ".join(
+                str(item.get(key, ""))
+                for key in ("id", "draft_id", "category_id", "path", "draft_path", "title")
+            ).lower()
+            return bool(task_terms.intersection(terms(haystack)))
+
+        for item in selected_results:
+            # Search already ranked this record for the task, so Chinese or
+            # otherwise non-tokenized task text must not suppress the gate.
+            if item.get("ownership") == "draft":
+                matches.append({
+                    "id": item.get("id"),
+                    "draft_id": item.get("draft_id"),
+                    "path": item.get("path") or item.get("draft_path"),
+                    "category_id": item.get("category_id"),
+                    "source": "knowledge_search",
+                })
+        for item in pending_drafts:
+            if relevant(item):
+                matches.append({
+                    "id": item.get("draft_id"),
+                    "draft_id": item.get("draft_id"),
+                    "path": item.get("path") or item.get("draft_path"),
+                    "category_id": item.get("category_id"),
+                    "kind": item.get("kind"),
+                    "status": item.get("status"),
+                    "content_hash": item.get("content_hash"),
+                    "source": "guidance_workflow",
+                })
+        unique: dict[str, dict[str, Any]] = {}
+        for item in matches:
+            key = str(item.get("draft_id") or item.get("id") or item.get("path"))
+            unique[key] = {key: value for key, value in item.items() if value not in (None, "")}
+        return {"review_required": bool(unique), "drafts": list(unique.values())}
 
     @staticmethod
     def _symbol_terms(task: str) -> list[str]:

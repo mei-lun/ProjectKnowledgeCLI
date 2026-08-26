@@ -47,7 +47,7 @@ class InitializationWorkflowTests(unittest.TestCase):
         result = workflow.submit_batch(first["run_id"], batch["batch_id"], first["snapshot_id"], [{
             "category_id": "activity", "name": "活动", "purpose": "开发活动", "confidence": 0.8,
             "evidence": [{"path": path, "hash": next(item["content_hash"] for item in files if item["path"] == path)}],
-        }])
+        }], analyzed_files=batch["files"])
         self.assertEqual(result["covered_files"], 40)
         self.assertEqual(workflow.next_batch(first["run_id"])["batch"]["ordinal"], 1)
 
@@ -69,7 +69,7 @@ class InitializationWorkflowTests(unittest.TestCase):
             workflow.submit_batch(first["run_id"], batch["batch_id"], first["snapshot_id"], [{
                 "category_id": "activity", "name": "活动", "purpose": "开发活动", "confidence": .8,
                 "evidence": [{"path": evidence_path, "hash": next(item["content_hash"] for item in files if item["path"] == evidence_path)}],
-            }])
+            }], analyzed_files=batch["files"])
         client._files[0]["content_hash"] = "changed"
         second = workflow.start()
         self.assertNotEqual(first["run_id"], second["run_id"])
@@ -82,17 +82,78 @@ class InitializationWorkflowTests(unittest.TestCase):
         result = workflow.start()
         batch = result["batches"][0]
         with self.assertRaisesRegex(ValueError, "快照"):
-            workflow.submit_batch(result["run_id"], batch["batch_id"], "old", [])
+            workflow.submit_batch(
+                result["run_id"], batch["batch_id"], "old", [],
+                analyzed_files=batch["files"],
+            )
         with self.assertRaisesRegex(ValueError, "证据"):
             workflow.submit_batch(result["run_id"], batch["batch_id"], result["snapshot_id"], [{
                 "category_id": "x", "name": "x", "purpose": "x", "confidence": .5,
                 "evidence": [{"path": "other.lua", "hash": "h"}],
-            }])
+            }], analyzed_files=batch["files"])
         with self.assertRaisesRegex(ValueError, "hash"):
             workflow.submit_batch(result["run_id"], batch["batch_id"], result["snapshot_id"], [{
                 "category_id": "x", "name": "x", "purpose": "x", "confidence": .5,
                 "evidence": [{"path": "a.lua", "hash": "old"}],
-            }])
+            }], analyzed_files=batch["files"])
+
+    def test_analyzed_files_must_exactly_match_batch(self):
+        files = [
+            {"path": "a.lua", "language": "lua", "content_hash": "ha", "module": "root", "symbols": []},
+            {"path": "b.lua", "language": "lua", "content_hash": "hb", "module": "root", "symbols": []},
+        ]
+        workflow = InitializationWorkflow(self.root, client=FakeCodeGraph(files))
+        started = workflow.start()
+        batch = started["batches"][0]
+        for analyzed in (["a.lua"], ["a.lua", "b.lua", "extra.lua"], ["a.lua", "a.lua"]):
+            with self.assertRaisesRegex(ValueError, "analyzedFiles"):
+                workflow.submit_batch(
+                    started["run_id"], batch["batch_id"], started["snapshot_id"], [],
+                    analyzed_files=analyzed,
+                )
+
+    def test_snapshot_change_marks_run_failed(self):
+        files = [{"path": "a.lua", "language": "lua", "content_hash": "h1", "module": "", "symbols": []}]
+        client = FakeCodeGraph(files)
+        workflow = InitializationWorkflow(self.root, client=client)
+        started = workflow.start()
+        batch = started["batches"][0]
+        client._files[0]["content_hash"] = "h2"
+        with self.assertRaisesRegex(ValueError, "快照"):
+            workflow.submit_batch(
+                started["run_id"], batch["batch_id"], started["snapshot_id"], [],
+                analyzed_files=batch["files"],
+            )
+        restarted = workflow.start()
+        self.assertNotEqual(restarted["run_id"], started["run_id"])
+
+    def test_failed_batch_can_restart_same_snapshot(self):
+        files = [{"path": "a.lua", "language": "lua", "content_hash": "h1", "module": "", "symbols": []}]
+        workflow = InitializationWorkflow(self.root, client=FakeCodeGraph(files))
+        started = workflow.start()
+        batch = started["batches"][0]
+        failed = workflow.submit_batch(
+            started["run_id"], batch["batch_id"], started["snapshot_id"], [],
+            analyzed_files=batch["files"], error="model failed",
+        )
+        self.assertEqual(failed["status"], "failed")
+        restarted = workflow.start()
+        self.assertEqual(restarted["status"], "scanning")
+        self.assertEqual(restarted["batches"][0]["status"], "pending")
+
+    def test_completed_batches_expose_aggregated_category_candidates(self):
+        files = [{"path": "a.lua", "language": "lua", "content_hash": "h1", "module": "", "symbols": []}]
+        workflow = InitializationWorkflow(self.root, client=FakeCodeGraph(files))
+        started = workflow.start()
+        batch = started["batches"][0]
+        result = workflow.submit_batch(
+            started["run_id"], batch["batch_id"], started["snapshot_id"], [{
+                "category_id": "login", "name": "登录", "purpose": "建立身份",
+                "confidence": .9, "evidence": [{"path": "a.lua", "hash": "h1"}],
+            }], analyzed_files=batch["files"],
+        )
+        self.assertEqual(result["next_action"], "create_category_draft")
+        self.assertEqual(result["category_candidates"][0]["category_id"], "login")
 
 
 if __name__ == "__main__":

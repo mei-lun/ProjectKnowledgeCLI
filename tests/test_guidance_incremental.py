@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -157,6 +158,22 @@ class GuidanceIncrementalTests(unittest.TestCase):
         record = KnowledgeAPI(self.root).get("guide.login")
         self.assertEqual(record["freshness"], "potentially_stale")
         self.assertNotIn("扩展流程", record["content"])
+
+    def test_multi_category_progress_does_not_advance_baseline_early(self):
+        self.workflow.changes()
+        with KnowledgeStore(self.db) as store:
+            guidance = GuidanceStore(store)
+            change = guidance.pending_changes()[0]
+            change.payload["pendingCategories"] = ["login", "other"]
+            change.payload["completedCategories"] = []
+            guidance.save_change(change)
+            store.connection.commit()
+            self.workflow._advance(store, guidance, change, "login")
+            self.assertEqual(guidance.pending_changes()[0].payload["pendingCategories"], ["other"])
+            self.assertEqual(json.loads(store.get_meta("guidance_snapshot"))["snapshot_id"], "snap-base")
+            self.workflow._advance(store, guidance, guidance.pending_changes()[0], "other")
+            self.assertEqual(guidance.pending_changes(), [])
+            self.assertEqual(json.loads(store.get_meta("guidance_snapshot"))["snapshot_id"], self.client.snapshot()["snapshot_id"])
 
 
 if __name__ == "__main__":

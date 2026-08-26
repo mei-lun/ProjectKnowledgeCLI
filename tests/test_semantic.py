@@ -172,8 +172,9 @@ class SemanticKnowledgeTests(unittest.TestCase):
         self.assertEqual(record["confidence"], "generated")
         self.assertEqual(api.search("背包物品使用")["results"][0]["id"], "draft.feature.bag-item-use")
         context = api.context("开发背包物品使用功能", max_tokens=1600)
-        self.assertEqual(context["knowledge"][0]["id"], "draft.feature.bag-item-use")
-        self.assertTrue(context["knowledge"][0]["requires_live_source"])
+        self.assertTrue(context["review_required"])
+        self.assertEqual(context["review_drafts"][0]["id"], "draft.feature.bag-item-use")
+        self.assertFalse(context["knowledge"])
 
         proposal_service = ProposalService(self.root)
         proposal = proposal_service.create_from_feature_draft("bag-item-use", change_range="HEAD")

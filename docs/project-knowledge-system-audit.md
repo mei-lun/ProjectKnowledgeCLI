@@ -1,6 +1,6 @@
 # 项目级知识库最小需求审计与实施基线
 
-> 当前版本：0.1.48
+> 当前版本：0.1.54
 > 复核日期：2026-08-24  
 > 报告状态：Phase 0～2 确定性检索基线已交付；发布证据正在重新对齐，最终生产质量门尚未通过
 > 默认语言：中文
@@ -11,10 +11,18 @@
 
 | 工作包 | 需求 ID | 目标 | 当前状态 |
 | --- | --- | --- | --- |
-| WP-KC-01 | KC-NEXT-001～006 | status 返回唯一下一动作和待审草稿摘要；context 命中草稿时返回审核门 | 待设计复核 |
-| WP-KC-02 | KC-INIT-001～008 | 全文件分批分析并自动生成分类、方法论和项目指导草稿；按任务命中或用户主动提示触发审核 | 待设计复核 |
-| WP-KC-03 | KC-INCR-001～007 | 顺序处理受影响类别，一级自动更新、二三级审核，全部完成后推进 baseline | 待设计复核 |
-| WP-KC-04 | KC-GATE-001～006 | 将覆盖、草稿生成、待处理变化、新鲜度和 snapshot 对齐纳入基础 Ready/finalize 门禁；未审核草稿按任务触发审核 | 待设计复核 |
+| WP-KC-01 | KC-NEXT-001～006 | status 返回唯一下一动作和待审草稿摘要；context 命中草稿时返回审核门 | 已完成 |
+| WP-KC-02 | KC-INIT-001～008 | 全文件分批分析并自动生成分类、方法论和项目指导草稿；按任务命中或用户主动提示触发审核 | 已完成 |
+| WP-KC-03 | KC-INCR-001～007 | 顺序处理受影响类别，一级自动更新、二三级审核，全部完成后推进 baseline | 已完成 |
+| WP-KC-04 | KC-GATE-001～006 | 将覆盖、草稿生成、待处理变化、新鲜度和 snapshot 对齐纳入基础 Ready/finalize 门禁；未审核草稿按任务触发审核 | 已完成 |
+
+WP-KC-01 验收证据：`tests/test_knowledge_loop_status.py` 覆盖状态优先级、唯一 `next_action` 和任务范围审核门；`KnowledgeAPI.status()` 输出 `guidance_workflow.state/next_action/drafts`，`knowledge_context` 命中草稿时输出 `review_required/review_drafts` 并剔除草稿正文。相关 MCP、工作流和端到端回归测试已通过。
+
+WP-KC-02 验收证据：`tests/test_guidance_initialization_loop.py` 覆盖 2 批次、2 类别、5 个草稿在不确认语义草稿时达到基础 Ready；`tests/test_initialization_workflow.py` 覆盖 `analyzedFiles` 精确集合、失败批次重启、snapshot 变化失败和候选聚合；`tests/test_guidance_workflow.py` 覆盖来源缺失阻断、草稿独立索引和快照失败。WP-KC-02 及发布一致性相关 56 项测试通过；当前运行按 run 隔离草稿/分类/正式资产，确认前复核 CodeGraph 快照，服务端强制方法论→指导顺序，并在失败重启时清理草稿索引。完整 343 项套件此前已通过，后续仅需在 CodeGraph 集成耗时可接受时复跑。
+
+WP-KC-03 验收证据：`tests/test_guidance_incremental.py` 覆盖变更事实包、证据 hash、单类别 fact 自动推进、指导/分类草稿审核、拒绝保持 pending，以及多类别 pending/completed 进度和 baseline 最终门禁；`knowledge_status` 在 pending change 时返回唯一 `inspect_changes` 动作，并输出类别进度。进入 guidance baseline 管理后，`sync` 不再创建 semantic update queue。相关增量、端到端、MCP 和状态回归共 59 项通过。
+
+WP-KC-04 验收证据：`FinalizationService` 现在同时检查 Git/CodeGraph 对齐、最新初始化 run、批次覆盖、类别三类正式资产及 evidence、草稿状态、pending change、guidance baseline 和 stale/conflicted knowledge，并以 `gate_blockers` 返回精确阻断原因与下一动作。`tests/test_finalization.py` 的 6 项门禁、只读和完整 guidance 场景通过。
 
 每个工作包必须先补正负测试和端到端样本，再实现行为；只有实现、测试、相关评测、文档、版本和知识同步全部完成后，才能把对应需求标记为已完成。当前 55 条 semantic update queue 属于开发期可丢弃数据，后续使用干净知识库重新初始化，不建设迁移路径。
 

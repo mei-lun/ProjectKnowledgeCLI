@@ -482,6 +482,11 @@ class KnowledgeStore:
                 if self.get_meta("fts") == "enabled":
                     self.connection.execute("DELETE FROM knowledge_fts WHERE id = ?", (row["id"],))
 
+    def delete_knowledge(self, record_id: str) -> None:
+        self.connection.execute("DELETE FROM knowledge WHERE id = ?", (record_id,))
+        if self.get_meta("fts") == "enabled":
+            self.connection.execute("DELETE FROM knowledge_fts WHERE id = ?", (record_id,))
+
     @staticmethod
     def _knowledge(row: sqlite3.Row) -> KnowledgeRecord:
         sources = [SourceReference(**source) for source in json.loads(row["sources_json"])]

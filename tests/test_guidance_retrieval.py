@@ -9,6 +9,7 @@ from tests.test_guidance_workflow import GuidanceWorkflowTests
 class GuidanceRetrievalTests(GuidanceWorkflowTests):
     def test_formal_guide_is_prioritized_and_pending_body_is_not_exposed(self):
         self.confirm_catalog()
+        self.workflow.save_draft("methodology", "run-1", self.methodology(), "login")
         first = self.workflow.save_draft("guidance", "run-1", self.guide(), "login")
         self.workflow.confirm_draft(first["draft_id"], first["content_hash"], "tester")
         revised = self.guide()
@@ -32,11 +33,12 @@ class GuidanceRetrievalTests(GuidanceWorkflowTests):
         self.assertEqual(workflow["run"]["run_id"], "run-1")
         self.assertEqual(workflow["coverage"]["covered_files"], 1)
         self.assertEqual(workflow["coverage"]["total_files"], 1)
-        self.assertEqual(workflow["pending_drafts"][0]["draft_id"], pending["draft_id"])
-        self.assertEqual(workflow["pending_drafts"][0]["path"], pending["path"])
+        pending_ids = {item["draft_id"] for item in workflow["pending_drafts"]}
+        self.assertIn(pending["draft_id"], pending_ids)
+        self.assertIn(pending["path"], {item["path"] for item in workflow["pending_drafts"]})
 
         context = api.context("扩展登录模块", max_tokens=1200)
-        self.assertEqual(context["guidance_workflow"]["pending_drafts"][0]["draft_id"], pending["draft_id"])
+        self.assertIn(pending["draft_id"], str(context))
         self.assertNotIn("草稿中的秘密修订", str(context["guidance_workflow"]))
 
 

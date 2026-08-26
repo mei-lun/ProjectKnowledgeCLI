@@ -84,7 +84,11 @@ class IncrementalWorkflow:
             payload = {
                 "base_snapshot_id": base_id, "head_snapshot_id": current["snapshot_id"],
                 "changed_files": changed, "added": added, "modified": modified, "deleted": deleted,
-                "affected_categories": sorted(affected_categories), "facts": facts,
+                "affected_categories": sorted(affected_categories),
+                "pendingCategories": sorted(affected_categories),
+                "completedCategories": [],
+                "categoryLevels": {category_id: "guidance" for category_id in sorted(affected_categories)},
+                "facts": facts,
             }
             now = utc_now()
             change = GuidanceChange(
@@ -120,9 +124,15 @@ class IncrementalWorkflow:
                 raise KeyError(f"待处理变化不存在：{change_id}")
             if level not in {"fact", "guidance", "category"}:
                 raise ValueError(f"更新级别无效：{level}")
+            pending_categories = list(change.payload.get("pendingCategories", change.affected_categories))
+            if not pending_categories:
+                raise ValueError("change has no affected category; classify it before updating")
+            selected_category = category_id or pending_categories[0]
+            if selected_category != pending_categories[0]:
+                raise ValueError("updates must process pending categories in order")
             if level == "fact":
                 result = self._submit_fact(store, guidance, change, category_id, content, evidence)
-                self._advance(store, guidance, change)
+                self._advance(store, guidance, change, selected_category)
                 return result
             run_id = self._run_for_snapshot(store, change.head_snapshot_id)
             linked_content = dict(content)
@@ -176,13 +186,31 @@ class IncrementalWorkflow:
             store.upsert_knowledge(record)
         return {"status": "completed", "change_id": change.change_id, "level": "fact", "version_id": version.version_id, "next_actions": []}
 
-    def _advance(self, store: KnowledgeStore, guidance: GuidanceStore, change: GuidanceChange) -> None:
+    def _advance(self, store: KnowledgeStore, guidance: GuidanceStore,
+                 change: GuidanceChange, category_id: str) -> None:
         now = utc_now()
-        snapshot = self.client.snapshot()
-        baseline = {"snapshot_id": snapshot["snapshot_id"], "files": {item["path"]: item["content_hash"] for item in snapshot["files"]}}
         with store.transaction():
-            store.set_meta(self.BASELINE_KEY, json.dumps(baseline, ensure_ascii=False, sort_keys=True))
-            guidance.mark_change_processed(change.change_id, now)
+            payload = dict(change.payload)
+            pending = [item for item in payload.get("pendingCategories", change.affected_categories) if item != category_id]
+            completed = list(payload.get("completedCategories", []))
+            if category_id not in completed:
+                completed.append(category_id)
+            payload["pendingCategories"] = pending
+            payload["completedCategories"] = completed
+            change.payload = payload
+            guidance.save_change(change)
+            if not pending:
+                self._advance_baseline(store, guidance, change, now)
+
+    def _advance_baseline(self, store: KnowledgeStore, guidance: GuidanceStore,
+                          change: GuidanceChange, now: str) -> None:
+        snapshot = self.client.snapshot()
+        baseline = {
+            "snapshot_id": snapshot["snapshot_id"],
+            "files": {item["path"]: item["content_hash"] for item in snapshot["files"]},
+        }
+        store.set_meta(self.BASELINE_KEY, json.dumps(baseline, ensure_ascii=False, sort_keys=True))
+        guidance.mark_change_processed(change.change_id, now)
 
     def _baseline(self, store: KnowledgeStore, guidance: GuidanceStore) -> dict[str, Any]:
         raw = store.get_meta(self.BASELINE_KEY)

@@ -1,0 +1,25 @@
+{
+  "affected_knowledge": [
+    "curated.architecture",
+    "curated.conventions",
+    "generated.frameworks",
+    "generated.module.project_knowledge",
+    "generated.module.tests",
+    "generated.project-map",
+    "generated.test-map"
+  ],
+  "base_commit": "0d82a6dd212c13571ff8e263dec1e1ac4cb5b259",
+  "changed_files": [
+    "src/project_knowledge/__init__.py",
+    "src/project_knowledge/finalization.py",
+    "tests/test_finalization.py"
+  ],
+  "changed_symbols": [],
+  "changeset_id": "change-20260826-215114",
+  "created_at": "2026-08-26T21:51:14+08:00",
+  "head_commit": "0d82a6dd212c13571ff8e263dec1e1ac4cb5b259",
+  "queue_id": "sq-7cead62ea70392d0",
+  "schema_version": 1,
+  "status": "awaiting_semantic_generation",
+  "task_summary": "manual synchronization"
+}

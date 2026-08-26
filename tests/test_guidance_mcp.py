@@ -23,6 +23,10 @@ class GuidanceMCPTests(unittest.TestCase):
             set(draft_tool["inputSchema"]["properties"]["kind"]["enum"]),
             {"category_catalog", "methodology", "guidance"},
         )
+        submit_tool = next(
+            item for item in TOOLS if item["name"] == "knowledge_initialization_submit"
+        )
+        self.assertIn("analyzedFiles", submit_tool["inputSchema"]["required"])
         for item in TOOLS[5:]:
             self.assertFalse(item["annotations"]["destructiveHint"])
         for name in {
@@ -82,6 +86,16 @@ class GuidanceMCPTests(unittest.TestCase):
             workflow.return_value.start.return_value = {"status": "scanning"}
             self.assertEqual(server._call("knowledge_initialization_start", {})["status"], "scanning")
             workflow.return_value.start.assert_called_once_with()
+        with patch("project_knowledge.initialization.InitializationWorkflow") as workflow:
+            workflow.return_value.submit_batch.return_value = {"status": "category_review"}
+            server._call("knowledge_initialization_submit", {
+                "runId": "run-1", "batchId": "batch-1", "snapshotId": "snap-1",
+                "candidates": [], "analyzedFiles": ["a.py"],
+            })
+            workflow.return_value.submit_batch.assert_called_once_with(
+                "run-1", "batch-1", "snap-1", [],
+                analyzed_files=["a.py"], error=None,
+            )
         with patch("project_knowledge.guidance_workflow.GuidanceWorkflow") as workflow:
             workflow.return_value.confirm_draft.return_value = {"status": "confirmed"}
             result = server._call("knowledge_draft_confirm", {

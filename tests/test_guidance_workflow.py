@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -7,6 +8,7 @@ from pathlib import Path
 from project_knowledge.guidance_models import GuidanceBatch, GuidanceRun
 from project_knowledge.guidance_store import GuidanceStore
 from project_knowledge.guidance_workflow import GuidanceWorkflow
+from project_knowledge.retrieval import KnowledgeAPI
 from project_knowledge.config import ProjectConfig
 from project_knowledge.engine import create_engine
 from project_knowledge.store import KnowledgeStore
@@ -98,8 +100,58 @@ class GuidanceWorkflowTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "哈希"):
             self.workflow.confirm_draft(draft["draft_id"], draft["content_hash"], "tester")
 
+    def test_initial_drafts_complete_without_confirmation_and_are_indexed(self):
+        catalog = self.workflow.save_draft("category_catalog", "run-1", self.catalog)
+        with KnowledgeStore(self.db) as store:
+            guidance = GuidanceStore(store)
+            self.assertEqual(guidance.get_run("run-1").status, "guidance_generation")
+            self.assertEqual(
+                [item.category_id for item in guidance.list_categories("run-1")],
+                ["login"],
+            )
+            status = KnowledgeAPI._guidance_workflow_status(
+                store, current_snapshot_id="snap-1"
+            )
+            self.assertEqual(status["next_action"], "create_methodology")
+            self.assertEqual(
+                status["next_draft"],
+                {"kind": "methodology", "category_id": "login"},
+            )
+
+        methodology = self.workflow.save_draft(
+            "methodology", "run-1", self.methodology(), "login"
+        )
+        with KnowledgeStore(self.db) as store:
+            status = KnowledgeAPI._guidance_workflow_status(
+                store, current_snapshot_id="snap-1"
+            )
+            self.assertEqual(status["next_action"], "create_guidance")
+
+        guide = self.workflow.save_draft("guidance", "run-1", self.guide(), "login")
+        with KnowledgeStore(self.db) as store:
+            guidance_store = GuidanceStore(store)
+            self.assertEqual(guidance_store.get_run("run-1").status, "complete")
+            self.assertEqual(len(guidance_store.list_pending_drafts("run-1")), 3)
+            status = KnowledgeAPI._guidance_workflow_status(
+                store, current_snapshot_id="snap-1"
+            )
+            self.assertEqual(status["state"], "ready")
+            self.assertEqual(status["next_action"], "none")
+            for draft_id in (methodology["draft_id"], guide["draft_id"]):
+                record = store.get_knowledge(f"draft.{draft_id}")
+                self.assertIsNotNone(record)
+                self.assertEqual(record.ownership, "draft")
+                self.assertNotEqual(record.confidence, "verified")
+                self.assertTrue(record.sources)
+            baseline = json.loads(store.get_meta("guidance_snapshot"))
+            self.assertEqual(baseline["snapshot_id"], "snap-1")
+        self.assertTrue(Path(catalog["path"]).is_file())
+        self.assertTrue(Path(methodology["path"]).is_file())
+        self.assertTrue(Path(guide["path"]).is_file())
+
     def test_catalog_confirmation_and_exact_reviewed_guide(self):
         catalog = self.confirm_catalog()
+        self.workflow.save_draft("methodology", "run-1", self.methodology(), "login")
         self.assertTrue(Path(catalog["path"]).is_file())
         self.assertFalse((self.root / ".project-kb" / "功能分类目录-待审核.md").exists())
         draft = self.workflow.save_draft("guidance", "run-1", self.guide(), "login")
@@ -138,7 +190,7 @@ class GuidanceWorkflowTests(unittest.TestCase):
             guidance = GuidanceStore(store)
             self.assertIsNone(guidance.current_version("login", "methodology"))
             self.assertEqual(guidance.current_version("login", "project_guidance").version, 1)
-            self.assertEqual(guidance.get_run("run-1").status, "guidance_review")
+            self.assertEqual(guidance.get_run("run-1").status, "complete")
 
         method_result = self.workflow.confirm_draft(
             methodology["draft_id"], methodology["content_hash"], "tester",
@@ -160,6 +212,29 @@ class GuidanceWorkflowTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "不完整"):
             self.workflow.confirm_draft(draft["draft_id"], draft["content_hash"], "tester")
 
+    def test_guide_without_evidence_cannot_complete_generation(self):
+        self.workflow.save_draft("category_catalog", "run-1", self.catalog)
+        self.workflow.save_draft("methodology", "run-1", self.methodology(), "login")
+        content = self.guide()
+        content["evidence"] = []
+        draft = self.workflow.save_draft("guidance", "run-1", content, "login")
+        self.assertEqual(draft["status"], "incomplete")
+        with KnowledgeStore(self.db) as store:
+            guidance = GuidanceStore(store)
+            self.assertEqual(guidance.get_run("run-1").status, "guidance_generation")
+            self.assertIsNone(store.get_knowledge(f"draft.{draft['draft_id']}"))
+
+    def test_snapshot_change_during_draft_generation_fails_run(self):
+        self.workflow.save_draft("category_catalog", "run-1", self.catalog)
+        self.client.value = {**self.snapshot, "snapshot_id": "snap-2"}
+        with self.assertRaisesRegex(ValueError, "快照"):
+            self.workflow.save_draft(
+                "methodology", "run-1", self.methodology(), "login"
+            )
+        with KnowledgeStore(self.db) as store:
+            run = GuidanceStore(store).get_run("run-1")
+            self.assertEqual(run.status, "failed")
+
     def test_lightweight_methodology_rejects_project_leakage_and_guide_rejects_embedded_layer(self):
         self.confirm_catalog()
         leaked = self.methodology()
@@ -174,6 +249,7 @@ class GuidanceWorkflowTests(unittest.TestCase):
 
     def test_reject_keeps_current_version(self):
         self.confirm_catalog()
+        self.workflow.save_draft("methodology", "run-1", self.methodology(), "login")
         first = self.workflow.save_draft("guidance", "run-1", self.guide(), "login")
         self.workflow.confirm_draft(first["draft_id"], first["content_hash"], "tester")
         revised = self.guide()
@@ -182,6 +258,8 @@ class GuidanceWorkflowTests(unittest.TestCase):
         self.workflow.reject_draft(second["draft_id"], "tester", "需要补充")
         with KnowledgeStore(self.db) as store:
             self.assertEqual(GuidanceStore(store).current_version("login").version, 1)
+            self.assertEqual(store.get_knowledge("guide.login").ownership, "curated")
+            self.assertIsNone(store.get_knowledge(f"draft.{second['draft_id']}"))
 
 
 if __name__ == "__main__":

@@ -116,9 +116,14 @@ WORKFLOW_TOOLS: list[dict[str, Any]] = [
                 "batchId": {"type": "string", "minLength": 1},
                 "snapshotId": {"type": "string", "minLength": 1},
                 "candidates": {"type": "array", "items": {"type": "object"}},
+                "analyzedFiles": {
+                    "type": "array",
+                    "items": {"type": "string", "minLength": 1},
+                    "uniqueItems": True,
+                },
                 "error": {"type": "string", "minLength": 1},
             },
-            "required": ["runId", "batchId", "snapshotId", "candidates"],
+            "required": ["runId", "batchId", "snapshotId", "candidates", "analyzedFiles"],
             "additionalProperties": False,
         },
         "annotations": {"readOnlyHint": False, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
@@ -314,6 +319,7 @@ class MCPServer:
             return InitializationWorkflow(project).submit_batch(
                 str(arguments["runId"]), str(arguments["batchId"]),
                 str(arguments["snapshotId"]), list(arguments["candidates"]),
+                analyzed_files=list(arguments["analyzedFiles"]),
                 error=arguments.get("error"),
             )
         if name == "knowledge_draft_save":

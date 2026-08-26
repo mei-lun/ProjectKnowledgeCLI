@@ -79,6 +79,7 @@ class GuidanceEndToEndTests(unittest.TestCase):
                 "category_id": "service-feature", "name": "服务功能", "purpose": "提供可复用服务能力",
                 "confidence": 0.9, "evidence": [{"path": "src/feature.lua", "hash": file_hash}],
             }],
+            "analyzedFiles": batch["batch"]["files"],
         })
         self.assertTrue(submitted["ready_for_category_draft"])
 
@@ -95,6 +96,25 @@ class GuidanceEndToEndTests(unittest.TestCase):
         self.assertTrue(Path(draft["path"]).is_file())
         self.call(server, "knowledge_draft_confirm", {
             "draftId": draft["draft_id"], "contentHash": draft["content_hash"], "reviewer": "e2e",
+        })
+
+        """
+        methodology = {
+            "basic": {"title": "鏈嶅姟鍔熻兘杞婚噺鏂規硶璁?},
+            "scope": ["鏈嶅姟绔姛鑳?], "questions": ["鍏ュ彛涓庤竟鐣?],
+            "starter_checks": ["鎺ュ彛鍙祴璇?], "unknowns": [],
+            "evidence": [{"path": "src/feature.lua", "hash": file_hash}],
+        }
+        """
+        methodology = {
+            "basic": {"title": "service methodology"},
+            "scope": ["service feature"], "questions": ["entrypoints"],
+            "starter_checks": ["run tests"], "unknowns": [],
+            "evidence": [{"path": "src/feature.lua", "hash": file_hash}],
+        }
+        self.call(server, "knowledge_draft_save", {
+            "action": "save", "kind": "methodology", "runId": started["run_id"],
+            "categoryId": "service-feature", "content": methodology,
         })
 
         guide_content = {
