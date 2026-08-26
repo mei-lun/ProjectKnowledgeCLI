@@ -361,11 +361,11 @@ project-kb finalize /path/to/repository --check --json
 MCP 同时提供只读查询和受控写入工具：
 
 - 查询：`knowledge_status`、`knowledge_context`、`knowledge_search`、`knowledge_get`、`knowledge_impact`。
-- 初始化：分批读取稳定代码快照、提交候选分类并生成分类目录草稿。
-- 审核：保存、拒绝或通过“草稿 ID + 正文哈希”确认 Markdown 草稿。
+- 初始化：分批读取稳定代码快照，提交候选分类，并自动生成分类、方法论和项目指导草稿；首次初始化不强制审核。
+- 审核：任务命中未审核草稿时先询问用户，或由用户输入“审核知识草稿”等提示主动审核；保存、拒绝或通过“草稿 ID + 正文哈希”确认 Markdown 草稿。
 - 增量：比较已处理快照与当前 CodeGraph 快照，按事实、指导或分类级别提交更新。
 
-KnowledgeStore 是正式知识来源；Markdown 是可阅读、可审核的投影。未经用户确认的草稿不会覆盖正式版本，也不会推进已处理快照。
+KnowledgeStore 是正式知识来源；Markdown 是可阅读、可审核的投影。未经用户确认的草稿不会覆盖正式版本；初始草稿生成可完成基础扫描，但增量草稿未确认前不会推进对应的已处理快照。
 
 ## 项目文件
 

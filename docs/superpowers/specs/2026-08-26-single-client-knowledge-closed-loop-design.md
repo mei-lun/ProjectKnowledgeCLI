@@ -10,12 +10,13 @@ Project Knowledge CLI 已经提供 CodeGraph 事实索引、确定性 generated 
 
 本设计面向当前真实使用方式：一个本地项目、一个知识库、一个 MCP AI 客户端顺序工作。目标不是建设通用工作流引擎，而是让 AI 只凭 `knowledge_status` 返回的下一动作，使用现有 MCP 工具完成以下闭环：
 
-1. 首次分批分析全部项目文件；
-2. 用户审核分类、方法论和项目指导；
-3. 正式知识进入 KnowledgeStore；
-4. 后续仅分析变化代码和必要影响范围；
-5. 一级事实变化自动更新，二级指导和三级分类变化重新审核；
-6. 所有条件满足后返回可验证的 `ready`。
+1. 首次分批分析全部项目文件并自动生成可追溯草稿；
+2. 只有任务实际需要某个草稿时，才询问用户是否审核并固化；
+3. 用户也可以主动发起“审核知识草稿”提示，利用空闲时间逐项审核；
+4. 已审核知识进入 KnowledgeStore，未审核草稿保持可见但不能冒充正式结论；
+5. 后续仅分析变化代码和必要影响范围；
+6. 一级事实变化自动更新，二级指导和三级分类变化重新审核；
+7. 基础事实库和草稿生成完成后即可返回可验证的 `ready`，任务命中未审核草稿时另返回 `review_required`。
 
 ## 2. 适用边界
 
@@ -62,13 +63,15 @@ knowledge_status
     ├─ next_action=create_category_draft ─> knowledge_draft_save
     ├─ next_action=create_methodology ────> knowledge_draft_save
     ├─ next_action=create_guidance ───────> knowledge_draft_save
-    ├─ next_action=await_user_review ─────> 停止并展示草稿路径/hash
     ├─ next_action=inspect_changes ───────> knowledge_changes
     ├─ next_action=classify_change ───────> knowledge_update_submit
     └─ next_action=none, state=ready
+
+knowledge_context(task)
+    └─ 命中未审核草稿 ──> review_required=true，询问用户是否审核
 ```
 
-AI 在每次写入工具成功后重新调用 `knowledge_status`。循环只在 `await_user_review`、`ready` 或 `failed` 停止。
+AI 在每次写入工具成功后重新调用 `knowledge_status`。基础循环只在 `ready` 或 `failed` 停止；任务上下文若返回 `review_required=true`，则暂停当前任务并询问用户是否审核对应草稿。
 
 ## 5. WP-KC-01：状态与下一动作
 
@@ -80,6 +83,8 @@ AI 在每次写入工具成功后重新调用 `knowledge_status`。循环只在 
 | KC-NEXT-002 | 下一动作完全由现有存储状态和当前 CodeGraph snapshot 只读计算 |
 | KC-NEXT-003 | 每个非终态恰好返回一个可执行动作 |
 | KC-NEXT-004 | 托管 AGENTS 指示 AI 按 status 返回值循环，而不是依赖隐含调用顺序 |
+| KC-NEXT-005 | `knowledge_context(task)` 命中未审核草稿时返回 `review_required` 和草稿证据 |
+| KC-NEXT-006 | `knowledge_status` 返回待审草稿摘要，支持用户主动提示审核 |
 
 ### 5.2 状态映射
 
@@ -87,16 +92,18 @@ AI 在每次写入工具成功后重新调用 `knowledge_status`。循环只在 
 | --- | --- | --- |
 | `not_started` | 没有 guidance run | `start_initialization` |
 | `scanning` | 存在 pending batch | `analyze_next_batch` |
-| `category_review` | 批次完成但分类目录未确认，或已有分类草稿 | `create_category_draft` 或 `await_user_review` |
-| `guide_generation` | 分类已确认，仍有类别缺少方法论或指导 | `create_methodology` 或 `create_guidance` |
-| `guide_review` | 存在待确认方法论或指导草稿 | `await_user_review` |
+| `draft_generation` | 批次完成，仍有类别草稿未生成 | `create_category_draft`、`create_methodology` 或 `create_guidance` |
 | `incremental` | 当前 snapshot 与 guidance baseline 不一致，或存在 pending change | `inspect_changes` 或 `classify_change` |
 | `ready` | 第 9 节所有门禁通过 | `none` |
 | `failed` | 当前 run 明确失败 | `restart_initialization` |
 
 当一个状态存在两个候选动作时，以是否已有草稿或 change 记录决定唯一结果。`knowledge_status` 不创建 change、不保存草稿，也不推进 baseline。
 
-状态按以下固定优先级计算，命中后立即停止：没有 run、run 失败、存在待审草稿、存在 pending batch、分类目录未确认、类别正式资产不完整、存在 pending change、baseline 与当前 snapshot 不一致、Ready。待生成类别按 `category_id` 排序；同一类别先生成方法论再生成项目指导。增量变化按 `pendingCategories` 的排序顺序每次处理一个类别。这样即使多个事实同时成立，也只返回一个动作。
+状态按以下固定优先级计算，命中后立即停止：没有 run、run 失败、存在 pending batch、草稿尚未生成、存在 pending change、baseline 与当前 snapshot 不一致、基础 Ready。草稿已存在不阻塞基础 Ready；`knowledge_status` 只返回待审核草稿摘要，不判断具体任务是否需要它。只有 `knowledge_context(task)` 命中未审核草稿时，才返回独立的 `review_required=true` 任务门。待生成类别按 `category_id` 排序；同一类别先生成方法论再生成项目指导。增量变化按 `pendingCategories` 的排序顺序每次处理一个类别。这样即使多个事实同时成立，也只返回一个动作。
+
+`knowledge_status` 的库状态与 `knowledge_context` 的任务门分离：前者回答“知识库是否有可用基础和哪些草稿待审”，后者回答“本次任务是否必须先审核某个草稿”。
+
+现有数据库中的 `category_review`、`guidance_generation` 和 `guidance_review` 是历史 run 状态名称；本期 status 对外统一映射为上述简化状态，不新增迁移要求。
 
 ## 6. WP-KC-02：首次建库闭环
 
@@ -106,10 +113,12 @@ AI 在每次写入工具成功后重新调用 `knowledge_status`。循环只在 
 | --- | --- |
 | KC-INIT-001 | 初始化按现有最大 40 文件批次覆盖当前 CodeGraph snapshot |
 | KC-INIT-002 | 批次提交的 `analyzedFiles` 必须与批次文件集合完全一致 |
-| KC-INIT-003 | 所有批次完成后才能创建分类目录草稿 |
-| KC-INIT-004 | 分类确认后按类别顺序生成方法论和项目指导 |
-| KC-INIT-005 | 每个类别必须同时存在正式方法论和正式项目指导 |
+| KC-INIT-003 | 所有批次完成后自动创建分类目录草稿，不等待用户确认 |
+| KC-INIT-004 | 分类候选生成后按类别顺序生成方法论和项目指导草稿 |
+| KC-INIT-005 | 每个类别的草稿必须有来源和 snapshot，但不要求首次初始化时确认 |
 | KC-INIT-006 | 快照变化或批次失败时当前 run 失败，重新开始初始化 |
+| KC-INIT-007 | 草稿生成完成即可结束首次初始化，不因未审核草稿阻塞基础 Ready |
+| KC-INIT-008 | 未审核草稿可显式检索，但必须标注 draft ownership 和未确认状态 |
 
 ### 6.2 顺序
 
@@ -118,9 +127,17 @@ AI 在每次写入工具成功后重新调用 `knowledge_status`。循环只在 
 3. AI 提交候选类别、证据和 `analyzedFiles`。
 4. PKS 校验 `analyzedFiles` 与批次文件集合相等、证据 hash 属于冻结 snapshot。
 5. 全部批次完成后，AI 汇总候选并保存分类目录草稿。
-6. 用户确认分类目录。
-7. AI 按 `category_id` 排序，每次只生成一个缺失资产：先方法论，后项目指导。
-8. 用户逐份确认。最后一个类别的两个资产都确认后，首次建库完成。
+6. AI 按 `category_id` 排序，每次只生成一个缺失资产草稿：先方法论，后项目指导。
+7. 所有草稿生成完成后，首次事实扫描完成；不要求用户立即确认任何草稿。
+
+草稿可以通过两条路径进入审核：
+
+- 任务触发：`knowledge_context(task)` 命中某个未审核草稿时，返回 `review_required=true`、草稿 ID、路径、hash 和来源摘要。AI 必须先询问用户是否审核，用户同意后再调用现有确认接口；用户拒绝则只能使用 CodeGraph 实时事实和已审核知识。
+- 主动触发：用户输入“审核知识草稿”“审核登录相关草稿”等提示。AI 调用 status 获取待审草稿，按类别或用户指定范围顺序展示，逐项调用现有确认接口。
+
+主动审核不是初始化的隐含步骤。用户不发起审核提示时，草稿可以长期保持 `awaiting_confirmation`，不阻塞基础 Ready。
+
+未审核草稿允许被 `knowledge_search` 和 `knowledge_get` 显式查看，但必须标注 `ownership=draft`、`confidence=generated` 或 `inferred`，不能作为 `verified` 结论注入默认任务上下文。
 
 批次完成表示 AI 声明已处理批次内全部文件。PKS 不尝试证明模型是否真正理解正文，但不允许通过省略文件伪造覆盖率。
 
@@ -168,8 +185,8 @@ AI 在每次写入工具成功后重新调用 `knowledge_status`。循环只在 
 | ID | 要求 |
 | --- | --- |
 | KC-GATE-001 | 最新初始化 run 已完成且所有批次均成功 |
-| KC-GATE-002 | 每个类别同时存在正式方法论和正式项目指导 |
-| KC-GATE-003 | 不存在待审核 guidance draft 或 pending guidance change |
+| KC-GATE-002 | 所有类别草稿均已生成并带有效来源 |
+| KC-GATE-003 | 不存在未处理 guidance change；未审核草稿不阻塞基础 Ready |
 | KC-GATE-004 | 不存在 stale/conflicted knowledge |
 | KC-GATE-005 | guidance baseline 等于当前 CodeGraph snapshot |
 | KC-GATE-006 | `check/finalize` 返回精确阻塞原因和对应下一动作 |
@@ -182,13 +199,13 @@ AI 在每次写入工具成功后重新调用 `knowledge_status`。循环只在 
 2. 最新 guidance run 为 `complete`；
 3. 批次覆盖数等于总文件数且没有失败文件；
 4. 类别数大于零；
-5. 每个类别都有当前方法论和当前项目指导；
-6. 没有 `incomplete` 或 `awaiting_confirmation` 草稿；
+5. 每个类别都有分类、方法论和项目指导草稿；
+6. 没有 `incomplete` 草稿；`awaiting_confirmation` 草稿允许存在；
 7. 没有未处理 guidance change；
 8. guidance baseline snapshot 等于当前 CodeGraph snapshot；
 9. stale/conflicted knowledge 均为零。
 
-`finalize --check` 在任一条件不满足时返回非零，并列出具体条件；不再只返回笼统的 `knowledge_review_required`。
+`finalize --check` 在基础 Ready 条件不满足时返回非零，并列出具体条件；存在未审核草稿时不阻塞基础 Ready，但任务上下文必须返回 `review_required`，不再只返回笼统的 `knowledge_review_required`。
 
 ## 10. 失败处理
 
@@ -208,8 +225,9 @@ AI 在每次写入工具成功后重新调用 `knowledge_status`。循环只在 
 
 ### WP-KC-02
 
-- 两个批次、两个类别从空库到 Ready。
-- 缺少一个 analyzed file、错误 snapshot、失败批次、缺少方法论、缺少指导均不能完成。
+- 两个批次、两个类别从空库到 `ready`，不确认任何语义草稿也能通过基础 Ready。
+- 缺少一个 analyzed file、错误 snapshot、失败批次、缺少分类/方法论/指导草稿均不能完成。
+- 任务命中未审核草稿时返回 `review_required`；用户主动输入审核提示时能够列出待审草稿。
 
 ### WP-KC-03
 
