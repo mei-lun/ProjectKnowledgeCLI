@@ -5,6 +5,19 @@
 > 报告状态：Phase 0～2 确定性检索基线已交付；发布证据正在重新对齐，最终生产质量门尚未通过
 > 默认语言：中文
 
+## 单 AI 客户端知识闭环计划：WP-KC-01～04
+
+本工作包对应 `docs/superpowers/specs/2026-08-26-single-client-knowledge-closed-loop-design.md`。当前仅登记已经确认的适用边界和待实施需求，不宣称功能完成：单 AI 客户端顺序维护单个本地知识库；开发期允许重新初始化，不做旧数据迁移、并发调度、后台 daemon 或终端中断恢复。
+
+| 工作包 | 需求 ID | 目标 | 当前状态 |
+| --- | --- | --- | --- |
+| WP-KC-01 | KC-NEXT-001～004 | `knowledge_status` 返回唯一、只读、可执行的下一动作，并更新 AI 客户端规则 | 待设计复核 |
+| WP-KC-02 | KC-INIT-001～006 | 全文件分批分析、分类审核和逐类别双资产审核形成首次建库闭环 | 待设计复核 |
+| WP-KC-03 | KC-INCR-001～007 | 顺序处理受影响类别，一级自动更新、二三级审核，全部完成后推进 baseline | 待设计复核 |
+| WP-KC-04 | KC-GATE-001～006 | 将覆盖、正式资产、待审项、新鲜度和 snapshot 对齐纳入 Ready/finalize 门禁 | 待设计复核 |
+
+每个工作包必须先补正负测试和端到端样本，再实现行为；只有实现、测试、相关评测、文档、版本和知识同步全部完成后，才能把对应需求标记为已完成。当前 55 条 semantic update queue 属于开发期可丢弃数据，后续使用干净知识库重新初始化，不建设迁移路径。
+
 ## npm 一键安装交付复核：WP-NPM-01
 
 本工作包对应 `docs/superpowers/specs/2026-08-24-npm-bootstrap-design.md` 和 `docs/superpowers/plans/2026-08-24-npm-bootstrap.md`。Windows 首发实现、真实安装样本、0.1.48 版本递增和生成知识同步均已完成；提交后 `curated.conventions` 因其引用的版本、Changelog、审计和活动评测来源变化而进入人工复核，`conflicted_knowledge=0`。该待审项不冒充已确认，也不阻断 npm 安装功能验收。
