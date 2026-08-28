@@ -20,6 +20,7 @@ from .progress import TerminalProgressRenderer
 from .schemas import FEATURE_GUIDE_DRAFT_SCHEMA
 from .semantic import SemanticKnowledgeService
 from .service import ProjectService
+from .task_workflow import TaskCompletionWorkflow
 from .util import atomic_json
 
 
@@ -74,6 +75,13 @@ def build_parser() -> argparse.ArgumentParser:
     git_event.add_argument("--flag", default="")
     git_event.add_argument("--json", action="store_true", dest="as_json")
     git_event.add_argument("--quiet", action="store_true")
+
+    task_event = commands.add_parser("task-event", help="register a post-task completion event for later confirmation")
+    task_event.add_argument("--project", default=".")
+    task_event.add_argument("--task-id", required=True)
+    task_event.add_argument("--summary", required=True)
+    task_event.add_argument("--json", action="store_true", dest="as_json")
+    task_event.add_argument("--quiet", action="store_true")
 
     evaluation = commands.add_parser("evaluate", help="evaluate retrieval against a JSONL dataset")
     evaluation.add_argument("dataset", help="JSONL dataset with task and expected source anchors")
@@ -255,6 +263,9 @@ def main(argv: list[str] | None = None) -> int:
         elif args.command == "finalize":
             result, ready = FinalizationService(args.path).finalize(check_only=args.check)
             exit_code = 0 if ready else 2
+        elif args.command == "task-event":
+            result = TaskCompletionWorkflow(args.project).register_pending(args.task_id, args.summary)
+            exit_code = 0
         else:
             service = ProjectService(args.path)
             if args.command == "init":

@@ -10,6 +10,7 @@ from .guidance_models import (
     GuidanceDraft,
     GuidanceRun,
     GuidanceVersion,
+    TaskCompletion,
 )
 from .store import SCHEMA_VERSION, KnowledgeStore
 
@@ -237,6 +238,59 @@ class GuidanceStore:
             parameters,
         )
         return [self._draft(row) for row in rows]
+
+    def save_task_completion(self, task: TaskCompletion) -> TaskCompletion:
+        self.connection.execute(
+            """
+            INSERT INTO task_completions(
+                task_id, project_root, summary, changed_files_json, changed_symbols_json,
+                tests_json, base_snapshot_id, final_snapshot_id, user_confirmed,
+                generation_status, affected_categories_json, skip_reason, error,
+                created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(task_id) DO UPDATE SET
+                summary=excluded.summary, changed_files_json=excluded.changed_files_json,
+                changed_symbols_json=excluded.changed_symbols_json, tests_json=excluded.tests_json,
+                final_snapshot_id=excluded.final_snapshot_id, user_confirmed=excluded.user_confirmed,
+                generation_status=excluded.generation_status,
+                affected_categories_json=excluded.affected_categories_json,
+                skip_reason=excluded.skip_reason, error=excluded.error, updated_at=excluded.updated_at
+            WHERE task_completions.project_root=excluded.project_root
+            """,
+            (
+                task.task_id, task.project_root, task.summary, _json(task.changed_files),
+                _json(task.changed_symbols), _json(task.tests), task.base_snapshot_id,
+                task.final_snapshot_id, int(task.user_confirmed), task.generation_status,
+                _json(task.affected_categories), task.skip_reason, task.error,
+                task.created_at, task.updated_at,
+            ),
+        )
+        return task
+
+    def get_task_completion(self, task_id: str) -> TaskCompletion | None:
+        row = self.connection.execute(
+            "SELECT * FROM task_completions WHERE task_id = ?", (task_id,)
+        ).fetchone()
+        if row is None:
+            return None
+        return TaskCompletion.from_dict({
+            "task_id": row["task_id"], "project_root": row["project_root"],
+            "summary": row["summary"], "changed_files": json.loads(row["changed_files_json"]),
+            "changed_symbols": json.loads(row["changed_symbols_json"]),
+            "tests": json.loads(row["tests_json"]), "base_snapshot_id": row["base_snapshot_id"],
+            "final_snapshot_id": row["final_snapshot_id"], "user_confirmed": bool(row["user_confirmed"]),
+            "generation_status": row["generation_status"],
+            "affected_categories": json.loads(row["affected_categories_json"]),
+            "skip_reason": row["skip_reason"], "error": row["error"],
+            "created_at": row["created_at"], "updated_at": row["updated_at"],
+        })
+
+    def list_task_completions(self, limit: int = 20) -> list[TaskCompletion]:
+        rows = self.connection.execute(
+            "SELECT task_id FROM task_completions ORDER BY updated_at DESC, task_id DESC LIMIT ?",
+            (max(1, min(limit, 100)),),
+        )
+        return [item for row in rows if (item := self.get_task_completion(str(row["task_id"]))) is not None]
 
     def save_version(self, version: GuidanceVersion) -> GuidanceVersion:
         category = self._require_category(version.category_id)

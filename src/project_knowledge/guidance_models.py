@@ -21,6 +21,7 @@ DraftStatus = Literal[
     "incomplete", "awaiting_confirmation", "confirmed", "rejected"
 ]
 UpdateLevel = Literal["fact", "guidance", "category"]
+TaskGenerationStatus = Literal["pending", "generated", "skipped", "failed"]
 
 
 def _require_id(name: str, value: str) -> None:
@@ -314,4 +315,55 @@ class GuidanceChange:
             affected_categories=list(value.get("affected_categories", [])),
             payload=dict(value.get("payload", {})), created_at=value["created_at"],
             processed_at=value.get("processed_at"),
+        )
+
+
+@dataclass(slots=True)
+class TaskCompletion:
+    task_id: str
+    project_root: str
+    summary: str
+    changed_files: list[str]
+    changed_symbols: list[str]
+    tests: list[dict[str, Any]]
+    base_snapshot_id: str
+    final_snapshot_id: str
+    user_confirmed: bool
+    generation_status: TaskGenerationStatus
+    affected_categories: list[str]
+    created_at: str
+    updated_at: str
+    skip_reason: str | None = None
+    error: str | None = None
+
+    _STATUSES: ClassVar[set[str]] = {"pending", "generated", "skipped", "failed"}
+
+    def __post_init__(self) -> None:
+        _require_id("task_id", self.task_id)
+        _require_id("project_root", self.project_root)
+        _require_id("summary", self.summary)
+        _require_id("base_snapshot_id", self.base_snapshot_id)
+        _require_id("final_snapshot_id", self.final_snapshot_id)
+        _require_choice("generation_status", self.generation_status, self._STATUSES)
+        _require_iso_time("created_at", self.created_at)
+        _require_iso_time("updated_at", self.updated_at)
+        if not isinstance(self.user_confirmed, bool):
+            raise ValueError("user_confirmed 必须是布尔值")
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, value: dict[str, Any]) -> "TaskCompletion":
+        return cls(
+            task_id=value["task_id"], project_root=value["project_root"],
+            summary=value["summary"], changed_files=list(value.get("changed_files", [])),
+            changed_symbols=list(value.get("changed_symbols", [])),
+            tests=[dict(item) for item in value.get("tests", [])],
+            base_snapshot_id=value["base_snapshot_id"], final_snapshot_id=value["final_snapshot_id"],
+            user_confirmed=bool(value.get("user_confirmed", False)),
+            generation_status=value["generation_status"],
+            affected_categories=list(value.get("affected_categories", [])),
+            created_at=value["created_at"], updated_at=value["updated_at"],
+            skip_reason=value.get("skip_reason"), error=value.get("error"),
         )

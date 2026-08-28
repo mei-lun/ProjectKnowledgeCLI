@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import os
 import subprocess
+import time
 
 
 def main() -> int:
@@ -14,7 +15,17 @@ def main() -> int:
         ["project-kb", "sync", project, "--task-summary", summary, "--quiet"],
         check=False,
     )
-    return result.returncode
+    if result.returncode != 0:
+        return result.returncode
+    task_id = os.environ.get("PROJECT_KB_TASK_ID", f"hook-{int(time.time())}")
+    subprocess.run(
+        [
+            "project-kb", "task-event", "--project", project,
+            "--task-id", task_id, "--summary", summary, "--quiet",
+        ],
+        check=False,
+    )
+    return 0
 
 
 if __name__ == "__main__":

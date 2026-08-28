@@ -39,6 +39,7 @@
 - `src/project_knowledge/semantic.py`（Python）
 - `src/project_knowledge/service.py`（Python）
 - `src/project_knowledge/store.py`（Python）
+- `src/project_knowledge/task_workflow.py`（Python）
 - `src/project_knowledge/util.py`（Python）
 - `src/project_knowledge/vector.py`（Python）
 - `src/project_knowledge/versioning.py`（Python）

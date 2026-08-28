@@ -7,6 +7,10 @@
 
 ## 单 AI 客户端知识闭环计划：WP-KC-01～04
 
+### WP-KC-05 任务确认驱动的指导生成
+
+基础闭环已实现：指导目录按类别/模块组织；用户主动生成时可选择类别；开发前由 `knowledge_context` 返回 `guidance_offer`；用户确认任务完成后通过 `knowledge_task_complete` 锁定快照并准备受影响类别的待审核草稿；post-task hook 仅登记未收口事件作为兜底。完整 CodeGraph 集成回归和更细的类别选择生成仍需后续评测。
+
 本工作包对应 `docs/superpowers/specs/2026-08-26-single-client-knowledge-closed-loop-design.md`。当前仅登记已经确认的适用边界和待实施需求，不宣称功能完成：单 AI 客户端顺序维护单个本地知识库；开发期允许重新初始化，不做旧数据迁移、并发调度、后台 daemon 或终端中断恢复。
 
 | 工作包 | 需求 ID | 目标 | 当前状态 |

@@ -17,7 +17,8 @@ Use the knowledge base as an index into live source, not as a substitute for ver
 6. Read only the cited source anchors needed to confirm behavior and static-analysis gaps.
 7. Implement the change and run the returned verification commands plus any task-specific checks.
 8. Run `project-kb sync --task-summary "<intent>"` after source changes when command execution is available.
-9. Report stale curated records or semantic changes that need human review; never silently rewrite curated prose or accepted ADRs.
+9. When the user confirms the task is complete, call `knowledge_task_complete` with the task summary, changed files, symbols, and test results, then continue the returned guidance draft actions in the same conversation.
+10. Report stale curated records or semantic changes that need human review; never silently rewrite curated prose or accepted ADRs.
 
 ## Trust Rules
 
@@ -34,4 +35,3 @@ Use the knowledge base as an index into live source, not as a substitute for ver
 - Use `knowledge_get` when a stable knowledge ID is already known.
 - Use `knowledge_impact` before modifying shared symbols or cross-module behavior.
 - Use `knowledge_status` to check commits, pending files, parse errors, stale knowledge, and watcher health.
-

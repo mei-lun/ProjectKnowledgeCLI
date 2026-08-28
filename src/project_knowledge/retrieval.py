@@ -490,6 +490,28 @@ class KnowledgeAPI:
             if impact.get("limitations"):
                 unknowns.append("当前索引使用有限关系解析，动态派发/反射仍需现场验证。")
             likely_modules = sorted(set(impact.get("affected_modules", []))) or sorted({self._module_from_path(item.get("path", "")) for item in symbol_matches if item.get("path")})
+            workflow = status.get("guidance_workflow", {})
+            pending_guidance = review_gate.get("drafts", [])
+            formal_count = workflow.get("categories", {}).get("with_formal_guidance", 0)
+            category_candidates = workflow.get("category_candidates", [])
+            candidate_ids = [
+                str(item.get("category_id")) for item in category_candidates
+                if isinstance(item, dict) and item.get("category_id")
+            ]
+            if pending_guidance:
+                offer_reason = "draft_only"
+                offer_action = "review_draft"
+            elif candidate_ids and formal_count == 0:
+                offer_reason = "missing"
+                offer_action = "generate"
+            else:
+                offer_reason = "sufficient"
+                offer_action = "use_existing"
+            guidance_offer = {
+                "reason": offer_reason,
+                "category_candidates": sorted(set(candidate_ids)),
+                "recommended_action": offer_action,
+            }
             retrieval_explanation = {
                 "task_type": intent["task_type"], "signals": intent["signals"], "rationale": intent["rationale"],
                 "selected_records": [{"id": item["id"], "score": item["score"], "why_selected": item.get("why_selected", "")} for item in selected_results],
@@ -540,6 +562,7 @@ class KnowledgeAPI:
                 "token_budget": budget,
                 "estimated_tokens": 0,
                 "guidance_workflow": status.get("guidance_workflow", {}),
+                "guidance_offer": guidance_offer,
                 "vector_retrieval": search.get("vector_retrieval", {}),
                 "fact_source": "codegraph",
                 "engine_limitations": self.service.engine.status().get("limitations", []),
@@ -1485,6 +1508,7 @@ class KnowledgeAPI:
         batches = guidance.list_batches(run.run_id) if run else []
         drafts = guidance.list_pending_drafts(run.run_id) if run else []
         changes = guidance.pending_changes()
+        task_completions = guidance.list_task_completions(limit=20)
         categories = guidance.list_categories(run.run_id) if run else []
         formal_guides = sum(1 for category in categories if guidance.current_version(category.category_id))
         formal_methodologies = sum(
@@ -1510,6 +1534,9 @@ class KnowledgeAPI:
         workflow_state = KnowledgeAPI._workflow_state(
             run, batches, drafts, changes, categories, baseline_mismatch, formal_assets
         )
+        pending_tasks = [item for item in task_completions if item.generation_status == "pending" and item.user_confirmed]
+        if pending_tasks and workflow_state.get("next_action") in {"none", "draft_available"}:
+            workflow_state = {"state": "task_completion", "next_action": "generate_guidance_draft"}
         draft_counts = {
             "total": len(drafts),
             "awaiting_confirmation": sum(draft.status == "awaiting_confirmation" for draft in drafts),
@@ -1558,6 +1585,13 @@ class KnowledgeAPI:
                 }
                 for change in changes
             ],
+            "task_completion": {
+                "recent": [item.to_dict() for item in task_completions[:10]],
+                "pending_generation": sum(
+                    item.generation_status == "pending" for item in task_completions
+                ),
+                "failed": sum(item.generation_status == "failed" for item in task_completions),
+            },
         }
 
     @staticmethod

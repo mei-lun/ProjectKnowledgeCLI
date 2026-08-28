@@ -363,6 +363,25 @@ class KnowledgeStore:
             )""",
             """CREATE INDEX IF NOT EXISTS idx_guidance_changes_pending
                 ON guidance_changes(processed_at, created_at)""",
+            """CREATE TABLE IF NOT EXISTS task_completions (
+                task_id TEXT PRIMARY KEY CHECK(length(task_id) > 0),
+                project_root TEXT NOT NULL CHECK(length(project_root) > 0),
+                summary TEXT NOT NULL CHECK(length(summary) > 0),
+                changed_files_json TEXT NOT NULL,
+                changed_symbols_json TEXT NOT NULL,
+                tests_json TEXT NOT NULL,
+                base_snapshot_id TEXT NOT NULL CHECK(length(base_snapshot_id) > 0),
+                final_snapshot_id TEXT NOT NULL CHECK(length(final_snapshot_id) > 0),
+                user_confirmed INTEGER NOT NULL CHECK(user_confirmed IN (0, 1)),
+                generation_status TEXT NOT NULL CHECK(generation_status IN ('pending', 'generated', 'skipped', 'failed')),
+                affected_categories_json TEXT NOT NULL,
+                skip_reason TEXT,
+                error TEXT,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            )""",
+            """CREATE INDEX IF NOT EXISTS idx_task_completions_status
+                ON task_completions(generation_status, updated_at)""",
         ]
         for statement in statements:
             self.connection.execute(statement)
@@ -374,6 +393,10 @@ class KnowledgeStore:
                 "SELECT 1 FROM sqlite_master WHERE type='table' AND name=?", (table,)
             ).fetchone()
             graph[table] = self.rows(f"SELECT * FROM {table}") if exists else []
+        exists = self.connection.execute(
+            "SELECT 1 FROM sqlite_master WHERE type='table' AND name='task_completions'"
+        ).fetchone()
+        graph["task_completions"] = self.rows("SELECT * FROM task_completions") if exists else []
         return graph
 
     def import_guidance_graph(self, graph: dict[str, list[dict[str, Any]]]) -> None:
@@ -385,6 +408,13 @@ class KnowledgeStore:
                     f"INSERT INTO {table} ({', '.join(columns)}) VALUES ({placeholders})",
                     [row[column] for column in columns],
                 )
+        for row in graph.get("task_completions", []):
+            columns = list(row)
+            placeholders = ", ".join("?" for _ in columns)
+            self.connection.execute(
+                f"INSERT INTO task_completions ({', '.join(columns)}) VALUES ({placeholders})",
+                [row[column] for column in columns],
+            )
 
     @staticmethod
     def _guidance_tables() -> tuple[str, ...]:

@@ -83,6 +83,42 @@ TOOLS: list[dict[str, Any]] = [
 
 WORKFLOW_TOOLS: list[dict[str, Any]] = [
     {
+        "name": "knowledge_guidance_plan",
+        "title": "规划可生成的类别指导",
+        "description": "返回类别目录和当前指导资产状态，供用户选择生成范围。",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "projectPath": {"type": "string", "minLength": 1},
+                "selectedCategories": {"type": "array", "items": {"type": "string"}, "uniqueItems": True},
+            },
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
+    },
+    {
+        "name": "knowledge_task_complete",
+        "title": "确认任务完成并准备指导生成",
+        "description": "记录用户确认完成的任务，锁定快照并返回受影响类别和证据。",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "projectPath": {"type": "string", "minLength": 1},
+                "taskId": {"type": "string", "minLength": 1},
+                "summary": {"type": "string", "minLength": 1},
+                "changedFiles": {"type": "array", "items": {"type": "string"}, "uniqueItems": True},
+                "changedSymbols": {"type": "array", "items": {"type": "string"}, "uniqueItems": True},
+                "tests": {"type": "array", "items": {"type": "object"}},
+                "userConfirmed": {"type": "boolean"},
+                "skip": {"type": "boolean"},
+                "skipReason": {"type": "string", "minLength": 1},
+            },
+            "required": ["taskId", "summary", "userConfirmed"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": False, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
+    },
+    {
         "name": "knowledge_initialization_start",
         "title": "开始开发指导初始化",
         "description": "基于 CodeGraph 当前快照建立或恢复稳定分批初始化。",
@@ -311,6 +347,20 @@ class MCPServer:
         if name == "knowledge_initialization_start":
             from .initialization import InitializationWorkflow
             return InitializationWorkflow(project).start()
+        if name == "knowledge_guidance_plan":
+            from .task_workflow import TaskCompletionWorkflow
+            return TaskCompletionWorkflow(project).plan(list(arguments.get("selectedCategories", [])))
+        if name == "knowledge_task_complete":
+            from .task_workflow import TaskCompletionWorkflow
+            return TaskCompletionWorkflow(project).complete(
+                str(arguments["taskId"]), str(arguments["summary"]),
+                changed_files=list(arguments.get("changedFiles", [])),
+                changed_symbols=list(arguments.get("changedSymbols", [])),
+                tests=list(arguments.get("tests", [])),
+                user_confirmed=bool(arguments["userConfirmed"]),
+                skip=bool(arguments.get("skip", False)),
+                skip_reason=arguments.get("skipReason"),
+            )
         if name == "knowledge_initialization_next":
             from .initialization import InitializationWorkflow
             return InitializationWorkflow(project).next_batch(str(arguments["runId"]))

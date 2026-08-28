@@ -1,0 +1,38 @@
+{
+  "affected_knowledge": [
+    "curated.architecture",
+    "curated.conventions",
+    "curated.feature.guide.generation",
+    "curated.provider.and.evidence",
+    "decision.0001.local.first.core",
+    "decision.0002.codegraph.adapter.boundary",
+    "generated.frameworks",
+    "generated.module.plugins",
+    "generated.module.project_knowledge",
+    "generated.module.tests",
+    "generated.project-map",
+    "generated.test-map"
+  ],
+  "base_commit": "0d82a6dd212c13571ff8e263dec1e1ac4cb5b259",
+  "changed_files": [
+    "plugins/project-knowledge/hooks/sync_after_task.py",
+    "src/project_knowledge/__init__.py",
+    "src/project_knowledge/cli.py",
+    "src/project_knowledge/guidance_models.py",
+    "src/project_knowledge/guidance_store.py",
+    "src/project_knowledge/mcp.py",
+    "src/project_knowledge/retrieval.py",
+    "src/project_knowledge/store.py",
+    "src/project_knowledge/task_workflow.py",
+    "tests/test_guidance_mcp.py",
+    "tests/test_task_completion.py"
+  ],
+  "changed_symbols": [],
+  "changeset_id": "change-20260828-160002",
+  "created_at": "2026-08-28T16:00:02+08:00",
+  "head_commit": "1dd8da19c116a7ed0431f63456687523d6d76ef9",
+  "queue_id": "sq-f68bed43dfd6043c",
+  "schema_version": 1,
+  "status": "awaiting_semantic_generation",
+  "task_summary": "实现任务确认驱动的指导生成与收口流程"
+}

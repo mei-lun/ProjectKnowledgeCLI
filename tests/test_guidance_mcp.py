@@ -11,12 +11,13 @@ from project_knowledge.mcp import MCPServer, TOOLS
 
 class GuidanceMCPTests(unittest.TestCase):
     def test_lists_seven_workflow_tools(self):
-        self.assertEqual(len(TOOLS), 12)
+        self.assertEqual(len(TOOLS), 14)
         names = {item["name"] for item in TOOLS}
         self.assertTrue({
             "knowledge_initialization_start", "knowledge_initialization_next",
             "knowledge_initialization_submit", "knowledge_draft_save",
             "knowledge_draft_confirm", "knowledge_changes", "knowledge_update_submit",
+            "knowledge_guidance_plan", "knowledge_task_complete",
         }.issubset(names))
         draft_tool = next(item for item in TOOLS if item["name"] == "knowledge_draft_save")
         self.assertEqual(
@@ -117,6 +118,23 @@ class GuidanceMCPTests(unittest.TestCase):
             })
             workflow.assert_called_once_with(Path("/tmp/project").resolve(), client=client.return_value)
             load.assert_called_once_with(Path("/tmp/project").resolve())
+
+    def test_task_completion_routes_to_workflow(self):
+        server = object.__new__(MCPServer)
+        server.project = Path("/tmp/project")
+        server.api = None
+        with patch("project_knowledge.task_workflow.TaskCompletionWorkflow") as workflow:
+            workflow.return_value.complete.return_value = {"task_id": "t1", "next_action": "generate_guidance_draft"}
+            result = server._call("knowledge_task_complete", {
+                "taskId": "t1", "summary": "完成登录功能", "userConfirmed": True,
+                "changedFiles": ["src/login.py"], "tests": [{"command": "pytest", "passed": True}],
+            })
+            self.assertEqual(result["task_id"], "t1")
+            workflow.return_value.complete.assert_called_once_with(
+                "t1", "完成登录功能", changed_files=["src/login.py"],
+                changed_symbols=[], tests=[{"command": "pytest", "passed": True}],
+                user_confirmed=True, skip=False, skip_reason=None,
+            )
 
     def test_save_and_reject_require_conditional_fields(self):
         server = object.__new__(MCPServer)
