@@ -66,10 +66,10 @@ class CodexBootstrapTests(unittest.TestCase):
         self.assertEqual(config_text.count("# project-kb:codex-mcp:start"), 1)
         parsed = tomllib.loads(config_text)
         server = parsed["mcp_servers"]["project_knowledge"]
-        self.assertEqual(Path(server["command"]), Path(sys.executable).resolve())
-        self.assertEqual(server["args"], ["-m", "project_knowledge", "mcp", "--project", "."])
-        self.assertEqual(Path(server["cwd"]), self.root.resolve())
-        self.assertEqual(Path(server["env"]["CODEGRAPH_COMMAND"]), self.codegraph)
+        self.assertEqual(server["command"], "project-kb")
+        self.assertEqual(server["args"], ["mcp", "--project", "."])
+        self.assertNotIn("cwd", server)
+        self.assertNotIn("env", server)
         self.assertIn(
             ".codex/config.toml",
             (self.root / ".gitignore").read_text(encoding="utf-8"),

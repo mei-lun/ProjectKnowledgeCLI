@@ -4,6 +4,7 @@
 
 | 测试文件 | 模块 |
 | --- | --- |
+| `npm/test/agent-installer.test.js` | npm |
 | `npm/test/runtime.test.js` | npm |
 | `tests/__init__.py` | tests |
 | `tests/test_codegraph.py` | tests |

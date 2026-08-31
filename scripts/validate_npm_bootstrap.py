@@ -83,14 +83,16 @@ def validate_npm_bootstrap(root: Path = PROJECT_ROOT) -> dict[str, Any]:
         temporary = Path(directory)
         artifacts = temporary / "artifacts"
         prefix = temporary / "npm-prefix"
-        runtime_home = temporary / "runtimes"
+        codex_home = temporary / "codex-home"
+        pi_agent_dir = temporary / "pi-agent"
         project = temporary / "sample-project"
         artifacts.mkdir()
         project.mkdir()
         env = os.environ.copy()
         env.update({
             "PROJECT_KB_PYTHON": sys.executable,
-            "PROJECT_KB_RUNTIME_HOME": str(runtime_home),
+            "CODEX_HOME": str(codex_home),
+            "PI_CODING_AGENT_DIR": str(pi_agent_dir),
             "npm_config_audit": "false",
             "npm_config_fund": "false",
         })
@@ -140,6 +142,32 @@ def validate_npm_bootstrap(root: Path = PROJECT_ROOT) -> dict[str, Any]:
                 f"Node launcher did not preserve the Python CLI exit code 2: {invalid.returncode}"
             )
 
+        global_install = run_checked(
+            [launcher, "install", "--target", "codex,pi", "--location", "global", "--yes", "--json"],
+            cwd=temporary,
+            env=env,
+        )
+        global_payload = json.loads(global_install.stdout)
+        global_config = codex_home / "config.toml"
+        if str(global_config) not in global_payload.get("changedPaths", []):
+            raise RuntimeError("global agent install did not report Codex config")
+        global_toml = tomllib.loads(global_config.read_text(encoding="utf-8"))
+        global_server = global_toml["mcp_servers"]["project_knowledge"]
+        if global_server.get("command") != "project-kb" or global_server.get("args") != ["mcp", "--project", "."]:
+            raise RuntimeError("global Codex config does not use the stable project-kb launcher")
+        if "env" in global_server or "cwd" in global_server:
+            raise RuntimeError("global Codex config contains machine-specific runtime fields")
+        if not (pi_agent_dir / "extensions" / "project-kb.ts").is_file():
+            raise RuntimeError("global Pi extension is missing")
+        doctor = run_checked(
+            [launcher, "doctor", "--global", "--json"],
+            cwd=temporary,
+            env=env,
+        )
+        doctor_payload = json.loads(doctor.stdout)
+        if not doctor_payload.get("codexConfigured") or not doctor_payload.get("piConfigured"):
+            raise RuntimeError("doctor --global did not report both agent integrations")
+
         run_checked([git_command, "init", "-q"], cwd=project, env=env)
         source = project / "src"
         source.mkdir()
@@ -154,12 +182,12 @@ def validate_npm_bootstrap(root: Path = PROJECT_ROOT) -> dict[str, Any]:
         first_config = config_path.read_bytes()
         parsed = tomllib.loads(first_config.decode("utf-8"))
         server = parsed["mcp_servers"]["project_knowledge"]
-        python_command = Path(server["command"]).resolve()
-        codegraph_command = Path(server["env"]["CODEGRAPH_COMMAND"]).resolve()
-        if runtime_home.resolve() not in python_command.parents:
-            raise RuntimeError("Codex MCP Python command is outside the managed runtime")
-        if prefix.resolve() not in codegraph_command.parents:
-            raise RuntimeError("Codex MCP CodeGraph command is outside the npm installation")
+        if server.get("command") != "project-kb":
+            raise RuntimeError("project Codex MCP config does not use the stable project-kb launcher")
+        if server.get("args") != ["mcp", "--project", "."]:
+            raise RuntimeError("project Codex MCP config does not use the stable project-relative arguments")
+        if "env" in server or "cwd" in server:
+            raise RuntimeError("project Codex MCP config contains machine-specific runtime fields")
 
         run_checked([launcher, "init", "--json"], cwd=project, env=env)
         if config_path.read_bytes() != first_config:
@@ -213,9 +241,11 @@ def validate_npm_bootstrap(root: Path = PROJECT_ROOT) -> dict[str, Any]:
             "version": version,
             "npm_package": tarball.name,
             "release_docs_packed": True,
-            "runtime_created": (runtime_home / version / ".complete").is_file(),
             "exit_code_forwarded": True,
             "codex_config_valid": True,
+            "global_agent_install": True,
+            "pi_extension_present": True,
+            "doctor_global_valid": True,
             "init_idempotent": True,
             "mcp_tools": required_tools,
             "knowledge_preserved": True,

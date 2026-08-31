@@ -21,7 +21,7 @@ from project_knowledge.guidance_models import (
     GuidanceVersion,
 )
 from project_knowledge.guidance_store import GuidanceStore
-from project_knowledge.mcp import MCPServer
+from project_knowledge.mcp import MCPServer, TOOLS
 from project_knowledge.retrieval import KnowledgeAPI
 from project_knowledge.service import ProjectService
 from project_knowledge.store import KnowledgeStore
@@ -166,7 +166,7 @@ class IntegrationTests(unittest.TestCase):
         })
         self.assertEqual(initialized["result"]["protocolVersion"], "2025-06-18")
         tools = server.handle({"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}})
-        self.assertEqual(len(tools["result"]["tools"]), 12)
+        self.assertEqual(len(tools["result"]["tools"]), len(TOOLS))
         called = server.handle({
             "jsonrpc": "2.0", "id": 3, "method": "tools/call",
             "params": {"name": "knowledge_status", "arguments": {}},

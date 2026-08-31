@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-import json
 import os
 import re
 import shutil
-import sys
 import tomllib
 from pathlib import Path
 
@@ -27,22 +25,11 @@ def resolve_codegraph_command() -> Path:
 
 
 def codex_mcp_body(root: Path, codegraph_command: Path | None = None) -> str:
-    command = codegraph_command or resolve_codegraph_command()
-    values = {
-        "python": str(Path(sys.executable).resolve()),
-        "root": str(root.resolve()),
-        "codegraph": str(command.resolve()),
-    }
-    quote = lambda value: json.dumps(value, ensure_ascii=False)
     return "\n".join(
         [
             "[mcp_servers.project_knowledge]",
-            f"command = {quote(values['python'])}",
-            'args = ["-m", "project_knowledge", "mcp", "--project", "."]',
-            f"cwd = {quote(values['root'])}",
-            "",
-            "[mcp_servers.project_knowledge.env]",
-            f"CODEGRAPH_COMMAND = {quote(values['codegraph'])}",
+            'command = "project-kb"',
+            'args = ["mcp", "--project", "."]',
         ]
     )
 

@@ -63,7 +63,7 @@ ProjectKnowledgeCLI 不是另一个代码解析器，而是建立在 CodeGraph �
 
 上述能力已经在代码中实现，但“功能可用”不等于所有检索质量门槛已经通过。当前正式评估报告仍显示候选覆盖、符号召回和调用路径召回存在不足；gardenserver 的受控实践数据表明排序和检索延迟已有明显改善，但生产规模验证仍在继续。PKS 优化的是知识管理、检索编排和工作流，不会替代 CodeGraph 底层的语言解析和关系抽取能力。
 
-## 当前质量指标（0.1.54）
+## 当前质量指标（0.1.58）
 
 当前真实 CodeGraph Adapter 已接入并可用：`codegraph-public-cli 1.5.0`。当前活动评测使用 50 个 self-repo 样本；精确指标和环境相关延迟以 [活动评测报告](evaluation/reports/latest.json) 为唯一来源，避免在 README 中复制会随 live 检索发生小幅波动的数据。
 
@@ -142,6 +142,22 @@ project-kb --version
 
 npm 包会发现 Python 3.11+，在 `%LOCALAPPDATA%\ProjectKnowledgeCLI\runtimes\<版本>` 创建版本隔离的托管虚拟环境，并离线安装包内同版本 Python wheel。它还会使用包内固定的 `@colbymchenry/codegraph@1.5.0`。可以用 `PROJECT_KB_PYTHON` 指定 Python，或用 `PROJECT_KB_RUNTIME_HOME` 改变托管运行时根目录。
 
+### 一键接入 Windows Codex 和 Pi
+
+npm 全局安装完成后，在任意目录执行一次用户级 agent 安装：
+
+```powershell
+project-kb install --target codex,pi --location global --yes
+```
+
+该命令会写入 `%CODEX_HOME%\config.toml`（未设置时为 `%USERPROFILE%\.codex\config.toml`）、Codex 用户级 `AGENTS.md` 和 `%PI_CODING_AGENT_DIR%\extensions\project-kb.ts`（未设置时为 `%USERPROFILE%\.pi\agent`）。Codex 配置只调用稳定的 `project-kb` 命令，不保存当前机器的 Python 或 CodeGraph 绝对路径；Pi 通过原生扩展调用当前项目。重复执行会刷新 project-kb 自有区块并保持幂等。
+
+安装后重启 Codex/Pi。检查用户级接入状态：
+
+```powershell
+project-kb doctor --global --json
+```
+
 ## 在项目中初始化
 
 进入需要接入 Codex 的 Git 项目根目录，然后初始化并检查状态：
@@ -175,10 +191,11 @@ project-kb check . --json
 project-kb rebuild .
 ```
 
-升级 npm 包后，需要在每个已初始化项目根目录再次运行 `init`，让 Codex 配置切换到新版本托管运行时：
+升级 npm 包后，先重新执行用户级 agent 安装以刷新 Codex/Pi 配置；项目级配置则在对应项目根目录再次运行 `init`：
 
 ```powershell
 npm install --global project-kb-cli@latest
+project-kb install --target codex,pi --location global --yes
 project-kb init
 ```
 
@@ -273,6 +290,8 @@ rm -rf -- .project-kb .codegraph .project-kb.yml
 - `project-kb` 找不到：重新打开终端，并确认 npm 全局 bin 目录在 `PATH` 中。
 - Python 探测失败：安装 Python 3.11+，或设置 `PROJECT_KB_PYTHON` 为解释器绝对路径后重新安装/运行。
 - `knowledge_status` 等工具不可见：确认项目已受信任、`.codex/config.toml` 存在，然后重启 Codex 并新建任务。
+- Codex 全局工具不可见：运行 `project-kb install --target codex --location global --yes`，确认 `CODEX_HOME` 指向 Codex 实际目录后重启 Codex。
+- Pi 工具不可见：确认 `%USERPROFILE%\.pi\agent\extensions\project-kb.ts` 存在，或设置 `PI_CODING_AGENT_DIR` 后重新安装并重启 Pi。
 - 同名 MCP 配置冲突：`init` 不会覆盖用户自有的 `[mcp_servers.project_knowledge]`；先改名或迁移原配置再重试。
 - 诊断安装：在目标项目根目录运行 `project-kb doctor . --json`，并用 `project-kb status . --json` 检查索引状态。
 

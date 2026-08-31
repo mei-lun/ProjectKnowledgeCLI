@@ -48,7 +48,8 @@
 
 | 客户端 | 安装目标 | 安装参数 | 所有权与卸载行为 | 状态 |
 | --- | --- | --- | --- | --- |
-| Codex | `AGENTS.md`、`.codex/config.toml`、`.project-kb/mcp.json` | `project-kb init` 自动安装 | 只维护 `project-kb:instructions` 和 `project-kb:codex-mcp` 区块；冲突的用户自有 MCP 表会明确失败 | Windows npm 路径已验证 |
+| Codex | `%CODEX_HOME%/AGENTS.md`、`%CODEX_HOME%/config.toml`；项目级仍支持 `.codex/config.toml` | `project-kb install --target codex --location global --yes` 或 `project-kb init` | 全局配置只维护 `project-kb:instructions` 和 `project-kb:codex-mcp` 区块，使用稳定 `project-kb` 命令；冲突的用户自有 MCP 表会明确失败 | Windows npm 路径已验证 |
+| Pi | `%PI_CODING_AGENT_DIR%/extensions/project-kb.ts` | `project-kb install --target pi --location global --yes` | 原生扩展只维护 project-kb marker；Pi 无内置 MCP 客户端，不写 MCP 配置 | Windows npm 路径已验证 |
 | Claude Code | `.claude/CLAUDE.md` | `--client claude` | 只维护 `project-kb:claude` 区块 | 基础支持 |
 | Cursor | `.cursor/rules/project-knowledge.mdc` | `--client cursor` | 只维护 `project-kb:cursor` 区块 | 基础支持 |
 | Gemini CLI | `GEMINI.md` | `--client gemini` | 只维护 `project-kb:gemini` 区块 | 基础支持 |
@@ -64,7 +65,7 @@
 | Python | 3.11+；依次检查 `PROJECT_KB_PYTHON`、Windows `py -3.11`、`python`、`python3` |
 | CodeGraph | npm 依赖固定为 `@colbymchenry/codegraph@1.5.0`，启动器通过绝对 `CODEGRAPH_COMMAND` 传给 Python |
 | 托管运行时 | `%LOCALAPPDATA%\ProjectKnowledgeCLI\runtimes\<版本>`；无 `LOCALAPPDATA` 时回退 `%USERPROFILE%\.project-kb\runtimes\<版本>`；完成标记验证包版本、wheel SHA-256 和完成时间，死亡 PID 陈旧锁可恢复 |
-| 更新 | 新 npm 版本创建新的版本目录；项目再次执行 `project-kb init` 后更新 `.codex/config.toml` 的绝对 Python 路径 |
+| 更新 | 新 npm 版本创建新的版本目录；重新执行全局 `project-kb install` 刷新 Codex/Pi，自有配置不保存 Python 绝对路径 |
 | 覆盖 | `PROJECT_KB_PYTHON` 指定解释器，`PROJECT_KB_RUNTIME_HOME` 指定运行时根目录，已有 `CODEGRAPH_COMMAND` 保持优先 |
 
 安装后验证由 `scripts/validate_npm_bootstrap.py` 完成：构建 wheel 和 tarball、安装到隔离 npm prefix、初始化临时 Git 项目、重复初始化、执行 MCP `initialize/tools/list/knowledge_status`，最后确认卸载只删除自有标记。

@@ -16,7 +16,7 @@ class NpmPackageBuildTests(unittest.TestCase):
         package.mkdir(parents=True)
         (package / "__init__.py").write_text('__version__ = "1.2.3"\n', encoding="utf-8")
         npm = self.root / "npm"
-        for directory in ["bin", "lib", "scripts"]:
+        for directory in ["bin", "lib", "scripts", "templates"]:
             target = npm / directory
             target.mkdir(parents=True)
             (target / "placeholder.js").write_text("module.exports = {};\n", encoding="utf-8")
@@ -54,6 +54,7 @@ class NpmPackageBuildTests(unittest.TestCase):
         self.assertTrue((output / "bin" / "placeholder.js").exists())
         self.assertTrue((output / "lib" / "placeholder.js").exists())
         self.assertTrue((output / "scripts" / "placeholder.js").exists())
+        self.assertTrue((output / "templates").is_dir())
         self.assertEqual((output / "README.md").read_text(encoding="utf-8"), "# Test package\n")
         self.assertEqual(
             (output / "LICENSE").read_text(encoding="utf-8"),

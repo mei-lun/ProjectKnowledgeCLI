@@ -2,13 +2,13 @@
 
 # 项目地图：ProjectKnowledgeCLI
 
-生成时间：`2026-08-28T16:05:26+08:00`；来源提交：`fcd652deedd60088b807bcacfcd717bc46df02c5`。
+生成时间：`2026-08-31T11:30:25+08:00`；来源提交：`44c4e25ea7bb93e4dff2a311548c929227dc4c3f`。
 
 ## 概览
 
 | 指标 | 数量 |
 | --- | ---: |
-| 文件 | 101 |
+| 文件 | 104 |
 | 符号 | 0 |
 | 关系 | 0 |
 | 模块 | 8 |
@@ -20,8 +20,9 @@
 | 语言 | 文件数 |
 | --- | ---: |
 | Python | 94 |
-| JavaScript | 4 |
+| JavaScript | 6 |
 | Yaml | 3 |
+| TypeScript | 1 |
 
 ## 模块
 
@@ -29,7 +30,7 @@
 | --- | ---: |
 | [.github](modules/github.md) | 1 |
 | [evaluation](modules/evaluation.md) | 2 |
-| [npm](modules/npm.md) | 4 |
+| [npm](modules/npm.md) | 7 |
 | [plugins](modules/plugins.md) | 3 |
 | [project_knowledge](modules/project_knowledge.md) | 39 |
 | [root](modules/root.md) | 1 |

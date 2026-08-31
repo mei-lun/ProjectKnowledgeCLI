@@ -5,8 +5,11 @@
 ## 文件
 
 - `npm/bin/project-kb.js`（JavaScript）
+- `npm/lib/agent-installer.js`（JavaScript）
 - `npm/lib/runtime.js`（JavaScript）
 - `npm/scripts/postinstall.js`（JavaScript）
+- `npm/templates/project-kb.ts`（TypeScript）
+- `npm/test/agent-installer.test.js`（JavaScript）
 - `npm/test/runtime.test.js`（JavaScript）
 
 ## 代码事实

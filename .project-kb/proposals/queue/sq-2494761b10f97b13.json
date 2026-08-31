@@ -1,0 +1,34 @@
+{
+  "affected_knowledge": [
+    "curated.conventions",
+    "generated.frameworks",
+    "generated.module.npm",
+    "generated.module.project_knowledge",
+    "generated.module.scripts",
+    "generated.module.tests",
+    "generated.project-map",
+    "generated.test-map"
+  ],
+  "base_commit": "84032fc7a84f39c8dc6127fdcb76589485df4d47",
+  "changed_files": [
+    "npm/bin/project-kb.js",
+    "npm/lib/agent-installer.js",
+    "npm/templates/project-kb.ts",
+    "npm/test/agent-installer.test.js",
+    "scripts/build_npm_package.py",
+    "scripts/validate_npm_bootstrap.py",
+    "src/project_knowledge/__init__.py",
+    "src/project_knowledge/codex.py",
+    "tests/test_codex_bootstrap.py",
+    "tests/test_integration.py",
+    "tests/test_npm_package_build.py"
+  ],
+  "changed_symbols": [],
+  "changeset_id": "change-20260831-113039",
+  "created_at": "2026-08-31T11:30:39+08:00",
+  "head_commit": "44c4e25ea7bb93e4dff2a311548c929227dc4c3f",
+  "queue_id": "sq-2494761b10f97b13",
+  "schema_version": 1,
+  "status": "awaiting_semantic_generation",
+  "task_summary": "Windows Codex 与 Pi 一键安装"
+}

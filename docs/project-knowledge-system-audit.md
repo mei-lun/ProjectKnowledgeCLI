@@ -1,7 +1,7 @@
 # 项目级知识库最小需求审计与实施基线
 
-> 当前版本：0.1.54
-> 复核日期：2026-08-24  
+> 当前版本：0.1.58
+> 复核日期：2026-08-31  
 > 报告状态：Phase 0～2 确定性检索基线已交付；发布证据正在重新对齐，最终生产质量门尚未通过
 > 默认语言：中文
 
@@ -47,6 +47,18 @@ WP-KC-04 验收证据：`FinalizationService` 现在同时检查 Git/CodeGraph �
 首发支持边界为 Windows 10/11 x64、Node.js 20+、npm 10+、Python 3.11+。本批不自动下载 Python，不重写 Python 核心或 CodeGraph，也不宣称 macOS/Linux npm 路径已完成发布验收。
 
 npm registry 凭据和首次公开发布不属于本地实现完成条件。README 明确区分“registry 发布后安装”和“从本仓库 tarball 验收安装”；registry 返回 `E404` 时不得把一键安装描述为已经公开可用。
+
+## Windows Codex + Pi 一键接入：WP-INSTALL-WIN-01
+
+本工作包对应 `docs/superpowers/specs/2026-08-31-windows-codex-pi-install-design.md`，目标是修复跨电脑复制配置后 Python/CodeGraph 绝对路径失效、`CODEX_HOME` 不一致和 Pi 无 MCP 工具的问题。Windows tarball 安装、隔离目录验证、版本递增和回归测试均已完成；生成知识状态工具因本地数据库缺少 `task_completions` 表仍需人工复核。
+
+| 需求 ID | 当前结论 | 验收证据与边界 |
+| --- | --- | --- |
+| WIN-001～WIN-002 | 已完成 | npm 启动器复用既有托管 Python 运行时；隔离 Windows tarball 安装和 MCP `initialize/tools/list/knowledge_status` 验证通过 |
+| WIN-003～WIN-004 | 已完成 | 全局 Codex 使用 `CODEX_HOME` 和稳定 `project-kb` 命令；无 Python/CodeGraph 绝对路径，重复安装幂等 |
+| WIN-005 | 已完成 | Pi 扩展模板写入 `%PI_CODING_AGENT_DIR%\extensions\project-kb.ts`，并按现有工具名避免重复注册 |
+| WIN-006 | 已完成 | marker 所有权、冲突保护、卸载保留用户配置均有 Node 正负测试覆盖 |
+| WIN-007～WIN-008 | 已完成 | 隔离 Windows npm 安装执行 `doctor --global`，同时验证 Codex 与 Pi 均已配置 |
 
 ## 当前检索质量交付复核（WP-RQ-01～04）
 

@@ -39,7 +39,7 @@ def stage_npm_package(root: Path, output: Path, wheel: Path) -> dict[str, str]:
     output.parent.mkdir(parents=True, exist_ok=True)
     temporary = Path(tempfile.mkdtemp(prefix=f".{output.name}-", dir=output.parent))
     try:
-        for directory in ["bin", "lib", "scripts"]:
+        for directory in ["bin", "lib", "scripts", "templates"]:
             source = root / "npm" / directory
             if not source.is_dir():
                 raise ValueError(f"missing npm package directory: {source}")
