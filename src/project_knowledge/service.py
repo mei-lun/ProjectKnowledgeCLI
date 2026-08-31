@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from .config import ProjectConfig
-from .codex import codex_mcp_body, update_codex_config
+from .codex import codex_mcp_body, migrate_legacy_codex, update_codex_config, verify_project_mcp
 from .engine import CodeIndexEngine, CodeIndexSnapshot, IndexedFile, create_engine
 from .guidance import GuidanceService
 from .knowledge import KnowledgeGenerator
@@ -186,6 +186,7 @@ class ProjectService:
             self._progress(progress, "integration", "安装客户端集成", "started", 5)
             try:
                 result["codex"] = self._install_codex_integration()
+                result["codex_migration"] = migrate_legacy_codex(self.root)
             except Exception as error:
                 self._progress(progress, "integration", "安装客户端集成", "failed", 5, error=str(error))
                 raise
@@ -585,10 +586,13 @@ class ProjectService:
         result = ProjectConfig.migrate_file(self.root, dry_run=dry_run)
         if not dry_run and result.get("changed"):
             self.config = ProjectConfig.load(self.root)
+        codex = migrate_legacy_codex(self.root, dry_run=dry_run)
+        result["codex"] = codex
         return result
 
     def _client_targets(self) -> dict[str, tuple[Path, str]]:
         return {
+            "codex": (self.root / ".codex" / "config.toml", "codex"),
             "claude": (self.root / ".claude" / CLIENT_BODIES["claude"][0], "claude"),
             "cursor": (self.root / ".cursor" / "rules" / CLIENT_BODIES["cursor"][0], "cursor"),
             "gemini": (self.root / CLIENT_BODIES["gemini"][0], "gemini"),
@@ -634,7 +638,8 @@ class ProjectService:
                 "clients": selected,
                 "client_targets": [str(self._client_targets()[name][0]) for name in selected],
             }
-        codex = self._install_codex_integration()
+        codex = self._install_codex_integration() if "codex" in selected else {"config": ".codex/config.toml", "agents_updated": False, "config_updated": False}
+        migration = migrate_legacy_codex(self.root)
         changed = codex["agents_updated"]
         self._write_mcp_config()
         hooks: list[str] = []
@@ -649,13 +654,16 @@ class ProjectService:
                 hooks.append(str(path))
         installed_clients: list[str] = []
         for name in selected:
+            if name == "codex":
+                installed_clients.append(name)
+                continue
             path, marker = self._client_targets()[name]
             body = CLIENT_BODIES[name][1]
             marker_update(path, marker, body)
             installed_clients.append(name)
         return {
             "action": "install", "agents_updated": changed, "mcp_config": ".project-kb/mcp.json",
-            "codex": codex, "hooks": hooks, "clients": installed_clients,
+            "codex": codex, "codex_migration": migration, "hooks": hooks, "clients": installed_clients,
         }
 
     def uninstall(self, dry_run: bool = False, clients: list[str] | None = None) -> dict[str, Any]:
@@ -673,7 +681,7 @@ class ProjectService:
                 "clients": selected,
                 "knowledge_preserved": True,
             }
-        codex_removed = update_codex_config(self.root / ".codex" / "config.toml", None)
+        codex_removed = update_codex_config(self.root / ".codex" / "config.toml", None) if "codex" in selected else False
         changed = marker_update(self.root / "AGENTS.md", "instructions", None)
         mcp_path = self.root / ".project-kb" / "mcp.json"
         mcp_removed = mcp_path.exists()
@@ -686,6 +694,8 @@ class ProjectService:
                     hooks_removed.append(str(path))
         clients_removed: list[str] = []
         for name in selected:
+            if name == "codex":
+                continue
             path, marker = self._client_targets()[name]
             if marker_update(path, marker, None):
                 clients_removed.append(name)
@@ -699,6 +709,19 @@ class ProjectService:
     def doctor(self) -> dict[str, Any]:
         status = self.status() if self.db_path.exists() else {}
         engine_status = self.engine.status() if status else self.engine.diagnose(self.root)
+        codex_config = self.root / ".codex" / "config.toml"
+        global_config = Path(os.environ.get("CODEX_HOME", Path.home() / ".codex")) / "config.toml"
+        legacy_global = []
+        if global_config.exists():
+            try:
+                from .codex import _parse_toml, _is_project_kb_command, _legacy_project_path
+                servers = _parse_toml(read_text(global_config)).get("mcp_servers", {})
+                if isinstance(servers, dict):
+                    for name, value in servers.items():
+                        if str(name).startswith("project_knowledge") and isinstance(value, dict) and _is_project_kb_command(str(value.get("command", "")), value.get("args", [])):
+                            legacy_global.append(str(name))
+            except ValueError:
+                legacy_global = ["<invalid-config>"]
         return {
             "python": os.sys.version.split()[0],
             "sqlite": __import__("sqlite3").sqlite_version,
@@ -717,6 +740,7 @@ class ProjectService:
             "package_source": self._package_source_provenance(),
             "configuration_warnings": self.config.capability_warnings(),
             "last_git_event": self._last_git_event(),
+            "codex": {"project_config": str(codex_config), "configured": codex_config.exists() and "project-kb:codex-mcp:start" in read_text(codex_config), "legacy_global_entries": legacy_global},
         }
 
     def _last_git_event(self) -> dict[str, Any] | None:
@@ -849,11 +873,13 @@ class ProjectService:
     def _install_codex_integration(self) -> dict[str, Any]:
         config_path = self.root / ".codex" / "config.toml"
         config_changed = update_codex_config(config_path, codex_mcp_body(self.root))
+        verification = verify_project_mcp(self.root)
         agents_changed = marker_update(self.root / "AGENTS.md", "instructions", AGENTS_BODY)
         return {
             "config": ".codex/config.toml",
             "config_updated": config_changed,
             "agents_updated": agents_changed,
+            "verification": verification,
         }
 
     def _pending_knowledge(self, store: KnowledgeStore) -> list[str]:

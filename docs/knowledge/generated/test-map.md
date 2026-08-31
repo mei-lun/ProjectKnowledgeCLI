@@ -10,6 +10,7 @@
 | `tests/test_codegraph.py` | tests |
 | `tests/test_codegraph_validation.py` | tests |
 | `tests/test_codex_bootstrap.py` | tests |
+| `tests/test_codex_project_scope.py` | tests |
 | `tests/test_config.py` | tests |
 | `tests/test_context_evidence.py` | tests |
 | `tests/test_delivery_reliability.py` | tests |

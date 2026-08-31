@@ -31,23 +31,21 @@ test("resolveAgentPaths honors CODEX_HOME and PI_CODING_AGENT_DIR", () => {
   assert.equal(paths.piExtension, path.resolve("D:\\Pi Agent", "extensions", "project-kb.ts"));
 });
 
-test("global installer writes stable Codex config and Pi extension idempotently", (t) => {
+test("global installer rejects Codex and installs Pi idempotently", (t) => {
   const root = tempDir(t);
   const env = {
     CODEX_HOME: path.join(root, "codex"),
     PI_CODING_AGENT_DIR: path.join(root, "pi"),
   };
-  const first = installAgents({ target: ["codex", "pi"], location: "global", env, platform: "win32" });
-  const second = installAgents({ target: ["codex", "pi"], location: "global", env, platform: "win32" });
+  assert.throws(() => installAgents({ target: ["codex"], location: "global", env, platform: "win32" }), /project-scoped/);
+  const first = installAgents({ target: ["pi"], location: "global", env, platform: "win32" });
+  const second = installAgents({ target: ["pi"], location: "global", env, platform: "win32" });
   assert.deepEqual(second.changedPaths, []);
-  const config = fs.readFileSync(first.paths.codexConfig, "utf8");
-  assert.match(config, /command = "project-kb"/);
-  assert.match(config, /args = \["mcp", "--project", "\."\]/);
-  assert.doesNotMatch(config, /sys\.executable|CODEGRAPH_COMMAND|Scripts\\python/);
+  assert.equal(fs.existsSync(first.paths.codexConfig), false);
   assert.match(fs.readFileSync(first.paths.piExtension, "utf8"), /knowledge_context/);
 });
 
-test("global installer refreshes an older project-kb marker block", (t) => {
+test("global installer never refreshes an older Codex marker block", (t) => {
   const root = tempDir(t);
   const codexHome = path.join(root, "codex");
   fs.mkdirSync(codexHome, { recursive: true });
@@ -61,11 +59,10 @@ test("global installer refreshes an older project-kb marker block", (t) => {
     "# project-kb:codex-mcp:end",
     "",
   ].join("\n"));
-  installAgents({ target: ["codex"], location: "global", env: { CODEX_HOME: codexHome }, platform: "win32" });
+  assert.throws(() => installAgents({ target: ["codex"], location: "global", env: { CODEX_HOME: codexHome }, platform: "win32" }), /project-scoped/);
   const updated = fs.readFileSync(configPath, "utf8");
   assert.match(updated, /model = "gpt-5"/);
-  assert.match(updated, /command = "project-kb"/);
-  assert.doesNotMatch(updated, /old\/python\.exe/);
+  assert.match(updated, /old\/python\.exe/);
 });
 
 test("installer preserves user config and rejects unowned Codex server", (t) => {
@@ -77,19 +74,18 @@ test("installer preserves user config and rejects unowned Codex server", (t) => 
   fs.writeFileSync(configPath, original);
   assert.throws(
     () => installAgents({ target: ["codex"], location: "global", env: { CODEX_HOME: codexHome }, platform: "win32" }),
-    /project_knowledge/,
+    /project-scoped/,
   );
   assert.equal(fs.readFileSync(configPath, "utf8"), original);
 });
 
-test("uninstall removes owned files but keeps unrelated Codex content", (t) => {
+test("uninstall removes owned Pi file and refuses global Codex cleanup", (t) => {
   const root = tempDir(t);
   const env = { CODEX_HOME: path.join(root, "codex"), PI_CODING_AGENT_DIR: path.join(root, "pi") };
-  installAgents({ target: ["codex", "pi"], location: "global", env, platform: "win32" });
-  fs.appendFileSync(path.join(env.CODEX_HOME, "config.toml"), '\nmodel = "gpt-5"\n');
-  const result = uninstallAgents({ target: ["codex", "pi"], location: "global", env, platform: "win32" });
-  assert.ok(result.removedPaths.length >= 2);
-  assert.match(fs.readFileSync(path.join(env.CODEX_HOME, "config.toml"), "utf8"), /model = "gpt-5"/);
+  installAgents({ target: ["pi"], location: "global", env, platform: "win32" });
+  assert.throws(() => uninstallAgents({ target: ["codex"], location: "global", env, platform: "win32" }), /project-scoped/);
+  const result = uninstallAgents({ target: ["pi"], location: "global", env, platform: "win32" });
+  assert.ok(result.removedPaths.length >= 1);
   assert.equal(fs.existsSync(path.join(env.PI_CODING_AGENT_DIR, "extensions", "project-kb.ts")), false);
 });
 

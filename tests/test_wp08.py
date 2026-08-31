@@ -66,7 +66,7 @@ class ConfigMigrationAndClientTests(unittest.TestCase):
         service = ProjectService(root)
         service.initialize()
         result = service.install()
-        self.assertEqual(set(result["clients"]), {"claude", "cursor", "gemini"})
+        self.assertEqual(set(result["clients"]), {"codex", "claude", "cursor", "gemini"})
         service.install()
         claude = root / ".claude" / "CLAUDE.md"
         cursor = root / ".cursor" / "rules" / "project-knowledge.mdc"

@@ -8,6 +8,7 @@
 - `tests/test_codegraph.py`（Python）
 - `tests/test_codegraph_validation.py`（Python）
 - `tests/test_codex_bootstrap.py`（Python）
+- `tests/test_codex_project_scope.py`（Python）
 - `tests/test_config.py`（Python）
 - `tests/test_context_evidence.py`（Python）
 - `tests/test_delivery_reliability.py`（Python）

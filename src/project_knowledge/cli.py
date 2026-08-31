@@ -54,7 +54,9 @@ def build_parser() -> argparse.ArgumentParser:
         if name == "sync":
             sub.add_argument("--task-summary", default="manual synchronization")
         if name in {"install", "uninstall"}:
-            sub.add_argument("--client", action="append", choices=["claude", "cursor", "gemini"], dest="clients")
+            sub.add_argument("--client", action="append", choices=["codex", "claude", "cursor", "gemini"], dest="clients")
+        if name == "migrate":
+            sub.add_argument("--codex-scope", choices=["project"], help="migrate legacy user-level Codex entries for this project")
 
     watch = commands.add_parser("watch", help="watch for file changes and synchronize")
     _common(watch, dry_run=True)
@@ -290,6 +292,8 @@ def main(argv: list[str] | None = None) -> int:
                     print(json.dumps(result, ensure_ascii=False, indent=2) if args.as_json else _human(result))
                 return exit_code
             elif args.command == "migrate":
+                if args.codex_scope and args.codex_scope != "project":
+                    raise ValueError("仅支持 --codex-scope project")
                 result = service.migrate(args.dry_run)
             elif args.command == "watch":
                 if args.dry_run:

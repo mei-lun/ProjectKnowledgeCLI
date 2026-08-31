@@ -34,6 +34,7 @@ function installAgents(options = {}) {
   assertWindows(options);
   const targets = normalizeTargets(options.target || ["codex", "pi"]);
   if (options.location && options.location !== "global") throw new Error("Windows agent installer currently supports --location=global only");
+  if (targets.includes("codex")) throw new Error("Codex Project Knowledge integration is project-scoped. Run `project-kb init` or `project-kb install --client codex` inside a project.");
   const paths = resolveAgentPaths(options);
   const changedPaths = [];
   if (targets.includes("codex")) {
@@ -47,6 +48,7 @@ function installAgents(options = {}) {
 function uninstallAgents(options = {}) {
   assertWindows(options);
   const targets = normalizeTargets(options.target || ["codex", "pi"]);
+  if (targets.includes("codex")) throw new Error("Codex Project Knowledge integration is project-scoped. Run `project-kb uninstall --client codex` inside a project.");
   const paths = resolveAgentPaths(options);
   const removedPaths = [];
   if (targets.includes("codex")) {
@@ -66,6 +68,12 @@ function doctorAgents(options = {}) {
   const npmGlobalBin = env.npm_config_prefix ? path.join(env.npm_config_prefix, "") : null;
   const launcherOnPath = pathEntries.some((entry) => fs.existsSync(path.join(entry, launcher)));
   const runtimeHome = env.PROJECT_KB_RUNTIME_HOME || (env.LOCALAPPDATA ? path.join(env.LOCALAPPDATA, "ProjectKnowledgeCLI", "runtimes") : path.join(os.homedir(), ".project-kb", "runtimes"));
+  let legacyCodexEntries = [];
+  if (fs.existsSync(paths.codexConfig)) {
+    const content = fs.readFileSync(paths.codexConfig, "utf8");
+    const matches = content.match(/^\[mcp_servers\.(project_knowledge[^\.\]]*)\]/gm);
+    legacyCodexEntries = matches ? matches.map((item) => item.replace(/^\[mcp_servers\.|\]$/g, "")) : [];
+  }
   return {
     platform: process.platform,
     codexHome: paths.codexHome,
@@ -78,6 +86,7 @@ function doctorAgents(options = {}) {
     npmGlobalBin,
     runtimeHome: path.resolve(runtimeHome),
     codegraph: { managedByProjectKb: true, override: env.CODEGRAPH_COMMAND || null },
+    legacyCodexEntries,
   };
 }
 

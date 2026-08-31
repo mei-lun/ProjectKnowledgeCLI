@@ -68,8 +68,9 @@ class CodexBootstrapTests(unittest.TestCase):
         server = parsed["mcp_servers"]["project_knowledge"]
         self.assertEqual(server["command"], "project-kb")
         self.assertEqual(server["args"], ["mcp", "--project", "."])
-        self.assertNotIn("cwd", server)
-        self.assertNotIn("env", server)
+        self.assertEqual(Path(server["cwd"]), self.root.resolve())
+        self.assertTrue(server["enabled"])
+        self.assertEqual(Path(server["env"]["CODEGRAPH_COMMAND"]), self.codegraph)
         self.assertIn(
             ".codex/config.toml",
             (self.root / ".gitignore").read_text(encoding="utf-8"),

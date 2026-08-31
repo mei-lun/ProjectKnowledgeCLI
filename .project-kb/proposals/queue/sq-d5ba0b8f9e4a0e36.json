@@ -1,0 +1,26 @@
+{
+  "affected_knowledge": [
+    "generated.frameworks",
+    "generated.module.npm",
+    "generated.module.scripts",
+    "generated.module.tests",
+    "generated.project-map",
+    "generated.test-map"
+  ],
+  "base_commit": "00af8954e185c6289e6e3550840296267a252af9",
+  "changed_files": [
+    "npm/lib/agent-installer.js",
+    "npm/test/agent-installer.test.js",
+    "scripts/validate_npm_bootstrap.py",
+    "tests/test_codex_bootstrap.py",
+    "tests/test_wp08.py"
+  ],
+  "changed_symbols": [],
+  "changeset_id": "change-20260831-180918",
+  "created_at": "2026-08-31T18:09:18+08:00",
+  "head_commit": "00af8954e185c6289e6e3550840296267a252af9",
+  "queue_id": "sq-d5ba0b8f9e4a0e36",
+  "schema_version": 1,
+  "status": "awaiting_semantic_generation",
+  "task_summary": "manual synchronization"
+}

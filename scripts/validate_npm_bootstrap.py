@@ -143,20 +143,14 @@ def validate_npm_bootstrap(root: Path = PROJECT_ROOT) -> dict[str, Any]:
             )
 
         global_install = run_checked(
-            [launcher, "install", "--target", "codex,pi", "--location", "global", "--yes", "--json"],
+            [launcher, "agent", "install", "--global", "--target", "pi", "--json"],
             cwd=temporary,
             env=env,
         )
         global_payload = json.loads(global_install.stdout)
         global_config = codex_home / "config.toml"
-        if str(global_config) not in global_payload.get("changedPaths", []):
-            raise RuntimeError("global agent install did not report Codex config")
-        global_toml = tomllib.loads(global_config.read_text(encoding="utf-8"))
-        global_server = global_toml["mcp_servers"]["project_knowledge"]
-        if global_server.get("command") != "project-kb" or global_server.get("args") != ["mcp", "--project", "."]:
-            raise RuntimeError("global Codex config does not use the stable project-kb launcher")
-        if "env" in global_server or "cwd" in global_server:
-            raise RuntimeError("global Codex config contains machine-specific runtime fields")
+        if global_config.exists():
+            raise RuntimeError("global agent install unexpectedly wrote Codex config")
         if not (pi_agent_dir / "extensions" / "project-kb.ts").is_file():
             raise RuntimeError("global Pi extension is missing")
         doctor = run_checked(
@@ -165,8 +159,8 @@ def validate_npm_bootstrap(root: Path = PROJECT_ROOT) -> dict[str, Any]:
             env=env,
         )
         doctor_payload = json.loads(doctor.stdout)
-        if not doctor_payload.get("codexConfigured") or not doctor_payload.get("piConfigured"):
-            raise RuntimeError("doctor --global did not report both agent integrations")
+        if doctor_payload.get("codexConfigured") or not doctor_payload.get("piConfigured"):
+            raise RuntimeError("doctor --global did not report Pi-only integration")
 
         run_checked([git_command, "init", "-q"], cwd=project, env=env)
         source = project / "src"

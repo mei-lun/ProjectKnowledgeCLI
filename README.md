@@ -63,7 +63,7 @@ ProjectKnowledgeCLI 不是另一个代码解析器，而是建立在 CodeGraph �
 
 上述能力已经在代码中实现，但“功能可用”不等于所有检索质量门槛已经通过。当前正式评估报告仍显示候选覆盖、符号召回和调用路径召回存在不足；gardenserver 的受控实践数据表明排序和检索延迟已有明显改善，但生产规模验证仍在继续。PKS 优化的是知识管理、检索编排和工作流，不会替代 CodeGraph 底层的语言解析和关系抽取能力。
 
-## 当前质量指标（0.1.58）
+## 当前质量指标（0.1.59）
 
 当前真实 CodeGraph Adapter 已接入并可用：`codegraph-public-cli 1.5.0`。当前活动评测使用 50 个 self-repo 样本；精确指标和环境相关延迟以 [活动评测报告](evaluation/reports/latest.json) 为唯一来源，避免在 README 中复制会随 live 检索发生小幅波动的数据。
 
@@ -147,7 +147,7 @@ npm 包会发现 Python 3.11+，在 `%LOCALAPPDATA%\ProjectKnowledgeCLI\runtimes
 npm 全局安装完成后，在任意目录执行一次用户级 agent 安装：
 
 ```powershell
-project-kb install --target codex,pi --location global --yes
+project-kb agent install --global --target pi
 ```
 
 该命令会写入 `%CODEX_HOME%\config.toml`（未设置时为 `%USERPROFILE%\.codex\config.toml`）、Codex 用户级 `AGENTS.md` 和 `%PI_CODING_AGENT_DIR%\extensions\project-kb.ts`（未设置时为 `%USERPROFILE%\.pi\agent`）。Codex 配置只调用稳定的 `project-kb` 命令，不保存当前机器的 Python 或 CodeGraph 绝对路径；Pi 通过原生扩展调用当前项目。重复执行会刷新 project-kb 自有区块并保持幂等。
@@ -195,7 +195,7 @@ project-kb rebuild .
 
 ```powershell
 npm install --global project-kb-cli@latest
-project-kb install --target codex,pi --location global --yes
+project-kb agent install --global --target pi
 project-kb init
 ```
 

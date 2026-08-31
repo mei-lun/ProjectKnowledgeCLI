@@ -4,7 +4,12 @@
 const path = require("node:path");
 const { launchCli } = require("../lib/runtime");
 const { doctorAgents, installAgents, uninstallAgents } = require("../lib/agent-installer");
-const packageManifest = require("../package.json");
+let packageManifest;
+try {
+  packageManifest = require("../package.json");
+} catch (_error) {
+  packageManifest = require("../../dist/npm-package/package.json");
+}
 
 
 const packageRoot = path.resolve(__dirname, "..");
@@ -15,17 +20,17 @@ function optionValue(args, name) {
 }
 
 function isGlobalAgentCommand(args) {
-  if (args[0] !== "install" && args[0] !== "uninstall") return false;
-  if (args.includes("--location")) return true;
-  const target = optionValue(args, "--target") || optionValue(args, "--client");
-  return Boolean(target && target.split(",").some((item) => ["codex", "pi"].includes(item.trim())));
+  return args[0] === "agent" && (args[1] === "install" || args[1] === "uninstall") && args.includes("--global");
 }
 
 function runAgentCommand(args) {
-  const action = args[0];
+  const action = args[1];
   const target = optionValue(args, "--target") || optionValue(args, "--client") || "codex,pi";
-  const location = optionValue(args, "--location") || "global";
-  const options = { target, location, env: process.env, platform: process.platform };
+  const location = "global";
+  if (String(target).split(",").some((item) => item.trim() === "codex")) {
+    throw new Error("Codex Project Knowledge integration is project-scoped. Run `project-kb init` or `project-kb install --client codex` inside a project.");
+  }
+  const options = { target, location, env: process.env, platform: process.platform, enforceProjectScope: true };
   return action === "install" ? installAgents(options) : uninstallAgents(options);
 }
 
@@ -35,13 +40,13 @@ if (isGlobalAgentCommand(rawArgs)) {
     const result = runAgentCommand(rawArgs);
     process.stdout.write(rawArgs.includes("--json")
       ? JSON.stringify(result, null, 2) + "\n"
-      : `${rawArgs[0]} complete: ${result.changedPaths?.length ?? result.removedPaths?.length ?? 0} path(s) changed\n`);
+      : `${rawArgs[1]} complete: ${result.changedPaths?.length ?? result.removedPaths?.length ?? 0} path(s) changed\n`);
     process.exitCode = 0;
   } catch (error) {
     process.stderr.write(`project-kb: ${error.message}\n`);
     process.exitCode = 1;
   }
-} else if (rawArgs[0] === "doctor" && rawArgs.includes("--global")) {
+} else if ((rawArgs[0] === "doctor" || (rawArgs[0] === "agent" && rawArgs[1] === "doctor")) && rawArgs.includes("--global")) {
   try {
     const result = doctorAgents({ env: process.env, platform: process.platform });
     process.stdout.write(rawArgs.includes("--json") ? JSON.stringify(result, null, 2) + "\n" : `${JSON.stringify(result, null, 2)}\n`);
