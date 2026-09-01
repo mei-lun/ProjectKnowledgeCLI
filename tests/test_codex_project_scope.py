@@ -2,16 +2,48 @@ from __future__ import annotations
 
 import os
 import json
+import subprocess
 import tempfile
 import tomllib
 import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from project_knowledge.codex import codex_mcp_body, migrate_legacy_codex
+from project_knowledge.codex import codex_mcp_body, migrate_legacy_codex, verify_project_mcp
 
 
 class CodexProjectScopeTests(unittest.TestCase):
+    def test_verify_project_mcp_accepts_batched_jsonrpc_response(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            launcher = root / "project-kb.cmd"
+            launcher.write_text("", encoding="utf-8")
+            stdout = json.dumps([
+                {"jsonrpc": "2.0", "id": 1, "result": {}},
+                {"jsonrpc": "2.0", "id": 2, "result": {"tools": {"tools": [
+                    {"name": "knowledge_status"},
+                    {"name": "knowledge_context"},
+                    {"name": "knowledge_impact"},
+                ]}}},
+            ])
+            completed = subprocess.CompletedProcess([], 0, stdout=stdout, stderr="")
+            with patch("project_knowledge.codex.subprocess.run", return_value=completed):
+                result = verify_project_mcp(root, launcher=launcher)
+            self.assertTrue(result["verified"])
+            self.assertEqual(result["tools"], ["knowledge_context", "knowledge_impact", "knowledge_status"])
+
+    def test_verify_project_mcp_ignores_non_object_batch_items(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            launcher = root / "project-kb.cmd"
+            launcher.write_text("", encoding="utf-8")
+            stdout = json.dumps([None, ["not-a-response"], {"jsonrpc": "2.0", "id": 1, "result": {}}])
+            completed = subprocess.CompletedProcess([], 0, stdout=stdout, stderr="")
+            with patch("project_knowledge.codex.subprocess.run", return_value=completed):
+                result = verify_project_mcp(root, launcher=launcher)
+            self.assertFalse(result["verified"])
+            self.assertEqual(result["tools"], [])
+
     def test_project_block_is_absolute_and_parseable(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory) / "中文 project"

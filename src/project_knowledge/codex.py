@@ -192,6 +192,18 @@ def _remove_server_tables(content: str, names: list[str]) -> str:
     return "".join(out).strip() + ("\n" if out else "")
 
 
+def _jsonrpc_response_objects(value: object) -> list[dict[str, Any]]:
+    """Return JSON-RPC response objects from a single or batched payload."""
+    if isinstance(value, dict):
+        return [value]
+    if isinstance(value, list):
+        responses: list[dict[str, Any]] = []
+        for item in value:
+            responses.extend(_jsonrpc_response_objects(item))
+        return responses
+    return []
+
+
 def verify_project_mcp(root: Path, *, launcher: Path | None = None, timeout: float = 8.0) -> dict[str, Any]:
     launcher = launcher or resolve_project_launcher()
     if not launcher.is_absolute() or not launcher.exists():
@@ -208,8 +220,26 @@ def verify_project_mcp(root: Path, *, launcher: Path | None = None, timeout: flo
             cwd=str(Path(root).resolve()), check=False,
             shell=launcher.suffix.lower() in {".cmd", ".bat"},
         )
-        responses = [json.loads(line) for line in completed.stdout.splitlines() if line.strip()]
-        tools = {item.get("name") for response in responses for item in response.get("result", {}).get("tools", {}).get("tools", [])}
+        responses = [
+            response
+            for line in completed.stdout.splitlines()
+            if line.strip()
+            for response in _jsonrpc_response_objects(json.loads(line))
+        ]
+        tools: set[str] = set()
+        for response in responses:
+            result = response.get("result")
+            if not isinstance(result, dict):
+                continue
+            tools_result = result.get("tools")
+            if not isinstance(tools_result, dict):
+                continue
+            tool_items = tools_result.get("tools")
+            if not isinstance(tool_items, list):
+                continue
+            for item in tool_items:
+                if isinstance(item, dict) and isinstance(item.get("name"), str):
+                    tools.add(item["name"])
         required = {"knowledge_status", "knowledge_context", "knowledge_impact"}
         verified = completed.returncode == 0 and required <= tools
         return {"attempted": True, "verified": verified, "tools": sorted(tools), "stderr": completed.stderr[-500:] if completed.stderr else None}

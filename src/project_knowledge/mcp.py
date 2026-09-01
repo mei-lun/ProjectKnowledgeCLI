@@ -250,7 +250,9 @@ class MCPServer:
         self.input = input_stream or sys.stdin
         self.output = output_stream or sys.stdout
         self.audit = audit_logger or MCPAuditLogger(
-            self.project, protocol_version=CURRENT_PROTOCOL,
+            self.project,
+            protocol_version=CURRENT_PROTOCOL,
+            enabled=ProjectConfig.load(self.project.resolve()).mcp_audit_enabled,
         )
         self.api: KnowledgeAPI | None = None
         try:
@@ -533,7 +535,12 @@ class MCPServer:
 
 
 def serve(project: str | Path = ".") -> None:
-    audit = MCPAuditLogger(project, protocol_version=CURRENT_PROTOCOL)
+    root = Path(project).resolve()
+    audit = MCPAuditLogger(
+        root,
+        protocol_version=CURRENT_PROTOCOL,
+        enabled=ProjectConfig.load(root).mcp_audit_enabled,
+    )
     # Connection-time compensation keeps the read tools from serving known old facts.
     try:
         with audit.activate_session():

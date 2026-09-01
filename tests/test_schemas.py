@@ -19,6 +19,12 @@ class SchemaTests(unittest.TestCase):
             CONFIG_SCHEMA["properties"]["index"]["properties"]["engine"]["enum"],
             ["codegraph"],
         )
+        self.assertEqual(
+            CONFIG_SCHEMA["properties"]["observability"]["properties"][
+                "mcp_audit_enabled"
+            ],
+            {"type": "boolean"},
+        )
 
     def test_required_empty_collections_are_preserved_and_validate(self) -> None:
         payload = KnowledgeRecord(

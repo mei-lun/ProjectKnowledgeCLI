@@ -61,6 +61,7 @@ class ProjectConfig:
     ranking_policy: str = "policy-v2"
     local_only: bool = True
     telemetry: bool = False
+    mcp_audit_enabled: bool = False
     provider_id: str = "disabled"
     provider_model: str = ""
     provider_endpoint: str = ""
@@ -133,7 +134,10 @@ class ProjectConfig:
         result = {
             "action": "migrate", "changed": True, "from_version": version,
             "to_version": 1, "path": str(path), "preserved_user_fields": sorted(
-                key for key in raw if key not in {"version", "project", "index", "knowledge", "updates", "retrieval", "privacy", "provider"}
+                key for key in raw if key not in {
+                    "version", "project", "index", "knowledge", "updates",
+                    "retrieval", "privacy", "observability", "provider",
+                }
             ),
         }
         if dry_run:
@@ -160,6 +164,7 @@ class ProjectConfig:
         updates = raw.get("updates", {})
         retrieval = raw.get("retrieval", {})
         privacy = raw.get("privacy", {})
+        observability = raw.get("observability", {})
         provider = raw.get("provider", {})
         return cls(
             version=int(raw.get("version", 1)),
@@ -185,6 +190,10 @@ class ProjectConfig:
             ranking_policy=str(retrieval.get("ranking_policy", "policy-v2")),
             local_only=bool(privacy.get("local_only", True)),
             telemetry=bool(privacy.get("telemetry", False)),
+            mcp_audit_enabled=_strict_bool(
+                observability.get("mcp_audit_enabled"),
+                "observability.mcp_audit_enabled",
+            ),
             provider_id=str(provider.get("id", "disabled")),
             provider_model=str(provider.get("model", "")),
             provider_endpoint=str(provider.get("endpoint", "")),
@@ -246,6 +255,9 @@ class ProjectConfig:
             f"  local_only: {str(self.local_only).lower()}",
             f"  telemetry: {str(self.telemetry).lower()}",
             "",
+            "observability:",
+            f"  mcp_audit_enabled: {str(self.mcp_audit_enabled).lower()}",
+            "",
             "provider:",
             f"  id: {self.provider_id}",
             f"  model: {json.dumps(self.provider_model, ensure_ascii=False)}",
@@ -268,6 +280,69 @@ class ProjectConfig:
 
     def write(self, root: Path) -> None:
         atomic_write(root / ".project-kb.yml", self.dump())
+
+    @classmethod
+    def set_mcp_audit_enabled(cls, root: Path, enabled: bool) -> dict[str, Any]:
+        """Update only the owned audit switch while preserving unrelated config text."""
+        root = Path(root).resolve()
+        path = root / ".project-kb.yml"
+        if not path.exists():
+            config = cls(project_name=root.name, mcp_audit_enabled=enabled)
+            rendered = config.dump()
+        else:
+            text = path.read_text(encoding="utf-8")
+            if text.lstrip().startswith("{"):
+                raw = cls.load_raw(root)
+                section = raw.setdefault("observability", {})
+                if not isinstance(section, dict):
+                    raise ValueError("observability 配置必须是对象")
+                section["mcp_audit_enabled"] = enabled
+                rendered = json.dumps(raw, ensure_ascii=False, indent=2) + "\n"
+            else:
+                lines = text.splitlines()
+                section_index = next((
+                    index for index, line in enumerate(lines)
+                    if line.strip().split("#", 1)[0].strip() == "observability:"
+                ), None)
+                value_line = f"  mcp_audit_enabled: {str(enabled).lower()}"
+                if section_index is None:
+                    if lines and lines[-1].strip():
+                        lines.append("")
+                    lines.extend(["observability:", value_line])
+                else:
+                    section_end = len(lines)
+                    for index in range(section_index + 1, len(lines)):
+                        line = lines[index]
+                        if line and not line.startswith((" ", "\t", "#")):
+                            section_end = index
+                            break
+                    setting_index = next((
+                        index for index in range(section_index + 1, section_end)
+                        if lines[index].startswith("  ")
+                        and not lines[index].startswith("    ")
+                        and lines[index].lstrip().startswith("mcp_audit_enabled:")
+                    ), None)
+                    if setting_index is None:
+                        lines.insert(section_end, value_line)
+                    else:
+                        indent = lines[setting_index][:-len(lines[setting_index].lstrip())]
+                        lines[setting_index] = (
+                            f"{indent}mcp_audit_enabled: {str(enabled).lower()}"
+                        )
+                rendered = "\n".join(lines) + "\n"
+        candidate = (
+            json.loads(rendered)
+            if rendered.lstrip().startswith("{") else parse_simple_yaml(rendered)
+        )
+        validate_instance(candidate, CONFIG_SCHEMA)
+        atomic_write(path, rendered)
+        return {
+            "action": "mcp_audit_enable" if enabled else "mcp_audit_disable",
+            "enabled": enabled,
+            "project": str(root),
+            "config_path": str(path),
+            "restart_required": True,
+        }
 
     def capability_warnings(self) -> list[dict[str, str]]:
         """Return explicit warnings for configured behavior that is not wired yet."""
@@ -327,7 +402,7 @@ class ProjectConfig:
 
 def _scalar(value: str) -> Any:
     value = value.strip()
-    if not value:
+    if not value or value.startswith("#"):
         return {}
     if value in {"true", "false"}:
         return value == "true"
@@ -339,6 +414,14 @@ def _scalar(value: str) -> Any:
         return int(value)
     except ValueError:
         return value
+
+
+def _strict_bool(value: Any, field_name: str, default: bool = False) -> bool:
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        return value
+    raise ValueError(f"{field_name} 必须是布尔值 true 或 false")
 
 
 def parse_simple_yaml(text: str) -> dict[str, Any]:

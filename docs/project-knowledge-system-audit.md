@@ -1,6 +1,6 @@
 # 项目级知识库最小需求审计与实施基线
 
-> 当前版本：0.1.60
+> 当前版本：0.1.62
 > 复核日期：2026-08-31  
 > 报告状态：Phase 0～2 确定性检索基线已交付；发布证据正在重新对齐，最终生产质量门尚未通过
 > 默认语言：中文
@@ -1539,3 +1539,16 @@ gardenserver 冻结 12 题集的文件召回、核心文件召回、符号召回
 | OBS-008 | 已完成受控样本 | `scripts/validate_mcp_observability.py` 使用真实 CodeGraph 临时项目和真实 MCP stdio 会话生成 46 个事件、17 个 span、3 行分析；独立标注计算 file precision/recall=`0.6667/0.6667`，并暴露 symbol recall 缺口；删除终态事件后导出被拒绝 |
 
 OBS-008 的指标只代表受控样本，不是全仓库质量门。`ground_truth_ref` 与独立标注 JSONL 关联；未标注的 initialize 等协议调用保留在链路数据中但不纳入检索 precision/recall。调用链默认只有会话内有序关系（`ordered_only`），不能据此推断 Agent 意图；客户端通过 `_meta` 明确关联时才允许 `client_correlated`。生成知识已在实现后同步，curated architecture/provider/conventions 等受影响记录仍需人工复核。
+
+# 0.1.62 当前交付：MCP 客户端集成探测兼容性修复
+
+安装阶段的 `verify_project_mcp` 现在兼容 JSON-RPC 单响应和批量响应，并跳过批量负载中的非对象项及结构异常工具项，避免客户端集成验证因列表响应触发异常。新增 Codex 探测回归测试覆盖批量成功响应和混合异常响应。
+
+# 0.1.61 当前交付：WP-OBS-02 MCP 审计项目级开关
+
+| 需求 ID | 当前结论 | 验收证据与边界 |
+| --- | --- | --- |
+| OBS-CFG-001 | 已完成 | `observability.mcp_audit_enabled` 默认 `false`，未开启时 MCP 不创建或追加审计日志 |
+| OBS-CFG-002 | 已完成 | `mcp-log enable/disable/status --project` 管理项目级持久开关，配置更新保留非本功能字段 |
+| OBS-CFG-003 | 已完成 | 开关在新 MCP 会话读取，命令明确返回 `restart_required=true`；关闭不删除历史日志 |
+| OBS-CFG-004 | 已完成 | README、配置 Schema、默认关闭、开启记录、关闭保留和真实验收脚本同步更新 |

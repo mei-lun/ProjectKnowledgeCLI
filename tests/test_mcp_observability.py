@@ -50,6 +50,19 @@ class MCPObservabilityTests(unittest.TestCase):
         logger.start_invocation(invocation, request)
         return invocation
 
+    @staticmethod
+    def _audited_server(
+        root: Path,
+        input_stream: io.StringIO | None = None,
+        output_stream: io.StringIO | None = None,
+    ) -> MCPServer:
+        return MCPServer(
+            root,
+            input_stream or io.StringIO(),
+            output_stream or io.StringIO(),
+            audit_logger=MCPAuditLogger(root),
+        )
+
     def test_recursive_redaction_reports_paths_without_truncating_payload(self) -> None:
         private_key = "-----BEGIN PRIVATE KEY-----\nsecret\n-----END PRIVATE KEY-----"
         payload = {
@@ -393,7 +406,7 @@ class MCPObservabilityTests(unittest.TestCase):
     def test_non_debug_context_keeps_full_retrieval_trace_only_in_audit(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            server = MCPServer(root, io.StringIO(), io.StringIO())
+            server = self._audited_server(root)
             server.api = Mock()
             server.api.context_for_evaluation.return_value = (
                 {"files": ["src/a.py"]},
@@ -425,6 +438,7 @@ class MCPObservabilityTests(unittest.TestCase):
             root = Path(directory)
             service = Mock()
             service.sync.return_value = {"status": "aligned"}
+            ProjectConfig.set_mcp_audit_enabled(root, True)
             with patch("project_knowledge.mcp.ProjectService", return_value=service), patch(
                 "project_knowledge.mcp.KnowledgeAPI", return_value=Mock(),
             ), patch("sys.stdin", io.StringIO()), patch("sys.stdout", io.StringIO()):
@@ -547,7 +561,7 @@ class MCPObservabilityTests(unittest.TestCase):
             ]
             input_text = "\n".join(json.dumps(item) for item in lines) + "\n{not-json\n"
             output = io.StringIO()
-            server = MCPServer(root, io.StringIO(input_text), output)
+            server = self._audited_server(root, io.StringIO(input_text), output)
 
             server.serve()
 
@@ -587,7 +601,7 @@ class MCPObservabilityTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             output = io.StringIO()
-            MCPServer(root, io.StringIO("[]\n"), output).serve()
+            self._audited_server(root, io.StringIO("[]\n"), output).serve()
 
             response = json.loads(output.getvalue())
             self.assertEqual(response["error"]["code"], -32600)
@@ -598,7 +612,7 @@ class MCPObservabilityTests(unittest.TestCase):
     def test_read_tool_has_retrieval_span_nested_below_dispatch(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            server = MCPServer(root, io.StringIO(), io.StringIO())
+            server = self._audited_server(root)
             server.api = Mock()
             server.api.status.return_value = {"initialized": True}
 
@@ -810,6 +824,64 @@ class MCPObservabilityTests(unittest.TestCase):
                 {item["code"] for item in json.loads(stdout.getvalue())["issues"]},
                 {"no_audit_log"},
             )
+
+    def test_mcp_audit_is_default_off_and_cli_controls_future_sessions(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            request = json.dumps({
+                "jsonrpc": "2.0", "id": 1, "method": "ping", "params": {},
+            }) + "\n"
+            log_path = root / ".project-kb" / "logs" / "mcp-events.jsonl"
+
+            MCPServer(root, io.StringIO(request), io.StringIO()).serve()
+            self.assertFalse(log_path.exists())
+
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                exit_code = main([
+                    "mcp-log", "status", "--project", str(root), "--json",
+                ])
+            self.assertEqual(exit_code, 0)
+            self.assertFalse(json.loads(stdout.getvalue())["enabled"])
+
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                exit_code = main([
+                    "mcp-log", "enable", "--project", str(root), "--json",
+                ])
+            self.assertEqual(exit_code, 0)
+            self.assertTrue(json.loads(stdout.getvalue())["enabled"])
+            MCPServer(root, io.StringIO(request), io.StringIO()).serve()
+            self.assertTrue(log_path.exists())
+            enabled_content = log_path.read_bytes()
+
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                exit_code = main([
+                    "mcp-log", "disable", "--project", str(root), "--json",
+                ])
+            self.assertEqual(exit_code, 0)
+            disabled = json.loads(stdout.getvalue())
+            self.assertFalse(disabled["enabled"])
+            self.assertTrue(disabled["restart_required"])
+            MCPServer(root, io.StringIO(request), io.StringIO()).serve()
+            self.assertEqual(log_path.read_bytes(), enabled_content)
+
+    def test_mcp_log_toggle_preserves_unowned_configuration(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            config_path = root / ".project-kb.yml"
+            config_path.write_text(
+                "version: 1\nproject:\n  name: sample\ncustom:\n  retained: yes\n",
+                encoding="utf-8",
+            )
+
+            self.assertEqual(main([
+                "mcp-log", "enable", "--project", str(root), "--quiet",
+            ]), 0)
+            rendered = config_path.read_text(encoding="utf-8")
+            self.assertIn("custom:\n  retained: yes", rendered)
+            self.assertIn("observability:\n  mcp_audit_enabled: true", rendered)
 
     def test_raw_events_and_analysis_rows_publish_machine_validatable_schemas(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

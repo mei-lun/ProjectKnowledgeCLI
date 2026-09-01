@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from project_knowledge.mcp import MCPServer
+from project_knowledge.config import ProjectConfig
 from project_knowledge.observability import (
     AuditIntegrityError,
     evaluate_audit_analysis,
@@ -115,6 +116,7 @@ def main() -> int:
         ProjectService(root).initialize()
 
         stdout = io.StringIO()
+        ProjectConfig.set_mcp_audit_enabled(root, True)
         MCPServer(root, io.StringIO(_messages()), stdout).serve()
         responses = [json.loads(line) for line in stdout.getvalue().splitlines()]
         if len(responses) != 3:

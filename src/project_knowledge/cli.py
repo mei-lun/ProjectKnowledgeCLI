@@ -70,8 +70,13 @@ def build_parser() -> argparse.ArgumentParser:
     mcp = commands.add_parser("mcp", help="run the stdio MCP server and guidance workflow")
     mcp.add_argument("--project", default=".", help="initialized project path")
 
-    mcp_log = commands.add_parser("mcp-log", help="validate or export local MCP audit events")
+    mcp_log = commands.add_parser("mcp-log", help="configure, validate or export local MCP audit events")
     mcp_log_commands = mcp_log.add_subparsers(dest="mcp_log_command", required=True)
+    for action in ("enable", "disable", "status"):
+        toggle = mcp_log_commands.add_parser(action, help=f"{action} MCP audit logging")
+        toggle.add_argument("--project", default=".", help="project path")
+        toggle.add_argument("--json", action="store_true", dest="as_json")
+        toggle.add_argument("--quiet", action="store_true")
     mcp_log_validate = mcp_log_commands.add_parser("validate", help="validate MCP audit completeness")
     mcp_log_validate.add_argument("--project", default=".", help="project path")
     mcp_log_validate.add_argument("--json", action="store_true", dest="as_json")
@@ -186,7 +191,22 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     try:
         if args.command == "mcp-log":
-            if args.mcp_log_command == "evaluate":
+            if args.mcp_log_command in {"enable", "disable"}:
+                result = ProjectConfig.set_mcp_audit_enabled(
+                    Path(args.project), args.mcp_log_command == "enable",
+                )
+                exit_code = 0
+            elif args.mcp_log_command == "status":
+                root = Path(args.project).resolve()
+                config = ProjectConfig.load(root)
+                result = {
+                    "project": str(root),
+                    "enabled": config.mcp_audit_enabled,
+                    "config_path": str(root / ".project-kb.yml"),
+                    "log_path": str(root / ".project-kb" / "logs" / "mcp-events.jsonl"),
+                }
+                exit_code = 0
+            elif args.mcp_log_command == "evaluate":
                 result = evaluate_audit_analysis(args.analysis, args.ground_truth)
                 if args.output:
                     atomic_json(Path(args.output), result)

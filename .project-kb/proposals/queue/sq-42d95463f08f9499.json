@@ -1,0 +1,25 @@
+{
+  "affected_knowledge": [
+    "curated.conventions",
+    "curated.provider.and.evidence",
+    "decision.0001.local.first.core",
+    "generated.frameworks",
+    "generated.module.project_knowledge",
+    "generated.module.tests",
+    "generated.project-map",
+    "generated.test-map"
+  ],
+  "base_commit": "24ff0e0c981e8700577ab8012e92234feacc407c",
+  "changed_files": [
+    "src/project_knowledge/config.py",
+    "tests/test_config.py"
+  ],
+  "changed_symbols": [],
+  "changeset_id": "change-20260901-173353",
+  "created_at": "2026-09-01T17:33:53+08:00",
+  "head_commit": "24ff0e0c981e8700577ab8012e92234feacc407c",
+  "queue_id": "sq-42d95463f08f9499",
+  "schema_version": 1,
+  "status": "awaiting_semantic_generation",
+  "task_summary": "同步 WP-OBS-02 严格布尔配置校验与审计开关文档"
+}

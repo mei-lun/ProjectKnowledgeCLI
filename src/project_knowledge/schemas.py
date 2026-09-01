@@ -553,6 +553,11 @@ CONFIG_SCHEMA: dict[str, Any] = {
             "additionalProperties": True,
         },
         "privacy": {"type": "object", "additionalProperties": True},
+        "observability": {
+            "type": "object",
+            "properties": {"mcp_audit_enabled": {"type": "boolean"}},
+            "additionalProperties": True,
+        },
         "provider": {"type": "object", "additionalProperties": True},
     },
     "additionalProperties": True,

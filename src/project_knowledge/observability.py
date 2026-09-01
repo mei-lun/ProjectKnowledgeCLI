@@ -21,7 +21,7 @@ from .schemas import (
     SchemaValidationError,
     validate_instance,
 )
-from .util import atomic_write, process_alive, utc_now
+from .util import atomic_write, utc_now
 
 
 AUDIT_SCHEMA_VERSION = 1
@@ -112,58 +112,57 @@ def redact_payload(value: Any) -> tuple[Any, list[dict[str, str]]]:
 
 @contextmanager
 def _append_lock(path: Path, timeout_seconds: float = 30.0) -> Iterator[None]:
-    lock_path = path.with_suffix(path.suffix + ".lockdir")
+    lock_path = path.with_suffix(path.suffix + ".lock")
     lock_path.parent.mkdir(parents=True, exist_ok=True)
     deadline = time.monotonic() + timeout_seconds
-    owner_token = uuid.uuid4().hex
-    payload = json.dumps({
-        "pid": os.getpid(), "created_at": time.time(), "token": owner_token,
-    })
-    while True:
-        try:
-            lock_path.mkdir()
-            lock_path.joinpath("owner").write_text(payload, encoding="utf-8")
-            break
-        except FileExistsError:
-            stale = False
+    with lock_path.open("a+b") as handle:
+        if handle.tell() == 0:
+            handle.write(b"0")
+            handle.flush()
+        while True:
             try:
-                owner = json.loads(lock_path.joinpath("owner").read_text(encoding="utf-8"))
-                stale = (
-                    not process_alive(int(owner.get("pid", 0)))
-                    or time.time() - float(owner.get("created_at", 0)) > 30
-                )
-            except (OSError, ValueError, TypeError, json.JSONDecodeError):
-                try:
-                    stale = time.time() - lock_path.stat().st_mtime > 30
-                except (FileNotFoundError, PermissionError):
-                    continue
-            if stale:
-                try:
-                    lock_path.joinpath("owner").unlink(missing_ok=True)
-                    lock_path.rmdir()
-                except (FileNotFoundError, OSError):
-                    pass
-                continue
-            if time.monotonic() >= deadline:
-                raise TimeoutError(f"timed out acquiring audit append lock: {lock_path}")
-            time.sleep(0.01)
-    try:
-        yield
-    finally:
+                if sys.platform == "win32":
+                    import msvcrt
+
+                    handle.seek(0)
+                    msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
+                else:
+                    import fcntl
+
+                    fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                break
+            except OSError:
+                if time.monotonic() >= deadline:
+                    raise TimeoutError(
+                        f"timed out acquiring audit append lock: {lock_path}"
+                    )
+                time.sleep(0.01)
         try:
-            owner = json.loads(lock_path.joinpath("owner").read_text(encoding="utf-8"))
-            if owner.get("token") == owner_token:
-                lock_path.joinpath("owner").unlink(missing_ok=True)
-                lock_path.rmdir()
-        except (FileNotFoundError, OSError, ValueError, TypeError, json.JSONDecodeError):
-            pass
+            yield
+        finally:
+            if sys.platform == "win32":
+                import msvcrt
+
+                handle.seek(0)
+                msvcrt.locking(handle.fileno(), msvcrt.LK_UNLCK, 1)
+            else:
+                import fcntl
+
+                fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
 
 
 class MCPAuditLogger:
-    def __init__(self, root: str | Path, *, protocol_version: str = "unknown") -> None:
+    def __init__(
+        self,
+        root: str | Path,
+        *,
+        protocol_version: str = "unknown",
+        enabled: bool = True,
+    ) -> None:
         self.root = Path(root).resolve()
         self.log_path = self.root / ".project-kb" / "logs" / "mcp-events.jsonl"
         self.protocol_version = protocol_version
+        self.enabled = enabled
         self.session_id = _identifier("ses")
         self._sequence = 0
         self._previous_invocation_id: str | None = None
@@ -188,6 +187,8 @@ class MCPAuditLogger:
         span_id: str | None = None,
         parent_span_id: str | None = None,
     ) -> dict[str, Any]:
+        if not self.enabled:
+            return {}
         try:
             safe_payload, redactions = redact_payload(payload)
             safe_client_request_id = None

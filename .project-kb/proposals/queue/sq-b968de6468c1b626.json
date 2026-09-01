@@ -1,0 +1,37 @@
+{
+  "affected_knowledge": [
+    "curated.architecture",
+    "curated.conventions",
+    "curated.feature.guide.generation",
+    "curated.glossary",
+    "curated.provider.and.evidence",
+    "decision.0001.local.first.core",
+    "generated.frameworks",
+    "generated.module.project_knowledge",
+    "generated.module.scripts",
+    "generated.module.tests",
+    "generated.project-map",
+    "generated.test-map"
+  ],
+  "base_commit": "24ff0e0c981e8700577ab8012e92234feacc407c",
+  "changed_files": [
+    "scripts/validate_mcp_observability.py",
+    "src/project_knowledge/__init__.py",
+    "src/project_knowledge/cli.py",
+    "src/project_knowledge/config.py",
+    "src/project_knowledge/mcp.py",
+    "src/project_knowledge/observability.py",
+    "src/project_knowledge/schemas.py",
+    "tests/test_config.py",
+    "tests/test_mcp_observability.py",
+    "tests/test_schemas.py"
+  ],
+  "changed_symbols": [],
+  "changeset_id": "change-20260901-164652",
+  "created_at": "2026-09-01T16:46:52+08:00",
+  "head_commit": "24ff0e0c981e8700577ab8012e92234feacc407c",
+  "queue_id": "sq-b968de6468c1b626",
+  "schema_version": 1,
+  "status": "awaiting_semantic_generation",
+  "task_summary": "完成 WP-OBS-02 MCP 审计日志项目级开关、默认关闭与 README 文档"
+}
