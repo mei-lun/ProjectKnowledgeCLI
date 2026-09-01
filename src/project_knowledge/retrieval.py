@@ -162,8 +162,10 @@ class KnowledgeAPI:
         debug: bool = False,
         *,
         _status: dict[str, Any] | None = None,
+        _diagnostics: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         started = time.monotonic()
+        diagnostics_requested = debug or _diagnostics is not None
         pending = set((_status or self.service.status()).get("pending_files", []))
         with KnowledgeStore(self.service.db_path) as store:
             matches = store.search_knowledge(query, max(1, min(limit * 2, 100)), kinds, module)
@@ -236,9 +238,9 @@ class KnowledgeAPI:
                 "gaps": [] if items else ["No matching knowledge record; search live source."],
                 "vector_retrieval": vector_diagnostics,
             }
-            if debug:
+            if diagnostics_requested:
                 duration_ms = round((time.monotonic() - started) * 1000, 3)
-                result["retrieval_trace"] = {
+                trace = {
                     "schema_version": 2,
                     "operation": "knowledge_search",
                     "status": "ok",
@@ -270,8 +272,25 @@ class KnowledgeAPI:
                         for item in items
                     ],
                 }
+                if _diagnostics is not None:
+                    _diagnostics["retrieval_trace"] = trace
+                if debug:
+                    result["retrieval_trace"] = trace
             self._record_query(store, "knowledge_search", len(query), result, started)
             return result
+
+    def search_for_evaluation(
+        self,
+        query: str,
+        kinds: list[str] | None = None,
+        module: str | None = None,
+        limit: int = 10,
+    ) -> tuple[dict[str, Any], dict[str, Any]]:
+        diagnostics: dict[str, Any] = {}
+        result = self.search(
+            query, kinds, module, limit, _diagnostics=diagnostics,
+        )
+        return result, diagnostics
 
     def impact(
         self,
@@ -280,8 +299,11 @@ class KnowledgeAPI:
         max_hops: int = 1,
         max_relations: int = 500,
         debug: bool = False,
+        *,
+        _diagnostics: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         started = time.monotonic()
+        diagnostics_requested = debug or _diagnostics is not None
         files = [Path(path).as_posix().lstrip("./") for path in (files or [])]
         symbols = symbols or []
         max_hops = max(0, min(int(max_hops), 5))
@@ -326,9 +348,9 @@ class KnowledgeAPI:
                 "dependency_files": sorted(affected_files),
                 "limitations": self.service.engine.status().get("limitations", []),
             })
-            if debug:
+            if diagnostics_requested:
                 duration_ms = round((time.monotonic() - started) * 1000, 3)
-                engine_result["retrieval_trace"] = {
+                trace = {
                     "schema_version": 2,
                     "operation": "knowledge_impact",
                     "status": "partial" if engine_result["truncated"] else "ok",
@@ -352,8 +374,25 @@ class KnowledgeAPI:
                         },
                     },
                 }
+                if _diagnostics is not None:
+                    _diagnostics["retrieval_trace"] = trace
+                if debug:
+                    engine_result["retrieval_trace"] = trace
             self._record_query(store, "knowledge_impact", len(json.dumps(engine_result["input"])), engine_result, started)
         return engine_result
+
+    def impact_for_evaluation(
+        self,
+        files: list[str] | None = None,
+        symbols: list[str] | None = None,
+        max_hops: int = 1,
+        max_relations: int = 500,
+    ) -> tuple[dict[str, Any], dict[str, Any]]:
+        diagnostics: dict[str, Any] = {}
+        result = self.impact(
+            files, symbols, max_hops, max_relations, _diagnostics=diagnostics,
+        )
+        return result, diagnostics
 
     def context_for_evaluation(
         self,

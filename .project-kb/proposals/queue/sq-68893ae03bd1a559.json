@@ -1,0 +1,33 @@
+{
+  "affected_knowledge": [
+    "curated.architecture",
+    "curated.conventions",
+    "curated.feature.guide.generation",
+    "curated.glossary",
+    "curated.provider.and.evidence",
+    "decision.0001.local.first.core",
+    "decision.0002.codegraph.adapter.boundary",
+    "generated.frameworks",
+    "generated.module.project_knowledge",
+    "generated.module.tests",
+    "generated.project-map",
+    "generated.test-map"
+  ],
+  "base_commit": "b83f3b3ac4df0bad26413c58135be12f8483ea79",
+  "changed_files": [
+    "src/project_knowledge/evidence.py",
+    "src/project_knowledge/mcp.py",
+    "src/project_knowledge/observability.py",
+    "src/project_knowledge/retrieval.py",
+    "tests/test_guidance_mcp.py",
+    "tests/test_mcp_observability.py"
+  ],
+  "changed_symbols": [],
+  "changeset_id": "change-20260901-143945",
+  "created_at": "2026-09-01T14:39:45+08:00",
+  "head_commit": "b83f3b3ac4df0bad26413c58135be12f8483ea79",
+  "queue_id": "sq-68893ae03bd1a559",
+  "schema_version": 1,
+  "status": "awaiting_semantic_generation",
+  "task_summary": "完成 WP-OBS-01 MCP 全链路审计日志、跨进程追加与质量指标语义修复"
+}

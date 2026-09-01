@@ -59,11 +59,23 @@ ProjectKnowledgeCLI 不是另一个代码解析器，而是建立在 CodeGraph �
 - 通过 npm 包自动管理 Python 运行时和固定版本的 CodeGraph，降低 Windows 用户安装成本。
 - 默认不联网、不发送遥测，只通过 CodeGraph 公共 CLI/API 获取代码事实。
 
+### MCP 全链路审计日志
+
+Project Knowledge MCP 默认将本地调用事实追加写入 `.project-kb/logs/mcp-events.jsonl`。日志覆盖 JSON-RPC 消息、工具参数、完整非敏感响应、调用顺序、耗时、检索阶段、CodeGraph/Provider 依赖调用、缓存命中和错误；不会记录 Agent 对话或终端命令，也不会写入 MCP stdout。认证信息、Token、密码、Cookie 和私钥会递归脱敏，非敏感载荷不按长度截断。
+
+```bash
+project-kb mcp-log validate --project . --json
+project-kb mcp-log export --project . --output analysis.jsonl --json
+project-kb mcp-log evaluate --analysis analysis.jsonl --ground-truth labels.jsonl --json
+```
+
+`validate` 在发现损坏 JSON、事件缺口、未闭合调用/span、孤儿 span 或重复 ID 时返回退出码 `2`；`export` 不会为不完整日志生成正式分析文件。分析 JSONL 一行对应一次闭合 MCP 调用，包含返回文件、符号、知识 ID、调用路径、阶段树和 `ground_truth_ref`。ground truth 必须独立维护，运行时日志不会读取评测标签；只有明确标注的检索调用才纳入 file/symbol/call-path precision 和 recall，未标注的协议调用只用于链路与可靠性分析。调用之间默认只有会话内顺序关系，除非客户端在 `_meta` 提供关联信息。
+
 ## 当前状态与边界
 
 上述能力已经在代码中实现，但“功能可用”不等于所有检索质量门槛已经通过。当前正式评估报告仍显示候选覆盖、符号召回和调用路径召回存在不足；gardenserver 的受控实践数据表明排序和检索延迟已有明显改善，但生产规模验证仍在继续。PKS 优化的是知识管理、检索编排和工作流，不会替代 CodeGraph 底层的语言解析和关系抽取能力。
 
-## 当前质量指标（0.1.59）
+## 当前质量指标（0.1.60）
 
 当前真实 CodeGraph Adapter 已接入并可用：`codegraph-public-cli 1.5.0`。当前活动评测使用 50 个 self-repo 样本；精确指标和环境相关延迟以 [活动评测报告](evaluation/reports/latest.json) 为唯一来源，避免在 README 中复制会随 live 检索发生小幅波动的数据。
 

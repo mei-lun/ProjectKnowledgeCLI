@@ -41,6 +41,7 @@ class SecretScanner:
         re.DOTALL,
     )
     _bearer = re.compile(r"(?i)\bBearer\s+[A-Za-z0-9._~+/=-]{8,}")
+    _basic = re.compile(r"(?i)\bBasic\s+[A-Za-z0-9+/]{4,}={0,2}")
     _known_token = re.compile(
         r"(?<![A-Za-z0-9])(?:sk-[A-Za-z0-9_-]{12,}|gh[pousr]_[A-Za-z0-9]{20,}|AKIA[A-Z0-9]{16})(?![A-Za-z0-9])"
     )
@@ -65,6 +66,12 @@ class SecretScanner:
         )
         redacted = self._bearer.sub(
             replace_simple("bearer_token", "Bearer [REDACTED:bearer_token]"), redacted,
+        )
+        redacted = self._basic.sub(
+            replace_simple(
+                "basic_credentials", "Basic [REDACTED:basic_credentials]",
+            ),
+            redacted,
         )
         def replace_assignment(match: re.Match[str]) -> str:
             kind = re.sub(r"[-_]", "_", match.group("key").lower())

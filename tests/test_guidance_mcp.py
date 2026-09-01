@@ -72,12 +72,16 @@ class GuidanceMCPTests(unittest.TestCase):
         server.project = Path("/tmp/project")
         server.api = None
         with patch("project_knowledge.mcp.KnowledgeAPI") as api:
-            api.return_value.impact.return_value = {"status": "current"}
+            api.return_value.impact_for_evaluation.return_value = (
+                {"status": "current"}, {"retrieval_trace": {}},
+            )
             server._call("knowledge_impact", {
                 "projectPath": "/tmp/other", "files": ["a.lua"],
                 "maxHops": 2, "maxRelations": 40,
             })
-            api.return_value.impact.assert_called_once_with(["a.lua"], None, 2, 40)
+            api.return_value.impact_for_evaluation.assert_called_once_with(
+                ["a.lua"], None, 2, 40,
+            )
 
     def test_initialization_and_draft_routes_are_explicit(self):
         server = object.__new__(MCPServer)

@@ -11,6 +11,7 @@
 - `scripts/validate_evaluation_dataset.py`（Python）
 - `scripts/validate_evaluation_provenance.py`（Python）
 - `scripts/validate_gardenserver_guidance_workflow.py`（Python）
+- `scripts/validate_mcp_observability.py`（Python）
 - `scripts/validate_npm_bootstrap.py`（Python）
 
 ## 代码事实

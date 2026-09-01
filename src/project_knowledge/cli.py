@@ -14,6 +14,7 @@ from .evaluate import STRATEGIES, evaluate_suite, load_json_object
 from .finalization import FinalizationService
 from .mcp import serve
 from .models import PatchOperation
+from .observability import evaluate_audit_analysis, export_audit_log, validate_audit_log
 from .proposal import ProposalService
 from .provider import ModelRuntime, ProviderConfig, create_preview_provider, create_provider
 from .progress import TerminalProgressRenderer
@@ -68,6 +69,24 @@ def build_parser() -> argparse.ArgumentParser:
 
     mcp = commands.add_parser("mcp", help="run the stdio MCP server and guidance workflow")
     mcp.add_argument("--project", default=".", help="initialized project path")
+
+    mcp_log = commands.add_parser("mcp-log", help="validate or export local MCP audit events")
+    mcp_log_commands = mcp_log.add_subparsers(dest="mcp_log_command", required=True)
+    mcp_log_validate = mcp_log_commands.add_parser("validate", help="validate MCP audit completeness")
+    mcp_log_validate.add_argument("--project", default=".", help="project path")
+    mcp_log_validate.add_argument("--json", action="store_true", dest="as_json")
+    mcp_log_validate.add_argument("--quiet", action="store_true")
+    mcp_log_export = mcp_log_commands.add_parser("export", help="export one analysis row per MCP invocation")
+    mcp_log_export.add_argument("--project", default=".", help="project path")
+    mcp_log_export.add_argument("--output", required=True, help="analysis JSONL output path")
+    mcp_log_export.add_argument("--json", action="store_true", dest="as_json")
+    mcp_log_export.add_argument("--quiet", action="store_true")
+    mcp_log_evaluate = mcp_log_commands.add_parser("evaluate", help="evaluate exported MCP predictions")
+    mcp_log_evaluate.add_argument("--analysis", required=True, help="exported MCP analysis JSONL")
+    mcp_log_evaluate.add_argument("--ground-truth", required=True, help="independent ground-truth JSONL")
+    mcp_log_evaluate.add_argument("--output", help="optional JSON quality report")
+    mcp_log_evaluate.add_argument("--json", action="store_true", dest="as_json")
+    mcp_log_evaluate.add_argument("--quiet", action="store_true")
 
     git_event = commands.add_parser("git-event", help="record and compensate a Git lifecycle event")
     git_event.add_argument("--event", required=True, choices=["post-checkout", "post-merge", "post-rewrite", "post-commit"])
@@ -166,7 +185,21 @@ def main(argv: list[str] | None = None) -> int:
         serve(args.project)
         return 0
     try:
-        if args.command == "generate":
+        if args.command == "mcp-log":
+            if args.mcp_log_command == "evaluate":
+                result = evaluate_audit_analysis(args.analysis, args.ground_truth)
+                if args.output:
+                    atomic_json(Path(args.output), result)
+                exit_code = 0
+            else:
+                audit_path = Path(args.project).resolve() / ".project-kb" / "logs" / "mcp-events.jsonl"
+                if args.mcp_log_command == "validate":
+                    result = validate_audit_log(audit_path)
+                    exit_code = 0 if result["valid"] else 2
+                else:
+                    result = export_audit_log(audit_path, Path(args.output))
+                    exit_code = 0
+        elif args.command == "generate":
             root = Path(args.project).resolve()
             project_config = ProjectConfig.load(root)
             provider_config = ProviderConfig.from_project_config(project_config)

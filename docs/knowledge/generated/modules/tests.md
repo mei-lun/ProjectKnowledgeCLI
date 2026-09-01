@@ -30,6 +30,7 @@
 - `tests/test_initialization_workflow.py`（Python）
 - `tests/test_integration.py`（Python）
 - `tests/test_knowledge_loop_status.py`（Python）
+- `tests/test_mcp_observability.py`（Python）
 - `tests/test_npm_bootstrap_validation.py`（Python）
 - `tests/test_npm_package_build.py`（Python）
 - `tests/test_progress.py`（Python）

@@ -8,8 +8,10 @@ from typing import Any, TextIO
 from . import __version__
 from .codegraph import CodeGraphClient
 from .config import ProjectConfig
+from .observability import AuditInvocation, MCPAuditLogger, audit_span
 from .retrieval import KnowledgeAPI
 from .schemas import validate_instance
+from .service import ProjectService
 
 
 CURRENT_PROTOCOL = "2026-07-28"
@@ -236,40 +238,114 @@ TOOLS.extend(WORKFLOW_TOOLS)
 
 
 class MCPServer:
-    def __init__(self, project: str | Path = ".", input_stream: TextIO | None = None, output_stream: TextIO | None = None):
+    def __init__(
+        self,
+        project: str | Path = ".",
+        input_stream: TextIO | None = None,
+        output_stream: TextIO | None = None,
+        *,
+        audit_logger: MCPAuditLogger | None = None,
+    ):
         self.project = Path(project)
         self.input = input_stream or sys.stdin
         self.output = output_stream or sys.stdout
+        self.audit = audit_logger or MCPAuditLogger(
+            self.project, protocol_version=CURRENT_PROTOCOL,
+        )
         self.api: KnowledgeAPI | None = None
         try:
-            self.api = KnowledgeAPI(self.project)
+            with self.audit.activate_session():
+                with audit_span(
+                    "mcp.server", "knowledge_api_initialize",
+                    {"project": self.project.resolve().as_posix()},
+                ) as span:
+                    self.api = KnowledgeAPI(self.project)
+                    span.set_output({"status": "ready"})
         except RuntimeError:
             pass
 
     def serve(self) -> None:
-        for line in self.input:
-            if not line.strip():
-                continue
-            try:
-                request = json.loads(line)
-                response = self.handle(request)
-            except json.JSONDecodeError as error:
-                response = self._error(None, -32700, f"parse error: {error.msg}")
-            except Exception as error:  # Keep the stdio server alive across tool failures.
-                response = self._error(None, -32603, str(error))
-            if response is not None:
-                self.output.write(json.dumps(response, ensure_ascii=False, separators=(",", ":")) + "\n")
-                self.output.flush()
+        try:
+            for line in self.input:
+                if not line.strip():
+                    continue
+                invocation: AuditInvocation | None = None
+                try:
+                    request = json.loads(line)
+                    if not isinstance(request, dict):
+                        invocation = self.audit.begin_message(line, parse_error="JSON-RPC request must be an object")
+                        response = self._error(None, -32600, "JSON-RPC request must be an object")
+                        request = {"jsonrpc": "2.0", "id": None, "method": "<invalid_request>"}
+                        self.audit.start_invocation(invocation, request)
+                        self.audit.complete_invocation(invocation, response)
+                    else:
+                        invocation = self.audit.begin_message(line, request=request)
+                        response = self.handle(request, _audit_invocation=invocation)
+                except json.JSONDecodeError as error:
+                    invocation = self.audit.begin_message(
+                        line, parse_error=f"parse error: {error.msg}",
+                    )
+                    request = {"jsonrpc": "2.0", "id": None, "method": "<parse_error>"}
+                    self.audit.start_invocation(invocation, request)
+                    response = self._error(None, -32700, f"parse error: {error.msg}")
+                    self.audit.complete_invocation(invocation, response, error=error)
+                except Exception as error:  # Keep the stdio server alive across tool failures.
+                    response = self._error(None, -32603, str(error))
+                    if invocation is not None:
+                        self.audit.complete_invocation(invocation, response, error=error)
+                if response is not None:
+                    self.output.write(json.dumps(response, ensure_ascii=False, separators=(",", ":")) + "\n")
+                    self.output.flush()
+        finally:
+            self.audit.close()
 
-    def handle(self, request: dict[str, Any]) -> dict[str, Any] | None:
+    def handle(
+        self,
+        request: dict[str, Any],
+        *,
+        _audit_invocation: AuditInvocation | None = None,
+    ) -> dict[str, Any] | None:
+        audit = getattr(self, "audit", None)
+        invocation = _audit_invocation
+        if audit is not None and invocation is None:
+            invocation = audit.begin_message(
+                json.dumps(request, ensure_ascii=False, separators=(",", ":")),
+                request=request,
+            )
+        request_id = request.get("id")
+        if request_id is None:
+            if audit is not None and invocation is not None:
+                audit.observe_notification(invocation, request)
+            return None
+        if audit is not None and invocation is not None:
+            audit.start_invocation(invocation, request)
+        try:
+            if audit is not None and invocation is not None:
+                with audit.activate(invocation):
+                    response = self._handle_request(request, invocation)
+            else:
+                response = self._handle_request(request, invocation)
+        except Exception as error:  # Direct handle calls receive the same stable error as serve().
+            response = self._error(request_id, -32603, str(error))
+            if audit is not None and invocation is not None:
+                audit.complete_invocation(invocation, response, error=error)
+            return response
+        if audit is not None and invocation is not None:
+            audit.complete_invocation(invocation, response)
+        return response
+
+    def _handle_request(
+        self, request: dict[str, Any], invocation: AuditInvocation | None,
+    ) -> dict[str, Any]:
         request_id = request.get("id")
         method = request.get("method")
         params = request.get("params") or {}
-        if request_id is None:
-            return None
         if method == "initialize":
             requested = params.get("protocolVersion", LEGACY_PROTOCOL)
             protocol = requested if requested in {CURRENT_PROTOCOL, LEGACY_PROTOCOL, "2025-11-25", "2024-11-05"} else LEGACY_PROTOCOL
+            audit = getattr(self, "audit", None)
+            if audit is not None and invocation is not None:
+                audit.client_initialized(invocation, params, protocol)
             return self._result(request_id, {
                 "protocolVersion": protocol,
                 "capabilities": {"tools": {"listChanged": False}},
@@ -297,7 +373,9 @@ class MCPServer:
                 if not isinstance(arguments, dict):
                     raise ValueError("tools/call arguments 必须是对象")
                 validate_instance(arguments, tool["inputSchema"], "$.arguments")
-                value = self._call(name, arguments)
+                with audit_span("tool_dispatch", str(name), arguments) as span:
+                    value = self._call(name, arguments)
+                    span.set_output(value)
             except (KeyError, ValueError, RuntimeError) as error:
                 result = {"content": [{"type": "text", "text": str(error)}], "isError": True}
                 return self._result(request_id, result)
@@ -316,37 +394,68 @@ class MCPServer:
         api = None
         if name in read_tools:
             api = KnowledgeAPI(project) if project_path or self.api is None else self.api
-        if name == "knowledge_context":
-            if arguments.get("debug", False):
-                return api.context(str(arguments["task"]), arguments.get("maxTokens"), True)
-            return api.context(str(arguments["task"]), arguments.get("maxTokens"))
-        if name == "knowledge_search":
-            if arguments.get("debug", False):
-                return api.search(
-                    str(arguments["query"]), arguments.get("kinds"),
-                    arguments.get("module"), int(arguments.get("limit", 10)), True,
-                )
-            return api.search(
-                str(arguments["query"]), arguments.get("kinds"),
-                arguments.get("module"), int(arguments.get("limit", 10)),
-            )
-        if name == "knowledge_get":
-            return api.get(str(arguments["id"]))
-        if name == "knowledge_impact":
-            if arguments.get("debug", False):
-                return api.impact(
-                    arguments.get("files"), arguments.get("symbols"),
-                    arguments.get("maxHops", 1), arguments.get("maxRelations", 500), True,
-                )
-            return api.impact(
-                arguments.get("files"), arguments.get("symbols"),
-                arguments.get("maxHops", 1), arguments.get("maxRelations", 500),
-            )
-        if name == "knowledge_status":
-            return api.status()
+            with audit_span("retrieval", name, arguments) as span:
+                value, retrieval_trace = self._call_read_tool(api, name, arguments)
+                span.set_output({
+                    "result": value,
+                    "retrieval_trace": retrieval_trace,
+                })
+                return value
+
         if name == "knowledge_initialization_start":
             from .initialization import InitializationWorkflow
             return InitializationWorkflow(project).start()
+        return self._call_workflow_tool(name, arguments)
+
+    @staticmethod
+    def _call_read_tool(
+        api: KnowledgeAPI,
+        name: str,
+        arguments: dict[str, Any],
+    ) -> tuple[dict[str, Any], dict[str, Any] | None]:
+        if name == "knowledge_context":
+            if arguments.get("debug", False):
+                value = api.context(
+                    str(arguments["task"]), arguments.get("maxTokens"), True,
+                )
+                return value, value.get("retrieval_trace")
+            value, diagnostics = api.context_for_evaluation(
+                str(arguments["task"]), arguments.get("maxTokens"),
+            )
+            return value, diagnostics.get("retrieval_trace")
+        if name == "knowledge_search":
+            if arguments.get("debug", False):
+                value = api.search(
+                    str(arguments["query"]), arguments.get("kinds"),
+                    arguments.get("module"), int(arguments.get("limit", 10)), True,
+                )
+                return value, value.get("retrieval_trace")
+            value, diagnostics = api.search_for_evaluation(
+                str(arguments["query"]), arguments.get("kinds"),
+                arguments.get("module"), int(arguments.get("limit", 10)),
+            )
+            return value, diagnostics.get("retrieval_trace")
+        if name == "knowledge_get":
+            return api.get(str(arguments["id"])), None
+        if name == "knowledge_impact":
+            if arguments.get("debug", False):
+                value = api.impact(
+                    arguments.get("files"), arguments.get("symbols"),
+                    arguments.get("maxHops", 1), arguments.get("maxRelations", 500), True,
+                )
+                return value, value.get("retrieval_trace")
+            value, diagnostics = api.impact_for_evaluation(
+                arguments.get("files"), arguments.get("symbols"),
+                arguments.get("maxHops", 1), arguments.get("maxRelations", 500),
+            )
+            return value, diagnostics.get("retrieval_trace")
+        if name == "knowledge_status":
+            return api.status(), None
+        raise KeyError(f"unknown read tool: {name}")
+
+    def _call_workflow_tool(self, name: str, arguments: dict[str, Any]) -> dict[str, Any]:
+        project_path = arguments.get("projectPath")
+        project = Path(project_path).resolve() if project_path else self.project.resolve()
         if name == "knowledge_guidance_plan":
             from .task_workflow import TaskCompletionWorkflow
             return TaskCompletionWorkflow(project).plan(list(arguments.get("selectedCategories", [])))
@@ -424,10 +533,22 @@ class MCPServer:
 
 
 def serve(project: str | Path = ".") -> None:
+    audit = MCPAuditLogger(project, protocol_version=CURRENT_PROTOCOL)
     # Connection-time compensation keeps the read tools from serving known old facts.
-    service = __import__("project_knowledge.service", fromlist=["ProjectService"]).ProjectService(project)
     try:
-        service.sync(task_summary="MCP connection compensation")
+        with audit.activate_session():
+            with audit_span(
+                "mcp.server", "connection_compensation",
+                {"task_summary": "MCP connection compensation"},
+            ) as span:
+                result = ProjectService(project).sync(
+                    task_summary="MCP connection compensation",
+                )
+                span.set_output(result)
     except RuntimeError:
         pass
-    MCPServer(project).serve()
+    try:
+        MCPServer(project, audit_logger=audit).serve()
+    except BaseException:
+        audit.close()
+        raise

@@ -1,0 +1,37 @@
+{
+  "affected_knowledge": [
+    "curated.architecture",
+    "curated.conventions",
+    "curated.feature.guide.generation",
+    "curated.glossary",
+    "curated.provider.and.evidence",
+    "decision.0001.local.first.core",
+    "decision.0002.codegraph.adapter.boundary",
+    "generated.frameworks",
+    "generated.module.project_knowledge",
+    "generated.module.scripts",
+    "generated.module.tests",
+    "generated.project-map",
+    "generated.test-map"
+  ],
+  "base_commit": "ca6df1929e62895b8de39f8ee7df5ff11bd6cbc5",
+  "changed_files": [
+    "scripts/validate_mcp_observability.py",
+    "src/project_knowledge/__init__.py",
+    "src/project_knowledge/cli.py",
+    "src/project_knowledge/codegraph.py",
+    "src/project_knowledge/mcp.py",
+    "src/project_knowledge/observability.py",
+    "src/project_knowledge/provider.py",
+    "src/project_knowledge/schemas.py",
+    "tests/test_mcp_observability.py"
+  ],
+  "changed_symbols": [],
+  "changeset_id": "change-20260901-125858",
+  "created_at": "2026-09-01T12:58:58+08:00",
+  "head_commit": "b83f3b3ac4df0bad26413c58135be12f8483ea79",
+  "queue_id": "sq-34b03b2ab9c0a946",
+  "schema_version": 1,
+  "status": "awaiting_semantic_generation",
+  "task_summary": "实现 WP-OBS-01 MCP 全链路审计日志与质量分析导出"
+}

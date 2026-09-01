@@ -28,6 +28,7 @@
 - `src/project_knowledge/knowledge.py`（Python）
 - `src/project_knowledge/mcp.py`（Python）
 - `src/project_knowledge/models.py`（Python）
+- `src/project_knowledge/observability.py`（Python）
 - `src/project_knowledge/performance.py`（Python）
 - `src/project_knowledge/progress.py`（Python）
 - `src/project_knowledge/proposal.py`（Python）

@@ -1,0 +1,2 @@
+{"schema_version":1,"case_id":"mcp-context-save-flow","tool":"knowledge_context","argument_match":{"task":"change Repository save behavior"},"expected_files":["src/app.py"],"expected_symbols":["src/app.py::Repository.save"],"expected_call_path":[]}
+{"schema_version":1,"case_id":"mcp-impact-save-file","tool":"knowledge_impact","argument_match":{"files":["src/app.py"]},"expected_files":["src/app.py","tests/test_app.py"],"expected_symbols":[],"expected_call_path":[]}

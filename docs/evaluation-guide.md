@@ -71,6 +71,24 @@ project-kb evaluate evaluation/questions.jsonl \
 
 质量门失败返回退出码 `2`。阈值按策略独立冻结，避免要求 grep+Read 返回代码图符号，或把 Markdown 的高 Token 成本隐藏在混合平均值里。
 
+## MCP 调用质量分析
+
+MCP 服务器会将原始事件写入项目内 `.project-kb/logs/mcp-events.jsonl`。使用以下命令检查完整性并导出一次调用一行的分析数据：
+
+```bash
+project-kb mcp-log validate --project . --json
+project-kb mcp-log export --project . --output evaluation/mcp-analysis.jsonl --json
+project-kb mcp-log evaluate \
+  --analysis evaluation/mcp-analysis.jsonl \
+  --ground-truth evaluation/mcp-ground-truth.jsonl \
+  --output evaluation/reports/mcp-quality.json \
+  --json
+```
+
+ground truth 与运行时日志分离，每行至少包含 `ground_truth_ref`、`expected_files`、`expected_symbols` 和 `expected_call_path`；可以额外提供 `acceptable_supporting_files`、`expected_extension_points`、`expected_invariants` 和 `expected_design_reasons`。标注通过 `ground_truth_ref` 关联导出行，不能根据日志响应自动生成。`mcp-log evaluate` 输出 micro precision/recall、每次 invocation 指标、计数和标注覆盖率；未标注的 `initialize`、`ping` 或 `tools/list` 调用不会被当作检索失败。
+
+原始日志保留完整的非敏感 MCP 请求/响应和内部 span，不限制文件大小；Secret、Bearer、API Key、密码、Cookie 和私钥始终脱敏。删除事件或写入损坏行后，`validate` 返回非零，`export` 拒绝生成分析文件。调用链默认标注为 `ordered_only`，只有客户端 `_meta` 明确提供关联信息时才标为 `client_correlated`，因此顺序统计不能被解释为 Agent 意图或因果证明。
+
 0.1.3 首次冻结前先排除了 `evaluation/reports/**` 和 `evaluation/baselines/**`，防止历史答案进入下一轮被测索引。稳定轮次实测 grep+Read 文件召回率/精确率为 `0.675/0.29375`、only-Markdown 文件精确率为 `0.087313`，对应门槛以小幅跨环境余量冻结为 `0.67/0.29/0.085`。这组数值是当前能力下限，不是产品目标；冻结后的任何降低都必须有新证据、版本记录和人工复核。
 
 0.1.4 将快速集扩展到 25 题，最低样本数同步提升为 25，未降低任何指标阈值。基线比较只有在 `dataset_sha256` 相同时才执行；数据集变化时报告 `baseline_dataset_mismatch` 并只检查绝对阈值，避免比较不可比的汇总均值。only-Markdown 每题最多读取三页，并在总 Token 预算内抽取与任务相关的片段。

@@ -1,6 +1,6 @@
 # 项目级知识库最小需求审计与实施基线
 
-> 当前版本：0.1.59
+> 当前版本：0.1.60
 > 复核日期：2026-08-31  
 > 报告状态：Phase 0～2 确定性检索基线已交付；发布证据正在重新对齐，最终生产质量门尚未通过
 > 默认语言：中文
@@ -1527,3 +1527,15 @@ WP-RQ-03 的确定性排序基线已完成。默认 `policy-v2` 将开发任务�
 gardenserver 冻结 12 题集的文件召回、核心文件召回、符号召回和成功率均为 1.000000，nDCG@5 为 0.938488；20 题挑战集的文件召回、符号召回和成功率均为 1.000000，核心文件召回为 0.966667、核心文件精确率为 0.300000、nDCG@5 为 0.738156。两套评测均无排序回退。
 
 0.1.38 当时的最终质量计划仍未完成：只有同一 gardenserver 快照的 32 题，且端到端 P95 超过 12 秒；当时尚未实现原方案 `precision@5`，不能用 `core_file_precision` 代替。该历史复现证据见 `evaluation/reports/gardenserver-phase2-0.1.38.json`；0.1.46 的实践门复核与正式门边界以本文开头的当前结论为准。
+
+# 0.1.60 当前交付：WP-OBS-01 MCP 全链路审计日志
+
+本工作包对应 `docs/superpowers/specs/2026-09-01-project-kb-mcp-observability-design.md` 和 `docs/superpowers/plans/2026-09-01-wp-obs-01-mcp-observability.md`。目标是只观测 Project Knowledge MCP 自身行为，不记录 Agent 对话或终端命令。原始事件默认追加到 `.project-kb/logs/mcp-events.jsonl`，完整保存非敏感请求/响应、协议错误、会话顺序、耗时、工具分派、检索、CodeGraph、Provider、缓存和重试 span；Secret 强制递归脱敏，不限制日志文件大小，不上传。
+
+| 需求 ID | 当前结论 | 验收证据与边界 |
+| --- | --- | --- |
+| OBS-001～OBS-005 | 已完成实现 | `tests/test_mcp_observability.py` 覆盖 MCP 协议消息、工具响应、调用/span 关联、CodeGraph/Provider 依赖、缓存/重试、递归脱敏和 stdout 隔离 |
+| OBS-006～OBS-007 | 已完成实现 | `mcp-log validate/export`、Schema、并发追加、写失败 `audit_gap`、损坏 JSON、未闭合 invocation/span 和孤儿 span 正负测试通过 |
+| OBS-008 | 已完成受控样本 | `scripts/validate_mcp_observability.py` 使用真实 CodeGraph 临时项目和真实 MCP stdio 会话生成 46 个事件、17 个 span、3 行分析；独立标注计算 file precision/recall=`0.6667/0.6667`，并暴露 symbol recall 缺口；删除终态事件后导出被拒绝 |
+
+OBS-008 的指标只代表受控样本，不是全仓库质量门。`ground_truth_ref` 与独立标注 JSONL 关联；未标注的 initialize 等协议调用保留在链路数据中但不纳入检索 precision/recall。调用链默认只有会话内有序关系（`ordered_only`），不能据此推断 Agent 意图；客户端通过 `_meta` 明确关联时才允许 `client_correlated`。生成知识已在实现后同步，curated architecture/provider/conventions 等受影响记录仍需人工复核。

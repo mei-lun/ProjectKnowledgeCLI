@@ -14,6 +14,7 @@ from urllib.parse import urlparse
 
 from .evidence import SecretScanner
 from .models import EvidencePack
+from .observability import audit_span
 from .schemas import EVIDENCE_PACK_SCHEMA, validate_instance
 from .util import atomic_json, hash_text, utc_now
 
@@ -235,22 +236,31 @@ class HttpJsonProvider(ModelProvider):
             if cancel_event.is_set():
                 raise ProviderCancelledError("Provider 请求已取消")
             try:
-                response = self.transport(
-                    self.config.endpoint, payload, headers, self.config.timeout_seconds,
-                )
-                output = response.get("output")
-                if not isinstance(output, dict):
-                    raise ProviderError("Provider 响应缺少 object 类型的 output")
-                usage = response.get("usage", {})
-                if not isinstance(usage, dict):
-                    usage = {}
-                return ProviderOutput(
-                    output=dict(output),
-                    usage=ProviderUsage(
-                        input_tokens=int(usage.get("input_tokens", 0)),
-                        output_tokens=int(usage.get("output_tokens", 0)),
-                    ),
-                )
+                with audit_span("dependency.provider_attempt", "http-json", {
+                    "attempt": attempt + 1,
+                    "max_attempts": self.config.max_retries + 1,
+                    "endpoint": self.config.endpoint,
+                    "payload": payload,
+                    "headers": headers,
+                    "timeout_seconds": self.config.timeout_seconds,
+                }) as span:
+                    response = self.transport(
+                        self.config.endpoint, payload, headers, self.config.timeout_seconds,
+                    )
+                    span.set_output(response)
+                    output = response.get("output")
+                    if not isinstance(output, dict):
+                        raise ProviderError("Provider 响应缺少 object 类型的 output")
+                    usage = response.get("usage", {})
+                    if not isinstance(usage, dict):
+                        usage = {}
+                    return ProviderOutput(
+                        output=dict(output),
+                        usage=ProviderUsage(
+                            input_tokens=int(usage.get("input_tokens", 0)),
+                            output_tokens=int(usage.get("output_tokens", 0)),
+                        ),
+                    )
             except (TimeoutError, OSError, urllib.error.URLError) as error:
                 last_error = error
                 if attempt >= self.config.max_retries:
@@ -320,12 +330,19 @@ class ModelRuntime:
         checkpoint_path = self.root / ".project-kb" / "provider-checkpoints" / f"{request_hash[7:]}.json"
 
         if self.config.cache_enabled and cache_path.exists():
-            cached = json.loads(cache_path.read_text(encoding="utf-8"))
-            result = GenerationResult.from_dict(cached, cached=True)
-            validate_instance(result.output, output_schema)
-            if post_validate is not None:
-                post_validate(result.output)
-            return result
+            with audit_span("dependency.provider_cache", "generate", {
+                "provider_id": self.provider.provider_id,
+                "model_id": self.provider.model_id,
+                "request_hash": request_hash,
+                "cache_path": cache_path.as_posix(),
+            }) as span:
+                cached = json.loads(cache_path.read_text(encoding="utf-8"))
+                result = GenerationResult.from_dict(cached, cached=True)
+                validate_instance(result.output, output_schema)
+                if post_validate is not None:
+                    post_validate(result.output)
+                span.set_output(result.to_dict())
+                return result
 
         checkpoint = {
             "checkpoint_id": request_hash,
@@ -339,7 +356,19 @@ class ModelRuntime:
         if self.config.checkpoint_enabled:
             atomic_json(checkpoint_path, checkpoint)
         try:
-            provider_output = self.provider.generate_structured(payload, event)
+            with audit_span("dependency.provider", "generate", {
+                "provider_id": self.provider.provider_id,
+                "model_id": self.provider.model_id,
+                "prompt_version": self.config.prompt_version,
+                "output_schema_version": self.config.output_schema_version,
+                "request_hash": request_hash,
+                "payload": payload,
+            }) as span:
+                provider_output = self.provider.generate_structured(payload, event)
+                span.set_output({
+                    "output": provider_output.output,
+                    "usage": provider_output.usage.to_dict(),
+                })
             safe_output = self.scanner.redact_value(provider_output.output)
             if not isinstance(safe_output, dict):
                 raise ProviderError("Provider 输出脱敏后不是 object")

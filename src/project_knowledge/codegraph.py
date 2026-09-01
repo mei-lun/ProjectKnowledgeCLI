@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any, Sequence
 
 from .config import ProjectConfig
+from .observability import audit_span
 
 
 class CodeGraphError(RuntimeError):
@@ -175,41 +176,68 @@ class CodeGraphClient:
         cache_key = (command, tuple(args), input_text, json_output)
         cacheable = cache is not None and command in self._CACHEABLE_COMMANDS
         if cacheable and cache_key in cache:
-            return deepcopy(cache[cache_key])
+            with audit_span("dependency.codegraph_cache", command, {
+                "args": list(args), "input": input_text, "json_output": json_output,
+            }) as span:
+                result = deepcopy(cache[cache_key])
+                span.set_output({"hit": True, "result": result})
+                return result
         argv = [*self.command.argv, command, *args]
         if json_output:
             argv.append("--json")
         effective_argv = self._effective_argv(argv)
-        try:
-            completed = self._runner(
-                effective_argv,
-                input=input_text,
-                text=True,
-                encoding="utf-8",
-                errors="replace",
-                capture_output=True,
-                timeout=self.timeout,
-                check=False,
-                env={**os.environ, "CODEGRAPH_DIR": getattr(self.config, "codegraph_dir", ".codegraph")},
-            )
-        except FileNotFoundError as error:
-            raise CodeGraphError(f"CodeGraph 命令不存在：{self.command.display}") from error
-        except subprocess.TimeoutExpired as error:
-            raise CodeGraphError(f"CodeGraph 命令超时（{self.timeout}s）：{command}") from error
-        if completed.returncode != 0:
-            detail = (completed.stderr or completed.stdout or "").strip()
-            raise CodeGraphError(f"CodeGraph {command} 失败（退出码 {completed.returncode}）：{detail}")
-        output = completed.stdout or ""
-        if not json_output:
-            result: Any = output
-        else:
+        with audit_span("dependency.codegraph", command, {
+            "argv": effective_argv,
+            "cwd": self.project.as_posix(),
+            "stdin": input_text,
+            "json_output": json_output,
+            "timeout_seconds": self.timeout,
+        }) as span:
             try:
-                result = json.loads(output) if output.strip() else {}
-            except json.JSONDecodeError as error:
-                raise CodeGraphError(f"CodeGraph {command} 返回无效 JSON：{output[:240]}") from error
-        if cacheable:
-            cache[cache_key] = deepcopy(result)
-        return result
+                completed = self._runner(
+                    effective_argv,
+                    input=input_text,
+                    text=True,
+                    encoding="utf-8",
+                    errors="replace",
+                    capture_output=True,
+                    timeout=self.timeout,
+                    check=False,
+                    env={**os.environ, "CODEGRAPH_DIR": getattr(self.config, "codegraph_dir", ".codegraph")},
+                )
+            except FileNotFoundError as error:
+                raise CodeGraphError(f"CodeGraph 命令不存在：{self.command.display}") from error
+            except subprocess.TimeoutExpired as error:
+                span.set_output({
+                    "argv": effective_argv,
+                    "timeout_seconds": self.timeout,
+                    "stdout": error.stdout or "",
+                    "stderr": error.stderr or "",
+                })
+                raise CodeGraphError(f"CodeGraph 命令超时（{self.timeout}s）：{command}") from error
+            output = completed.stdout or ""
+            diagnostics: dict[str, Any] = {
+                "argv": effective_argv,
+                "returncode": completed.returncode,
+                "stdout": output,
+                "stderr": completed.stderr or "",
+            }
+            span.set_output(diagnostics)
+            if completed.returncode != 0:
+                detail = (completed.stderr or completed.stdout or "").strip()
+                raise CodeGraphError(f"CodeGraph {command} 失败（退出码 {completed.returncode}）：{detail}")
+            if not json_output:
+                result: Any = output
+            else:
+                try:
+                    result = json.loads(output) if output.strip() else {}
+                except json.JSONDecodeError as error:
+                    raise CodeGraphError(f"CodeGraph {command} 返回无效 JSON：{output[:240]}") from error
+            diagnostics["result"] = result
+            span.set_output(diagnostics)
+            if cacheable:
+                cache[cache_key] = deepcopy(result)
+            return result
 
     def init(self, *, force: bool = False) -> dict[str, Any]:
         args = [_host_path(self.project)]

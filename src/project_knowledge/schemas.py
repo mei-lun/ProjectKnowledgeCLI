@@ -559,6 +559,83 @@ CONFIG_SCHEMA: dict[str, Any] = {
 }
 
 
+AUDIT_EVENT_SCHEMA: dict[str, Any] = {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://project-kb.local/schema/audit-event-v1.json",
+    "type": "object",
+    "required": [
+        "schema_version", "event_id", "event", "timestamp", "monotonic_ns",
+        "project_id", "project_root", "server_version", "protocol_version",
+        "pid", "session_id", "sequence", "invocation_id",
+        "previous_invocation_id", "client_request_id", "trace_id", "span_id",
+        "parent_span_id", "payload", "redactions",
+    ],
+    "properties": {
+        "schema_version": {"enum": [1]},
+        "event_id": {"type": "string", "pattern": "^evt_[0-9a-f]{32}$"},
+        "event": {"type": "string", "minLength": 1},
+        "timestamp": {"type": "string", "minLength": 1},
+        "monotonic_ns": {"type": "integer", "minimum": 0},
+        "project_id": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "project_root": {"type": "string", "minLength": 1},
+        "server_version": {"type": "string", "minLength": 1},
+        "protocol_version": {"type": "string", "minLength": 1},
+        "pid": {"type": "integer", "minimum": 1},
+        "session_id": {"type": "string", "pattern": "^ses_[0-9a-f]{32}$"},
+        "sequence": {"type": "integer", "minimum": 0},
+        "invocation_id": {"type": ["string", "null"]},
+        "previous_invocation_id": {"type": ["string", "null"]},
+        "trace_id": {"type": ["string", "null"]},
+        "span_id": {"type": ["string", "null"]},
+        "parent_span_id": {"type": ["string", "null"]},
+        "payload": {"type": "object", "additionalProperties": True},
+        "redactions": {
+            "type": "array",
+            "items": {"type": "object", "additionalProperties": True},
+        },
+    },
+    "additionalProperties": True,
+}
+
+
+MCP_ANALYSIS_SCHEMA: dict[str, Any] = {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://project-kb.local/schema/mcp-analysis-v1.json",
+    "type": "object",
+    "required": [
+        "schema_version", "session_id", "sequence", "invocation_id",
+        "method", "tool", "arguments", "request", "response", "status",
+        "started_at", "completed_at", "duration_ms", "spans", "prediction",
+        "ground_truth_ref", "causality", "integrity",
+    ],
+    "properties": {
+        "schema_version": {"enum": [1]},
+        "session_id": {"type": "string", "pattern": "^ses_[0-9a-f]{32}$"},
+        "sequence": {"type": "integer", "minimum": 1},
+        "invocation_id": {"type": "string", "pattern": "^inv_[0-9a-f]{32}$"},
+        "previous_invocation_id": {"type": ["string", "null"]},
+        "protocol_version": {"type": "string"},
+        "server_version": {"type": "string"},
+        "method": {"type": ["string", "null"]},
+        "tool": {"type": ["string", "null"]},
+        "arguments": {"type": "object", "additionalProperties": True},
+        "request": {"type": "object", "additionalProperties": True},
+        "response": {"type": "object", "additionalProperties": True},
+        "status": {"enum": ["ok", "error"]},
+        "started_at": {"type": "string", "minLength": 1},
+        "completed_at": {"type": "string", "minLength": 1},
+        "duration_ms": {"type": "number", "minimum": 0},
+        "error": {"type": ["object", "null"], "additionalProperties": True},
+        "spans": {"type": "array", "items": {"type": "object", "additionalProperties": True}},
+        "prediction": {"type": "object", "additionalProperties": True},
+        "ground_truth_ref": {"type": "string", "minLength": 1},
+        "causality": {"enum": ["ordered_only", "client_correlated"]},
+        "integrity": {"enum": ["complete"]},
+    },
+    "additionalProperties": True,
+}
+
+
 def all_schemas() -> dict[str, dict[str, Any]]:
     return {
         "config-v1.json": CONFIG_SCHEMA,
@@ -576,4 +653,6 @@ def all_schemas() -> dict[str, dict[str, Any]]:
         "guidance-draft-v2.json": GUIDANCE_DRAFT_SCHEMA,
         "guidance-version-v2.json": GUIDANCE_VERSION_SCHEMA,
         "guidance-change-v2.json": GUIDANCE_CHANGE_SCHEMA,
+        "audit-event-v1.json": AUDIT_EVENT_SCHEMA,
+        "mcp-analysis-v1.json": MCP_ANALYSIS_SCHEMA,
     }

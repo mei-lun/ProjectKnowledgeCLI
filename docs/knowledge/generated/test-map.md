@@ -32,6 +32,7 @@
 | `tests/test_initialization_workflow.py` | tests |
 | `tests/test_integration.py` | tests |
 | `tests/test_knowledge_loop_status.py` | tests |
+| `tests/test_mcp_observability.py` | tests |
 | `tests/test_npm_bootstrap_validation.py` | tests |
 | `tests/test_npm_package_build.py` | tests |
 | `tests/test_progress.py` | tests |
