@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-08T14:40:48+08:00",
+  "generated_at": "2026-09-14T19:43:39+08:00",
   "project": "ProjectKnowledgeCLI",
   "records": [
     {
@@ -752,7 +752,7 @@
           "type": "file"
         }
       ],
-      "status": "fresh",
+      "status": "potentially_stale",
       "tags": [
         "decision"
       ],
@@ -762,10 +762,10 @@
       "confidence": "generated",
       "id": "generated.frameworks",
       "kind": "framework",
-      "last_generated_at": "2026-09-08T14:40:48+08:00",
+      "last_generated_at": "2026-09-14T19:43:39+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/frameworks.md",
-      "source_commit": "59265e3065a7ead40401cc2aad6b5850ac92c7f4",
+      "source_commit": "7cc7917d1e8270a24fae97ca12c4f6ee0d7ee68c",
       "source_hashes": {
         ".github/workflows/quality.yml": "sha256:2b0403615ead5cc041a558b6d6aab547746ef7809f8947adca11e1dbd2819ce1",
         ".project-kb.yml": "sha256:48736e6e85940ae62a4ca22c00aa3c169999c7f1b3d953d343d4db4617a85467",
@@ -773,12 +773,12 @@
         "evaluation/real_project_harness.py": "sha256:d970b13db02dcc3f0f6500599a5018a9fd37595186a275a9f6aa8e4b3922a915",
         "npm/bin/project-kb.js": "sha256:eced41f4fe8f149781e3b18614e772042b42ee713f63413835a40cd244b406c5",
         "npm/lib/agent-installer.js": "sha256:1189f7c0c0fac3685f659a917a12f189a8eb631e67b6d0f01bc0897a0c4a5ec4",
-        "npm/lib/runtime.js": "sha256:311098d5ba26ba715cdcca791206dd69cd35219bc5e58b5491647bd64d7a6a1a",
+        "npm/lib/runtime.js": "sha256:e0658c7256dcd8a278a80d0e523e9565ffb7cad180bbecffc6ce9f846ff5699d",
         "npm/scripts/postinstall.js": "sha256:c4530302327599a6b12ce55cb08f99e3cf4241f06805aaf7e66a835c30c8e1df",
         "npm/templates/project-kb.ts": "sha256:544551c64e7efcd47e3c8d335d2f431fbf3272c472e531d6c2e5f4e37b377c58",
         "npm/test/agent-installer.test.js": "sha256:09a8bf3ee1a0946a57238ccd5595c30a133ca3f9ee01c52aa7f71533f66c0942",
-        "npm/test/runtime.test.js": "sha256:6682136e669ac547c13896f9a33295174c0a3254e2d6ed268cfb402270ac5156",
-        "plugins/project-knowledge/hooks/sync_after_task.py": "sha256:f2cd23f756cee243fad5cdd3801bc9f0fdee00a20ca76d8b7c29d287ccc41f11",
+        "npm/test/runtime.test.js": "sha256:b00fb236afaac757545a754283fe482889d2276922dd8cd1c5c1d35fc36bd62f",
+        "plugins/project-knowledge/hooks/sync_after_task.py": "sha256:39eec1665f1818db6f8a77d0e4d1c01a9037d6fac3b52f7defe413397c57310a",
         "plugins/project-knowledge/scripts/project_status.py": "sha256:7f8532a6c877d51ed78ebf71d7c35c700d28691483f44c16717f39fe0b3ec7cc",
         "plugins/project-knowledge/skills/project-knowledge/agents/openai.yaml": "sha256:dfb233e13fa9e0b3a8448a697db0b865606beeb94d073989d065446ae3e65268",
         "scripts/build_npm_package.py": "sha256:130aae32270643fa00f10918652fdf22bf8788c13f9ff8b18808b005e7c2055c",
@@ -789,30 +789,31 @@
         "scripts/validate_evaluation_provenance.py": "sha256:eee90d7deeea90be8c9b0fb300ba176c5df0c49e49d684e16114ec777a250662",
         "scripts/validate_gardenserver_guidance_workflow.py": "sha256:72cb18dc8ee95bee5fe9e7531ea2d56c67eb427f27307af007f0b038528e362f",
         "scripts/validate_mcp_observability.py": "sha256:ffab83349be73e9c94d4b768018e324b1fc369fa5f7813ffed358eb8b1289f40",
-        "scripts/validate_npm_bootstrap.py": "sha256:1ff70fba5d4fe1e085b7973144640c40bf4da8b59ebe982e9a2033ce014f32bb",
-        "src/project_knowledge/__init__.py": "sha256:81a57e4b1f81b44a5929271f0a67c2abbc7227f937681a3e04e6bfb941420b08",
+        "scripts/validate_npm_bootstrap.py": "sha256:034757ef4c208e12a1c4a50a1ff4760c3e3412d3742c5272c1940570bd9a7b86",
+        "src/project_knowledge/__init__.py": "sha256:1e74df1d7eba5e26b4472c6d4c5710da1afc55d15f236839e20b77fb07a3191e",
         "src/project_knowledge/__main__.py": "sha256:2cdd23d4f5cd6c3b3e4cb690ad16d560637767b9ca5b2a3cf129fcc0a5ebc82b",
-        "src/project_knowledge/cli.py": "sha256:7c2fe5a9539585e1c1712fb1c848cf0e5c6657e48d764ba6cc6040692502cc38",
+        "src/project_knowledge/cli.py": "sha256:183e1fb4eb5cd876a9d86850a321a9c45e4b45140ee3c67cf2a623ff6a136dac",
         "src/project_knowledge/codegraph.py": "sha256:aaf5f2e1f6fa8f42d142fee7b4561e3f809037089fe4ee0a21207294ed518090",
-        "src/project_knowledge/codex.py": "sha256:df03b95d45d052e933e7a0aee2194dabf071ee1c52992ae67b3120c7ba4890d9",
+        "src/project_knowledge/codex.py": "sha256:b22061a7a49ad0dc134d5b8d35acf0cfe8c28d0e01e0e148f1e84ee9c5e79e54",
         "src/project_knowledge/config.py": "sha256:ea53044d371027b45cda57e963992cdeb88fc6c065ce7aaf67f861979e413b8a",
         "src/project_knowledge/context_evidence.py": "sha256:64b15e0c89a915f2e8ec69afb0a8f7d3b4ec74d3a01d08c0aeccdd4a33de0ca8",
         "src/project_knowledge/engine.py": "sha256:4d0e03072966e765312302d5d933b2014888d2034a5bbc57a627c5d38cf45a94",
         "src/project_knowledge/errors.py": "sha256:14b585cd2301ec2cfd363a5353f10ba8e204eb41476eb8239600b5ba8df2473c",
         "src/project_knowledge/evaluate.py": "sha256:a4201ddd097c4468423b28aadaab23c6c86aaca47777c5c9f41eb184fd163b8e",
         "src/project_knowledge/evidence.py": "sha256:a94f45b1d05fce17eeaf2c72a0233fb3ed6ce7367661b67205760bce04f7b707",
-        "src/project_knowledge/finalization.py": "sha256:270e2f2f408b0aba95d46f14a8a6e3c4906c215270097bc513a907dc962df33f",
+        "src/project_knowledge/finalization.py": "sha256:cd068c901824b454fa7762d1229937f83dbcb76f883dde62decb3a5dd0fee84e",
         "src/project_knowledge/frameworks.py": "sha256:ed87654bf965bad9e67a2e5766ba6480c357c364a07e51477d1b27466a969e5b",
         "src/project_knowledge/gardenserver.py": "sha256:b0a4c2dc97b6e1d29d7556a5a99d39a157ee73c801f00fd94c9da50efbaa81ad",
         "src/project_knowledge/guidance.py": "sha256:5b1e5b7a77daaede6720dba991e7a2d0da01c6284d85e03f25811ff2257cf47e",
-        "src/project_knowledge/guidance_models.py": "sha256:e0166aea112b1e84fb0e339597c6f5167af0a4a955ad6691cee9f6a33ca2f104",
-        "src/project_knowledge/guidance_store.py": "sha256:dc4b8fd6c1a67a4c5dca13022cbd905c6bb92ac5626b8593d95b332b6a509dc2",
+        "src/project_knowledge/guidance_models.py": "sha256:74d74671908a76251556f92cbb792e727e360fdcb4e69db086861894fc5ce0a8",
+        "src/project_knowledge/guidance_store.py": "sha256:583889c69c7fef329e1fb9528d799cf8169dcc64d20b580999696f488f5d73e7",
         "src/project_knowledge/guidance_templates.py": "sha256:9cdafc3ff2f590f41f83fe0d5ba584d41f59d28d2c3f581ffba6aa95a3c47b72",
-        "src/project_knowledge/guidance_workflow.py": "sha256:54ae9082b458ee8ea0cb9a9f39f1f3207e0c2b8a9bb372fd73b4f17fc00bfcf4",
-        "src/project_knowledge/incremental.py": "sha256:b830c1257934608108d207c4aa16a48aba7b9fda88f8d7b76d9de646bc3d3d4c",
-        "src/project_knowledge/initialization.py": "sha256:7fcf6ff5b8571f433231328387584026ba3f4ec386900f350592c0dfdf0eaeb1",
-        "src/project_knowledge/knowledge.py": "sha256:1ab86508987b4a7c43f84bfc982b1798c13b031ba5c217ff25681b60202fbc70",
-        "src/project_knowledge/mcp.py": "sha256:7fc1a6c22534b97de2e50acfefb14d6b787c43f4cc4cdb20ea131661008b2887",
+        "src/project_knowledge/guidance_workflow.py": "sha256:3d3a37000d87303d94d18b28cff4f452e0944a107c8bb63bf474e52f87c5dc22",
+        "src/project_knowledge/incremental.py": "sha256:c3c54881ad3951736d65aac6426758a85c8b8fa95c1a1d2a684d3b05a53b8ce8",
+        "src/project_knowledge/initialization.py": "sha256:b5f10954a44741e81de2d0aa83c77d4e6524141b272b01f8b71022fd52a17f22",
+        "src/project_knowledge/instructions.py": "sha256:99ef17b8f8c814820b9d39abe4b7ec8a84b9871e2057a8a82e4c2513c164bd16",
+        "src/project_knowledge/knowledge.py": "sha256:34de3a1c51748cf91a8d4211cb0e7279755343db8b92f767d49db6b839f91d27",
+        "src/project_knowledge/mcp.py": "sha256:774b007953c634d5118457e6f2ae668bfd5b03a2b01ebe66760c79955b09a4c5",
         "src/project_knowledge/models.py": "sha256:3517017e77d4edb136cb321b014db25c83a902570ed406c82b719942357cb79e",
         "src/project_knowledge/observability.py": "sha256:afe01b377c8eda0f6319c611f923ff601f45ee593eb2b0f99a67604c79e77ad0",
         "src/project_knowledge/performance.py": "sha256:624de477dee44f9c8ae341538e1566428ee538b9f4228b0fe968cc657519992a",
@@ -821,23 +822,25 @@
         "src/project_knowledge/provider.py": "sha256:818543e90f6e90625995ade34a968a39d6e5e5c86921eb0cce611ba42ca91a26",
         "src/project_knowledge/ranking.py": "sha256:3f1f33a10a6cf598cac62f61d4b9cca55fc6526f4da120899f54a43e98e2fbab",
         "src/project_knowledge/real_project.py": "sha256:d54f7eaa523d14f4b3e01005fad0900a23827b253416c10ab68e6f5c3eaf9ade",
-        "src/project_knowledge/retrieval.py": "sha256:c494ffe04424ecbe38ce3a96da696bdcd66837e9c2098c64a47f28a1934dbaf9",
+        "src/project_knowledge/retrieval.py": "sha256:00535cdb7abfa9d21e22e245a9446715042ca797c86602293c30e43a1c591c03",
         "src/project_knowledge/schemas.py": "sha256:4a6be75dbd1b4e241a493323da3e83b1626e2adb046a5edb783d20ca4434f74f",
         "src/project_knowledge/semantic.py": "sha256:62a3e83d8e244a63c8d7a4441ab9ca1e5b583bfc89953c12d34d70ea7c32aabb",
-        "src/project_knowledge/service.py": "sha256:57150283220ef16c1d1d098d38ea2dcc0cdd2443aba7f1c3ea287a24e00db310",
-        "src/project_knowledge/store.py": "sha256:e7f1d25258ad28af2d5f69bd92a1f8868f204cfccd2ef04086439c6233e072ac",
-        "src/project_knowledge/task_workflow.py": "sha256:3db858f362c1f368cf498781c133320553e0a7460666b84102edfd263559684f",
+        "src/project_knowledge/service.py": "sha256:a9d8dc75cb8b1efddc0120c631c4f544be1242b3caf0a3be41a42601d3aff8a0",
+        "src/project_knowledge/store.py": "sha256:a3c9be2345712d66292144421cd02148794e1f4a9af675e840a82c607c919631",
+        "src/project_knowledge/task_workflow.py": "sha256:ed310d2a2e0586d4f752bea56c5b0bee96e5c6359dc26f2471cdbd76c5e0ff4d",
         "src/project_knowledge/util.py": "sha256:11f4902fd9593f986e15add4d047f0fffdd870696704ae10399da6591224fb79",
         "src/project_knowledge/vector.py": "sha256:8ba9a5b640d505e99c40106932aedff25c51652e317e5911fa4f166be02cbb8a",
         "src/project_knowledge/versioning.py": "sha256:28c1eb70f34cef82854e409a23843cfe22a0c29eff5595dab889fd32b2f1cedb",
         "tests/__init__.py": "sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
         "tests/test_codegraph.py": "sha256:0e36c50db060f5320595688ab6e0a86935b7ff500a252694f1289a327fbcb270",
         "tests/test_codegraph_validation.py": "sha256:d7d429099a2003e11142173df710a4196a76c32e2a99b2178b72ade810772a4f",
-        "tests/test_codex_bootstrap.py": "sha256:341adc8e0211d244e6cb76fa73b91a553d4035983d46a370452655205f0086b2",
-        "tests/test_codex_project_scope.py": "sha256:e318a9d90e5374f5b34d4d8978ca544e9614a4356e42b4681574371fa82c2280",
+        "tests/test_codex_bootstrap.py": "sha256:e85c5c1808299b54ce65b56e21330948d0586f7a884bed51af38512d50d1bc13",
+        "tests/test_codex_project_scope.py": "sha256:f62e770c453f4ca448b4bba5b02b57e4c68253e4777fb1f19330368becae3399",
         "tests/test_config.py": "sha256:a56d161a6b4c19bb61704f79649b3714e329d2466f5fc677c692d3af01db097a",
         "tests/test_context_evidence.py": "sha256:15fda63a0e63c2a23e1294f42ffc8ebf8738067af4f7ff65cd1f3ec84459cb15",
+        "tests/test_default_knowledge_workflow.py": "sha256:bd7fdf01c245dade38c2c2d4268f2b43fa0f5115a3d1c8c5a1a7d8cd08e01b23",
         "tests/test_delivery_reliability.py": "sha256:5e8c270210905478ebef436f390de64703bccef12f06381dd25bdc29093a5eaf",
+        "tests/test_doctor_mcp_probe.py": "sha256:52be5a756e5ba37fcc5eb9b470b84331de87519ece5958f654e06ee5c899cd6d",
         "tests/test_documentation_roadmap.py": "sha256:9a69996ff3685dd8cc4117f11fe1ccb7546973eb20a52299628b2b6f91fd3ac1",
         "tests/test_engine.py": "sha256:c491e9826de079367706257cac9bb55ef4ff9d4903ad279e2ed90b629a0e5f2f",
         "tests/test_evaluate.py": "sha256:267153f6a03b89bbfbc546389521e35e66a7c7c1c7916bcf09b9e76939b2de39",
@@ -847,19 +850,20 @@
         "tests/test_gardenserver_rules.py": "sha256:afc3add1527802d0f399cffaf302ac8590a2b512af93eb2d3bdf8f2ce6030f84",
         "tests/test_guidance.py": "sha256:ed4557280ad1ee7519628714bc5c35490df2b535711e1a966d8375177b505b21",
         "tests/test_guidance_e2e.py": "sha256:7bbecb420bdc4dbabf53a60313ad4c27b302dd20316e593dc7b5131f9f3264f7",
-        "tests/test_guidance_incremental.py": "sha256:5c6b2e09663623d91da4111c906028cc7cecf0070d3ef7f6b73aabd5b7286b45",
+        "tests/test_guidance_incremental.py": "sha256:5e322ebcd6e4fd3191a5764e53e028caa8f1a00117e6ce98f3a874adbf7c0b58",
         "tests/test_guidance_initialization_loop.py": "sha256:dca1eabcba20f8503f537d30b02708c5df82aa4c634f154eed32ab90cab3feb2",
-        "tests/test_guidance_mcp.py": "sha256:a7dd466338d302269bea05be4c58e9771d0a6fb4437a4b7f7a25840d03bda1e7",
+        "tests/test_guidance_mcp.py": "sha256:73131e4ce4b1bf5f0526c8d829b0d6e3340da2d8b433c2e559183378f6dca030",
         "tests/test_guidance_retrieval.py": "sha256:956e46901834fdded86a36ea52d6082d53eaa5ea08ac75e4dd0f349c899b4fd5",
-        "tests/test_guidance_store.py": "sha256:b2c3e53acefb183a7486b8b2408f67179eb673f03b0f58deb46b12fcae130190",
-        "tests/test_guidance_workflow.py": "sha256:d09df4d44dd0e81d87e5b1d063edd279bb0a8209a337f00c24544085879c14d2",
+        "tests/test_guidance_store.py": "sha256:d3f0a270052947aa63fab5252e470cf174bf1cf316877145cd7a7d0babd975bf",
+        "tests/test_guidance_workflow.py": "sha256:c2701212dd5dcc92264bbc773e8227b275a077c89e7f639d877e5b4dda6629cd",
         "tests/test_initialization_workflow.py": "sha256:35ecb1f59a96309c2063fcd807222dccec5b104479338680a6dd9ff9aba03df1",
-        "tests/test_integration.py": "sha256:120866d8a554150bb058f8e4d21d20401dcef07cc146fcbb16857cd2b7abdcde",
+        "tests/test_integration.py": "sha256:f05909e5b6dd356847d7694bae1e68e0973acaca56fa58fb63343b70ee9bf8a6",
         "tests/test_knowledge_loop_status.py": "sha256:1fb9f6d4de379d27cb092d0e77d57676c8298e40b65f736e63c33c26232aa007",
         "tests/test_mcp_observability.py": "sha256:f25c78fd5df986136051f256abe9ff7e9130e7635ecc36ff868256c5df8a2099",
-        "tests/test_npm_bootstrap_validation.py": "sha256:2f11af573866ad9237e2813226dd81a1638cd82d3eb33197427ab1c6c44e0639",
+        "tests/test_mcp_stdio_encoding.py": "sha256:6fe0f3ee9982925987130dbd36918e5e4757d7ce0f3082cb2a4a86e268ad31e8",
+        "tests/test_npm_bootstrap_validation.py": "sha256:02b32cfe4f5bc1afb9c9b0c29aa6dcdcaaf3b71064df934a5f0d8a2a71ae59eb",
         "tests/test_npm_package_build.py": "sha256:5c57d232ac5a5988326760f6a254d46ab5249872cd26e730c1e5b62de0ed431f",
-        "tests/test_progress.py": "sha256:5e71999e4b59dba2d9601b04edd69e7f20ccb382cc203310bf40fffca2e6a94b",
+        "tests/test_progress.py": "sha256:a7cf0365f4de120e82d4bfc740615b8f6058dce81caa0f6107a378ea7af75f44",
         "tests/test_proposal.py": "sha256:b9a4f2098690dd3194dadeb39e8be9597b3503ef536244df48cee11c876fa743",
         "tests/test_provider.py": "sha256:d102bc1491a9ffd31cdb98a3aab10db56c91b315560e4bd6a11c4d41314fc8ea",
         "tests/test_ranking.py": "sha256:7d82fb0fa2e688cef26dd68985e25630577a1fc54752f2060afad0da1dd24c85",
@@ -870,10 +874,11 @@
         "tests/test_schemas.py": "sha256:17b3af4dc07ff546435be95ec927ae86357f3c7cc267891eed2ba79c6bd4d5cf",
         "tests/test_semantic.py": "sha256:5c61cdc748c3e706c4d55f8795fcdd6a098b35e6f9dff68ce5d87b7dfaf9df3f",
         "tests/test_single_directory.py": "sha256:eccaa5a95d56f54cdee44fa224ac1d4c994164e0489a7b14a57da25f449aba9e",
-        "tests/test_task_completion.py": "sha256:c618d0364245e2e03fe1742e9975ce30fc73afd15667eadfae206dd48e0bf4db",
+        "tests/test_task_closed_loop.py": "sha256:0948fca3b6739b20bd653f8cd459873e7a97ba62f9a53e383bb519316ab25e7d",
+        "tests/test_task_completion.py": "sha256:fe69b181f8f36efb7645c87f7d56444de598a5a073b55fc0151e461e71e7db07",
         "tests/test_vector_retrieval.py": "sha256:e52ca7df2f8a01085636e1104c39024c15b0587343af43443ae1e616f6620742",
         "tests/test_versioning.py": "sha256:954ef4ea592d10ee884c875a6f51339fcca9a005ce0599fdf1220c6e506175de",
-        "tests/test_watch_wp07.py": "sha256:3bc3442a333e85a727d28e3885d1a9284d4726e53def1fe758e89893866f0b6e",
+        "tests/test_watch_wp07.py": "sha256:9f4543729131d0433154216b946dbb54f790bc96708e1942786f3ba8e430a96f",
         "tests/test_wp08.py": "sha256:eef5010fb4bef3befb4759019c23acf53497596e73c734ba492d40cf2c1b36ae"
       },
       "sources": [
@@ -1054,6 +1059,10 @@
           "type": "file"
         },
         {
+          "path": "src/project_knowledge/instructions.py",
+          "type": "file"
+        },
+        {
           "path": "src/project_knowledge/knowledge.py",
           "type": "file"
         },
@@ -1158,7 +1167,15 @@
           "type": "file"
         },
         {
+          "path": "tests/test_default_knowledge_workflow.py",
+          "type": "file"
+        },
+        {
           "path": "tests/test_delivery_reliability.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_doctor_mcp_probe.py",
           "type": "file"
         },
         {
@@ -1238,6 +1255,10 @@
           "type": "file"
         },
         {
+          "path": "tests/test_mcp_stdio_encoding.py",
+          "type": "file"
+        },
+        {
           "path": "tests/test_npm_bootstrap_validation.py",
           "type": "file"
         },
@@ -1290,6 +1311,10 @@
           "type": "file"
         },
         {
+          "path": "tests/test_task_closed_loop.py",
+          "type": "file"
+        },
+        {
           "path": "tests/test_task_completion.py",
           "type": "file"
         },
@@ -1322,10 +1347,10 @@
       "confidence": "generated",
       "id": "generated.module.evaluation",
       "kind": "module",
-      "last_generated_at": "2026-09-08T14:40:48+08:00",
+      "last_generated_at": "2026-09-14T19:43:39+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/evaluation.md",
-      "source_commit": "59265e3065a7ead40401cc2aad6b5850ac92c7f4",
+      "source_commit": "7cc7917d1e8270a24fae97ca12c4f6ee0d7ee68c",
       "source_hashes": {
         "evaluation/performance_harness.py": "sha256:b878ad61af63f561eb43c29a20119438540c0e8a4f39aee09fe965dba5f41403",
         "evaluation/real_project_harness.py": "sha256:d970b13db02dcc3f0f6500599a5018a9fd37595186a275a9f6aa8e4b3922a915"
@@ -1351,10 +1376,10 @@
       "confidence": "generated",
       "id": "generated.module.github",
       "kind": "module",
-      "last_generated_at": "2026-09-08T14:40:48+08:00",
+      "last_generated_at": "2026-09-14T19:43:39+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/github.md",
-      "source_commit": "59265e3065a7ead40401cc2aad6b5850ac92c7f4",
+      "source_commit": "7cc7917d1e8270a24fae97ca12c4f6ee0d7ee68c",
       "source_hashes": {
         ".github/workflows/quality.yml": "sha256:2b0403615ead5cc041a558b6d6aab547746ef7809f8947adca11e1dbd2819ce1"
       },
@@ -1375,18 +1400,18 @@
       "confidence": "generated",
       "id": "generated.module.npm",
       "kind": "module",
-      "last_generated_at": "2026-09-08T14:40:48+08:00",
+      "last_generated_at": "2026-09-14T19:43:39+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/npm.md",
-      "source_commit": "59265e3065a7ead40401cc2aad6b5850ac92c7f4",
+      "source_commit": "7cc7917d1e8270a24fae97ca12c4f6ee0d7ee68c",
       "source_hashes": {
         "npm/bin/project-kb.js": "sha256:eced41f4fe8f149781e3b18614e772042b42ee713f63413835a40cd244b406c5",
         "npm/lib/agent-installer.js": "sha256:1189f7c0c0fac3685f659a917a12f189a8eb631e67b6d0f01bc0897a0c4a5ec4",
-        "npm/lib/runtime.js": "sha256:311098d5ba26ba715cdcca791206dd69cd35219bc5e58b5491647bd64d7a6a1a",
+        "npm/lib/runtime.js": "sha256:e0658c7256dcd8a278a80d0e523e9565ffb7cad180bbecffc6ce9f846ff5699d",
         "npm/scripts/postinstall.js": "sha256:c4530302327599a6b12ce55cb08f99e3cf4241f06805aaf7e66a835c30c8e1df",
         "npm/templates/project-kb.ts": "sha256:544551c64e7efcd47e3c8d335d2f431fbf3272c472e531d6c2e5f4e37b377c58",
         "npm/test/agent-installer.test.js": "sha256:09a8bf3ee1a0946a57238ccd5595c30a133ca3f9ee01c52aa7f71533f66c0942",
-        "npm/test/runtime.test.js": "sha256:6682136e669ac547c13896f9a33295174c0a3254e2d6ed268cfb402270ac5156"
+        "npm/test/runtime.test.js": "sha256:b00fb236afaac757545a754283fe482889d2276922dd8cd1c5c1d35fc36bd62f"
       },
       "sources": [
         {
@@ -1429,12 +1454,12 @@
       "confidence": "generated",
       "id": "generated.module.plugins",
       "kind": "module",
-      "last_generated_at": "2026-09-08T14:40:48+08:00",
+      "last_generated_at": "2026-09-14T19:43:39+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/plugins.md",
-      "source_commit": "59265e3065a7ead40401cc2aad6b5850ac92c7f4",
+      "source_commit": "7cc7917d1e8270a24fae97ca12c4f6ee0d7ee68c",
       "source_hashes": {
-        "plugins/project-knowledge/hooks/sync_after_task.py": "sha256:f2cd23f756cee243fad5cdd3801bc9f0fdee00a20ca76d8b7c29d287ccc41f11",
+        "plugins/project-knowledge/hooks/sync_after_task.py": "sha256:39eec1665f1818db6f8a77d0e4d1c01a9037d6fac3b52f7defe413397c57310a",
         "plugins/project-knowledge/scripts/project_status.py": "sha256:7f8532a6c877d51ed78ebf71d7c35c700d28691483f44c16717f39fe0b3ec7cc",
         "plugins/project-knowledge/skills/project-knowledge/agents/openai.yaml": "sha256:dfb233e13fa9e0b3a8448a697db0b865606beeb94d073989d065446ae3e65268"
       },
@@ -1463,34 +1488,35 @@
       "confidence": "generated",
       "id": "generated.module.project_knowledge",
       "kind": "module",
-      "last_generated_at": "2026-09-08T14:40:48+08:00",
+      "last_generated_at": "2026-09-14T19:43:39+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/project_knowledge.md",
-      "source_commit": "59265e3065a7ead40401cc2aad6b5850ac92c7f4",
+      "source_commit": "7cc7917d1e8270a24fae97ca12c4f6ee0d7ee68c",
       "source_hashes": {
-        "src/project_knowledge/__init__.py": "sha256:81a57e4b1f81b44a5929271f0a67c2abbc7227f937681a3e04e6bfb941420b08",
+        "src/project_knowledge/__init__.py": "sha256:1e74df1d7eba5e26b4472c6d4c5710da1afc55d15f236839e20b77fb07a3191e",
         "src/project_knowledge/__main__.py": "sha256:2cdd23d4f5cd6c3b3e4cb690ad16d560637767b9ca5b2a3cf129fcc0a5ebc82b",
-        "src/project_knowledge/cli.py": "sha256:7c2fe5a9539585e1c1712fb1c848cf0e5c6657e48d764ba6cc6040692502cc38",
+        "src/project_knowledge/cli.py": "sha256:183e1fb4eb5cd876a9d86850a321a9c45e4b45140ee3c67cf2a623ff6a136dac",
         "src/project_knowledge/codegraph.py": "sha256:aaf5f2e1f6fa8f42d142fee7b4561e3f809037089fe4ee0a21207294ed518090",
-        "src/project_knowledge/codex.py": "sha256:df03b95d45d052e933e7a0aee2194dabf071ee1c52992ae67b3120c7ba4890d9",
+        "src/project_knowledge/codex.py": "sha256:b22061a7a49ad0dc134d5b8d35acf0cfe8c28d0e01e0e148f1e84ee9c5e79e54",
         "src/project_knowledge/config.py": "sha256:ea53044d371027b45cda57e963992cdeb88fc6c065ce7aaf67f861979e413b8a",
         "src/project_knowledge/context_evidence.py": "sha256:64b15e0c89a915f2e8ec69afb0a8f7d3b4ec74d3a01d08c0aeccdd4a33de0ca8",
         "src/project_knowledge/engine.py": "sha256:4d0e03072966e765312302d5d933b2014888d2034a5bbc57a627c5d38cf45a94",
         "src/project_knowledge/errors.py": "sha256:14b585cd2301ec2cfd363a5353f10ba8e204eb41476eb8239600b5ba8df2473c",
         "src/project_knowledge/evaluate.py": "sha256:a4201ddd097c4468423b28aadaab23c6c86aaca47777c5c9f41eb184fd163b8e",
         "src/project_knowledge/evidence.py": "sha256:a94f45b1d05fce17eeaf2c72a0233fb3ed6ce7367661b67205760bce04f7b707",
-        "src/project_knowledge/finalization.py": "sha256:270e2f2f408b0aba95d46f14a8a6e3c4906c215270097bc513a907dc962df33f",
+        "src/project_knowledge/finalization.py": "sha256:cd068c901824b454fa7762d1229937f83dbcb76f883dde62decb3a5dd0fee84e",
         "src/project_knowledge/frameworks.py": "sha256:ed87654bf965bad9e67a2e5766ba6480c357c364a07e51477d1b27466a969e5b",
         "src/project_knowledge/gardenserver.py": "sha256:b0a4c2dc97b6e1d29d7556a5a99d39a157ee73c801f00fd94c9da50efbaa81ad",
         "src/project_knowledge/guidance.py": "sha256:5b1e5b7a77daaede6720dba991e7a2d0da01c6284d85e03f25811ff2257cf47e",
-        "src/project_knowledge/guidance_models.py": "sha256:e0166aea112b1e84fb0e339597c6f5167af0a4a955ad6691cee9f6a33ca2f104",
-        "src/project_knowledge/guidance_store.py": "sha256:dc4b8fd6c1a67a4c5dca13022cbd905c6bb92ac5626b8593d95b332b6a509dc2",
+        "src/project_knowledge/guidance_models.py": "sha256:74d74671908a76251556f92cbb792e727e360fdcb4e69db086861894fc5ce0a8",
+        "src/project_knowledge/guidance_store.py": "sha256:583889c69c7fef329e1fb9528d799cf8169dcc64d20b580999696f488f5d73e7",
         "src/project_knowledge/guidance_templates.py": "sha256:9cdafc3ff2f590f41f83fe0d5ba584d41f59d28d2c3f581ffba6aa95a3c47b72",
-        "src/project_knowledge/guidance_workflow.py": "sha256:54ae9082b458ee8ea0cb9a9f39f1f3207e0c2b8a9bb372fd73b4f17fc00bfcf4",
-        "src/project_knowledge/incremental.py": "sha256:b830c1257934608108d207c4aa16a48aba7b9fda88f8d7b76d9de646bc3d3d4c",
-        "src/project_knowledge/initialization.py": "sha256:7fcf6ff5b8571f433231328387584026ba3f4ec386900f350592c0dfdf0eaeb1",
-        "src/project_knowledge/knowledge.py": "sha256:1ab86508987b4a7c43f84bfc982b1798c13b031ba5c217ff25681b60202fbc70",
-        "src/project_knowledge/mcp.py": "sha256:7fc1a6c22534b97de2e50acfefb14d6b787c43f4cc4cdb20ea131661008b2887",
+        "src/project_knowledge/guidance_workflow.py": "sha256:3d3a37000d87303d94d18b28cff4f452e0944a107c8bb63bf474e52f87c5dc22",
+        "src/project_knowledge/incremental.py": "sha256:c3c54881ad3951736d65aac6426758a85c8b8fa95c1a1d2a684d3b05a53b8ce8",
+        "src/project_knowledge/initialization.py": "sha256:b5f10954a44741e81de2d0aa83c77d4e6524141b272b01f8b71022fd52a17f22",
+        "src/project_knowledge/instructions.py": "sha256:99ef17b8f8c814820b9d39abe4b7ec8a84b9871e2057a8a82e4c2513c164bd16",
+        "src/project_knowledge/knowledge.py": "sha256:34de3a1c51748cf91a8d4211cb0e7279755343db8b92f767d49db6b839f91d27",
+        "src/project_knowledge/mcp.py": "sha256:774b007953c634d5118457e6f2ae668bfd5b03a2b01ebe66760c79955b09a4c5",
         "src/project_knowledge/models.py": "sha256:3517017e77d4edb136cb321b014db25c83a902570ed406c82b719942357cb79e",
         "src/project_knowledge/observability.py": "sha256:afe01b377c8eda0f6319c611f923ff601f45ee593eb2b0f99a67604c79e77ad0",
         "src/project_knowledge/performance.py": "sha256:624de477dee44f9c8ae341538e1566428ee538b9f4228b0fe968cc657519992a",
@@ -1499,12 +1525,12 @@
         "src/project_knowledge/provider.py": "sha256:818543e90f6e90625995ade34a968a39d6e5e5c86921eb0cce611ba42ca91a26",
         "src/project_knowledge/ranking.py": "sha256:3f1f33a10a6cf598cac62f61d4b9cca55fc6526f4da120899f54a43e98e2fbab",
         "src/project_knowledge/real_project.py": "sha256:d54f7eaa523d14f4b3e01005fad0900a23827b253416c10ab68e6f5c3eaf9ade",
-        "src/project_knowledge/retrieval.py": "sha256:c494ffe04424ecbe38ce3a96da696bdcd66837e9c2098c64a47f28a1934dbaf9",
+        "src/project_knowledge/retrieval.py": "sha256:00535cdb7abfa9d21e22e245a9446715042ca797c86602293c30e43a1c591c03",
         "src/project_knowledge/schemas.py": "sha256:4a6be75dbd1b4e241a493323da3e83b1626e2adb046a5edb783d20ca4434f74f",
         "src/project_knowledge/semantic.py": "sha256:62a3e83d8e244a63c8d7a4441ab9ca1e5b583bfc89953c12d34d70ea7c32aabb",
-        "src/project_knowledge/service.py": "sha256:57150283220ef16c1d1d098d38ea2dcc0cdd2443aba7f1c3ea287a24e00db310",
-        "src/project_knowledge/store.py": "sha256:e7f1d25258ad28af2d5f69bd92a1f8868f204cfccd2ef04086439c6233e072ac",
-        "src/project_knowledge/task_workflow.py": "sha256:3db858f362c1f368cf498781c133320553e0a7460666b84102edfd263559684f",
+        "src/project_knowledge/service.py": "sha256:a9d8dc75cb8b1efddc0120c631c4f544be1242b3caf0a3be41a42601d3aff8a0",
+        "src/project_knowledge/store.py": "sha256:a3c9be2345712d66292144421cd02148794e1f4a9af675e840a82c607c919631",
+        "src/project_knowledge/task_workflow.py": "sha256:ed310d2a2e0586d4f752bea56c5b0bee96e5c6359dc26f2471cdbd76c5e0ff4d",
         "src/project_knowledge/util.py": "sha256:11f4902fd9593f986e15add4d047f0fffdd870696704ae10399da6591224fb79",
         "src/project_knowledge/vector.py": "sha256:8ba9a5b640d505e99c40106932aedff25c51652e317e5911fa4f166be02cbb8a",
         "src/project_knowledge/versioning.py": "sha256:28c1eb70f34cef82854e409a23843cfe22a0c29eff5595dab889fd32b2f1cedb"
@@ -1595,6 +1621,10 @@
           "type": "file"
         },
         {
+          "path": "src/project_knowledge/instructions.py",
+          "type": "file"
+        },
+        {
           "path": "src/project_knowledge/knowledge.py",
           "type": "file"
         },
@@ -1682,10 +1712,10 @@
       "confidence": "generated",
       "id": "generated.module.root",
       "kind": "module",
-      "last_generated_at": "2026-09-08T14:40:48+08:00",
+      "last_generated_at": "2026-09-14T19:43:39+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/root.md",
-      "source_commit": "59265e3065a7ead40401cc2aad6b5850ac92c7f4",
+      "source_commit": "7cc7917d1e8270a24fae97ca12c4f6ee0d7ee68c",
       "source_hashes": {
         ".project-kb.yml": "sha256:48736e6e85940ae62a4ca22c00aa3c169999c7f1b3d953d343d4db4617a85467"
       },
@@ -1706,10 +1736,10 @@
       "confidence": "generated",
       "id": "generated.module.scripts",
       "kind": "module",
-      "last_generated_at": "2026-09-08T14:40:48+08:00",
+      "last_generated_at": "2026-09-14T19:43:39+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/scripts.md",
-      "source_commit": "59265e3065a7ead40401cc2aad6b5850ac92c7f4",
+      "source_commit": "7cc7917d1e8270a24fae97ca12c4f6ee0d7ee68c",
       "source_hashes": {
         "scripts/build_npm_package.py": "sha256:130aae32270643fa00f10918652fdf22bf8788c13f9ff8b18808b005e7c2055c",
         "scripts/bump_version.py": "sha256:84f254dec8f3c3e1fd1dd58d995a675db61fd03839c215cf77733ad41c0c821d",
@@ -1719,7 +1749,7 @@
         "scripts/validate_evaluation_provenance.py": "sha256:eee90d7deeea90be8c9b0fb300ba176c5df0c49e49d684e16114ec777a250662",
         "scripts/validate_gardenserver_guidance_workflow.py": "sha256:72cb18dc8ee95bee5fe9e7531ea2d56c67eb427f27307af007f0b038528e362f",
         "scripts/validate_mcp_observability.py": "sha256:ffab83349be73e9c94d4b768018e324b1fc369fa5f7813ffed358eb8b1289f40",
-        "scripts/validate_npm_bootstrap.py": "sha256:1ff70fba5d4fe1e085b7973144640c40bf4da8b59ebe982e9a2033ce014f32bb"
+        "scripts/validate_npm_bootstrap.py": "sha256:034757ef4c208e12a1c4a50a1ff4760c3e3412d3742c5272c1940570bd9a7b86"
       },
       "sources": [
         {
@@ -1770,19 +1800,21 @@
       "confidence": "generated",
       "id": "generated.module.tests",
       "kind": "module",
-      "last_generated_at": "2026-09-08T14:40:48+08:00",
+      "last_generated_at": "2026-09-14T19:43:39+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/tests.md",
-      "source_commit": "59265e3065a7ead40401cc2aad6b5850ac92c7f4",
+      "source_commit": "7cc7917d1e8270a24fae97ca12c4f6ee0d7ee68c",
       "source_hashes": {
         "tests/__init__.py": "sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
         "tests/test_codegraph.py": "sha256:0e36c50db060f5320595688ab6e0a86935b7ff500a252694f1289a327fbcb270",
         "tests/test_codegraph_validation.py": "sha256:d7d429099a2003e11142173df710a4196a76c32e2a99b2178b72ade810772a4f",
-        "tests/test_codex_bootstrap.py": "sha256:341adc8e0211d244e6cb76fa73b91a553d4035983d46a370452655205f0086b2",
-        "tests/test_codex_project_scope.py": "sha256:e318a9d90e5374f5b34d4d8978ca544e9614a4356e42b4681574371fa82c2280",
+        "tests/test_codex_bootstrap.py": "sha256:e85c5c1808299b54ce65b56e21330948d0586f7a884bed51af38512d50d1bc13",
+        "tests/test_codex_project_scope.py": "sha256:f62e770c453f4ca448b4bba5b02b57e4c68253e4777fb1f19330368becae3399",
         "tests/test_config.py": "sha256:a56d161a6b4c19bb61704f79649b3714e329d2466f5fc677c692d3af01db097a",
         "tests/test_context_evidence.py": "sha256:15fda63a0e63c2a23e1294f42ffc8ebf8738067af4f7ff65cd1f3ec84459cb15",
+        "tests/test_default_knowledge_workflow.py": "sha256:bd7fdf01c245dade38c2c2d4268f2b43fa0f5115a3d1c8c5a1a7d8cd08e01b23",
         "tests/test_delivery_reliability.py": "sha256:5e8c270210905478ebef436f390de64703bccef12f06381dd25bdc29093a5eaf",
+        "tests/test_doctor_mcp_probe.py": "sha256:52be5a756e5ba37fcc5eb9b470b84331de87519ece5958f654e06ee5c899cd6d",
         "tests/test_documentation_roadmap.py": "sha256:9a69996ff3685dd8cc4117f11fe1ccb7546973eb20a52299628b2b6f91fd3ac1",
         "tests/test_engine.py": "sha256:c491e9826de079367706257cac9bb55ef4ff9d4903ad279e2ed90b629a0e5f2f",
         "tests/test_evaluate.py": "sha256:267153f6a03b89bbfbc546389521e35e66a7c7c1c7916bcf09b9e76939b2de39",
@@ -1792,19 +1824,20 @@
         "tests/test_gardenserver_rules.py": "sha256:afc3add1527802d0f399cffaf302ac8590a2b512af93eb2d3bdf8f2ce6030f84",
         "tests/test_guidance.py": "sha256:ed4557280ad1ee7519628714bc5c35490df2b535711e1a966d8375177b505b21",
         "tests/test_guidance_e2e.py": "sha256:7bbecb420bdc4dbabf53a60313ad4c27b302dd20316e593dc7b5131f9f3264f7",
-        "tests/test_guidance_incremental.py": "sha256:5c6b2e09663623d91da4111c906028cc7cecf0070d3ef7f6b73aabd5b7286b45",
+        "tests/test_guidance_incremental.py": "sha256:5e322ebcd6e4fd3191a5764e53e028caa8f1a00117e6ce98f3a874adbf7c0b58",
         "tests/test_guidance_initialization_loop.py": "sha256:dca1eabcba20f8503f537d30b02708c5df82aa4c634f154eed32ab90cab3feb2",
-        "tests/test_guidance_mcp.py": "sha256:a7dd466338d302269bea05be4c58e9771d0a6fb4437a4b7f7a25840d03bda1e7",
+        "tests/test_guidance_mcp.py": "sha256:73131e4ce4b1bf5f0526c8d829b0d6e3340da2d8b433c2e559183378f6dca030",
         "tests/test_guidance_retrieval.py": "sha256:956e46901834fdded86a36ea52d6082d53eaa5ea08ac75e4dd0f349c899b4fd5",
-        "tests/test_guidance_store.py": "sha256:b2c3e53acefb183a7486b8b2408f67179eb673f03b0f58deb46b12fcae130190",
-        "tests/test_guidance_workflow.py": "sha256:d09df4d44dd0e81d87e5b1d063edd279bb0a8209a337f00c24544085879c14d2",
+        "tests/test_guidance_store.py": "sha256:d3f0a270052947aa63fab5252e470cf174bf1cf316877145cd7a7d0babd975bf",
+        "tests/test_guidance_workflow.py": "sha256:c2701212dd5dcc92264bbc773e8227b275a077c89e7f639d877e5b4dda6629cd",
         "tests/test_initialization_workflow.py": "sha256:35ecb1f59a96309c2063fcd807222dccec5b104479338680a6dd9ff9aba03df1",
-        "tests/test_integration.py": "sha256:120866d8a554150bb058f8e4d21d20401dcef07cc146fcbb16857cd2b7abdcde",
+        "tests/test_integration.py": "sha256:f05909e5b6dd356847d7694bae1e68e0973acaca56fa58fb63343b70ee9bf8a6",
         "tests/test_knowledge_loop_status.py": "sha256:1fb9f6d4de379d27cb092d0e77d57676c8298e40b65f736e63c33c26232aa007",
         "tests/test_mcp_observability.py": "sha256:f25c78fd5df986136051f256abe9ff7e9130e7635ecc36ff868256c5df8a2099",
-        "tests/test_npm_bootstrap_validation.py": "sha256:2f11af573866ad9237e2813226dd81a1638cd82d3eb33197427ab1c6c44e0639",
+        "tests/test_mcp_stdio_encoding.py": "sha256:6fe0f3ee9982925987130dbd36918e5e4757d7ce0f3082cb2a4a86e268ad31e8",
+        "tests/test_npm_bootstrap_validation.py": "sha256:02b32cfe4f5bc1afb9c9b0c29aa6dcdcaaf3b71064df934a5f0d8a2a71ae59eb",
         "tests/test_npm_package_build.py": "sha256:5c57d232ac5a5988326760f6a254d46ab5249872cd26e730c1e5b62de0ed431f",
-        "tests/test_progress.py": "sha256:5e71999e4b59dba2d9601b04edd69e7f20ccb382cc203310bf40fffca2e6a94b",
+        "tests/test_progress.py": "sha256:a7cf0365f4de120e82d4bfc740615b8f6058dce81caa0f6107a378ea7af75f44",
         "tests/test_proposal.py": "sha256:b9a4f2098690dd3194dadeb39e8be9597b3503ef536244df48cee11c876fa743",
         "tests/test_provider.py": "sha256:d102bc1491a9ffd31cdb98a3aab10db56c91b315560e4bd6a11c4d41314fc8ea",
         "tests/test_ranking.py": "sha256:7d82fb0fa2e688cef26dd68985e25630577a1fc54752f2060afad0da1dd24c85",
@@ -1815,10 +1848,11 @@
         "tests/test_schemas.py": "sha256:17b3af4dc07ff546435be95ec927ae86357f3c7cc267891eed2ba79c6bd4d5cf",
         "tests/test_semantic.py": "sha256:5c61cdc748c3e706c4d55f8795fcdd6a098b35e6f9dff68ce5d87b7dfaf9df3f",
         "tests/test_single_directory.py": "sha256:eccaa5a95d56f54cdee44fa224ac1d4c994164e0489a7b14a57da25f449aba9e",
-        "tests/test_task_completion.py": "sha256:c618d0364245e2e03fe1742e9975ce30fc73afd15667eadfae206dd48e0bf4db",
+        "tests/test_task_closed_loop.py": "sha256:0948fca3b6739b20bd653f8cd459873e7a97ba62f9a53e383bb519316ab25e7d",
+        "tests/test_task_completion.py": "sha256:fe69b181f8f36efb7645c87f7d56444de598a5a073b55fc0151e461e71e7db07",
         "tests/test_vector_retrieval.py": "sha256:e52ca7df2f8a01085636e1104c39024c15b0587343af43443ae1e616f6620742",
         "tests/test_versioning.py": "sha256:954ef4ea592d10ee884c875a6f51339fcca9a005ce0599fdf1220c6e506175de",
-        "tests/test_watch_wp07.py": "sha256:3bc3442a333e85a727d28e3885d1a9284d4726e53def1fe758e89893866f0b6e",
+        "tests/test_watch_wp07.py": "sha256:9f4543729131d0433154216b946dbb54f790bc96708e1942786f3ba8e430a96f",
         "tests/test_wp08.py": "sha256:eef5010fb4bef3befb4759019c23acf53497596e73c734ba492d40cf2c1b36ae"
       },
       "sources": [
@@ -1851,7 +1885,15 @@
           "type": "file"
         },
         {
+          "path": "tests/test_default_knowledge_workflow.py",
+          "type": "file"
+        },
+        {
           "path": "tests/test_delivery_reliability.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_doctor_mcp_probe.py",
           "type": "file"
         },
         {
@@ -1931,6 +1973,10 @@
           "type": "file"
         },
         {
+          "path": "tests/test_mcp_stdio_encoding.py",
+          "type": "file"
+        },
+        {
           "path": "tests/test_npm_bootstrap_validation.py",
           "type": "file"
         },
@@ -1983,6 +2029,10 @@
           "type": "file"
         },
         {
+          "path": "tests/test_task_closed_loop.py",
+          "type": "file"
+        },
+        {
           "path": "tests/test_task_completion.py",
           "type": "file"
         },
@@ -2014,10 +2064,10 @@
       "confidence": "generated",
       "id": "generated.project-map",
       "kind": "project",
-      "last_generated_at": "2026-09-08T14:40:48+08:00",
+      "last_generated_at": "2026-09-14T19:43:39+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/project-map.md",
-      "source_commit": "59265e3065a7ead40401cc2aad6b5850ac92c7f4",
+      "source_commit": "7cc7917d1e8270a24fae97ca12c4f6ee0d7ee68c",
       "source_hashes": {
         ".github/workflows/quality.yml": "sha256:2b0403615ead5cc041a558b6d6aab547746ef7809f8947adca11e1dbd2819ce1",
         ".project-kb.yml": "sha256:48736e6e85940ae62a4ca22c00aa3c169999c7f1b3d953d343d4db4617a85467",
@@ -2025,12 +2075,12 @@
         "evaluation/real_project_harness.py": "sha256:d970b13db02dcc3f0f6500599a5018a9fd37595186a275a9f6aa8e4b3922a915",
         "npm/bin/project-kb.js": "sha256:eced41f4fe8f149781e3b18614e772042b42ee713f63413835a40cd244b406c5",
         "npm/lib/agent-installer.js": "sha256:1189f7c0c0fac3685f659a917a12f189a8eb631e67b6d0f01bc0897a0c4a5ec4",
-        "npm/lib/runtime.js": "sha256:311098d5ba26ba715cdcca791206dd69cd35219bc5e58b5491647bd64d7a6a1a",
+        "npm/lib/runtime.js": "sha256:e0658c7256dcd8a278a80d0e523e9565ffb7cad180bbecffc6ce9f846ff5699d",
         "npm/scripts/postinstall.js": "sha256:c4530302327599a6b12ce55cb08f99e3cf4241f06805aaf7e66a835c30c8e1df",
         "npm/templates/project-kb.ts": "sha256:544551c64e7efcd47e3c8d335d2f431fbf3272c472e531d6c2e5f4e37b377c58",
         "npm/test/agent-installer.test.js": "sha256:09a8bf3ee1a0946a57238ccd5595c30a133ca3f9ee01c52aa7f71533f66c0942",
-        "npm/test/runtime.test.js": "sha256:6682136e669ac547c13896f9a33295174c0a3254e2d6ed268cfb402270ac5156",
-        "plugins/project-knowledge/hooks/sync_after_task.py": "sha256:f2cd23f756cee243fad5cdd3801bc9f0fdee00a20ca76d8b7c29d287ccc41f11",
+        "npm/test/runtime.test.js": "sha256:b00fb236afaac757545a754283fe482889d2276922dd8cd1c5c1d35fc36bd62f",
+        "plugins/project-knowledge/hooks/sync_after_task.py": "sha256:39eec1665f1818db6f8a77d0e4d1c01a9037d6fac3b52f7defe413397c57310a",
         "plugins/project-knowledge/scripts/project_status.py": "sha256:7f8532a6c877d51ed78ebf71d7c35c700d28691483f44c16717f39fe0b3ec7cc",
         "plugins/project-knowledge/skills/project-knowledge/agents/openai.yaml": "sha256:dfb233e13fa9e0b3a8448a697db0b865606beeb94d073989d065446ae3e65268",
         "scripts/build_npm_package.py": "sha256:130aae32270643fa00f10918652fdf22bf8788c13f9ff8b18808b005e7c2055c",
@@ -2041,30 +2091,31 @@
         "scripts/validate_evaluation_provenance.py": "sha256:eee90d7deeea90be8c9b0fb300ba176c5df0c49e49d684e16114ec777a250662",
         "scripts/validate_gardenserver_guidance_workflow.py": "sha256:72cb18dc8ee95bee5fe9e7531ea2d56c67eb427f27307af007f0b038528e362f",
         "scripts/validate_mcp_observability.py": "sha256:ffab83349be73e9c94d4b768018e324b1fc369fa5f7813ffed358eb8b1289f40",
-        "scripts/validate_npm_bootstrap.py": "sha256:1ff70fba5d4fe1e085b7973144640c40bf4da8b59ebe982e9a2033ce014f32bb",
-        "src/project_knowledge/__init__.py": "sha256:81a57e4b1f81b44a5929271f0a67c2abbc7227f937681a3e04e6bfb941420b08",
+        "scripts/validate_npm_bootstrap.py": "sha256:034757ef4c208e12a1c4a50a1ff4760c3e3412d3742c5272c1940570bd9a7b86",
+        "src/project_knowledge/__init__.py": "sha256:1e74df1d7eba5e26b4472c6d4c5710da1afc55d15f236839e20b77fb07a3191e",
         "src/project_knowledge/__main__.py": "sha256:2cdd23d4f5cd6c3b3e4cb690ad16d560637767b9ca5b2a3cf129fcc0a5ebc82b",
-        "src/project_knowledge/cli.py": "sha256:7c2fe5a9539585e1c1712fb1c848cf0e5c6657e48d764ba6cc6040692502cc38",
+        "src/project_knowledge/cli.py": "sha256:183e1fb4eb5cd876a9d86850a321a9c45e4b45140ee3c67cf2a623ff6a136dac",
         "src/project_knowledge/codegraph.py": "sha256:aaf5f2e1f6fa8f42d142fee7b4561e3f809037089fe4ee0a21207294ed518090",
-        "src/project_knowledge/codex.py": "sha256:df03b95d45d052e933e7a0aee2194dabf071ee1c52992ae67b3120c7ba4890d9",
+        "src/project_knowledge/codex.py": "sha256:b22061a7a49ad0dc134d5b8d35acf0cfe8c28d0e01e0e148f1e84ee9c5e79e54",
         "src/project_knowledge/config.py": "sha256:ea53044d371027b45cda57e963992cdeb88fc6c065ce7aaf67f861979e413b8a",
         "src/project_knowledge/context_evidence.py": "sha256:64b15e0c89a915f2e8ec69afb0a8f7d3b4ec74d3a01d08c0aeccdd4a33de0ca8",
         "src/project_knowledge/engine.py": "sha256:4d0e03072966e765312302d5d933b2014888d2034a5bbc57a627c5d38cf45a94",
         "src/project_knowledge/errors.py": "sha256:14b585cd2301ec2cfd363a5353f10ba8e204eb41476eb8239600b5ba8df2473c",
         "src/project_knowledge/evaluate.py": "sha256:a4201ddd097c4468423b28aadaab23c6c86aaca47777c5c9f41eb184fd163b8e",
         "src/project_knowledge/evidence.py": "sha256:a94f45b1d05fce17eeaf2c72a0233fb3ed6ce7367661b67205760bce04f7b707",
-        "src/project_knowledge/finalization.py": "sha256:270e2f2f408b0aba95d46f14a8a6e3c4906c215270097bc513a907dc962df33f",
+        "src/project_knowledge/finalization.py": "sha256:cd068c901824b454fa7762d1229937f83dbcb76f883dde62decb3a5dd0fee84e",
         "src/project_knowledge/frameworks.py": "sha256:ed87654bf965bad9e67a2e5766ba6480c357c364a07e51477d1b27466a969e5b",
         "src/project_knowledge/gardenserver.py": "sha256:b0a4c2dc97b6e1d29d7556a5a99d39a157ee73c801f00fd94c9da50efbaa81ad",
         "src/project_knowledge/guidance.py": "sha256:5b1e5b7a77daaede6720dba991e7a2d0da01c6284d85e03f25811ff2257cf47e",
-        "src/project_knowledge/guidance_models.py": "sha256:e0166aea112b1e84fb0e339597c6f5167af0a4a955ad6691cee9f6a33ca2f104",
-        "src/project_knowledge/guidance_store.py": "sha256:dc4b8fd6c1a67a4c5dca13022cbd905c6bb92ac5626b8593d95b332b6a509dc2",
+        "src/project_knowledge/guidance_models.py": "sha256:74d74671908a76251556f92cbb792e727e360fdcb4e69db086861894fc5ce0a8",
+        "src/project_knowledge/guidance_store.py": "sha256:583889c69c7fef329e1fb9528d799cf8169dcc64d20b580999696f488f5d73e7",
         "src/project_knowledge/guidance_templates.py": "sha256:9cdafc3ff2f590f41f83fe0d5ba584d41f59d28d2c3f581ffba6aa95a3c47b72",
-        "src/project_knowledge/guidance_workflow.py": "sha256:54ae9082b458ee8ea0cb9a9f39f1f3207e0c2b8a9bb372fd73b4f17fc00bfcf4",
-        "src/project_knowledge/incremental.py": "sha256:b830c1257934608108d207c4aa16a48aba7b9fda88f8d7b76d9de646bc3d3d4c",
-        "src/project_knowledge/initialization.py": "sha256:7fcf6ff5b8571f433231328387584026ba3f4ec386900f350592c0dfdf0eaeb1",
-        "src/project_knowledge/knowledge.py": "sha256:1ab86508987b4a7c43f84bfc982b1798c13b031ba5c217ff25681b60202fbc70",
-        "src/project_knowledge/mcp.py": "sha256:7fc1a6c22534b97de2e50acfefb14d6b787c43f4cc4cdb20ea131661008b2887",
+        "src/project_knowledge/guidance_workflow.py": "sha256:3d3a37000d87303d94d18b28cff4f452e0944a107c8bb63bf474e52f87c5dc22",
+        "src/project_knowledge/incremental.py": "sha256:c3c54881ad3951736d65aac6426758a85c8b8fa95c1a1d2a684d3b05a53b8ce8",
+        "src/project_knowledge/initialization.py": "sha256:b5f10954a44741e81de2d0aa83c77d4e6524141b272b01f8b71022fd52a17f22",
+        "src/project_knowledge/instructions.py": "sha256:99ef17b8f8c814820b9d39abe4b7ec8a84b9871e2057a8a82e4c2513c164bd16",
+        "src/project_knowledge/knowledge.py": "sha256:34de3a1c51748cf91a8d4211cb0e7279755343db8b92f767d49db6b839f91d27",
+        "src/project_knowledge/mcp.py": "sha256:774b007953c634d5118457e6f2ae668bfd5b03a2b01ebe66760c79955b09a4c5",
         "src/project_knowledge/models.py": "sha256:3517017e77d4edb136cb321b014db25c83a902570ed406c82b719942357cb79e",
         "src/project_knowledge/observability.py": "sha256:afe01b377c8eda0f6319c611f923ff601f45ee593eb2b0f99a67604c79e77ad0",
         "src/project_knowledge/performance.py": "sha256:624de477dee44f9c8ae341538e1566428ee538b9f4228b0fe968cc657519992a",
@@ -2073,23 +2124,25 @@
         "src/project_knowledge/provider.py": "sha256:818543e90f6e90625995ade34a968a39d6e5e5c86921eb0cce611ba42ca91a26",
         "src/project_knowledge/ranking.py": "sha256:3f1f33a10a6cf598cac62f61d4b9cca55fc6526f4da120899f54a43e98e2fbab",
         "src/project_knowledge/real_project.py": "sha256:d54f7eaa523d14f4b3e01005fad0900a23827b253416c10ab68e6f5c3eaf9ade",
-        "src/project_knowledge/retrieval.py": "sha256:c494ffe04424ecbe38ce3a96da696bdcd66837e9c2098c64a47f28a1934dbaf9",
+        "src/project_knowledge/retrieval.py": "sha256:00535cdb7abfa9d21e22e245a9446715042ca797c86602293c30e43a1c591c03",
         "src/project_knowledge/schemas.py": "sha256:4a6be75dbd1b4e241a493323da3e83b1626e2adb046a5edb783d20ca4434f74f",
         "src/project_knowledge/semantic.py": "sha256:62a3e83d8e244a63c8d7a4441ab9ca1e5b583bfc89953c12d34d70ea7c32aabb",
-        "src/project_knowledge/service.py": "sha256:57150283220ef16c1d1d098d38ea2dcc0cdd2443aba7f1c3ea287a24e00db310",
-        "src/project_knowledge/store.py": "sha256:e7f1d25258ad28af2d5f69bd92a1f8868f204cfccd2ef04086439c6233e072ac",
-        "src/project_knowledge/task_workflow.py": "sha256:3db858f362c1f368cf498781c133320553e0a7460666b84102edfd263559684f",
+        "src/project_knowledge/service.py": "sha256:a9d8dc75cb8b1efddc0120c631c4f544be1242b3caf0a3be41a42601d3aff8a0",
+        "src/project_knowledge/store.py": "sha256:a3c9be2345712d66292144421cd02148794e1f4a9af675e840a82c607c919631",
+        "src/project_knowledge/task_workflow.py": "sha256:ed310d2a2e0586d4f752bea56c5b0bee96e5c6359dc26f2471cdbd76c5e0ff4d",
         "src/project_knowledge/util.py": "sha256:11f4902fd9593f986e15add4d047f0fffdd870696704ae10399da6591224fb79",
         "src/project_knowledge/vector.py": "sha256:8ba9a5b640d505e99c40106932aedff25c51652e317e5911fa4f166be02cbb8a",
         "src/project_knowledge/versioning.py": "sha256:28c1eb70f34cef82854e409a23843cfe22a0c29eff5595dab889fd32b2f1cedb",
         "tests/__init__.py": "sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
         "tests/test_codegraph.py": "sha256:0e36c50db060f5320595688ab6e0a86935b7ff500a252694f1289a327fbcb270",
         "tests/test_codegraph_validation.py": "sha256:d7d429099a2003e11142173df710a4196a76c32e2a99b2178b72ade810772a4f",
-        "tests/test_codex_bootstrap.py": "sha256:341adc8e0211d244e6cb76fa73b91a553d4035983d46a370452655205f0086b2",
-        "tests/test_codex_project_scope.py": "sha256:e318a9d90e5374f5b34d4d8978ca544e9614a4356e42b4681574371fa82c2280",
+        "tests/test_codex_bootstrap.py": "sha256:e85c5c1808299b54ce65b56e21330948d0586f7a884bed51af38512d50d1bc13",
+        "tests/test_codex_project_scope.py": "sha256:f62e770c453f4ca448b4bba5b02b57e4c68253e4777fb1f19330368becae3399",
         "tests/test_config.py": "sha256:a56d161a6b4c19bb61704f79649b3714e329d2466f5fc677c692d3af01db097a",
         "tests/test_context_evidence.py": "sha256:15fda63a0e63c2a23e1294f42ffc8ebf8738067af4f7ff65cd1f3ec84459cb15",
+        "tests/test_default_knowledge_workflow.py": "sha256:bd7fdf01c245dade38c2c2d4268f2b43fa0f5115a3d1c8c5a1a7d8cd08e01b23",
         "tests/test_delivery_reliability.py": "sha256:5e8c270210905478ebef436f390de64703bccef12f06381dd25bdc29093a5eaf",
+        "tests/test_doctor_mcp_probe.py": "sha256:52be5a756e5ba37fcc5eb9b470b84331de87519ece5958f654e06ee5c899cd6d",
         "tests/test_documentation_roadmap.py": "sha256:9a69996ff3685dd8cc4117f11fe1ccb7546973eb20a52299628b2b6f91fd3ac1",
         "tests/test_engine.py": "sha256:c491e9826de079367706257cac9bb55ef4ff9d4903ad279e2ed90b629a0e5f2f",
         "tests/test_evaluate.py": "sha256:267153f6a03b89bbfbc546389521e35e66a7c7c1c7916bcf09b9e76939b2de39",
@@ -2099,19 +2152,20 @@
         "tests/test_gardenserver_rules.py": "sha256:afc3add1527802d0f399cffaf302ac8590a2b512af93eb2d3bdf8f2ce6030f84",
         "tests/test_guidance.py": "sha256:ed4557280ad1ee7519628714bc5c35490df2b535711e1a966d8375177b505b21",
         "tests/test_guidance_e2e.py": "sha256:7bbecb420bdc4dbabf53a60313ad4c27b302dd20316e593dc7b5131f9f3264f7",
-        "tests/test_guidance_incremental.py": "sha256:5c6b2e09663623d91da4111c906028cc7cecf0070d3ef7f6b73aabd5b7286b45",
+        "tests/test_guidance_incremental.py": "sha256:5e322ebcd6e4fd3191a5764e53e028caa8f1a00117e6ce98f3a874adbf7c0b58",
         "tests/test_guidance_initialization_loop.py": "sha256:dca1eabcba20f8503f537d30b02708c5df82aa4c634f154eed32ab90cab3feb2",
-        "tests/test_guidance_mcp.py": "sha256:a7dd466338d302269bea05be4c58e9771d0a6fb4437a4b7f7a25840d03bda1e7",
+        "tests/test_guidance_mcp.py": "sha256:73131e4ce4b1bf5f0526c8d829b0d6e3340da2d8b433c2e559183378f6dca030",
         "tests/test_guidance_retrieval.py": "sha256:956e46901834fdded86a36ea52d6082d53eaa5ea08ac75e4dd0f349c899b4fd5",
-        "tests/test_guidance_store.py": "sha256:b2c3e53acefb183a7486b8b2408f67179eb673f03b0f58deb46b12fcae130190",
-        "tests/test_guidance_workflow.py": "sha256:d09df4d44dd0e81d87e5b1d063edd279bb0a8209a337f00c24544085879c14d2",
+        "tests/test_guidance_store.py": "sha256:d3f0a270052947aa63fab5252e470cf174bf1cf316877145cd7a7d0babd975bf",
+        "tests/test_guidance_workflow.py": "sha256:c2701212dd5dcc92264bbc773e8227b275a077c89e7f639d877e5b4dda6629cd",
         "tests/test_initialization_workflow.py": "sha256:35ecb1f59a96309c2063fcd807222dccec5b104479338680a6dd9ff9aba03df1",
-        "tests/test_integration.py": "sha256:120866d8a554150bb058f8e4d21d20401dcef07cc146fcbb16857cd2b7abdcde",
+        "tests/test_integration.py": "sha256:f05909e5b6dd356847d7694bae1e68e0973acaca56fa58fb63343b70ee9bf8a6",
         "tests/test_knowledge_loop_status.py": "sha256:1fb9f6d4de379d27cb092d0e77d57676c8298e40b65f736e63c33c26232aa007",
         "tests/test_mcp_observability.py": "sha256:f25c78fd5df986136051f256abe9ff7e9130e7635ecc36ff868256c5df8a2099",
-        "tests/test_npm_bootstrap_validation.py": "sha256:2f11af573866ad9237e2813226dd81a1638cd82d3eb33197427ab1c6c44e0639",
+        "tests/test_mcp_stdio_encoding.py": "sha256:6fe0f3ee9982925987130dbd36918e5e4757d7ce0f3082cb2a4a86e268ad31e8",
+        "tests/test_npm_bootstrap_validation.py": "sha256:02b32cfe4f5bc1afb9c9b0c29aa6dcdcaaf3b71064df934a5f0d8a2a71ae59eb",
         "tests/test_npm_package_build.py": "sha256:5c57d232ac5a5988326760f6a254d46ab5249872cd26e730c1e5b62de0ed431f",
-        "tests/test_progress.py": "sha256:5e71999e4b59dba2d9601b04edd69e7f20ccb382cc203310bf40fffca2e6a94b",
+        "tests/test_progress.py": "sha256:a7cf0365f4de120e82d4bfc740615b8f6058dce81caa0f6107a378ea7af75f44",
         "tests/test_proposal.py": "sha256:b9a4f2098690dd3194dadeb39e8be9597b3503ef536244df48cee11c876fa743",
         "tests/test_provider.py": "sha256:d102bc1491a9ffd31cdb98a3aab10db56c91b315560e4bd6a11c4d41314fc8ea",
         "tests/test_ranking.py": "sha256:7d82fb0fa2e688cef26dd68985e25630577a1fc54752f2060afad0da1dd24c85",
@@ -2122,10 +2176,11 @@
         "tests/test_schemas.py": "sha256:17b3af4dc07ff546435be95ec927ae86357f3c7cc267891eed2ba79c6bd4d5cf",
         "tests/test_semantic.py": "sha256:5c61cdc748c3e706c4d55f8795fcdd6a098b35e6f9dff68ce5d87b7dfaf9df3f",
         "tests/test_single_directory.py": "sha256:eccaa5a95d56f54cdee44fa224ac1d4c994164e0489a7b14a57da25f449aba9e",
-        "tests/test_task_completion.py": "sha256:c618d0364245e2e03fe1742e9975ce30fc73afd15667eadfae206dd48e0bf4db",
+        "tests/test_task_closed_loop.py": "sha256:0948fca3b6739b20bd653f8cd459873e7a97ba62f9a53e383bb519316ab25e7d",
+        "tests/test_task_completion.py": "sha256:fe69b181f8f36efb7645c87f7d56444de598a5a073b55fc0151e461e71e7db07",
         "tests/test_vector_retrieval.py": "sha256:e52ca7df2f8a01085636e1104c39024c15b0587343af43443ae1e616f6620742",
         "tests/test_versioning.py": "sha256:954ef4ea592d10ee884c875a6f51339fcca9a005ce0599fdf1220c6e506175de",
-        "tests/test_watch_wp07.py": "sha256:3bc3442a333e85a727d28e3885d1a9284d4726e53def1fe758e89893866f0b6e",
+        "tests/test_watch_wp07.py": "sha256:9f4543729131d0433154216b946dbb54f790bc96708e1942786f3ba8e430a96f",
         "tests/test_wp08.py": "sha256:eef5010fb4bef3befb4759019c23acf53497596e73c734ba492d40cf2c1b36ae"
       },
       "sources": [
@@ -2306,6 +2361,10 @@
           "type": "file"
         },
         {
+          "path": "src/project_knowledge/instructions.py",
+          "type": "file"
+        },
+        {
           "path": "src/project_knowledge/knowledge.py",
           "type": "file"
         },
@@ -2410,7 +2469,15 @@
           "type": "file"
         },
         {
+          "path": "tests/test_default_knowledge_workflow.py",
+          "type": "file"
+        },
+        {
           "path": "tests/test_delivery_reliability.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_doctor_mcp_probe.py",
           "type": "file"
         },
         {
@@ -2490,6 +2557,10 @@
           "type": "file"
         },
         {
+          "path": "tests/test_mcp_stdio_encoding.py",
+          "type": "file"
+        },
+        {
           "path": "tests/test_npm_bootstrap_validation.py",
           "type": "file"
         },
@@ -2542,6 +2613,10 @@
           "type": "file"
         },
         {
+          "path": "tests/test_task_closed_loop.py",
+          "type": "file"
+        },
+        {
           "path": "tests/test_task_completion.py",
           "type": "file"
         },
@@ -2577,21 +2652,23 @@
       "confidence": "generated",
       "id": "generated.test-map",
       "kind": "test",
-      "last_generated_at": "2026-09-08T14:40:48+08:00",
+      "last_generated_at": "2026-09-14T19:43:39+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/test-map.md",
-      "source_commit": "59265e3065a7ead40401cc2aad6b5850ac92c7f4",
+      "source_commit": "7cc7917d1e8270a24fae97ca12c4f6ee0d7ee68c",
       "source_hashes": {
         "npm/test/agent-installer.test.js": "sha256:09a8bf3ee1a0946a57238ccd5595c30a133ca3f9ee01c52aa7f71533f66c0942",
-        "npm/test/runtime.test.js": "sha256:6682136e669ac547c13896f9a33295174c0a3254e2d6ed268cfb402270ac5156",
+        "npm/test/runtime.test.js": "sha256:b00fb236afaac757545a754283fe482889d2276922dd8cd1c5c1d35fc36bd62f",
         "tests/__init__.py": "sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
         "tests/test_codegraph.py": "sha256:0e36c50db060f5320595688ab6e0a86935b7ff500a252694f1289a327fbcb270",
         "tests/test_codegraph_validation.py": "sha256:d7d429099a2003e11142173df710a4196a76c32e2a99b2178b72ade810772a4f",
-        "tests/test_codex_bootstrap.py": "sha256:341adc8e0211d244e6cb76fa73b91a553d4035983d46a370452655205f0086b2",
-        "tests/test_codex_project_scope.py": "sha256:e318a9d90e5374f5b34d4d8978ca544e9614a4356e42b4681574371fa82c2280",
+        "tests/test_codex_bootstrap.py": "sha256:e85c5c1808299b54ce65b56e21330948d0586f7a884bed51af38512d50d1bc13",
+        "tests/test_codex_project_scope.py": "sha256:f62e770c453f4ca448b4bba5b02b57e4c68253e4777fb1f19330368becae3399",
         "tests/test_config.py": "sha256:a56d161a6b4c19bb61704f79649b3714e329d2466f5fc677c692d3af01db097a",
         "tests/test_context_evidence.py": "sha256:15fda63a0e63c2a23e1294f42ffc8ebf8738067af4f7ff65cd1f3ec84459cb15",
+        "tests/test_default_knowledge_workflow.py": "sha256:bd7fdf01c245dade38c2c2d4268f2b43fa0f5115a3d1c8c5a1a7d8cd08e01b23",
         "tests/test_delivery_reliability.py": "sha256:5e8c270210905478ebef436f390de64703bccef12f06381dd25bdc29093a5eaf",
+        "tests/test_doctor_mcp_probe.py": "sha256:52be5a756e5ba37fcc5eb9b470b84331de87519ece5958f654e06ee5c899cd6d",
         "tests/test_documentation_roadmap.py": "sha256:9a69996ff3685dd8cc4117f11fe1ccb7546973eb20a52299628b2b6f91fd3ac1",
         "tests/test_engine.py": "sha256:c491e9826de079367706257cac9bb55ef4ff9d4903ad279e2ed90b629a0e5f2f",
         "tests/test_evaluate.py": "sha256:267153f6a03b89bbfbc546389521e35e66a7c7c1c7916bcf09b9e76939b2de39",
@@ -2601,19 +2678,20 @@
         "tests/test_gardenserver_rules.py": "sha256:afc3add1527802d0f399cffaf302ac8590a2b512af93eb2d3bdf8f2ce6030f84",
         "tests/test_guidance.py": "sha256:ed4557280ad1ee7519628714bc5c35490df2b535711e1a966d8375177b505b21",
         "tests/test_guidance_e2e.py": "sha256:7bbecb420bdc4dbabf53a60313ad4c27b302dd20316e593dc7b5131f9f3264f7",
-        "tests/test_guidance_incremental.py": "sha256:5c6b2e09663623d91da4111c906028cc7cecf0070d3ef7f6b73aabd5b7286b45",
+        "tests/test_guidance_incremental.py": "sha256:5e322ebcd6e4fd3191a5764e53e028caa8f1a00117e6ce98f3a874adbf7c0b58",
         "tests/test_guidance_initialization_loop.py": "sha256:dca1eabcba20f8503f537d30b02708c5df82aa4c634f154eed32ab90cab3feb2",
-        "tests/test_guidance_mcp.py": "sha256:a7dd466338d302269bea05be4c58e9771d0a6fb4437a4b7f7a25840d03bda1e7",
+        "tests/test_guidance_mcp.py": "sha256:73131e4ce4b1bf5f0526c8d829b0d6e3340da2d8b433c2e559183378f6dca030",
         "tests/test_guidance_retrieval.py": "sha256:956e46901834fdded86a36ea52d6082d53eaa5ea08ac75e4dd0f349c899b4fd5",
-        "tests/test_guidance_store.py": "sha256:b2c3e53acefb183a7486b8b2408f67179eb673f03b0f58deb46b12fcae130190",
-        "tests/test_guidance_workflow.py": "sha256:d09df4d44dd0e81d87e5b1d063edd279bb0a8209a337f00c24544085879c14d2",
+        "tests/test_guidance_store.py": "sha256:d3f0a270052947aa63fab5252e470cf174bf1cf316877145cd7a7d0babd975bf",
+        "tests/test_guidance_workflow.py": "sha256:c2701212dd5dcc92264bbc773e8227b275a077c89e7f639d877e5b4dda6629cd",
         "tests/test_initialization_workflow.py": "sha256:35ecb1f59a96309c2063fcd807222dccec5b104479338680a6dd9ff9aba03df1",
-        "tests/test_integration.py": "sha256:120866d8a554150bb058f8e4d21d20401dcef07cc146fcbb16857cd2b7abdcde",
+        "tests/test_integration.py": "sha256:f05909e5b6dd356847d7694bae1e68e0973acaca56fa58fb63343b70ee9bf8a6",
         "tests/test_knowledge_loop_status.py": "sha256:1fb9f6d4de379d27cb092d0e77d57676c8298e40b65f736e63c33c26232aa007",
         "tests/test_mcp_observability.py": "sha256:f25c78fd5df986136051f256abe9ff7e9130e7635ecc36ff868256c5df8a2099",
-        "tests/test_npm_bootstrap_validation.py": "sha256:2f11af573866ad9237e2813226dd81a1638cd82d3eb33197427ab1c6c44e0639",
+        "tests/test_mcp_stdio_encoding.py": "sha256:6fe0f3ee9982925987130dbd36918e5e4757d7ce0f3082cb2a4a86e268ad31e8",
+        "tests/test_npm_bootstrap_validation.py": "sha256:02b32cfe4f5bc1afb9c9b0c29aa6dcdcaaf3b71064df934a5f0d8a2a71ae59eb",
         "tests/test_npm_package_build.py": "sha256:5c57d232ac5a5988326760f6a254d46ab5249872cd26e730c1e5b62de0ed431f",
-        "tests/test_progress.py": "sha256:5e71999e4b59dba2d9601b04edd69e7f20ccb382cc203310bf40fffca2e6a94b",
+        "tests/test_progress.py": "sha256:a7cf0365f4de120e82d4bfc740615b8f6058dce81caa0f6107a378ea7af75f44",
         "tests/test_proposal.py": "sha256:b9a4f2098690dd3194dadeb39e8be9597b3503ef536244df48cee11c876fa743",
         "tests/test_provider.py": "sha256:d102bc1491a9ffd31cdb98a3aab10db56c91b315560e4bd6a11c4d41314fc8ea",
         "tests/test_ranking.py": "sha256:7d82fb0fa2e688cef26dd68985e25630577a1fc54752f2060afad0da1dd24c85",
@@ -2624,10 +2702,11 @@
         "tests/test_schemas.py": "sha256:17b3af4dc07ff546435be95ec927ae86357f3c7cc267891eed2ba79c6bd4d5cf",
         "tests/test_semantic.py": "sha256:5c61cdc748c3e706c4d55f8795fcdd6a098b35e6f9dff68ce5d87b7dfaf9df3f",
         "tests/test_single_directory.py": "sha256:eccaa5a95d56f54cdee44fa224ac1d4c994164e0489a7b14a57da25f449aba9e",
-        "tests/test_task_completion.py": "sha256:c618d0364245e2e03fe1742e9975ce30fc73afd15667eadfae206dd48e0bf4db",
+        "tests/test_task_closed_loop.py": "sha256:0948fca3b6739b20bd653f8cd459873e7a97ba62f9a53e383bb519316ab25e7d",
+        "tests/test_task_completion.py": "sha256:fe69b181f8f36efb7645c87f7d56444de598a5a073b55fc0151e461e71e7db07",
         "tests/test_vector_retrieval.py": "sha256:e52ca7df2f8a01085636e1104c39024c15b0587343af43443ae1e616f6620742",
         "tests/test_versioning.py": "sha256:954ef4ea592d10ee884c875a6f51339fcca9a005ce0599fdf1220c6e506175de",
-        "tests/test_watch_wp07.py": "sha256:3bc3442a333e85a727d28e3885d1a9284d4726e53def1fe758e89893866f0b6e",
+        "tests/test_watch_wp07.py": "sha256:9f4543729131d0433154216b946dbb54f790bc96708e1942786f3ba8e430a96f",
         "tests/test_wp08.py": "sha256:eef5010fb4bef3befb4759019c23acf53497596e73c734ba492d40cf2c1b36ae"
       },
       "sources": [
@@ -2668,7 +2747,15 @@
           "type": "file"
         },
         {
+          "path": "tests/test_default_knowledge_workflow.py",
+          "type": "file"
+        },
+        {
           "path": "tests/test_delivery_reliability.py",
+          "type": "file"
+        },
+        {
+          "path": "tests/test_doctor_mcp_probe.py",
           "type": "file"
         },
         {
@@ -2748,6 +2835,10 @@
           "type": "file"
         },
         {
+          "path": "tests/test_mcp_stdio_encoding.py",
+          "type": "file"
+        },
+        {
           "path": "tests/test_npm_bootstrap_validation.py",
           "type": "file"
         },
@@ -2800,6 +2891,10 @@
           "type": "file"
         },
         {
+          "path": "tests/test_task_closed_loop.py",
+          "type": "file"
+        },
+        {
           "path": "tests/test_task_completion.py",
           "type": "file"
         },
@@ -2829,5 +2924,5 @@
     }
   ],
   "schema_version": 1,
-  "source_commit": "59265e3065a7ead40401cc2aad6b5850ac92c7f4"
+  "source_commit": "7cc7917d1e8270a24fae97ca12c4f6ee0d7ee68c"
 }

@@ -25,6 +25,7 @@
 - `src/project_knowledge/guidance_workflow.py`（Python）
 - `src/project_knowledge/incremental.py`（Python）
 - `src/project_knowledge/initialization.py`（Python）
+- `src/project_knowledge/instructions.py`（Python）
 - `src/project_knowledge/knowledge.py`（Python）
 - `src/project_knowledge/mcp.py`（Python）
 - `src/project_knowledge/models.py`（Python）

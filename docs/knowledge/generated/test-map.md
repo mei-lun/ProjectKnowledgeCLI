@@ -13,7 +13,9 @@
 | `tests/test_codex_project_scope.py` | tests |
 | `tests/test_config.py` | tests |
 | `tests/test_context_evidence.py` | tests |
+| `tests/test_default_knowledge_workflow.py` | tests |
 | `tests/test_delivery_reliability.py` | tests |
+| `tests/test_doctor_mcp_probe.py` | tests |
 | `tests/test_documentation_roadmap.py` | tests |
 | `tests/test_engine.py` | tests |
 | `tests/test_evaluate.py` | tests |
@@ -33,6 +35,7 @@
 | `tests/test_integration.py` | tests |
 | `tests/test_knowledge_loop_status.py` | tests |
 | `tests/test_mcp_observability.py` | tests |
+| `tests/test_mcp_stdio_encoding.py` | tests |
 | `tests/test_npm_bootstrap_validation.py` | tests |
 | `tests/test_npm_package_build.py` | tests |
 | `tests/test_progress.py` | tests |
@@ -46,6 +49,7 @@
 | `tests/test_schemas.py` | tests |
 | `tests/test_semantic.py` | tests |
 | `tests/test_single_directory.py` | tests |
+| `tests/test_task_closed_loop.py` | tests |
 | `tests/test_task_completion.py` | tests |
 | `tests/test_vector_retrieval.py` | tests |
 | `tests/test_versioning.py` | tests |
