@@ -17,10 +17,8 @@ sys.path.insert(0, str(PROJECT_ROOT))
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from project_knowledge.versioning import read_project_version  # noqa: E402
+from project_knowledge.codex import REQUIRED_MCP_TOOLS, validate_mcp_response, verify_project_mcp  # noqa: E402
 from scripts.build_npm_package import build_npm_package  # noqa: E402
-
-
-REQUIRED_MCP_TOOLS = {"knowledge_status", "knowledge_context", "knowledge_impact"}
 
 
 def launcher_path(prefix: Path, *, platform: str = sys.platform) -> Path:
@@ -29,19 +27,20 @@ def launcher_path(prefix: Path, *, platform: str = sys.platform) -> Path:
 
 
 def validate_mcp_responses(responses: list[dict[str, Any]]) -> list[str]:
-    by_id = {response.get("id"): response for response in responses}
-    initialize = by_id.get(1, {}).get("result", {})
-    if initialize.get("serverInfo", {}).get("name") != "project-knowledge":
-        raise RuntimeError("MCP initialize did not return the project-knowledge server")
-    tools = by_id.get(2, {}).get("result", {}).get("tools", [])
-    names = {item.get("name") for item in tools if isinstance(item, dict)}
-    missing = sorted(REQUIRED_MCP_TOOLS - names)
-    if missing:
-        raise RuntimeError("MCP tools/list is missing: " + ", ".join(missing))
-    status = by_id.get(3, {}).get("result", {})
-    if status.get("isError") is not False:
-        raise RuntimeError("MCP knowledge_status returned an error")
-    return sorted(name for name in names if isinstance(name, str) and name in REQUIRED_MCP_TOOLS)
+    by_id = {}
+    for response in responses:
+        request_id = response.get("id")
+        if type(request_id) is not int or request_id not in {1, 2, 3, 4}:
+            raise RuntimeError("MCP returned an unexpected response ID")
+        if request_id in by_id:
+            raise RuntimeError("MCP returned a duplicate response ID")
+        by_id[request_id] = response
+    try:
+        for request_id in range(1, 5):
+            validate_mcp_response(by_id.get(request_id), request_id)
+    except ValueError as error:
+        raise RuntimeError(str(error)) from error
+    return sorted(REQUIRED_MCP_TOOLS)
 
 
 def run_checked(
@@ -89,6 +88,8 @@ def validate_npm_bootstrap(root: Path = PROJECT_ROOT) -> dict[str, Any]:
         artifacts.mkdir()
         project.mkdir()
         env = os.environ.copy()
+        # Validate the installed package, without inheriting a source checkout override.
+        env.pop("PYTHONPATH", None)
         env.update({
             "PROJECT_KB_PYTHON": sys.executable,
             "CODEX_HOME": str(codex_home),
@@ -125,6 +126,7 @@ def validate_npm_bootstrap(root: Path = PROJECT_ROOT) -> dict[str, Any]:
             env=env,
         )
         launcher = launcher_path(prefix)
+        env.pop("PROJECT_KB_LAUNCHER", None)
         if not launcher.is_file():
             raise RuntimeError(f"installed project-kb launcher is missing: {launcher}")
         version_result = run_checked([launcher, "--version"], cwd=temporary, env=env)
@@ -176,51 +178,25 @@ def validate_npm_bootstrap(root: Path = PROJECT_ROOT) -> dict[str, Any]:
         first_config = config_path.read_bytes()
         parsed = tomllib.loads(first_config.decode("utf-8"))
         server = parsed["mcp_servers"]["project_knowledge"]
-        if server.get("command") != "project-kb":
+        if not Path(server.get("command", "")).is_absolute() or Path(server["command"]).resolve() != launcher.resolve():
             raise RuntimeError("project Codex MCP config does not use the stable project-kb launcher")
         if server.get("args") != ["mcp", "--project", "."]:
             raise RuntimeError("project Codex MCP config does not use the stable project-relative arguments")
-        if "env" in server or "cwd" in server:
-            raise RuntimeError("project Codex MCP config contains machine-specific runtime fields")
+        if Path(server.get("cwd", "")).resolve() != project.resolve():
+            raise RuntimeError("project Codex MCP config does not use the project working directory")
+        if not isinstance(server.get("env", {}), dict):
+            raise RuntimeError("project Codex MCP environment must be a table")
+        if not first_payload.get("codex", {}).get("verification", {}).get("queries_verified"):
+            raise RuntimeError("init did not verify the installed MCP queries")
 
         run_checked([launcher, "init", "--json"], cwd=project, env=env)
         if config_path.read_bytes() != first_config:
             raise RuntimeError("repeated init changed the owned Codex config")
 
-        requests = [
-            {
-                "jsonrpc": "2.0",
-                "id": 1,
-                "method": "initialize",
-                "params": {
-                    "protocolVersion": "2025-06-18",
-                    "capabilities": {},
-                    "clientInfo": {"name": "npm-bootstrap-validator", "version": version},
-                },
-            },
-            {"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}},
-            {
-                "jsonrpc": "2.0",
-                "id": 3,
-                "method": "tools/call",
-                "params": {"name": "knowledge_status", "arguments": {}},
-            },
-        ]
-        mcp = subprocess.run(
-            [str(launcher), "mcp", "--project", str(project)],
-            cwd=project,
-            env=env,
-            input="".join(json.dumps(item, separators=(",", ":")) + "\n" for item in requests),
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-            capture_output=True,
-            timeout=180,
-        )
-        if mcp.returncode != 0:
-            raise RuntimeError(f"installed MCP process failed:\n{mcp.stderr}")
-        responses = [json.loads(line) for line in mcp.stdout.splitlines() if line.strip()]
-        required_tools = validate_mcp_responses(responses)
+        verification = verify_project_mcp(project, timeout=180, env=env)
+        if not verification["verified"]:
+            raise RuntimeError(f"installed MCP verification failed: {json.dumps(verification)}")
+        required_tools = sorted(REQUIRED_MCP_TOOLS & set(verification["tools"]))
 
         run_checked([launcher, "uninstall", "--json"], cwd=project, env=env)
         if "project-kb:codex-mcp" in config_path.read_text(encoding="utf-8"):
@@ -242,6 +218,8 @@ def validate_npm_bootstrap(root: Path = PROJECT_ROOT) -> dict[str, Any]:
             "doctor_global_valid": True,
             "init_idempotent": True,
             "mcp_tools": required_tools,
+            "mcp_queries_verified": verification["queries_verified"],
+            "codex_session_verified": False,
             "knowledge_preserved": True,
         }
 

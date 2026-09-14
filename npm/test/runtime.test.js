@@ -12,6 +12,7 @@ const {
   discoverPython,
   ensureRuntime,
   runtimeBase,
+  resolveNpmLauncher,
 } = require("../lib/runtime");
 
 
@@ -216,7 +217,7 @@ test("buildLaunchSpec forwards arguments and pins the npm-owned CodeGraph", () =
     pythonCommand: "C:\\runtime\\Scripts\\python.exe",
     packageRoot,
     args: ["init", "--json"],
-    env: { PATH: "test" },
+    env: { PATH: "test", PROJECT_KB_LAUNCHER: path.resolve("C:\\npm\\project-kb.cmd") },
     platform: "win32",
   });
 
@@ -237,8 +238,53 @@ test("buildLaunchSpec preserves an explicit CodeGraph override", () => {
     pythonCommand: "python",
     packageRoot: "C:\\package",
     args: [],
-    env: { CODEGRAPH_COMMAND: "D:\\custom\\codegraph.cmd" },
+    env: { CODEGRAPH_COMMAND: "D:\\custom\\codegraph.cmd", PROJECT_KB_LAUNCHER: path.resolve("C:\\npm\\project-kb.cmd") },
     platform: "win32",
   });
   assert.equal(spec.env.CODEGRAPH_COMMAND, "D:\\custom\\codegraph.cmd");
+});
+
+test("npm launcher identity comes from its installed package, not ambient PATH", (t) => {
+  const root = temporaryDirectory(t);
+  const packageRoot = path.join(root, "prefix", "node_modules", "project-kb-cli");
+  fs.mkdirSync(path.join(packageRoot, "bin"), { recursive: true });
+  fs.writeFileSync(path.join(packageRoot, "bin", "project-kb.js"), "entry");
+  const launcher = path.join(root, "prefix", "project-kb.cmd");
+  fs.writeFileSync(launcher, '@"%dp0%\\node_modules\\project-kb-cli\\bin\\project-kb.js" %*');
+  const spec = buildLaunchSpec({
+    packageRoot, pythonCommand: "python", platform: "win32",
+    env: { PATH: path.join(root, "unrelated-python-install") },
+  });
+  assert.equal(spec.env.PROJECT_KB_LAUNCHER, launcher);
+});
+
+test("local npm installation resolves its own .bin shim", (t) => {
+  const root = temporaryDirectory(t);
+  const packageRoot = path.join(root, "node_modules", "project-kb-cli");
+  fs.mkdirSync(path.join(packageRoot, "bin"), { recursive: true });
+  fs.writeFileSync(path.join(packageRoot, "bin", "project-kb.js"), "entry");
+  const launcher = path.join(root, "node_modules", ".bin", "project-kb.cmd");
+  fs.mkdirSync(path.dirname(launcher));
+  fs.writeFileSync(launcher, '@"%dp0%\\..\\project-kb-cli\\bin\\project-kb.js" %*');
+  assert.equal(resolveNpmLauncher({ packageRoot, platform: "win32" }), launcher);
+});
+
+test("npm launcher rejects a neighboring shim owned by another package", (t) => {
+  const root = temporaryDirectory(t);
+  const packageRoot = path.join(root, "node_modules", "project-kb-cli");
+  fs.mkdirSync(path.join(packageRoot, "bin"), { recursive: true });
+  fs.writeFileSync(path.join(packageRoot, "bin", "project-kb.js"), "entry");
+  fs.writeFileSync(path.join(root, "project-kb.cmd"), '@python -m project_knowledge %*');
+  assert.throws(() => resolveNpmLauncher({ packageRoot, platform: "win32" }), /installed npm launcher/);
+});
+
+test("Unix global npm launcher must link to this package entry point", { skip: process.platform === "win32" }, (t) => {
+  const root = temporaryDirectory(t);
+  const packageRoot = path.join(root, "lib", "node_modules", "project-kb-cli");
+  fs.mkdirSync(path.join(packageRoot, "bin"), { recursive: true });
+  fs.writeFileSync(path.join(packageRoot, "bin", "project-kb.js"), "entry");
+  fs.mkdirSync(path.join(root, "bin"));
+  const launcher = path.join(root, "bin", "project-kb");
+  fs.symlinkSync(path.join(packageRoot, "bin", "project-kb.js"), launcher);
+  assert.equal(resolveNpmLauncher({ packageRoot, platform: "linux" }), launcher);
 });

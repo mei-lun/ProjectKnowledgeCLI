@@ -158,7 +158,9 @@ class WatchWP07Tests(unittest.TestCase):
         ))
         subprocess.run(["git", "-C", str(root), "worktree", "add", "-qb", "linked", str(worktree)], check=True)
 
-        result = ProjectService(worktree).install()
+        # This test owns hook path resolution, not initialization/MCP readiness.
+        with patch('project_knowledge.service.verify_project_mcp', return_value={'verified': True}):
+            result = ProjectService(worktree).install()
 
         shared_hooks = Path(subprocess.run(
             ["git", "-C", str(worktree), "rev-parse", "--git-path", "hooks"],

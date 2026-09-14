@@ -54,6 +54,8 @@ def build_parser() -> argparse.ArgumentParser:
         _common(sub, dry_run=name in {"init", "sync", "rebuild", "install", "uninstall"})
         if name == "sync":
             sub.add_argument("--task-summary", default="manual synchronization")
+        if name == 'doctor':
+            sub.add_argument('--verify-mcp', action='store_true', help='probe the saved project MCP configuration')
         if name in {"install", "uninstall"}:
             sub.add_argument("--client", action="append", choices=["codex", "claude", "cursor", "gemini"], dest="clients")
         if name == "migrate":
@@ -361,9 +363,14 @@ def main(argv: list[str] | None = None) -> int:
                 result = service.uninstall(args.dry_run, args.clients)
             elif args.command == "doctor":
                 result = service.doctor()
+                if args.verify_mcp:
+                    from .codex import verify_project_mcp
+                    result['codex']['verification'] = verify_project_mcp(service.root)
             else:
                 raise RuntimeError(f"unsupported command: {args.command}")
             exit_code = 0
+            if args.command == 'doctor' and args.verify_mcp:
+                exit_code = 0 if result['codex']['verification']['verified'] else 2
     except ProjectKnowledgeError as error:
         if getattr(args, "as_json", False):
             print(json.dumps(error.to_dict(), ensure_ascii=False, indent=2))

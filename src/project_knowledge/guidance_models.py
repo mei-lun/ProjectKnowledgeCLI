@@ -335,6 +335,10 @@ class TaskCompletion:
     updated_at: str
     skip_reason: str | None = None
     error: str | None = None
+    development_completed: bool = False
+    change_id: str | None = None
+    request_hash: str | None = None
+    initialization_run_id: str | None = None
 
     _STATUSES: ClassVar[set[str]] = {"pending", "generated", "skipped", "failed"}
 
@@ -366,4 +370,7 @@ class TaskCompletion:
             affected_categories=list(value.get("affected_categories", [])),
             created_at=value["created_at"], updated_at=value["updated_at"],
             skip_reason=value.get("skip_reason"), error=value.get("error"),
+            development_completed=bool(value.get("development_completed", value.get("user_confirmed", False))),
+            change_id=value.get("change_id"), request_hash=value.get("request_hash"),
+            initialization_run_id=value.get('initialization_run_id'),
         )

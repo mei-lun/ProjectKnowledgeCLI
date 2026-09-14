@@ -97,7 +97,9 @@ class KnowledgeAPI:
     def _ensure_current_schema(self) -> None:
         with KnowledgeStore(self.service.db_path, readonly=True) as store:
             if store.get_meta("schema_version") == str(SCHEMA_VERSION):
-                return
+                columns = {row['name'] for row in store.connection.execute('PRAGMA table_info(task_completions)')}
+                if {'development_completed', 'change_id', 'request_hash', 'initialization_run_id'} <= columns:
+                    return
         with project_lock(self.root), KnowledgeStore(self.service.db_path) as store:
             store.initialize()
 
@@ -540,7 +542,7 @@ class KnowledgeAPI:
             if pending_guidance:
                 offer_reason = "draft_only"
                 offer_action = "review_draft"
-            elif candidate_ids and formal_count == 0:
+            elif formal_count == 0:
                 offer_reason = "missing"
                 offer_action = "generate"
             else:
@@ -1541,14 +1543,14 @@ class KnowledgeAPI:
     ) -> dict[str, Any]:
         guidance = GuidanceStore(store)
         row = store.connection.execute(
-            "SELECT run_id FROM guidance_runs ORDER BY updated_at DESC, created_at DESC, run_id DESC LIMIT 1"
+            "SELECT run_id FROM guidance_runs WHERE run_id NOT LIKE 'run-incr-%' ORDER BY updated_at DESC, created_at DESC, run_id DESC LIMIT 1"
         ).fetchone()
         run = guidance.get_run(str(row["run_id"])) if row else None
         batches = guidance.list_batches(run.run_id) if run else []
-        drafts = guidance.list_pending_drafts(run.run_id) if run else []
+        drafts = guidance.list_pending_drafts()
         changes = guidance.pending_changes()
-        task_completions = guidance.list_task_completions(limit=20)
-        categories = guidance.list_categories(run.run_id) if run else []
+        task_completions = guidance.list_task_completions(limit=None)
+        categories = guidance.list_categories() if run else []
         formal_guides = sum(1 for category in categories if guidance.current_version(category.category_id))
         formal_methodologies = sum(
             1 for category in categories
@@ -1573,9 +1575,31 @@ class KnowledgeAPI:
         workflow_state = KnowledgeAPI._workflow_state(
             run, batches, drafts, changes, categories, baseline_mismatch, formal_assets
         )
-        pending_tasks = [item for item in task_completions if item.generation_status == "pending" and item.user_confirmed]
-        if pending_tasks and workflow_state.get("next_action") in {"none", "draft_available"}:
-            workflow_state = {"state": "task_completion", "next_action": "generate_guidance_draft"}
+        from .task_workflow import TaskCompletionWorkflow
+        active_tasks = [item for item in task_completions if item.generation_status in {'pending', 'failed'}]
+        task_plans = [TaskCompletionWorkflow._result(item, store) for item in active_tasks]
+        if task_plans:
+            task_plan = task_plans[0]
+            workflow_state = {'state': 'task_completion', **{
+                key: task_plan[key] for key in ('next_action', 'next_tool', 'arguments', 'task_id') if key in task_plan
+            }}
+        elif changes:
+            from .incremental import IncrementalWorkflow
+            change_plan = IncrementalWorkflow.plan_from_store(store, changes[0])
+            workflow_state = {'state': 'incremental', **{
+                key: change_plan[key] for key in ('next_action', 'next_tool', 'arguments', 'change_id') if key in change_plan
+            }}
+        if current_snapshot_id and any(
+            item.development_completed and item.generation_status == 'pending'
+            and item.final_snapshot_id not in {'unavailable', current_snapshot_id} for item in active_tasks
+        ):
+            item = next(item for item in active_tasks if item.development_completed and item.generation_status == 'pending'
+                        and item.final_snapshot_id not in {'unavailable', current_snapshot_id})
+            workflow_state = {'state': 'task_completion', 'next_action': 'retry_task_completion',
+                              'next_tool': 'knowledge_task_complete', 'task_id': item.task_id,
+                              'arguments': {'taskId': item.task_id, 'summary': item.summary,
+                                            'changedFiles': item.changed_files, 'changedSymbols': item.changed_symbols,
+                                            'tests': item.tests, 'developmentCompleted': True, 'retry': True}}
         draft_counts = {
             "total": len(drafts),
             "awaiting_confirmation": sum(draft.status == "awaiting_confirmation" for draft in drafts),
@@ -1626,6 +1650,7 @@ class KnowledgeAPI:
             ],
             "task_completion": {
                 "recent": [item.to_dict() for item in task_completions[:10]],
+                "active": task_plans,
                 "pending_generation": sum(
                     item.generation_status == "pending" for item in task_completions
                 ),
@@ -2372,6 +2397,11 @@ class KnowledgeAPI:
                 result["guidance_workflow"] = {"available": bool(guidance.get("available"))}
                 record_trim_event("reduce_guidance", "guidance_workflow", before_tokens)
                 continue
+            if isinstance(result.get('vector_retrieval'), dict) and not result['vector_retrieval'].get('enabled'):
+                result.pop('vector_retrieval')
+                explanation.pop('vector_retrieval', None)
+                record_trim_event('drop_disabled_vector_diagnostics', 'vector_retrieval', before_tokens)
+                continue
             if len(result["knowledge"]) > 1:
                 result["knowledge"].pop()
                 record_trim_event("remove_knowledge_fragment", "knowledge", before_tokens)
@@ -2463,6 +2493,13 @@ class KnowledgeAPI:
             # cannot make the legacy response small enough.
             minimal = {
                 "task": result.get("task", ""),
+                "task_type": result.get("task_type", "investigation"),
+                "ranking_status": result.get("ranking_status"),
+                "ranking_policy": result.get("ranking_policy"),
+                "ranking_confidence": result.get("ranking_confidence"),
+                "file_rankings": result.get("file_rankings", []),
+                "retrieval_explanation": result.get("retrieval_explanation", {}),
+                "guidance_offer": result.get("guidance_offer", {}),
                 "token_budget": budget,
                 "estimated_tokens": 0,
                 "core_files": list(result.get("core_files", [])),

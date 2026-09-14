@@ -57,10 +57,17 @@ class KnowledgeGenerator:
                 self.store.upsert_knowledge(record)
             self.store.delete_missing_knowledge({record.id for record in generated}, "generated")
 
+        # Workflow records are owned by the database lifecycle. Their Markdown
+        # projections must not be re-imported under a different id or deleted.
+        workflow_records = [record for record in self.store.all_knowledge()
+                            if record.kind in {'development-guide', 'development-methodology', 'guidance-draft'}
+                            or record.id.startswith('draft.draft-')]
+        self._workflow_paths = {record.path.replace('\\', '/') for record in workflow_records}
+        workflow_ids = {record.id for record in workflow_records}
         curated = self._curated_records()
         for record in curated:
             self.store.upsert_knowledge(record)
-        self.store.delete_missing_knowledge({record.id for record in curated}, "curated")
+        self.store.delete_missing_knowledge({record.id for record in curated} | workflow_ids, "curated")
 
         decisions = self._decision_records()
         for record in decisions:
@@ -70,7 +77,7 @@ class KnowledgeGenerator:
         drafts = self._draft_records()
         for record in drafts:
             self.store.upsert_knowledge(record)
-        self.store.delete_missing_knowledge({record.id for record in drafts}, "draft")
+        self.store.delete_missing_knowledge({record.id for record in drafts} | workflow_ids, "draft")
 
         records = self.store.all_knowledge()
         self._knowledge_index(records)
@@ -490,7 +497,11 @@ class KnowledgeGenerator:
             return records
         for path in sorted(base.rglob("*.md")):
             relative = path.relative_to(self.root).as_posix()
+            if relative in getattr(self, '_workflow_paths', set()):
+                continue
             content = read_text(path)
+            if '<!-- project-kb:guidance-state:start -->' in content:
+                continue
             title_match = re.search(r"^#\s+(.+)$", content, re.MULTILINE)
             title = title_match.group(1).strip() if title_match else path.stem.replace("-", " ").title()
             if ownership == "decision":
@@ -564,13 +575,18 @@ class KnowledgeGenerator:
                 status = status_titles.get(record.status, record.status)
                 confidence = confidence_titles.get(record.confidence, record.confidence)
                 sections.append(
-                    f"- [{record.title}]({Path(record.path).relative_to(self.config.knowledge_root).as_posix()})"
+                    f"- [{record.title}]({self._index_link(record.path)})"
                     f" - 状态：`{status}`；可信度：`{confidence}`"
                 )
             if not groups.get(ownership):
                 sections.append("- 无")
             sections.append("")
         atomic_write(self.root / self.config.knowledge_root / "index.md", "\n".join(sections))
+
+    def _index_link(self, path: str) -> str:
+        import os
+        target = Path(path) if Path(path).is_absolute() else self.root / path
+        return Path(os.path.relpath(target, self.root / self.config.knowledge_root)).as_posix()
 
     def _manifest(self, records: list[KnowledgeRecord]) -> None:
         serialized_records = [record.to_dict() for record in records]

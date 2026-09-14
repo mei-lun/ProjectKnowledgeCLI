@@ -246,12 +246,16 @@ class GuidanceStore:
                 task_id, project_root, summary, changed_files_json, changed_symbols_json,
                 tests_json, base_snapshot_id, final_snapshot_id, user_confirmed,
                 generation_status, affected_categories_json, skip_reason, error,
-                created_at, updated_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                created_at, updated_at, development_completed, change_id, request_hash, initialization_run_id
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(task_id) DO UPDATE SET
                 summary=excluded.summary, changed_files_json=excluded.changed_files_json,
                 changed_symbols_json=excluded.changed_symbols_json, tests_json=excluded.tests_json,
+                base_snapshot_id=excluded.base_snapshot_id,
                 final_snapshot_id=excluded.final_snapshot_id, user_confirmed=excluded.user_confirmed,
+                development_completed=excluded.development_completed,
+                change_id=excluded.change_id, request_hash=excluded.request_hash,
+                initialization_run_id=excluded.initialization_run_id,
                 generation_status=excluded.generation_status,
                 affected_categories_json=excluded.affected_categories_json,
                 skip_reason=excluded.skip_reason, error=excluded.error, updated_at=excluded.updated_at
@@ -262,7 +266,8 @@ class GuidanceStore:
                 _json(task.changed_symbols), _json(task.tests), task.base_snapshot_id,
                 task.final_snapshot_id, int(task.user_confirmed), task.generation_status,
                 _json(task.affected_categories), task.skip_reason, task.error,
-                task.created_at, task.updated_at,
+                task.created_at, task.updated_at, int(task.development_completed), task.change_id, task.request_hash,
+                task.initialization_run_id,
             ),
         )
         return task
@@ -283,12 +288,15 @@ class GuidanceStore:
             "affected_categories": json.loads(row["affected_categories_json"]),
             "skip_reason": row["skip_reason"], "error": row["error"],
             "created_at": row["created_at"], "updated_at": row["updated_at"],
+            "development_completed": bool(row["development_completed"]),
+            "change_id": row["change_id"], "request_hash": row["request_hash"],
+            "initialization_run_id": row['initialization_run_id'],
         })
 
-    def list_task_completions(self, limit: int = 20) -> list[TaskCompletion]:
+    def list_task_completions(self, limit: int | None = 20) -> list[TaskCompletion]:
         rows = self.connection.execute(
-            "SELECT task_id FROM task_completions ORDER BY updated_at DESC, task_id DESC LIMIT ?",
-            (max(1, min(limit, 100)),),
+            "SELECT task_id FROM task_completions ORDER BY updated_at DESC, task_id DESC" + (" LIMIT ?" if limit is not None else ""),
+            (max(1, min(limit, 100)),) if limit is not None else (),
         )
         return [item for row in rows if (item := self.get_task_completion(str(row["task_id"]))) is not None]
 

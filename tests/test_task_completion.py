@@ -29,13 +29,14 @@ class TaskCompletionWorkflowTests(unittest.TestCase):
                         [{"path": "src/login.py", "hash": "h1"}], 0.9, [], now, now,
                     ))
             fake_snapshot = {"snapshot_id": "snap-2", "files": [{"path": "src/login.py", "content_hash": "h2", "language": "Python"}]}
-            with patch("project_knowledge.task_workflow.CodeGraphClient") as client:
+            with patch("project_knowledge.task_workflow.CodeGraphClient") as client, patch(
+                'project_knowledge.service.ProjectService.sync', return_value={'action': 'sync'}
+            ):
                 client.return_value.snapshot.return_value = fake_snapshot
                 workflow = TaskCompletionWorkflow(root)
-                first = workflow.complete("task-1", "完成登录", changed_files=["src/login.py"])
-                second = workflow.complete("task-1", "重复提交", changed_files=["src/login.py"])
-            self.assertEqual(first["affected_categories"], ["login"])
-            self.assertEqual(first["next_action"], "generate_guidance_draft")
+                first = workflow.complete("task-1", "完成登录", changed_files=["src/login.py"], user_confirmed=True)
+                second = workflow.complete("task-1", "完成登录", changed_files=["src/login.py"], user_confirmed=True)
+            self.assertEqual(first["next_action"], "analyze_next_batch")
             self.assertEqual(second["summary"], "完成登录")
             self.assertEqual(second["task_id"], "task-1")
 
@@ -48,7 +49,7 @@ class TaskCompletionWorkflowTests(unittest.TestCase):
             with patch("project_knowledge.task_workflow.CodeGraphClient") as client:
                 client.return_value.snapshot.return_value = {"snapshot_id": "snap-1", "files": []}
                 result = TaskCompletionWorkflow(root).register_pending("hook-1", "任务结束")
-            self.assertEqual(result["next_action"], "confirm_task_completion")
+            self.assertEqual(result["next_action"], "complete_development")
             self.assertFalse(result["user_confirmed"])
 
 

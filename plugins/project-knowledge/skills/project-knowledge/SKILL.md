@@ -1,37 +1,17 @@
 ---
 name: project-knowledge
-description: Retrieve source-traceable, freshness-aware project knowledge through the local Project Knowledge MCP server. Use for architecture explanations, feature implementation, cross-module bug fixes, public-interface changes, refactors, code review, impact analysis, or project knowledge maintenance in an initialized repository.
+description: Use Project Knowledge before project exploration, development, review, and knowledge maintenance. Automatically generate reviewable knowledge after development and verification.
 ---
 
 # Project Knowledge
 
-Use the knowledge base as an index into live source, not as a substitute for verification.
+Use the local Project Knowledge System before broad repository exploration.
 
-## Workflow
-
-1. Call `knowledge_status` before broad repository exploration.
-2. If `pending_files` is non-empty, request `project-kb sync` or read those files live before relying on indexed facts.
-3. Call `knowledge_context` with the user's exact task and an appropriate token budget.
-4. Inspect each returned record's `confidence`, `freshness`, and `sources`.
-5. Call `knowledge_impact` with the files or stable symbol IDs that may change.
-6. Read only the cited source anchors needed to confirm behavior and static-analysis gaps.
-7. Implement the change and run the returned verification commands plus any task-specific checks.
-8. Run `project-kb sync --task-summary "<intent>"` after source changes when command execution is available.
-9. When the user confirms the task is complete, call `knowledge_task_complete` with the task summary, changed files, symbols, and test results, then continue the returned guidance draft actions in the same conversation.
-10. Report stale curated records or semantic changes that need human review; never silently rewrite curated prose or accepted ADRs.
-
-## Trust Rules
-
-- Use `verified` and `fresh` curated knowledge as project intent.
-- Use `generated` and `fresh` knowledge as deterministic or explicitly bounded code facts.
-- Verify `inferred`, `potentially_stale`, `stale`, or `conflicted` claims in live source.
-- Treat unresolved call edges and generic-parser output as possible anchors, not proven runtime paths.
-- Do not return an indexed source excerpt when `knowledge_status` reports that file as pending.
-
-## Tool Selection
-
-- Use `knowledge_context` as the default task entry point.
-- Use `knowledge_search` for modules, workflows, recipes, glossary terms, and ADRs.
-- Use `knowledge_get` when a stable knowledge ID is already known.
-- Use `knowledge_impact` before modifying shared symbols or cross-module behavior.
-- Use `knowledge_status` to check commits, pending files, parse errors, stale knowledge, and watcher health.
+1. Call `knowledge_status` at task start. If unavailable, run `project-kb doctor --json` and report the exact failure; do not claim knowledge was consulted.
+2. If guidance is not initialized, call `knowledge_initialization_start`, then `knowledge_initialization_next` and `knowledge_initialization_submit` for every batch. Read the actual source files before submitting analyzedFiles. Save the category catalog, methodology, and guidance through `knowledge_draft_save`, following guidance_workflow.next_action until all required drafts exist. A code index alone is not initialized guidance.
+3. Call `knowledge_context` for the user task and `knowledge_impact` before cross-module changes. Follow returned next_action/next_tool/arguments. Verify stale or inferred claims in live source; never treat unreviewed drafts as verified guidance.
+4. Implement the change and run the returned verification commands and task-specific tests. Use a stable taskId for this development task, and reuse it on retries or lifecycle events.
+5. After development and verification finish, automatically call `knowledge_task_complete` with developmentCompleted=true, summary, changedFiles, changedSymbols, and tests. Do not wait for the user to say the task is complete. Do not set userConfirmed=true without explicit user approval. The tool synchronizes code before planning; run `project-kb sync --task-summary "<intent>"` after other source changes.
+6. Continue the returned next_tool with its arguments and evidence. Generate complete source-grounded content and submit each requested item through `knowledge_update_submit`; include taskId. Continue until generation_status=generated, no_update, skipped, or a concrete failure/manual-review requirement. A pending task is not a completed knowledge update. Explicit retry must revalidate the snapshot.
+7. Stop automatic generation when all required drafts are ready. Call `knowledge_draft_confirm` only after explicit user approval of the specific draft and its contentHash. Draft generation and formal publication are separate; do not auto-confirm drafts or rewrite curated/decision knowledge.
+8. Report the task ID, generated draft paths, synchronization result, failures or skipped reasons, and which knowledge still needs review. Hooks only synchronize/register events; do not assume a post-task hook runs in this client.

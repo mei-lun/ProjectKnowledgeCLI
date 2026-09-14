@@ -137,7 +137,7 @@ class GuidanceMCPTests(unittest.TestCase):
             workflow.return_value.complete.assert_called_once_with(
                 "t1", "完成登录功能", changed_files=["src/login.py"],
                 changed_symbols=[], tests=[{"command": "pytest", "passed": True}],
-                user_confirmed=True, skip=False, skip_reason=None,
+                user_confirmed=True, development_completed=False, retry=False, skip=False, skip_reason=None,
             )
 
     def test_save_and_reject_require_conditional_fields(self):

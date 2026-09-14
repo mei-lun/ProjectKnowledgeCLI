@@ -280,11 +280,38 @@ function runChecked(label, command, args, options) {
 }
 
 
+function resolveNpmLauncher(options) {
+  const packageRoot = path.resolve(options.packageRoot);
+  const platform = options.platform || process.platform;
+  const entry = path.join(packageRoot, "bin", "project-kb.js");
+  const name = platform === "win32" ? "project-kb.cmd" : "project-kb";
+  const candidates = [
+    path.resolve(packageRoot, "..", ".bin", name),
+    platform === "win32"
+      ? path.resolve(packageRoot, "..", "..", name)
+      : path.resolve(packageRoot, "..", "..", "..", "bin", name),
+  ];
+  for (const candidate of candidates) {
+    if (!fs.existsSync(candidate) || !fs.existsSync(entry)) continue;
+    if (platform === "win32") {
+      // npm's cmd shim invokes the package entry relative to its own directory.
+      const target = path.relative(path.dirname(candidate), entry).replaceAll("/", "\\");
+      const shim = fs.readFileSync(candidate, "utf8").replaceAll("/", "\\");
+      if (shim.toLowerCase().includes(`%dp0%\\${target}"`.toLowerCase())) return candidate;
+    } else if (fs.realpathSync(candidate) === fs.realpathSync(entry)) {
+      return candidate;
+    }
+  }
+  throw new Error("Cannot locate this package's installed npm launcher; reinstall project-kb-cli or set PROJECT_KB_LAUNCHER to its absolute launcher path.");
+}
+
+
 function buildLaunchSpec(options) {
   const platform = options.platform || process.platform;
   const env = { ...(options.env || process.env) };
   if (!env.PYTHONUTF8) env.PYTHONUTF8 = "1";
   if (!env.PYTHONIOENCODING) env.PYTHONIOENCODING = "utf-8";
+  if (!env.PROJECT_KB_LAUNCHER) env.PROJECT_KB_LAUNCHER = resolveNpmLauncher(options);
   if (!env.CODEGRAPH_COMMAND) {
     env.CODEGRAPH_COMMAND = path.join(
       path.resolve(options.packageRoot),
@@ -340,4 +367,5 @@ module.exports = {
   launchCli,
   runtimeBase,
   runtimePython,
+  resolveNpmLauncher,
 };
