@@ -100,8 +100,8 @@ WORKFLOW_TOOLS: list[dict[str, Any]] = [
     },
     {
         "name": "knowledge_task_complete",
-        "title": "确认任务完成并准备指导生成",
-        "description": "记录用户确认完成的任务，锁定快照并返回受影响类别和证据。",
+        "title": "完成开发并准备指导草稿",
+        "description": "开发与验证结束后自动调用；同步快照并返回逐项生成动作。生成草稿不要求用户确认，发布正式知识仍需审核。",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -112,10 +112,12 @@ WORKFLOW_TOOLS: list[dict[str, Any]] = [
                 "changedSymbols": {"type": "array", "items": {"type": "string"}, "uniqueItems": True},
                 "tests": {"type": "array", "items": {"type": "object"}},
                 "userConfirmed": {"type": "boolean"},
+                "developmentCompleted": {"type": "boolean"},
+                "retry": {"type": "boolean"},
                 "skip": {"type": "boolean"},
                 "skipReason": {"type": "string", "minLength": 1},
             },
-            "required": ["taskId", "summary", "userConfirmed"],
+            "required": ["taskId", "summary"],
             "additionalProperties": False,
         },
         "annotations": {"readOnlyHint": False, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
@@ -223,7 +225,8 @@ WORKFLOW_TOOLS: list[dict[str, Any]] = [
             "properties": {
                 "projectPath": {"type": "string", "minLength": 1},
                 "changeId": {"type": "string", "minLength": 1},
-                "level": {"enum": ["fact", "guidance", "category"]},
+                "taskId": {"type": "string", "minLength": 1},
+                "level": {"enum": ["fact", "guidance", "methodology", "category"]},
                 "categoryId": {"type": "string", "minLength": 1},
                 "content": {"type": "object"},
                 "evidence": {"type": "array", "items": {"type": "object"}},
@@ -345,6 +348,7 @@ class MCPServer:
         if method == "initialize":
             requested = params.get("protocolVersion", LEGACY_PROTOCOL)
             protocol = requested if requested in {CURRENT_PROTOCOL, LEGACY_PROTOCOL, "2025-11-25", "2024-11-05"} else LEGACY_PROTOCOL
+            self.protocol_version = protocol
             audit = getattr(self, "audit", None)
             if audit is not None and invocation is not None:
                 audit.client_initialized(invocation, params, protocol)
@@ -364,7 +368,9 @@ class MCPServer:
         if method == "ping":
             return self._result(request_id, {})
         if method == "tools/list":
-            return self._result(request_id, {"tools": TOOLS, "ttlMs": 60_000, "cacheScope": "server"})
+            metadata = ({'resultType': 'complete', 'ttlMs': 60_000, 'cacheScope': 'private'}
+                        if getattr(self, 'protocol_version', LEGACY_PROTOCOL) == CURRENT_PROTOCOL else {})
+            return self._result(request_id, {"tools": TOOLS, **metadata})
         if method == "tools/call":
             name = params.get("name")
             arguments = params.get("arguments") or {}
@@ -407,7 +413,19 @@ class MCPServer:
         if name == "knowledge_initialization_start":
             from .initialization import InitializationWorkflow
             return InitializationWorkflow(project).start()
-        return self._call_workflow_tool(name, arguments)
+        value = self._call_workflow_tool(name, arguments)
+        if name in {'knowledge_initialization_submit', 'knowledge_draft_save', 'knowledge_draft_confirm'} and (project / '.project-kb' / 'index.db').exists():
+            from .store import KnowledgeStore
+            from .guidance_store import GuidanceStore
+            from .task_workflow import refresh_initialization_tasks
+            with KnowledgeStore(project / '.project-kb' / 'index.db') as store:
+                store.initialize()
+                run_ids = {task.initialization_run_id for task in GuidanceStore(store).list_task_completions(limit=None)
+                           if task.initialization_run_id}
+                with store.transaction():
+                    for run_id in run_ids:
+                        refresh_initialization_tasks(store, run_id)
+        return value
 
     @staticmethod
     def _call_read_tool(
@@ -468,7 +486,9 @@ class MCPServer:
                 changed_files=list(arguments.get("changedFiles", [])),
                 changed_symbols=list(arguments.get("changedSymbols", [])),
                 tests=list(arguments.get("tests", [])),
-                user_confirmed=bool(arguments["userConfirmed"]),
+                user_confirmed=bool(arguments.get("userConfirmed", False)),
+                development_completed=bool(arguments.get("developmentCompleted", False)),
+                retry=bool(arguments.get("retry", False)),
                 skip=bool(arguments.get("skip", False)),
                 skip_reason=arguments.get("skipReason"),
             )
@@ -522,6 +542,7 @@ class MCPServer:
                 category_id=arguments.get("categoryId"),
                 content=dict(arguments.get("content", {})),
                 evidence=list(arguments.get("evidence", [])),
+                **({'task_id': arguments['taskId']} if arguments.get('taskId') else {}),
             )
         raise KeyError(f"unknown tool: {name}")
 
@@ -535,6 +556,10 @@ class MCPServer:
 
 
 def serve(project: str | Path = ".") -> None:
+    # MCP stdio is UTF-8 regardless of the launcher or Windows locale.
+    for stream in (sys.stdin, sys.stdout):
+        if hasattr(stream, 'reconfigure'):
+            stream.reconfigure(encoding='utf-8', errors='strict', newline='\n')
     root = Path(project).resolve()
     audit = MCPAuditLogger(
         root,

@@ -92,9 +92,32 @@ class GuidanceWorkflowTests(unittest.TestCase):
         draft = self.workflow.save_draft("category_catalog", "run-1", self.catalog)
         return self.workflow.confirm_draft(draft["draft_id"], draft["content_hash"], "tester")
 
+    def test_fully_reviewed_initialization_supersedes_older_pending_change(self):
+        from project_knowledge.guidance_models import GuidanceChange
+        now = utc_now()
+        with KnowledgeStore(self.db) as store:
+            with store.transaction():
+                GuidanceStore(store).save_change(GuidanceChange(
+                    'old-change', str(self.root.resolve()), 'old', 'snap-1', 'guidance',
+                    ['src/login.lua'], ['retired-category'], {}, now,
+                ))
+        self.confirm_catalog()
+        methodology = self.workflow.save_draft('methodology', 'run-1', self.methodology(), 'login')
+        guide = self.workflow.save_draft('guidance', 'run-1', self.guide(), 'login')
+        self.workflow.confirm_draft(methodology['draft_id'], methodology['content_hash'], 'tester')
+        with KnowledgeStore(self.db) as store:
+            self.assertEqual(len(GuidanceStore(store).pending_changes()), 1)
+        self.workflow.confirm_draft(guide['draft_id'], guide['content_hash'], 'tester')
+        with KnowledgeStore(self.db) as store:
+            self.assertEqual(GuidanceStore(store).pending_changes(), [])
+            payload = json.loads(store.connection.execute(
+                "SELECT payload_json FROM guidance_changes WHERE change_id='old-change'"
+            ).fetchone()[0])
+            self.assertEqual(payload['superseded_by_reviewed_initialization'], 'run-1')
+
     def test_category_catalog_requires_visible_markdown_and_hash(self):
         draft = self.workflow.save_draft("category_catalog", "run-1", self.catalog)
-        self.assertEqual(Path(draft["path"]), (self.root / ".project-kb" / "功能分类目录-待审核.md").resolve())
+        self.assertEqual(Path(draft["path"]), (self.root / ".project-kb" / "drafts" / "run-1" / draft['draft_id'] / "功能分类目录-待审核.md").resolve())
         self.assertTrue(Path(draft["path"]).is_file())
         Path(draft["path"]).write_text(Path(draft["path"]).read_text(encoding="utf-8") + "\n用户修改\n", encoding="utf-8")
         with self.assertRaisesRegex(ValueError, "哈希"):

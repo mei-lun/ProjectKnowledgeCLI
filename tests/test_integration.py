@@ -196,7 +196,7 @@ class IntegrationTests(unittest.TestCase):
             self.assertIn("guidance_workflow", response["result"]["structuredContent"])
 
         with KnowledgeStore(service.db_path, readonly=True) as store:
-            self.assertEqual(store.get_meta("schema_version"), "4")
+            self.assertEqual(store.get_meta("schema_version"), "5")
             self.assertEqual(store.counts()["knowledge"], existing_knowledge)
 
     def test_rebuild_preserves_complete_guidance_graph(self) -> None:

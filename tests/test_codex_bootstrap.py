@@ -10,6 +10,11 @@ from unittest.mock import patch
 
 from project_knowledge.engine import CodeIndexSnapshot
 from project_knowledge.service import ProjectService
+from project_knowledge.errors import ProjectKnowledgeError
+from project_knowledge.cli import main
+import contextlib
+import io
+import json
 
 
 class StubEngine:
@@ -46,8 +51,32 @@ class CodexBootstrapTests(unittest.TestCase):
         with (
             patch.dict(os.environ, {"CODEGRAPH_COMMAND": str(self.codegraph)}),
             patch.object(service, "_atomic_rebuild", return_value={"files_indexed": 0}),
+            patch("project_knowledge.service.verify_project_mcp", return_value={"verified": True}),
+            patch("project_knowledge.codex.resolve_project_launcher", return_value=Path("project-kb")),
         ):
             return service.initialize()
+
+    def test_init_verifies_after_releasing_writer_lock(self) -> None:
+        service = self.service()
+        def verify(root):
+            self.assertFalse((root / ".project-kb" / "write.lock").exists())
+            self.assertTrue((root / "AGENTS.md").exists())
+            return {"verified": True}
+        with patch.object(service, "_atomic_rebuild", return_value={}), patch("project_knowledge.service.verify_project_mcp", side_effect=verify):
+            service.initialize()
+
+    def test_failed_verification_preserves_config_and_returns_structured_nonzero_cli(self) -> None:
+        failure = {"verified": False, "stage": "knowledge_context", "reason": "query failed", "next_action": "repair database"}
+        for command in ["install", "init"]:
+            with self.subTest(command=command), patch("project_knowledge.service.verify_project_mcp", return_value=failure), patch("project_knowledge.cli.ProjectService", return_value=self.service()), patch.object(ProjectService, "_atomic_rebuild", return_value={}):
+                output = io.StringIO()
+                with contextlib.redirect_stdout(output):
+                    code = main([command, str(self.root), "--json"])
+                self.assertNotEqual(code, 0)
+                result = json.loads(output.getvalue())
+                self.assertEqual(result["error"], "mcp_verification_failed")
+                self.assertEqual(result["verification"], failure)
+                self.assertTrue((self.root / ".codex" / "config.toml").exists())
 
     def test_successful_init_writes_owned_agents_and_codex_mcp_config(self) -> None:
         agents = self.root / "AGENTS.md"

@@ -6,6 +6,11 @@ import shutil
 import tomllib
 import json
 import subprocess
+import queue
+import threading
+import time
+import signal
+from collections import deque
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -14,6 +19,7 @@ from .util import atomic_write, read_text
 
 
 CODEX_MCP_MARKER = "codex-mcp"
+MCP_VERIFICATION_TIMEOUT = 120.0
 
 
 def resolve_codegraph_command() -> Path:
@@ -49,6 +55,7 @@ def codex_mcp_body(root: Path, codegraph_command: Path | None = None, launcher: 
         'args = ["mcp", "--project", "."]',
         f"cwd = {json.dumps(str(root), ensure_ascii=False)}",
         "enabled = true",
+        f"startup_timeout_sec = {int(MCP_VERIFICATION_TIMEOUT)}",
     ]
     if codegraph_command:
         lines.extend(["", "[mcp_servers.project_knowledge.env]", f"CODEGRAPH_COMMAND = {json.dumps(str(codegraph_command), ensure_ascii=False)}"])
@@ -192,56 +199,173 @@ def _remove_server_tables(content: str, names: list[str]) -> str:
     return "".join(out).strip() + ("\n" if out else "")
 
 
-def _jsonrpc_response_objects(value: object) -> list[dict[str, Any]]:
-    """Return JSON-RPC response objects from a single or batched payload."""
-    if isinstance(value, dict):
-        return [value]
-    if isinstance(value, list):
-        responses: list[dict[str, Any]] = []
-        for item in value:
-            responses.extend(_jsonrpc_response_objects(item))
-        return responses
-    return []
+REQUIRED_MCP_TOOLS = {"knowledge_status", "knowledge_context", "knowledge_impact"}
+VERIFICATION_PROTOCOL = "2026-07-28"
 
 
-def verify_project_mcp(root: Path, *, launcher: Path | None = None, timeout: float = 8.0) -> dict[str, Any]:
-    launcher = launcher or resolve_project_launcher()
-    if not launcher.is_absolute() or not launcher.exists():
-        return {"attempted": False, "verified": False, "reason": "stable launcher is not available on PATH"}
-    requests = [
-        {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {"protocolVersion": "2026-07-28"}},
-        {"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}},
-    ]
+def validate_mcp_response(response: object, request_id: int) -> dict[str, Any]:
+    if not isinstance(response, dict) or response.get("jsonrpc") != "2.0":
+        raise ValueError("invalid JSON-RPC response")
+    if type(response.get("id")) is not int or response["id"] != request_id:
+        raise ValueError(f"unexpected response ID; expected {request_id}")
+    if "error" in response:
+        raise ValueError(f"MCP request failed: {response['error']}")
+    result = response.get("result")
+    if not isinstance(result, dict):
+        raise ValueError("MCP response result must be an object")
+    if request_id == 1:
+        info = result.get("serverInfo")
+        capabilities = result.get("capabilities")
+        if (result.get("protocolVersion") != VERIFICATION_PROTOCOL
+                or not isinstance(info, dict) or info.get("name") != "project-knowledge"
+                or not isinstance(info.get("version"), str)
+                or not isinstance(capabilities, dict) or not isinstance(capabilities.get("tools"), dict)):
+            raise ValueError("MCP initialize returned an invalid handshake")
+    elif request_id == 2:
+        items = result.get("tools")
+        if not isinstance(items, list) or any(not isinstance(item, dict) or not isinstance(item.get("name"), str) for item in items):
+            raise ValueError("MCP tools/list result.tools must be a list of tools")
+        missing = REQUIRED_MCP_TOOLS - {item["name"] for item in items}
+        if missing:
+            raise ValueError("MCP tools/list is missing: " + ", ".join(sorted(missing)))
+    else:
+        name = "knowledge_status" if request_id == 3 else "knowledge_context"
+        if result.get("isError", False) is not False:
+            raise ValueError(f"MCP {name} returned an error: {result.get('content')}")
+        payload = result.get("structuredContent")
+        if payload is None:
+            content = result.get("content")
+            if isinstance(content, list):
+                text = next((item.get("text") for item in content if isinstance(item, dict) and item.get("type") == "text"), None)
+                if isinstance(text, str):
+                    payload = json.loads(text)
+        if not isinstance(payload, dict) or not payload or payload.get("error"):
+            raise ValueError(f"MCP {name} returned an invalid query payload")
+    return result
+
+
+def verify_project_mcp(root: Path, *, launcher: Path | None = None, timeout: float = MCP_VERIFICATION_TIMEOUT, env: dict[str, str] | None = None) -> dict[str, Any]:
+    root = Path(root).resolve()
+    report: dict[str, Any] = {
+        "attempted": False, "verified": False, "stage": "configuration", "tools": [],
+        "server_started": False, "handshake_verified": False, "tools_verified": False,
+        "queries_verified": False, "codex_session_verified": False,
+    }
+    process = None
+    readers: list[threading.Thread] = []
+    stderr: deque[str] = deque(maxlen=20)
+    deadline = time.monotonic() + timeout
     try:
-        completed = subprocess.run(
-            [str(launcher), "mcp", "--project", str(Path(root).resolve())],
-            input="\n".join(json.dumps(item) for item in requests) + "\n",
-            text=True, capture_output=True, timeout=timeout,
-            cwd=str(Path(root).resolve()), check=False,
-            shell=launcher.suffix.lower() in {".cmd", ".bat"},
+        config = root / ".codex" / "config.toml"
+        if config.exists():
+            server = _project_knowledge_server(_parse_toml(read_text(config)))
+        else:
+            server = {"command": str(launcher or resolve_project_launcher()), "args": ["mcp", "--project", "."], "cwd": str(root)}
+        if not isinstance(server, dict):
+            raise ValueError("project Codex config has no project_knowledge server")
+        command, args = server.get("command"), server.get("args", [])
+        cwd, overrides = server.get("cwd", str(root)), server.get("env", {})
+        if not isinstance(command, str) or not Path(command).is_absolute() or not Path(command).is_file():
+            raise ValueError("stable launcher is missing; reinstall project-kb or set PROJECT_KB_LAUNCHER to its absolute path")
+        if server.get("enabled", True) is not True:
+            raise ValueError("project_knowledge MCP server is disabled")
+        if not isinstance(args, list) or any(not isinstance(arg, str) for arg in args):
+            raise ValueError("MCP args must be a list of strings")
+        if not isinstance(cwd, str) or not isinstance(overrides, dict) or any(not isinstance(value, str) for value in overrides.values()):
+            raise ValueError("MCP cwd and env must contain strings")
+        workdir = Path(cwd)
+        if not workdir.is_absolute():
+            workdir = root / workdir
+        report["stage"] = "launch"
+        report["attempted"] = True
+        process = subprocess.Popen(
+            [command, *args], cwd=workdir, env={**(os.environ if env is None else env), **overrides},
+            stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            text=True, encoding="utf-8", errors="replace", bufsize=1,
+            shell=Path(command).suffix.lower() in {".cmd", ".bat"},
+            start_new_session=os.name != "nt",
         )
-        responses = [
-            response
-            for line in completed.stdout.splitlines()
-            if line.strip()
-            for response in _jsonrpc_response_objects(json.loads(line))
+        report["server_started"] = True
+        incoming: queue.Queue[str | None] = queue.Queue()
+
+        def read_stdout() -> None:
+            try:
+                for line in process.stdout:
+                    incoming.put(line)
+            finally:
+                incoming.put(None)
+
+        def read_stderr() -> None:
+            for line in process.stderr:
+                stderr.append(line)
+
+        for target in (read_stdout, read_stderr):
+            reader = threading.Thread(target=target, daemon=True)
+            reader.start()
+            readers.append(reader)
+
+        def send(request: dict[str, Any]) -> None:
+            process.stdin.write(json.dumps(request) + "\n")
+            process.stdin.flush()
+
+        def receive(request_id: int) -> dict[str, Any]:
+            while True:
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    raise TimeoutError("MCP verification timed out")
+                try:
+                    line = incoming.get(timeout=remaining)
+                except queue.Empty as error:
+                    raise TimeoutError("MCP verification timed out") from error
+                if line is None:
+                    raise ValueError(f"MCP process closed before response {request_id}")
+                response = json.loads(line)
+                if isinstance(response, dict) and "id" not in response and response.get("jsonrpc") == "2.0" and isinstance(response.get("method"), str):
+                    continue
+                return validate_mcp_response(response, request_id)
+
+        steps = [
+            ("initialize", "initialize", {"protocolVersion": VERIFICATION_PROTOCOL, "capabilities": {}, "clientInfo": {"name": "project-kb-verifier", "version": "1"}}),
+            ("tools/list", "tools/list", {}),
+            ("knowledge_status", "tools/call", {"name": "knowledge_status", "arguments": {}}),
+            ("knowledge_context", "tools/call", {"name": "knowledge_context", "arguments": {"task": "Verify project knowledge installation", "maxTokens": 256}}),
         ]
-        tools: set[str] = set()
-        for response in responses:
-            result = response.get("result")
-            if not isinstance(result, dict):
-                continue
-            tools_result = result.get("tools")
-            if not isinstance(tools_result, dict):
-                continue
-            tool_items = tools_result.get("tools")
-            if not isinstance(tool_items, list):
-                continue
-            for item in tool_items:
-                if isinstance(item, dict) and isinstance(item.get("name"), str):
-                    tools.add(item["name"])
-        required = {"knowledge_status", "knowledge_context", "knowledge_impact"}
-        verified = completed.returncode == 0 and required <= tools
-        return {"attempted": True, "verified": verified, "tools": sorted(tools), "stderr": completed.stderr[-500:] if completed.stderr else None}
-    except (OSError, subprocess.SubprocessError, json.JSONDecodeError) as error:
-        return {"attempted": True, "verified": False, "error": str(error)}
+        for request_id, (stage, method, params) in enumerate(steps, 1):
+            report["stage"] = stage
+            send({"jsonrpc": "2.0", "id": request_id, "method": method, "params": params})
+            result = receive(request_id)
+            if request_id == 1:
+                report["handshake_verified"] = True
+                send({"jsonrpc": "2.0", "method": "notifications/initialized"})
+            elif request_id == 2:
+                report["tools_verified"] = True
+                report["tools"] = sorted(item["name"] for item in result["tools"])
+        report["queries_verified"] = True
+        report["stage"] = "shutdown"
+        process.stdin.close()
+        if process.wait(timeout=max(0.01, deadline - time.monotonic())) != 0:
+            raise ValueError(f"MCP process exited with code {process.returncode}")
+        report.update(verified=True, stage="complete", next_action="Restart Codex and verify tools in a new project session")
+    except (OSError, subprocess.SubprocessError, ValueError) as error:
+        report.update(reason=str(error), next_action="Inspect .codex/config.toml command/args/cwd/env and the reported stage, repair the cause, then rerun project-kb install")
+    finally:
+        if process is not None:
+            if process.poll() is None:
+                # npm shims launch descendants that also hold the stdio pipes open.
+                try:
+                    if os.name == "nt":
+                        subprocess.run(["taskkill", "/PID", str(process.pid), "/T", "/F"], capture_output=True, timeout=5, check=False)
+                    else:
+                        os.killpg(process.pid, signal.SIGKILL)
+                except (OSError, subprocess.SubprocessError):
+                    pass
+                if process.poll() is None:
+                    process.kill()
+                process.wait()
+            for reader in readers:
+                reader.join(timeout=1)
+            for stream in (process.stdin, process.stdout, process.stderr):
+                if stream is not None:
+                    stream.close()
+        report["stderr"] = "".join(stderr)[-1000:] or None
+    return report

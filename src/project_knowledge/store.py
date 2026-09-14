@@ -10,7 +10,7 @@ from .engine import CodeIndexSnapshot
 from .models import KnowledgeRecord, SourceReference
 
 
-SCHEMA_VERSION = 4
+SCHEMA_VERSION = 5
 
 
 class KnowledgeStore:
@@ -54,7 +54,7 @@ class KnowledgeStore:
             raise RuntimeError(
                 f"数据库 Schema v{existing_version} 高于当前支持的 v{SCHEMA_VERSION}"
             )
-        if existing_version not in {0, 1, 2, 3, SCHEMA_VERSION}:
+        if existing_version not in {0, 1, 2, 3, 4, SCHEMA_VERSION}:
             raise RuntimeError(f"不支持从 Schema v{existing_version} 迁移")
 
         self.connection.commit()
@@ -64,6 +64,7 @@ class KnowledgeStore:
             self._upgrade_early_guidance_schema()
             self._create_guidance_schema()
             self._upgrade_guidance_asset_schema()
+            self._upgrade_task_schema()
             try:
                 self.connection.execute(
                     "CREATE VIRTUAL TABLE IF NOT EXISTS knowledge_fts "
@@ -96,6 +97,20 @@ class KnowledgeStore:
         if version < 0:
             raise RuntimeError("数据库 schema_version 无效")
         return version
+
+    def _upgrade_task_schema(self) -> None:
+        columns = {row['name'] for row in self.connection.execute('PRAGMA table_info(task_completions)')}
+        for name, declaration in (
+            ('development_completed', 'INTEGER NOT NULL DEFAULT 0 CHECK(development_completed IN (0, 1))'),
+            ('change_id', 'TEXT'),
+            ('request_hash', 'TEXT'),
+            ('initialization_run_id', 'TEXT'),
+        ):
+            if name not in columns:
+                self.connection.execute(f'ALTER TABLE task_completions ADD COLUMN {name} {declaration}')
+        self.connection.execute(
+            'UPDATE task_completions SET development_completed=1 WHERE user_confirmed=1'
+        )
 
     def _create_base_schema(self) -> None:
         statements = [

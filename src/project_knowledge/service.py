@@ -16,6 +16,7 @@ from .codex import codex_mcp_body, migrate_legacy_codex, update_codex_config, ve
 from .engine import CodeIndexEngine, CodeIndexSnapshot, IndexedFile, create_engine
 from .guidance import GuidanceService
 from .knowledge import KnowledgeGenerator
+from .instructions import AGENTS_BODY
 from .models import ChangeSet
 from .proposal import ProposalService
 from .progress import ProgressEvent
@@ -38,16 +39,6 @@ from .util import (
     watcher_lock,
 )
 
-
-AGENTS_BODY = """Use the local Project Knowledge System before broad repository exploration.
-
-1. Call `knowledge_status` at task start.
-2. Call `knowledge_context` for the user task and `knowledge_impact` before cross-module changes.
-3. Treat `verified` and `generated` facts according to their reported freshness; verify stale or inferred claims in live source.
-4. Read only the source files needed to confirm and implement the change.
-5. Run the returned verification commands or the repository's documented checks.
-6. Report whether generated knowledge was synchronized and whether curated knowledge needs review.
-"""
 
 GITIGNORE_BODY = """.project-kb/index.db
 .project-kb/index.db-*
@@ -185,12 +176,17 @@ class ProjectService:
             )
             self._progress(progress, "integration", "安装客户端集成", "started", 5)
             try:
-                result["codex"] = self._install_codex_integration()
-                result["codex_migration"] = migrate_legacy_codex(self.root)
+                result["codex"] = self._install_codex_integration(verify=False)
             except Exception as error:
                 self._progress(progress, "integration", "安装客户端集成", "failed", 5, error=str(error))
                 raise
-            self._progress(progress, "integration", "安装客户端集成", "completed", 5)
+        try:
+            self._verify_codex_integration(result["codex"])
+            result["codex_migration"] = migrate_legacy_codex(self.root)
+        except Exception as error:
+            self._progress(progress, "integration", "安装客户端集成", "failed", 5, error=str(error))
+            raise
+        self._progress(progress, "integration", "安装客户端集成", "completed", 5)
         result["action"] = "init"
         result["codegraph"] = codegraph
         return result
@@ -870,31 +866,59 @@ class ProjectService:
             }
         })
 
-    def _install_codex_integration(self) -> dict[str, Any]:
+    def _install_codex_integration(self, *, verify: bool = True) -> dict[str, Any]:
         config_path = self.root / ".codex" / "config.toml"
         config_changed = update_codex_config(config_path, codex_mcp_body(self.root))
-        verification = verify_project_mcp(self.root)
         agents_changed = marker_update(self.root / "AGENTS.md", "instructions", AGENTS_BODY)
-        return {
+        result = {
             "config": ".codex/config.toml",
             "config_updated": config_changed,
             "agents_updated": agents_changed,
-            "verification": verification,
         }
+        if verify:
+            self._verify_codex_integration(result)
+        return result
+
+    def _verify_codex_integration(self, result: dict[str, Any]) -> None:
+        from .errors import ProjectKnowledgeError
+
+        verification = verify_project_mcp(self.root)
+        result["verification"] = verification
+        if not verification.get("verified"):
+            raise ProjectKnowledgeError(
+                "mcp_verification_failed",
+                f"MCP verification failed at {verification.get('stage', 'unknown')}: {verification.get('reason', 'verification did not succeed')}",
+                config=str(self.root / ".codex" / "config.toml"),
+                verification=verification,
+                next_action=verification.get("next_action", "Repair the configured MCP command and rerun project-kb install"),
+            )
 
     def _pending_knowledge(self, store: KnowledgeStore) -> list[str]:
+        rows = list(store.connection.execute("SELECT id, path, content, kind FROM knowledge WHERE ownership IN ('draft', 'curated', 'decision')"))
         indexed = {
             row["path"]: row["content"]
-            for row in store.connection.execute("SELECT path, content FROM knowledge WHERE ownership IN ('draft', 'curated', 'decision')")
+            for row in rows
         }
         current: dict[str, str] = {}
+        workflow_paths = {row['path'] for row in rows if row['kind'] in {'development-guide', 'development-methodology', 'guidance-draft'}
+                          or row['id'].startswith('draft.draft-')}
+        from .guidance_workflow import GuidanceWorkflow
+        for relative in workflow_paths:
+            path = self.root / relative
+            if path.exists():
+                content = path.read_text(encoding='utf-8')
+                current[relative] = GuidanceWorkflow(self.root)._body_from_document(content)
         for base_name in [self.config.drafts_root, self.config.curated_root, self.config.decisions_root]:
             base = self.root / base_name
             if not base.exists():
                 continue
             for path in base.rglob("*.md"):
                 relative = path.relative_to(self.root).as_posix()
-                current[relative] = path.read_text(encoding="utf-8", errors="replace")
+                if relative in workflow_paths:
+                    continue
+                content = path.read_text(encoding="utf-8", errors="replace")
+                if GuidanceWorkflow.MACHINE_START not in content:
+                    current[relative] = content
         changed = [path for path, content in current.items() if indexed.get(path) != content]
         changed.extend(path for path in indexed if path not in current)
         return sorted(set(changed))

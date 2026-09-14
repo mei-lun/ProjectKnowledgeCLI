@@ -94,7 +94,7 @@ class FinalizationService:
         with KnowledgeStore(self.service.db_path, readonly=True) as store:
             guidance = GuidanceStore(store)
             row = store.connection.execute(
-                "SELECT run_id FROM guidance_runs ORDER BY updated_at DESC, created_at DESC, run_id DESC LIMIT 1"
+                "SELECT run_id FROM guidance_runs WHERE run_id NOT LIKE 'run-incr-%' ORDER BY updated_at DESC, created_at DESC, run_id DESC LIMIT 1"
             ).fetchone()
             run = guidance.get_run(str(row["run_id"])) if row else None
             if run is None:

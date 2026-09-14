@@ -41,6 +41,7 @@ class GuidanceWorkflow:
             run = guidance.get_run(run_id)
             if run is None:
                 raise KeyError(f"运行不存在：{run_id}")
+            change = self._linked_change(guidance, content, run)
             snapshot_client = self.client or CodeGraphClient(self.root, self.config)
             if snapshot_client.snapshot()["snapshot_id"] != run.snapshot_id:
                 run.status = "failed"
@@ -48,6 +49,9 @@ class GuidanceWorkflow:
                 run.updated_at = utc_now()
                 with store.transaction():
                     guidance.create_run(run)
+                    if change:
+                        from .incremental import IncrementalWorkflow
+                        IncrementalWorkflow._fail_change(store, change, run.error)
                 raise ValueError("CodeGraph 快照已变化，请重新开始初始化")
             content = dict(content)
             category = None
@@ -105,7 +109,7 @@ class GuidanceWorkflow:
                 filename = f"{self._safe_name(category.name)}-methodology-draft.md"
             elif kind == "guidance":
                 filename = f"{self._safe_name(category.name)}-guidance-draft.md"
-            path = (self.root / ".project-kb" / filename).resolve()
+            path = (self.root / ".project-kb" / "drafts" / run_id / draft_id / filename).resolve()
             self._ensure_project_path(path)
             draft = GuidanceDraft(
                 draft_id=draft_id, run_id=run_id, kind=kind,
@@ -114,6 +118,11 @@ class GuidanceWorkflow:
                 payload={**content, "_body": body}, created_at=now, updated_at=now,
                 category_id=category_id,
             )
+            previous_draft = guidance.get_draft(draft_id)
+            if previous_draft is not None:
+                if previous_draft.status == "confirmed":
+                    raise ValueError("confirmed draft cannot be regenerated")
+                draft.created_at = previous_draft.created_at
             atomic_write(path, self._with_machine_state(draft, body))
             with store.transaction():
                 if complete and kind == "category_catalog" and not content.get("_change_id"):
@@ -127,24 +136,66 @@ class GuidanceWorkflow:
                         if existing is not None:
                             category_item.created_at = existing.created_at
                         guidance.save_category(category_item)
+                if complete and kind == "category_catalog" and change:
+                    catalog_paths = {item["path"] for category_item in content["categories"] for item in category_item["evidence"]}
+                    unclassified = set(change.payload.get("unclassified_files", [])) - set(change.payload.get("deleted", []))
+                    if unclassified - catalog_paths:
+                        raise ValueError("category catalog must cover every unclassified live change")
+                    existing_categories = {item.category_id for item in guidance.list_categories()}
+                    provisional_categories = {item.category_id for item in guidance.list_categories()
+                                              if item.run_id.startswith("run-incr-")
+                                              and guidance.current_version(item.category_id, "methodology") is None}
+                    methodology_categories = set()
+                    for item in content["categories"]:
+                        if item["category_id"] not in existing_categories:
+                            guidance.save_category(self._category_from(item, run_id, now))
+                            methodology_categories.add(item["category_id"])
+                        elif item["category_id"] in provisional_categories:
+                            methodology_categories.add(item["category_id"])
+                    change.payload["methodologyCategories"] = sorted(methodology_categories)
+                    change.payload["catalogRequired"] = True
+                    original = set(change.payload.setdefault(
+                        "originalAffectedCategories", change.payload.get("affected_categories", change.affected_categories),
+                    ))
+                    completed = set(change.payload.get("completedCategories", []))
+                    required = original | completed | {item["category_id"] for item in content["categories"]}
+                    change.payload["pendingCategories"] = sorted(required - completed)
+                    change.affected_categories = sorted(required)
+                    change.payload["affected_categories"] = sorted(required)
+                    for abandoned in guidance.list_pending_drafts(run_id):
+                        if abandoned.category_id and abandoned.category_id not in required and abandoned.payload.get("_change_id") == change.change_id:
+                            abandoned.status = "rejected"
+                            abandoned.rejection_reason = "Category removed from the latest catalog"
+                            abandoned.updated_at = now
+                            guidance.save_draft(abandoned)
+                            store.delete_knowledge(self._draft_record_id(abandoned))
+                    guidance.save_change(change)
                 guidance.save_draft(draft)
+                if change:
+                    from .incremental import IncrementalWorkflow
+                    change.payload.setdefault("latestDrafts", {})[IncrementalWorkflow.draft_slot(kind, category_id)] = draft_id
+                    guidance.save_change(change)
                 if complete:
                     store.upsert_knowledge(
                         self._draft_record(draft, body, content, category)
                     )
                 missing_assets = self._missing_assets(guidance, run_id)
-                if complete and kind == "category_catalog" and content.get("_change_id"):
-                    run.status = "category_review"
+                if change:
+                    from .incremental import IncrementalWorkflow
+                    plan = IncrementalWorkflow.plan_from_store(store, change)
+                    run.status = "guidance_review" if plan["generation_complete"] else "guidance_generation"
                 elif complete and kind == "category_catalog":
                     run.status = "guidance_generation" if missing_assets else "complete"
                 elif complete and not missing_assets:
                     run.status = "complete"
                 else:
                     run.status = "guidance_generation" if guidance.list_categories(run_id) else "category_review"
-                if run.status == "complete":
+                if run.status == "complete" and not change:
                     self._save_baseline(store, run)
                 run.updated_at = now
                 guidance.create_run(run)
+                if change:
+                    IncrementalWorkflow._refresh_tasks(store, change.change_id)
             return {
                 "status": draft.status, "draft_id": draft_id, "content_hash": content_hash,
                 "path": str(path), "next_actions": ["打开 Markdown 审核", "确认正文哈希后提交"],
@@ -159,6 +210,9 @@ class GuidanceWorkflow:
             if draft is None:
                 raise KeyError(f"草稿不存在：{draft_id}")
             if draft.status == "confirmed":
+                run = guidance.get_run(draft.run_id)
+                with store.transaction():
+                    self._complete_reviewed_initialization(store, guidance, run, utc_now())
                 formal_path = draft.payload.get("_formal_path", draft.path)
                 return {"status": "confirmed", "draft_id": draft_id, "content_hash": draft.content_hash, "path": formal_path, "next_actions": []}
             if draft.status != "awaiting_confirmation":
@@ -172,6 +226,14 @@ class GuidanceWorkflow:
             run = guidance.get_run(draft.run_id)
             if run is None or run.snapshot_id != draft.snapshot_id:
                 raise ValueError("草稿快照已过期")
+            change = self._linked_change(guidance, draft.payload, run)
+            if change:
+                from .incremental import IncrementalWorkflow
+                item = next((item for item in IncrementalWorkflow.plan_from_store(store, change)["items"]
+                             if item["category_id"] == draft.category_id
+                             and item["kind"] == ("category" if draft.kind == "category_catalog" else draft.kind)), None)
+                if item is None or item["draft_id"] != draft.draft_id:
+                    raise ValueError("draft has been superseded; review the latest draft")
             snapshot_client = self.client or CodeGraphClient(self.root, self.config)
             if snapshot_client.snapshot()["snapshot_id"] != run.snapshot_id:
                 run.status = "failed"
@@ -179,6 +241,9 @@ class GuidanceWorkflow:
                 run.updated_at = utc_now()
                 with store.transaction():
                     guidance.create_run(run)
+                    if change:
+                        from .incremental import IncrementalWorkflow
+                        IncrementalWorkflow._fail_change(store, change, run.error)
                 raise ValueError("CodeGraph snapshot changed; restart initialization")
             now = utc_now()
             if draft.kind == "category_catalog":
@@ -201,6 +266,8 @@ class GuidanceWorkflow:
                     run.status = "guidance_generation" if draft.payload.get("_change_id") else "categories_confirmed"
                     run.updated_at = now
                     guidance.create_run(run)
+                    if change:
+                        self._complete_linked_change(store, guidance, draft, now)
                     atomic_write(formal, disk_body)
                 path.unlink(missing_ok=True)
                 return {"status": "confirmed", "draft_id": draft_id, "content_hash": content_hash, "path": str(formal.resolve()), "next_actions": ["逐类别生成开发指导草稿"]}
@@ -214,12 +281,22 @@ class GuidanceWorkflow:
             draft = guidance.get_draft(draft_id)
             if draft is None:
                 raise KeyError(f"草稿不存在：{draft_id}")
+            if draft.status == "confirmed":
+                raise ValueError("confirmed draft cannot be rejected")
             draft.status = "rejected"
             draft.rejection_reason = f"{reviewer}: {reason}"
             draft.updated_at = utc_now()
             with store.transaction():
                 guidance.save_draft(draft)
                 store.delete_knowledge(self._draft_record_id(draft))
+                if draft.kind == "category_catalog" and draft.payload.get("_change_id"):
+                    for dependent in guidance.list_pending_drafts(draft.run_id):
+                        if dependent.kind != "category_catalog" and dependent.payload.get("_change_id") == draft.payload["_change_id"]:
+                            dependent.status = "rejected"
+                            dependent.rejection_reason = "Category catalog rejected; regenerate against the revised classification"
+                            dependent.updated_at = draft.updated_at
+                            guidance.save_draft(dependent)
+                            store.delete_knowledge(self._draft_record_id(dependent))
                 run = guidance.get_run(draft.run_id)
                 if run is not None:
                     if draft.kind == "category_catalog" and not draft.payload.get("_change_id"):
@@ -227,11 +304,25 @@ class GuidanceWorkflow:
                     run.status = "guidance_generation" if guidance.list_categories(run.run_id) else "category_review"
                     run.updated_at = draft.updated_at
                     guidance.create_run(run)
+                if draft.payload.get("_change_id"):
+                    from .incremental import IncrementalWorkflow
+                    IncrementalWorkflow._refresh_tasks(store, str(draft.payload["_change_id"]))
             return {"status": "rejected", "draft_id": draft_id, "path": draft.path, "next_actions": ["修改后重新保存草稿"]}
 
     def _confirm_asset(self, store: KnowledgeStore, guidance: GuidanceStore, draft: GuidanceDraft,
                        run: Any, body: str, now: str) -> dict[str, Any]:
         assert draft.category_id
+        change = self._linked_change(guidance, draft.payload, run)
+        if change and change.payload.get("catalogRequired"):
+            from .incremental import IncrementalWorkflow
+            catalog = next(item for item in IncrementalWorkflow.plan_from_store(store, change)["items"] if item["kind"] == "category")
+            if catalog["status"] != "processed":
+                raise ValueError("confirm the category catalog before its guidance")
+            if draft.kind == "guidance" and draft.category_id in change.payload.get("methodologyCategories", []):
+                methodology = next(item for item in IncrementalWorkflow.plan_from_store(store, change)["items"]
+                                   if item["kind"] == "methodology" and item["category_id"] == draft.category_id)
+                if methodology["status"] != "processed":
+                    raise ValueError("confirm the methodology before its guidance")
         category = next(item for item in guidance.list_categories() if item.category_id == draft.category_id)
         asset_type = "methodology" if draft.kind == "methodology" else "project_guidance"
         number = max((item.version for item in guidance.list_versions(category.category_id, asset_type)), default=0) + 1
@@ -272,12 +363,14 @@ class GuidanceWorkflow:
                 draft.confirmed_at = now
                 draft.updated_at = now
                 guidance.save_draft(draft)
-                run.status = "complete" if not self._missing_assets(guidance, run.run_id) else "guidance_generation"
-                if run.status == "complete":
+                run.status = "guidance_review" if change else "complete" if not self._missing_assets(guidance, run.run_id) else "guidance_generation"
+                if run.status == "complete" and not change:
                     self._save_baseline(store, run)
                 run.updated_at = now
                 guidance.create_run(run)
                 self._complete_linked_change(store, guidance, draft, now)
+                if not change:
+                    self._complete_reviewed_initialization(store, guidance, run, now)
                 atomic_write(formal, body)
         except BaseException:
             if previous is None:
@@ -384,6 +477,60 @@ class GuidanceWorkflow:
             "files": self._snapshot_hashes(run.snapshot_id),
         }, ensure_ascii=False, sort_keys=True))
 
+    def _complete_reviewed_initialization(self, store: KnowledgeStore, guidance: GuidanceStore,
+                                          run: Any, now: str) -> None:
+        if not run or run.run_id.startswith('run-incr-') or run.status != 'complete':
+            return
+        categories = guidance.list_categories(run.run_id)
+        drafts = [
+            guidance._draft(row) for row in store.rows('SELECT * FROM guidance_drafts WHERE run_id=?', [run.run_id])
+        ]
+        if not categories or not any(draft.kind == 'category_catalog' and draft.status == 'confirmed' for draft in drafts):
+            return
+        if any(not (version := guidance.current_version(category.category_id, asset)) or version.snapshot_id != run.snapshot_id
+               for category in categories for asset in ('methodology', 'project_guidance')):
+            return
+        client = self.client or CodeGraphClient(self.root, self.config)
+        if client.snapshot()['snapshot_id'] != run.snapshot_id:
+            return
+        from .incremental import IncrementalWorkflow
+        for change in guidance.pending_changes():
+            if Path(change.project_root).resolve() != self.root:
+                continue
+            change.payload['superseded_by_reviewed_initialization'] = run.run_id
+            guidance.save_change(change)
+            guidance.mark_change_processed(change.change_id, now)
+            IncrementalWorkflow._refresh_tasks(store, change.change_id)
+        for draft in guidance.list_pending_drafts():
+            if draft.run_id != run.run_id:
+                draft.status, draft.updated_at = 'rejected', now
+                draft.rejection_reason = 'Superseded by reviewed initialization ' + run.run_id
+                store.connection.execute(
+                    'UPDATE guidance_drafts SET status=?, updated_at=?, rejection_reason=? WHERE draft_id=?',
+                    (draft.status, draft.updated_at, draft.rejection_reason, draft.draft_id),
+                )
+                store.delete_knowledge(self._draft_record_id(draft))
+
+    @staticmethod
+    def _linked_change(guidance: GuidanceStore, content: dict[str, Any], run: Any) -> Any:
+        change_id = content.get("_change_id")
+        if not change_id:
+            if run.run_id.startswith("run-incr-"):
+                raise ValueError("incremental drafts require an explicit change association")
+            return None
+        change = next((item for item in guidance.pending_changes() if item.change_id == change_id), None)
+        if change is None:
+            raise ValueError("draft change is no longer pending")
+        if (change.project_root != run.project_root or change.head_snapshot_id != run.snapshot_id
+                or change.payload.get("run_id", run.run_id) != run.run_id
+                or content.get("_head_snapshot_id") != change.head_snapshot_id
+                or change.payload.get("error")):
+            raise ValueError("draft change snapshot or run association is invalid")
+        files = change.payload.get("snapshot_files")
+        if files is not None and content.get("_snapshot_files") != files:
+            raise ValueError("draft snapshot files do not match the change")
+        return change
+
     @staticmethod
     def _complete_linked_change(store: KnowledgeStore, guidance: GuidanceStore,
                                 draft: GuidanceDraft, now: str) -> None:
@@ -394,9 +541,6 @@ class GuidanceWorkflow:
         head = draft.payload.get("_head_snapshot_id")
         if not isinstance(files, dict) or not head:
             raise ValueError("增量草稿缺少快照基线")
-        store.set_meta("guidance_snapshot", json.dumps({
-            "snapshot_id": head, "files": files,
-        }, ensure_ascii=False, sort_keys=True))
         change = next(
             (item for item in guidance.pending_changes() if item.change_id == str(change_id)),
             None,
@@ -405,16 +549,27 @@ class GuidanceWorkflow:
             raise KeyError(f"pending change not found: {change_id}")
         payload = dict(change.payload)
         category_id = draft.category_id
-        pending = [item for item in payload.get("pendingCategories", change.affected_categories) if item != category_id]
+        pending = [item for item in payload.get("pendingCategories", change.affected_categories)
+                   if draft.kind != "guidance" or item != category_id]
         completed = list(payload.get("completedCategories", []))
-        if category_id and category_id not in completed:
+        if draft.kind == "guidance" and category_id and category_id not in completed:
             completed.append(category_id)
         payload["pendingCategories"] = pending
         payload["completedCategories"] = completed
         change.payload = payload
         guidance.save_change(change)
-        if not pending:
+        from .incremental import IncrementalWorkflow
+        plan = IncrementalWorkflow.plan_from_store(store, change)
+        if plan["items"] and all(item["status"] == "processed" for item in plan["items"]):
+            store.set_meta("guidance_snapshot", json.dumps({
+                "snapshot_id": head, "files": files,
+            }, ensure_ascii=False, sort_keys=True))
             guidance.mark_change_processed(str(change_id), now)
+            IncrementalWorkflow._retire_failed_changes(store, change, now)
+            run = guidance.get_run(draft.run_id)
+            run.status, run.updated_at = "complete", now
+            guidance.create_run(run)
+        IncrementalWorkflow._refresh_tasks(store, str(change_id))
 
     def _validate_categories(
         self, run_id: str, snapshot_id: str, categories: list[dict[str, Any]],
@@ -454,7 +609,7 @@ class GuidanceWorkflow:
         for item in evidence:
             self._validate_evidence(item, set(hashes), hashes)
         methodology_text = json.dumps(
-            {key: value for key, value in content.items() if key != "evidence"},
+            {key: value for key, value in content.items() if key != "evidence" and not key.startswith("_")},
             ensure_ascii=False,
         ).lower()
         return complete and not any(term in methodology_text for term in self.PROJECT_LEAKAGE_TERMS)

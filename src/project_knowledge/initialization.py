@@ -38,7 +38,7 @@ class InitializationWorkflow:
         with self._open() as store:
             guidance = GuidanceStore(store)
             row = store.connection.execute(
-                "SELECT run_id FROM guidance_runs WHERE project_root=? AND snapshot_id=? ORDER BY created_at LIMIT 1",
+                "SELECT run_id FROM guidance_runs WHERE project_root=? AND snapshot_id=? AND run_id NOT LIKE 'run-incr-%' ORDER BY created_at LIMIT 1",
                 (project_root, snapshot_id),
             ).fetchone()
             if row:
@@ -65,7 +65,7 @@ class InitializationWorkflow:
                 ordered = sorted(groups[group], key=lambda item: item["path"])
                 batches.extend(ordered[index:index + self.MAX_BATCH_FILES] for index in range(0, len(ordered), self.MAX_BATCH_FILES))
             previous_row = store.connection.execute(
-                "SELECT run_id FROM guidance_runs WHERE project_root=? ORDER BY created_at DESC, run_id DESC LIMIT 1",
+                "SELECT run_id FROM guidance_runs WHERE project_root=? AND run_id NOT LIKE 'run-incr-%' ORDER BY created_at DESC, run_id DESC LIMIT 1",
                 (project_root,),
             ).fetchone()
             reusable: dict[tuple[str, ...], dict[str, Any]] = {}

@@ -19,7 +19,7 @@ class NpmBootstrapValidationTests(unittest.TestCase):
             {
                 "jsonrpc": "2.0",
                 "id": 1,
-                "result": {"serverInfo": {"name": "project-knowledge", "version": "1.2.3"}},
+                "result": {"protocolVersion": "2026-07-28", "capabilities": {"tools": {}}, "serverInfo": {"name": "project-knowledge", "version": "1.2.3"}},
             },
             {
                 "jsonrpc": "2.0",
@@ -33,8 +33,9 @@ class NpmBootstrapValidationTests(unittest.TestCase):
             {
                 "jsonrpc": "2.0",
                 "id": 3,
-                "result": {"isError": False, "content": [{"type": "text", "text": "{}"}]},
+                "result": {"isError": False, "content": [{"type": "text", "text": "{\"project_root\": \"fixture\"}"}]},
             },
+            {"jsonrpc": "2.0", "id": 4, "result": {"isError": False, "structuredContent": {"task": "verify", "items": []}}},
         ])
 
         self.assertEqual(
@@ -45,10 +46,14 @@ class NpmBootstrapValidationTests(unittest.TestCase):
     def test_mcp_validation_rejects_missing_required_tools(self) -> None:
         with self.assertRaisesRegex(RuntimeError, "knowledge_impact"):
             validate_mcp_responses([
-                {"id": 1, "result": {"serverInfo": {"name": "project-knowledge"}}},
-                {"id": 2, "result": {"tools": [{"name": "knowledge_status"}, {"name": "knowledge_context"}]}},
+                {"jsonrpc": "2.0", "id": 1, "result": {"protocolVersion": "2026-07-28", "capabilities": {"tools": {}}, "serverInfo": {"name": "project-knowledge", "version": "test"}}},
+                {"jsonrpc": "2.0", "id": 2, "result": {"tools": [{"name": "knowledge_status"}, {"name": "knowledge_context"}]}},
                 {"id": 3, "result": {"isError": False}},
             ])
+
+    def test_mcp_validation_rejects_duplicate_ids(self) -> None:
+        with self.assertRaisesRegex(RuntimeError, "duplicate"):
+            validate_mcp_responses([{"id": 1}, {"id": 1}])
 
 
 if __name__ == "__main__":

@@ -28,6 +28,7 @@ class ProgressTests(unittest.TestCase):
             with (
                 patch.object(service, "_atomic_rebuild", return_value={"files_indexed": 0}),
                 patch.object(service, "_install_codex_integration", return_value={}),
+                patch.object(service, "_verify_codex_integration"),
             ):
                 result = service.initialize(progress=events.append)
 
