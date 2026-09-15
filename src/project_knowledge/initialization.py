@@ -44,6 +44,7 @@ class InitializationWorkflow:
             if row:
                 existing = guidance.get_run(str(row["run_id"]))
                 if existing is not None and existing.status != "failed":
+                    self._supersede_unbased_changes(store, guidance, existing.run_id)
                     return self._status(guidance, existing.run_id)
                 with store.transaction():
                     draft_rows = store.connection.execute(
@@ -56,6 +57,10 @@ class InitializationWorkflow:
                     )
             run_id = "run-" + hashlib.sha256(f"{project_root}\0{snapshot_id}".encode()).hexdigest()[:16]
             now = utc_now()
+            # Older clients could create a synthetic full-project incremental
+            # change before the initial guidance baseline existed.  Keep that
+            # record auditable, but retire it when initialization starts.
+            self._supersede_unbased_changes(store, guidance, run_id, now=now)
             groups: dict[str, list[dict[str, Any]]] = {}
             for item in files:
                 group = item.get("module") or item["path"].split("/", 1)[0]
@@ -99,6 +104,23 @@ class InitializationWorkflow:
                 run.updated_at = now
                 guidance.create_run(run)
             return self._status(guidance, run_id)
+
+    @staticmethod
+    def _supersede_unbased_changes(
+        store: KnowledgeStore,
+        guidance: GuidanceStore,
+        run_id: str,
+        *,
+        now: str | None = None,
+    ) -> None:
+        timestamp = now or utc_now()
+        with store.transaction():
+            for pending in guidance.pending_changes():
+                if pending.base_snapshot_id != "none":
+                    continue
+                pending.payload["superseded_by_initialization"] = run_id
+                pending.processed_at = timestamp
+                guidance.save_change(pending)
 
     def next_batch(self, run_id: str) -> dict[str, Any]:
         snapshot = self.client.snapshot()

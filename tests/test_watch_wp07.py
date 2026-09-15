@@ -182,9 +182,53 @@ class WatchWP07Tests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "sync failed"):
                 service.git_event("post-merge")
 
-        status = service.status()
+        with patch.object(service.engine, "diagnose", return_value={"available": False}):
+            status = service.status()
         self.assertTrue(status["reconciliation_required"])
         self.assertEqual(status["last_git_event"]["event"], "git_event_failed")
+
+    def test_recovered_git_event_is_auditable_without_active_reconciliation_alarm(self) -> None:
+        temporary, root = self._project()
+        self.addCleanup(temporary.cleanup)
+        service = ProjectService(root)
+        service.initialize()
+        service._log_event(
+            "git_event_failed", event_id="old-failure", event_type="post-checkout",
+            error="historical CodeGraph lookup failed", reconciliation_required=True,
+        )
+
+        status = service.status()
+
+        self.assertEqual(status["last_git_event"]["event"], "git_event_failed")
+        self.assertFalse(status["reconciliation_required"])
+        self.assertTrue(status["reconciliation_recovered"])
+        self.assertEqual(status["reconciliation_recovery_reason"], "historical_git_failure_recovered")
+
+    def test_generated_only_commit_does_not_clear_historical_git_failure(self) -> None:
+        temporary, root = self._project()
+        self.addCleanup(temporary.cleanup)
+        service = ProjectService(root)
+        service.initialize()
+        service._log_event(
+            "git_event_failed", event_id="old-failure", event_type="post-commit",
+            error="historical sync failed", reconciliation_required=True,
+        )
+        subprocess.run(["git", "-C", str(root), "config", "user.email", "tests@example.com"], check=True)
+        subprocess.run(["git", "-C", str(root), "config", "user.name", "Project KB Tests"], check=True)
+        subprocess.run(["git", "-C", str(root), "add", "."], check=True)
+        subprocess.run(["git", "-C", str(root), "commit", "-qm", "baseline"], check=True)
+        service.sync(task_summary="align baseline")
+        generated = root / ".project-kb" / "generated" / "note.md"
+        generated.write_text("# Note\n", encoding="utf-8")
+        subprocess.run(["git", "-C", str(root), "add", str(generated)], check=True)
+        subprocess.run(["git", "-C", str(root), "commit", "-qm", "generated output"], check=True)
+
+        status = service.status()
+
+        self.assertEqual(status["commit_alignment"], "generated_outputs_only")
+        self.assertTrue(status["verification_aligned"])
+        self.assertFalse(status["reconciliation_recovered"])
+        self.assertTrue(status["reconciliation_required"])
 
     def test_checkout_and_rewrite_events_realign_real_git_transitions(self) -> None:
         temporary, root = self._project()

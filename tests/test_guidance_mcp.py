@@ -170,6 +170,25 @@ class GuidanceMCPTests(unittest.TestCase):
                 evidence=[{"path": "a.lua", "hash": "h"}],
             )
 
+    def test_uninitialized_changes_then_search_remains_fast_and_bounded(self):
+        server = object.__new__(MCPServer)
+        server.project = Path("/tmp/project")
+        server.api = None
+        with patch("project_knowledge.incremental.IncrementalWorkflow") as changes, patch(
+            "project_knowledge.mcp.KnowledgeAPI"
+        ) as api:
+            changes.return_value.changes.return_value = {
+                "status": "initialization_required", "next_action": "start_initialization",
+                "next_tool": "knowledge_initialization_start", "facts": [],
+            }
+            api.return_value.search_for_evaluation.return_value = ({"results": []}, {"retrieval_trace": {}})
+            first = server._call("knowledge_changes", {})
+            second = server._call("knowledge_search", {"query": "login"})
+            self.assertEqual(first["next_action"], "start_initialization")
+            self.assertEqual(second, {"results": []})
+            changes.return_value.changes.assert_called_once_with()
+            api.return_value.search_for_evaluation.assert_called_once()
+
     def test_tool_failure_is_error_and_server_keeps_responding(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

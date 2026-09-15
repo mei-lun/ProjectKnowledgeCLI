@@ -383,7 +383,7 @@ class MCPServer:
                 validate_instance(arguments, tool["inputSchema"], "$.arguments")
                 with audit_span("tool_dispatch", str(name), arguments) as span:
                     value = self._call(name, arguments)
-                    span.set_output(value)
+                    span.set_output(self._audit_tool_output(str(name), value))
             except (KeyError, ValueError, RuntimeError) as error:
                 result = {"content": [{"type": "text", "text": str(error)}], "isError": True}
                 return self._result(request_id, result)
@@ -545,6 +545,43 @@ class MCPServer:
                 **({'task_id': arguments['taskId']} if arguments.get('taskId') else {}),
             )
         raise KeyError(f"unknown tool: {name}")
+
+    @staticmethod
+    def _audit_tool_output(name: str, value: dict[str, Any]) -> dict[str, Any]:
+        """Keep audit records bounded without changing the MCP response."""
+        if not isinstance(value, dict):
+            return value
+        def jsonable(item: Any) -> Any:
+            if isinstance(item, bytes):
+                return {"type": "bytes", "length": len(item)}
+            if isinstance(item, dict):
+                return {str(key): jsonable(child) for key, child in item.items()}
+            if isinstance(item, list):
+                return [jsonable(child) for child in item]
+            if isinstance(item, tuple):
+                return [jsonable(child) for child in item]
+            return item
+        value = jsonable(value)
+        if name != "knowledge_changes":
+            return value
+        facts = value.get("facts")
+        if not isinstance(facts, list) or not facts:
+            return value
+        summary = dict(value)
+        summary.pop("facts", None)
+        summary["fact_count"] = len(facts)
+        summary["facts_summary"] = [
+            {
+                key: item.get(key)
+                for key in ("path", "change", "hash", "old_hash", "analysis")
+                if key in item
+            }
+            for item in facts[:50]
+            if isinstance(item, dict)
+        ]
+        if len(facts) > 50:
+            summary["facts_truncated"] = True
+        return summary
 
     @staticmethod
     def _result(request_id: Any, result: dict[str, Any]) -> dict[str, Any]:

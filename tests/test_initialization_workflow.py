@@ -7,6 +7,10 @@ import unittest
 from pathlib import Path
 
 from project_knowledge.initialization import InitializationWorkflow
+from project_knowledge.guidance_models import GuidanceChange
+from project_knowledge.guidance_store import GuidanceStore
+from project_knowledge.store import KnowledgeStore
+from project_knowledge.util import utc_now
 
 
 class FakeCodeGraph:
@@ -154,6 +158,56 @@ class InitializationWorkflowTests(unittest.TestCase):
         )
         self.assertEqual(result["next_action"], "create_category_draft")
         self.assertEqual(result["category_candidates"][0]["category_id"], "login")
+
+    def test_initialization_supersedes_unbased_incremental_change(self):
+        client = FakeCodeGraph([{
+            "path": "a.lua", "language": "lua", "content_hash": "h1",
+            "module": "", "symbols": [],
+        }])
+        db = self.root / ".project-kb" / "index.db"
+        now = utc_now()
+        with KnowledgeStore(db) as store:
+            store.initialize()
+            with store.transaction():
+                GuidanceStore(store).save_change(GuidanceChange(
+                    "change-old", str(self.root.resolve()), "none", "head-old", "guidance",
+                    ["a.lua"], [], {"facts": [{"path": "a.lua"}]}, now,
+                ))
+
+        result = InitializationWorkflow(self.root, client=client).start()
+
+        self.assertEqual(result["status"], "scanning")
+        with KnowledgeStore(db, readonly=True) as store:
+            pending = GuidanceStore(store).pending_changes()
+            self.assertEqual(pending, [])
+            row = store.connection.execute(
+                "SELECT processed_at, payload_json FROM guidance_changes WHERE change_id=?",
+                ("change-old",),
+            ).fetchone()
+            self.assertIsNotNone(row["processed_at"])
+            self.assertIn(result["run_id"], row["payload_json"])
+
+    def test_resumed_initialization_supersedes_unbased_incremental_change(self):
+        client = FakeCodeGraph([{
+            "path": "a.lua", "language": "lua", "content_hash": "h1",
+            "module": "", "symbols": [],
+        }])
+        workflow = InitializationWorkflow(self.root, client=client)
+        first = workflow.start()
+        db = self.root / ".project-kb" / "index.db"
+        now = utc_now()
+        with KnowledgeStore(db) as store:
+            with store.transaction():
+                GuidanceStore(store).save_change(GuidanceChange(
+                    "change-old", str(self.root.resolve()), "none", "head-old", "guidance",
+                    ["a.lua"], [], {"facts": [{"path": "a.lua"}]}, now,
+                ))
+
+        resumed = workflow.start()
+
+        self.assertEqual(resumed["run_id"], first["run_id"])
+        with KnowledgeStore(db, readonly=True) as store:
+            self.assertEqual(GuidanceStore(store).pending_changes(), [])
 
 
 if __name__ == "__main__":

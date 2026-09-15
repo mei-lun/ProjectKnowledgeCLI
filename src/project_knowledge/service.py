@@ -524,6 +524,18 @@ class ProjectService:
         if watcher_state == "running" and watcher_health["stale"]:
             watcher_state = "crashed"
         last_git_event = self._last_git_event()
+        historical_git_failure = bool(
+            last_git_event and last_git_event.get("event") == "git_event_failed"
+        )
+        reconciliation_recovered = bool(
+            historical_git_failure
+            and commit_aligned
+            and content_fresh
+            and engine_status.get("available")
+        )
+        reconciliation_recovery_reason = (
+            "historical_git_failure_recovered" if reconciliation_recovered else None
+        )
         return {
             "initialized": True,
             "project_root": str(self.root),
@@ -562,9 +574,11 @@ class ProjectService:
             "engine": engine_status,
             "configuration_warnings": self.config.capability_warnings(),
             "last_git_event": last_git_event,
+            "reconciliation_recovered": reconciliation_recovered,
+            "reconciliation_recovery_reason": reconciliation_recovery_reason,
             "reconciliation_required": (
                 not verification_aligned
-                or bool(last_git_event and last_git_event.get("event") == "git_event_failed")
+                or (historical_git_failure and not reconciliation_recovered)
             ),
         }
 

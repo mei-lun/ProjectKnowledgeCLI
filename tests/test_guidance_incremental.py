@@ -220,6 +220,68 @@ class GuidanceIncrementalTests(unittest.TestCase):
         self.assertEqual(plan["next_action"], "generate_guidance")
         self.assertEqual(plan["evidence"], [{"path": "src/other.lua", "hash": "same"}])
 
+    def test_missing_guidance_baseline_requires_initialization_before_snapshot_analysis(self):
+        with KnowledgeStore(self.db) as store:
+            store.connection.execute(
+                "DELETE FROM metadata WHERE key = ?", ("guidance_snapshot",)
+            )
+            store.connection.commit()
+        self.client.source_calls.clear()
+        self.client.impact_calls.clear()
+
+        result = self.workflow.changes()
+
+        self.assertEqual(result["status"], "initialization_required")
+        self.assertEqual(result["next_action"], "start_initialization")
+        self.assertEqual(result["next_tool"], "knowledge_initialization_start")
+        self.assertEqual(result["arguments"]["projectPath"], str(self.root.resolve()))
+        self.assertEqual(self.client.source_calls, [])
+        self.assertEqual(self.client.impact_calls, [])
+        with KnowledgeStore(self.db, readonly=True) as store:
+            self.assertEqual(GuidanceStore(store).pending_changes(), [])
+
+    def test_unreviewed_initialization_blocks_incremental_even_with_legacy_baseline(self):
+        now = utc_now()
+        with KnowledgeStore(self.db) as store:
+            guidance = GuidanceStore(store)
+            with store.transaction():
+                guidance.create_run(GuidanceRun("run-init", str(self.root.resolve()), "snap-init", "guidance_review", 2, 2, now, now))
+                store.set_meta("guidance_snapshot", '{"snapshot_id":"snap-init","files":{}}')
+        self.client.source_calls.clear()
+        result = self.workflow.changes()
+        self.assertEqual(result["next_action"], "start_initialization")
+        self.assertEqual(self.client.source_calls, [])
+
+    def test_bulk_deletions_are_bounded_and_require_manual_review(self):
+        old_files = {f"src/old-{index:02}.lua": f"h{index}" for index in range(60)}
+        with KnowledgeStore(self.db) as store:
+            with store.transaction():
+                store.set_meta("guidance_snapshot", json.dumps({"snapshot_id": "snap-base", "files": old_files}))
+        self.client.files = []
+        change = self.workflow.changes()
+        self.assertTrue(change["truncated"])
+        self.assertLessEqual(len(change["facts"]), self.workflow.MAX_CHANGED_FILES)
+        self.assertEqual(self.workflow.plan(change["change_id"])["next_action"], "manual_review")
+
+    def test_large_increment_is_bounded_and_requires_manual_review(self):
+        self.client.files.extend(
+            {
+                "path": f"src/new-{index:02}.lua", "language": "lua",
+                "content_hash": f"new-{index}", "module": "src",
+                "symbols": [{"name": f"new_{index}"}],
+            }
+            for index in range(25)
+        )
+
+        change = self.workflow.changes()
+        plan = self.workflow.plan(change["change_id"])
+
+        self.assertTrue(change["truncated"])
+        self.assertEqual(len(change["unanalysed_files"]), 6)
+        self.assertEqual(len(self.client.source_calls), 20)
+        self.assertEqual(plan["next_action"], "manual_review")
+        self.assertEqual(plan["unanalysed_files"], change["unanalysed_files"])
+
     def test_fact_without_evidence_cannot_advance(self):
         change = self.workflow.changes()
         with self.assertRaises(ValueError):

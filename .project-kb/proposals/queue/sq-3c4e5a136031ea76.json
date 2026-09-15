@@ -1,0 +1,30 @@
+{
+  "affected_knowledge": [
+    "curated.architecture",
+    "curated.feature.guide.generation",
+    "decision.0001.local.first.core",
+    "generated.frameworks",
+    "generated.module.project_knowledge",
+    "generated.module.tests",
+    "generated.project-map",
+    "generated.test-map"
+  ],
+  "base_commit": "2019d0d2602363b78693589f95f9e865e255f55c",
+  "changed_files": [
+    "src/project_knowledge/incremental.py",
+    "src/project_knowledge/initialization.py",
+    "src/project_knowledge/mcp.py",
+    "src/project_knowledge/service.py",
+    "tests/test_guidance_incremental.py",
+    "tests/test_initialization_workflow.py",
+    "tests/test_watch_wp07.py"
+  ],
+  "changed_symbols": [],
+  "changeset_id": "change-20260914-213142",
+  "created_at": "2026-09-14T21:31:42+08:00",
+  "head_commit": "2019d0d2602363b78693589f95f9e865e255f55c",
+  "queue_id": "sq-3c4e5a136031ea76",
+  "schema_version": 1,
+  "status": "awaiting_semantic_generation",
+  "task_summary": "MCP connection compensation"
+}

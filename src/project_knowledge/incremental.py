@@ -20,6 +20,9 @@ class IncrementalWorkflow:
     """Build change-scoped fact packs and apply three update levels."""
 
     BASELINE_KEY = "guidance_snapshot"
+    MAX_DETAILED_FILES = 20
+    MAX_SOURCE_LINES = 200
+    MAX_CHANGED_FILES = 50
 
     def _node_path(self, item: dict[str, Any]) -> str:
         node = item.get("node", item)
@@ -44,6 +47,33 @@ class IncrementalWorkflow:
         return store
 
     def changes(self, *, retry: bool = False) -> dict[str, Any]:
+        # A missing guidance baseline means the client is still in the initial
+        # scan/review workflow.  Do this check before touching CodeGraph so a
+        # first connection cannot mistake the whole project for an increment.
+        with self._open() as store:
+            guidance = GuidanceStore(store)
+            baseline = store.get_meta(self.BASELINE_KEY)
+            runs = []
+            for row in store.connection.execute(
+                "SELECT run_id FROM guidance_runs WHERE project_root=? AND run_id NOT LIKE 'run-incr-%' ORDER BY created_at DESC, rowid DESC",
+                (str(self.root),),
+            ):
+                run = guidance.get_run(str(row["run_id"]))
+                if run is not None:
+                    runs.append(run)
+            initialization_incomplete = bool(runs and runs[0].status != "complete")
+            if not baseline or initialization_incomplete:
+                return {
+                    "status": "initialization_required",
+                    "change_id": None,
+                    "changed_files": [],
+                    "affected_categories": [],
+                    "facts": [],
+                    "next_actions": [],
+                    "next_action": "start_initialization",
+                    "next_tool": "knowledge_initialization_start",
+                    "arguments": {"projectPath": str(self.root)},
+                }
         current = self.client.snapshot()
         current_files = {item["path"]: item for item in current["files"]}
         with self._open() as store:
@@ -75,9 +105,18 @@ class IncrementalWorkflow:
                 change_id = "change-" + hashlib.sha256(f"{identity}\0retry-{attempt}".encode()).hexdigest()[:16]
             facts = []
             affected_paths = set(changed)
-            for path in added + modified:
+            bounded_changed = changed[: self.MAX_CHANGED_FILES]
+            detailed_paths = [*added, *modified][: self.MAX_DETAILED_FILES]
+            detailed_paths = [path for path in detailed_paths if path in bounded_changed]
+            bounded_deleted = [path for path in deleted if path in bounded_changed]
+            unanalysed_files = [path for path in changed if path not in bounded_changed]
+            unanalysed_files.extend(
+                path for path in [*added, *modified]
+                if path in bounded_changed and path not in detailed_paths
+            )
+            for path in detailed_paths:
                 item = current_files[path]
-                source = self.client.source(path, start_line=1, limit=400)
+                source = self.client.source(path, start_line=1, limit=self.MAX_SOURCE_LINES)
                 symbols = list(item.get("symbols", []))
                 analysis = {"symbol_source": "files", "truncated": len(symbols) > 20, "limitations": []}
                 if not symbols:
@@ -110,7 +149,7 @@ class IncrementalWorkflow:
                     "hash": item["content_hash"], "language": item["language"],
                     "symbols": symbols[:20], "source": source, "impact": impacts[:50], "analysis": analysis,
                 })
-            facts.extend({"path": path, "change": "deleted", "old_hash": old_files[path]} for path in deleted)
+            facts.extend({"path": path, "change": "deleted", "old_hash": old_files[path]} for path in bounded_deleted)
             affected_categories = []
             classified_paths: set[str] = set()
             confirmed_catalog_categories = {
@@ -140,6 +179,8 @@ class IncrementalWorkflow:
                 "snapshot_files": {path: item["content_hash"] for path, item in current_files.items()},
                 "unclassified_files": unclassified,
                 "catalogRequired": bool(unclassified),
+                "truncated": bool(unanalysed_files),
+                "unanalysed_files": unanalysed_files,
             }
             now = utc_now()
             change = GuidanceChange(
@@ -241,6 +282,13 @@ class IncrementalWorkflow:
             result.update(next_action="retry", generation_complete=False, error=payload["error"])
         elif change.processed_at:
             result.update(next_action="complete", generation_complete=True)
+        elif payload.get("truncated"):
+            result.update(
+                next_action="manual_review",
+                reason="详细变化分析达到上限，请先人工复核未分析文件",
+                unanalysed_files=list(payload.get("unanalysed_files", [])),
+                generation_complete=False,
+            )
         elif remaining:
             item = remaining[0]
             if not evidence:

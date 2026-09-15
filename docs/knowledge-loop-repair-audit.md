@@ -115,3 +115,4 @@ rtk proxy python -m project_knowledge sync . --json
 - 用户批准临时示例审核后，真实 Codex 发布并通过 knowledge_search/knowledge_get 读到 discount 的 fresh/verified 正式指导。该会话发现重新初始化后遗留旧类别变化；新增“全部正式资产已审核且当前快照一致后取代旧变化”处理及回归后，本地复验 next_action=none、pending_changes=[]、drafts.total=0、pending_files=[]，同步后正式知识仍存在。
 - 单独的新会话回读尝试超时，不能将其记为额外一次成功；先前真实审核会话中的正式知识检索已成功。检索全策略质量评测耗时较长，应用户合并指令中止，evaluation/reports/latest.json 保留历史结果，未修改历史 package_version 冒充本版本评测。E/F 的最终评测验收仍保留待完成，不宣称全部生产质量门通过。
 - 用户要求将本 worktree 代码合并到 main。全部源码、测试、说明和版本改动一并合入；运行时配置和生成知识在 main 重新生成，保留主工作区既有修改的备份。整批补丁版本仅递增一次。
+- 后续独立审查补齐初始化未审核门禁、批量删除上限、恢复已有初始化时淘汰旧伪增量、历史 Git 失败的精确提交对账、恢复原因和 MCP 顺序调用负例；新增测试通过后再执行完整交付复验。

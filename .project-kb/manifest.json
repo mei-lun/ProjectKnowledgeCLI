@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-14T19:43:39+08:00",
+  "generated_at": "2026-09-15T16:16:36+08:00",
   "project": "ProjectKnowledgeCLI",
   "records": [
     {
@@ -760,12 +760,631 @@
     },
     {
       "confidence": "generated",
+      "id": "draft.draft-02bbdd7614214f43",
+      "kind": "development-guide",
+      "last_generated_at": "2026-09-15T15:53:49+08:00",
+      "ownership": "draft",
+      "path": ".project-kb/drafts/run-95733856d30f1448/draft-02bbdd7614214f43/交付与质量门-guidance-draft.md",
+      "source_hashes": {
+        "scripts/validate_ci_workflow.py": "sha256:87c0b3076c9bee1a106c1c2b74f3a08df8aed1ae67620f44cbdabee1edd717ba"
+      },
+      "sources": [
+        {
+          "hash": "sha256:87c0b3076c9bee1a106c1c2b74f3a08df8aed1ae67620f44cbdabee1edd717ba",
+          "path": "scripts/validate_ci_workflow.py",
+          "type": "file"
+        }
+      ],
+      "status": "fresh",
+      "tags": [
+        "draft",
+        "guidance",
+        "d06795ab3cb18db3fadf75a9625631834761b2279d3151d92617443ba45b4623",
+        "delivery-quality",
+        "交付与质量门"
+      ],
+      "title": "交付与质量门项目事实指导草稿"
+    },
+    {
+      "confidence": "generated",
+      "id": "draft.draft-0839f105352f73db",
+      "kind": "development-methodology",
+      "last_generated_at": "2026-09-15T15:53:54+08:00",
+      "ownership": "draft",
+      "path": ".project-kb/drafts/run-95733856d30f1448/draft-0839f105352f73db/测试与回归验证-methodology-draft.md",
+      "source_hashes": {
+        "tests/test_guidance_incremental.py": "sha256:b68d9311349233b79564be4183800c179ca4b07d3ddc77264ff3141a85499129"
+      },
+      "sources": [
+        {
+          "hash": "sha256:b68d9311349233b79564be4183800c179ca4b07d3ddc77264ff3141a85499129",
+          "path": "tests/test_guidance_incremental.py",
+          "type": "file"
+        }
+      ],
+      "status": "fresh",
+      "tags": [
+        "draft",
+        "methodology",
+        "d06795ab3cb18db3fadf75a9625631834761b2279d3151d92617443ba45b4623",
+        "test-suite",
+        "测试与回归验证"
+      ],
+      "title": "测试与回归验证轻量方法论草稿"
+    },
+    {
+      "confidence": "generated",
+      "id": "draft.draft-095df29ffaef9260",
+      "kind": "development-methodology",
+      "last_generated_at": "2026-09-15T15:56:24+08:00",
+      "ownership": "draft",
+      "path": ".project-kb/drafts/run-95733856d30f1448/draft-095df29ffaef9260/核心知识系统-methodology-draft.md",
+      "source_hashes": {
+        "src/project_knowledge/codegraph.py": "sha256:aaf5f2e1f6fa8f42d142fee7b4561e3f809037089fe4ee0a21207294ed518090"
+      },
+      "sources": [
+        {
+          "hash": "sha256:aaf5f2e1f6fa8f42d142fee7b4561e3f809037089fe4ee0a21207294ed518090",
+          "path": "src/project_knowledge/codegraph.py",
+          "type": "file"
+        }
+      ],
+      "status": "fresh",
+      "tags": [
+        "draft",
+        "methodology",
+        "d06795ab3cb18db3fadf75a9625631834761b2279d3151d92617443ba45b4623",
+        "core-knowledge-system",
+        "核心知识系统"
+      ],
+      "title": "核心知识系统轻量方法论草稿"
+    },
+    {
+      "confidence": "generated",
+      "id": "draft.draft-16bc4e20c7f462f8",
+      "kind": "development-methodology",
+      "last_generated_at": "2026-09-15T15:53:50+08:00",
+      "ownership": "draft",
+      "path": ".project-kb/drafts/run-95733856d30f1448/draft-16bc4e20c7f462f8/评测与性能-methodology-draft.md",
+      "source_hashes": {
+        "evaluation/performance_harness.py": "sha256:b878ad61af63f561eb43c29a20119438540c0e8a4f39aee09fe965dba5f41403"
+      },
+      "sources": [
+        {
+          "hash": "sha256:b878ad61af63f561eb43c29a20119438540c0e8a4f39aee09fe965dba5f41403",
+          "path": "evaluation/performance_harness.py",
+          "type": "file"
+        }
+      ],
+      "status": "fresh",
+      "tags": [
+        "draft",
+        "methodology",
+        "d06795ab3cb18db3fadf75a9625631834761b2279d3151d92617443ba45b4623",
+        "evaluation",
+        "评测与性能"
+      ],
+      "title": "评测与性能轻量方法论草稿"
+    },
+    {
+      "confidence": "generated",
+      "id": "draft.draft-2871fcf06687ea38",
+      "kind": "guidance-catalog",
+      "last_generated_at": "2026-09-15T15:51:16+08:00",
+      "ownership": "draft",
+      "path": ".project-kb/drafts/run-95733856d30f1448/draft-2871fcf06687ea38/功能分类目录-待审核.md",
+      "source_hashes": {
+        "evaluation/performance_harness.py": "sha256:b878ad61af63f561eb43c29a20119438540c0e8a4f39aee09fe965dba5f41403",
+        "npm/bin/project-kb.js": "sha256:eced41f4fe8f149781e3b18614e772042b42ee713f63413835a40cd244b406c5",
+        "plugins/project-knowledge/hooks/sync_after_task.py": "sha256:39eec1665f1818db6f8a77d0e4d1c01a9037d6fac3b52f7defe413397c57310a",
+        "scripts/build_npm_package.py": "sha256:130aae32270643fa00f10918652fdf22bf8788c13f9ff8b18808b005e7c2055c",
+        "scripts/validate_ci_workflow.py": "sha256:87c0b3076c9bee1a106c1c2b74f3a08df8aed1ae67620f44cbdabee1edd717ba",
+        "src/project_knowledge/codegraph.py": "sha256:aaf5f2e1f6fa8f42d142fee7b4561e3f809037089fe4ee0a21207294ed518090",
+        "src/project_knowledge/config.py": "sha256:ea53044d371027b45cda57e963992cdeb88fc6c065ce7aaf67f861979e413b8a",
+        "src/project_knowledge/versioning.py": "sha256:28c1eb70f34cef82854e409a23843cfe22a0c29eff5595dab889fd32b2f1cedb",
+        "tests/test_guidance_incremental.py": "sha256:b68d9311349233b79564be4183800c179ca4b07d3ddc77264ff3141a85499129",
+        "tests/test_task_completion.py": "sha256:fe69b181f8f36efb7645c87f7d56444de598a5a073b55fc0151e461e71e7db07"
+      },
+      "sources": [
+        {
+          "hash": "sha256:87c0b3076c9bee1a106c1c2b74f3a08df8aed1ae67620f44cbdabee1edd717ba",
+          "path": "scripts/validate_ci_workflow.py",
+          "type": "file"
+        },
+        {
+          "hash": "sha256:ea53044d371027b45cda57e963992cdeb88fc6c065ce7aaf67f861979e413b8a",
+          "path": "src/project_knowledge/config.py",
+          "type": "file"
+        },
+        {
+          "hash": "sha256:b878ad61af63f561eb43c29a20119438540c0e8a4f39aee09fe965dba5f41403",
+          "path": "evaluation/performance_harness.py",
+          "type": "file"
+        },
+        {
+          "hash": "sha256:eced41f4fe8f149781e3b18614e772042b42ee713f63413835a40cd244b406c5",
+          "path": "npm/bin/project-kb.js",
+          "type": "file"
+        },
+        {
+          "hash": "sha256:39eec1665f1818db6f8a77d0e4d1c01a9037d6fac3b52f7defe413397c57310a",
+          "path": "plugins/project-knowledge/hooks/sync_after_task.py",
+          "type": "file"
+        },
+        {
+          "hash": "sha256:130aae32270643fa00f10918652fdf22bf8788c13f9ff8b18808b005e7c2055c",
+          "path": "scripts/build_npm_package.py",
+          "type": "file"
+        },
+        {
+          "hash": "sha256:aaf5f2e1f6fa8f42d142fee7b4561e3f809037089fe4ee0a21207294ed518090",
+          "path": "src/project_knowledge/codegraph.py",
+          "type": "file"
+        },
+        {
+          "hash": "sha256:28c1eb70f34cef82854e409a23843cfe22a0c29eff5595dab889fd32b2f1cedb",
+          "path": "src/project_knowledge/versioning.py",
+          "type": "file"
+        },
+        {
+          "hash": "sha256:b68d9311349233b79564be4183800c179ca4b07d3ddc77264ff3141a85499129",
+          "path": "tests/test_guidance_incremental.py",
+          "type": "file"
+        },
+        {
+          "hash": "sha256:fe69b181f8f36efb7645c87f7d56444de598a5a073b55fc0151e461e71e7db07",
+          "path": "tests/test_task_completion.py",
+          "type": "file"
+        }
+      ],
+      "status": "fresh",
+      "tags": [
+        "draft",
+        "category_catalog",
+        "d06795ab3cb18db3fadf75a9625631834761b2279d3151d92617443ba45b4623"
+      ],
+      "title": "功能分类目录草稿"
+    },
+    {
+      "confidence": "generated",
+      "id": "draft.draft-41733ca78a6260be",
+      "kind": "development-guide",
+      "last_generated_at": "2026-09-15T15:53:50+08:00",
+      "ownership": "draft",
+      "path": ".project-kb/drafts/run-95733856d30f1448/draft-41733ca78a6260be/评测与性能-guidance-draft.md",
+      "source_hashes": {
+        "evaluation/performance_harness.py": "sha256:b878ad61af63f561eb43c29a20119438540c0e8a4f39aee09fe965dba5f41403"
+      },
+      "sources": [
+        {
+          "hash": "sha256:b878ad61af63f561eb43c29a20119438540c0e8a4f39aee09fe965dba5f41403",
+          "path": "evaluation/performance_harness.py",
+          "type": "file"
+        }
+      ],
+      "status": "fresh",
+      "tags": [
+        "draft",
+        "guidance",
+        "d06795ab3cb18db3fadf75a9625631834761b2279d3151d92617443ba45b4623",
+        "evaluation",
+        "评测与性能"
+      ],
+      "title": "评测与性能项目事实指导草稿"
+    },
+    {
+      "confidence": "generated",
+      "id": "draft.draft-4d033a4ba807d8d9",
+      "kind": "development-methodology",
+      "last_generated_at": "2026-09-15T15:53:48+08:00",
+      "ownership": "draft",
+      "path": ".project-kb/drafts/run-95733856d30f1448/draft-4d033a4ba807d8d9/交付与质量门-methodology-draft.md",
+      "source_hashes": {
+        "scripts/validate_ci_workflow.py": "sha256:87c0b3076c9bee1a106c1c2b74f3a08df8aed1ae67620f44cbdabee1edd717ba"
+      },
+      "sources": [
+        {
+          "hash": "sha256:87c0b3076c9bee1a106c1c2b74f3a08df8aed1ae67620f44cbdabee1edd717ba",
+          "path": "scripts/validate_ci_workflow.py",
+          "type": "file"
+        }
+      ],
+      "status": "fresh",
+      "tags": [
+        "draft",
+        "methodology",
+        "d06795ab3cb18db3fadf75a9625631834761b2279d3151d92617443ba45b4623",
+        "delivery-quality",
+        "交付与质量门"
+      ],
+      "title": "交付与质量门轻量方法论草稿"
+    },
+    {
+      "confidence": "generated",
+      "id": "draft.draft-4e4590580318750e",
+      "kind": "development-guide",
+      "last_generated_at": "2026-09-15T15:53:56+08:00",
+      "ownership": "draft",
+      "path": ".project-kb/drafts/run-95733856d30f1448/draft-4e4590580318750e/版本与变更日志-guidance-draft.md",
+      "source_hashes": {
+        "src/project_knowledge/versioning.py": "sha256:28c1eb70f34cef82854e409a23843cfe22a0c29eff5595dab889fd32b2f1cedb"
+      },
+      "sources": [
+        {
+          "hash": "sha256:28c1eb70f34cef82854e409a23843cfe22a0c29eff5595dab889fd32b2f1cedb",
+          "path": "src/project_knowledge/versioning.py",
+          "type": "file"
+        }
+      ],
+      "status": "fresh",
+      "tags": [
+        "draft",
+        "guidance",
+        "d06795ab3cb18db3fadf75a9625631834761b2279d3151d92617443ba45b4623",
+        "versioning",
+        "版本与变更日志"
+      ],
+      "title": "版本与变更日志项目事实指导草稿"
+    },
+    {
+      "confidence": "generated",
+      "id": "draft.draft-4e8bf1ee4654ea58",
+      "kind": "development-guide",
+      "last_generated_at": "2026-09-15T15:53:52+08:00",
+      "ownership": "draft",
+      "path": ".project-kb/drafts/run-95733856d30f1448/draft-4e8bf1ee4654ea58/npm 分发与客户端安装-guidance-draft.md",
+      "source_hashes": {
+        "npm/bin/project-kb.js": "sha256:eced41f4fe8f149781e3b18614e772042b42ee713f63413835a40cd244b406c5"
+      },
+      "sources": [
+        {
+          "hash": "sha256:eced41f4fe8f149781e3b18614e772042b42ee713f63413835a40cd244b406c5",
+          "path": "npm/bin/project-kb.js",
+          "type": "file"
+        }
+      ],
+      "status": "fresh",
+      "tags": [
+        "draft",
+        "guidance",
+        "d06795ab3cb18db3fadf75a9625631834761b2279d3151d92617443ba45b4623",
+        "npm-distribution",
+        "npm 分发与客户端安装"
+      ],
+      "title": "npm 分发与客户端安装项目事实指导草稿"
+    },
+    {
+      "confidence": "generated",
+      "id": "draft.draft-6377ed2313927e12",
+      "kind": "development-methodology",
+      "last_generated_at": "2026-09-15T15:53:52+08:00",
+      "ownership": "draft",
+      "path": ".project-kb/drafts/run-95733856d30f1448/draft-6377ed2313927e12/npm 分发与客户端安装-methodology-draft.md",
+      "source_hashes": {
+        "npm/bin/project-kb.js": "sha256:eced41f4fe8f149781e3b18614e772042b42ee713f63413835a40cd244b406c5"
+      },
+      "sources": [
+        {
+          "hash": "sha256:eced41f4fe8f149781e3b18614e772042b42ee713f63413835a40cd244b406c5",
+          "path": "npm/bin/project-kb.js",
+          "type": "file"
+        }
+      ],
+      "status": "fresh",
+      "tags": [
+        "draft",
+        "methodology",
+        "d06795ab3cb18db3fadf75a9625631834761b2279d3151d92617443ba45b4623",
+        "npm-distribution",
+        "npm 分发与客户端安装"
+      ],
+      "title": "npm 分发与客户端安装轻量方法论草稿"
+    },
+    {
+      "confidence": "generated",
+      "id": "draft.draft-7c83c9b112bd354d",
+      "kind": "development-guide",
+      "last_generated_at": "2026-09-15T15:53:47+08:00",
+      "ownership": "draft",
+      "path": ".project-kb/drafts/run-95733856d30f1448/draft-7c83c9b112bd354d/项目配置-guidance-draft.md",
+      "source_hashes": {
+        "src/project_knowledge/config.py": "sha256:ea53044d371027b45cda57e963992cdeb88fc6c065ce7aaf67f861979e413b8a"
+      },
+      "sources": [
+        {
+          "hash": "sha256:ea53044d371027b45cda57e963992cdeb88fc6c065ce7aaf67f861979e413b8a",
+          "path": "src/project_knowledge/config.py",
+          "type": "file"
+        }
+      ],
+      "status": "fresh",
+      "tags": [
+        "draft",
+        "guidance",
+        "d06795ab3cb18db3fadf75a9625631834761b2279d3151d92617443ba45b4623",
+        "configuration",
+        "项目配置"
+      ],
+      "title": "项目配置项目事实指导草稿"
+    },
+    {
+      "confidence": "generated",
+      "id": "draft.draft-958c91052aa116a6",
+      "kind": "development-methodology",
+      "last_generated_at": "2026-09-15T15:53:53+08:00",
+      "ownership": "draft",
+      "path": ".project-kb/drafts/run-95733856d30f1448/draft-958c91052aa116a6/发布与验收工具-methodology-draft.md",
+      "source_hashes": {
+        "scripts/build_npm_package.py": "sha256:130aae32270643fa00f10918652fdf22bf8788c13f9ff8b18808b005e7c2055c"
+      },
+      "sources": [
+        {
+          "hash": "sha256:130aae32270643fa00f10918652fdf22bf8788c13f9ff8b18808b005e7c2055c",
+          "path": "scripts/build_npm_package.py",
+          "type": "file"
+        }
+      ],
+      "status": "fresh",
+      "tags": [
+        "draft",
+        "methodology",
+        "d06795ab3cb18db3fadf75a9625631834761b2279d3151d92617443ba45b4623",
+        "release-tooling",
+        "发布与验收工具"
+      ],
+      "title": "发布与验收工具轻量方法论草稿"
+    },
+    {
+      "confidence": "generated",
+      "id": "draft.draft-95f87667c16720af",
+      "kind": "development-guide",
+      "last_generated_at": "2026-09-15T15:52:30+08:00",
+      "ownership": "draft",
+      "path": ".project-kb/drafts/run-95733856d30f1448/draft-95f87667c16720af/AI 客户端集成-guidance-draft.md",
+      "source_hashes": {
+        "plugins/project-knowledge/hooks/sync_after_task.py": "sha256:39eec1665f1818db6f8a77d0e4d1c01a9037d6fac3b52f7defe413397c57310a"
+      },
+      "sources": [
+        {
+          "hash": "sha256:39eec1665f1818db6f8a77d0e4d1c01a9037d6fac3b52f7defe413397c57310a",
+          "path": "plugins/project-knowledge/hooks/sync_after_task.py",
+          "type": "file"
+        }
+      ],
+      "status": "fresh",
+      "tags": [
+        "draft",
+        "guidance",
+        "d06795ab3cb18db3fadf75a9625631834761b2279d3151d92617443ba45b4623",
+        "client-integration",
+        "AI 客户端集成"
+      ],
+      "title": "AI 客户端集成项目事实指导草稿"
+    },
+    {
+      "confidence": "generated",
+      "id": "draft.draft-a95f07282ad6bdea",
+      "kind": "development-methodology",
+      "last_generated_at": "2026-09-15T15:52:30+08:00",
+      "ownership": "draft",
+      "path": ".project-kb/drafts/run-95733856d30f1448/draft-a95f07282ad6bdea/AI 客户端集成-methodology-draft.md",
+      "source_hashes": {
+        "plugins/project-knowledge/hooks/sync_after_task.py": "sha256:39eec1665f1818db6f8a77d0e4d1c01a9037d6fac3b52f7defe413397c57310a"
+      },
+      "sources": [
+        {
+          "hash": "sha256:39eec1665f1818db6f8a77d0e4d1c01a9037d6fac3b52f7defe413397c57310a",
+          "path": "plugins/project-knowledge/hooks/sync_after_task.py",
+          "type": "file"
+        }
+      ],
+      "status": "fresh",
+      "tags": [
+        "draft",
+        "methodology",
+        "d06795ab3cb18db3fadf75a9625631834761b2279d3151d92617443ba45b4623",
+        "client-integration",
+        "AI 客户端集成"
+      ],
+      "title": "AI 客户端集成轻量方法论草稿"
+    },
+    {
+      "confidence": "generated",
+      "id": "draft.draft-bb69f5f7d5aa5659",
+      "kind": "development-methodology",
+      "last_generated_at": "2026-09-15T15:53:46+08:00",
+      "ownership": "draft",
+      "path": ".project-kb/drafts/run-95733856d30f1448/draft-bb69f5f7d5aa5659/项目配置-methodology-draft.md",
+      "source_hashes": {
+        "src/project_knowledge/config.py": "sha256:ea53044d371027b45cda57e963992cdeb88fc6c065ce7aaf67f861979e413b8a"
+      },
+      "sources": [
+        {
+          "hash": "sha256:ea53044d371027b45cda57e963992cdeb88fc6c065ce7aaf67f861979e413b8a",
+          "path": "src/project_knowledge/config.py",
+          "type": "file"
+        }
+      ],
+      "status": "fresh",
+      "tags": [
+        "draft",
+        "methodology",
+        "d06795ab3cb18db3fadf75a9625631834761b2279d3151d92617443ba45b4623",
+        "configuration",
+        "项目配置"
+      ],
+      "title": "项目配置轻量方法论草稿"
+    },
+    {
+      "confidence": "generated",
+      "id": "draft.draft-ca3f1d2d3afcde53",
+      "kind": "development-methodology",
+      "last_generated_at": "2026-09-15T15:53:51+08:00",
+      "ownership": "draft",
+      "path": ".project-kb/drafts/run-95733856d30f1448/draft-ca3f1d2d3afcde53/扩展回归与兼容性-methodology-draft.md",
+      "source_hashes": {
+        "tests/test_task_completion.py": "sha256:fe69b181f8f36efb7645c87f7d56444de598a5a073b55fc0151e461e71e7db07"
+      },
+      "sources": [
+        {
+          "hash": "sha256:fe69b181f8f36efb7645c87f7d56444de598a5a073b55fc0151e461e71e7db07",
+          "path": "tests/test_task_completion.py",
+          "type": "file"
+        }
+      ],
+      "status": "fresh",
+      "tags": [
+        "draft",
+        "methodology",
+        "d06795ab3cb18db3fadf75a9625631834761b2279d3151d92617443ba45b4623",
+        "extended-regressions",
+        "扩展回归与兼容性"
+      ],
+      "title": "扩展回归与兼容性轻量方法论草稿"
+    },
+    {
+      "confidence": "generated",
+      "id": "draft.draft-d9aa6c0afd45576b",
+      "kind": "development-guide",
+      "last_generated_at": "2026-09-15T15:53:54+08:00",
+      "ownership": "draft",
+      "path": ".project-kb/drafts/run-95733856d30f1448/draft-d9aa6c0afd45576b/发布与验收工具-guidance-draft.md",
+      "source_hashes": {
+        "scripts/build_npm_package.py": "sha256:130aae32270643fa00f10918652fdf22bf8788c13f9ff8b18808b005e7c2055c"
+      },
+      "sources": [
+        {
+          "hash": "sha256:130aae32270643fa00f10918652fdf22bf8788c13f9ff8b18808b005e7c2055c",
+          "path": "scripts/build_npm_package.py",
+          "type": "file"
+        }
+      ],
+      "status": "fresh",
+      "tags": [
+        "draft",
+        "guidance",
+        "d06795ab3cb18db3fadf75a9625631834761b2279d3151d92617443ba45b4623",
+        "release-tooling",
+        "发布与验收工具"
+      ],
+      "title": "发布与验收工具项目事实指导草稿"
+    },
+    {
+      "confidence": "generated",
+      "id": "draft.draft-df942e095f84d9a7",
+      "kind": "development-guide",
+      "last_generated_at": "2026-09-15T15:53:48+08:00",
+      "ownership": "draft",
+      "path": ".project-kb/drafts/run-95733856d30f1448/draft-df942e095f84d9a7/核心知识系统-guidance-draft.md",
+      "source_hashes": {
+        "src/project_knowledge/codegraph.py": "sha256:aaf5f2e1f6fa8f42d142fee7b4561e3f809037089fe4ee0a21207294ed518090"
+      },
+      "sources": [
+        {
+          "hash": "sha256:aaf5f2e1f6fa8f42d142fee7b4561e3f809037089fe4ee0a21207294ed518090",
+          "path": "src/project_knowledge/codegraph.py",
+          "type": "file"
+        }
+      ],
+      "status": "fresh",
+      "tags": [
+        "draft",
+        "guidance",
+        "d06795ab3cb18db3fadf75a9625631834761b2279d3151d92617443ba45b4623",
+        "core-knowledge-system",
+        "核心知识系统"
+      ],
+      "title": "核心知识系统项目事实指导草稿"
+    },
+    {
+      "confidence": "generated",
+      "id": "draft.draft-e060e6df0b570a91",
+      "kind": "development-methodology",
+      "last_generated_at": "2026-09-15T15:53:55+08:00",
+      "ownership": "draft",
+      "path": ".project-kb/drafts/run-95733856d30f1448/draft-e060e6df0b570a91/版本与变更日志-methodology-draft.md",
+      "source_hashes": {
+        "src/project_knowledge/versioning.py": "sha256:28c1eb70f34cef82854e409a23843cfe22a0c29eff5595dab889fd32b2f1cedb"
+      },
+      "sources": [
+        {
+          "hash": "sha256:28c1eb70f34cef82854e409a23843cfe22a0c29eff5595dab889fd32b2f1cedb",
+          "path": "src/project_knowledge/versioning.py",
+          "type": "file"
+        }
+      ],
+      "status": "fresh",
+      "tags": [
+        "draft",
+        "methodology",
+        "d06795ab3cb18db3fadf75a9625631834761b2279d3151d92617443ba45b4623",
+        "versioning",
+        "版本与变更日志"
+      ],
+      "title": "版本与变更日志轻量方法论草稿"
+    },
+    {
+      "confidence": "generated",
+      "id": "draft.draft-e08aba736aaaef4f",
+      "kind": "development-guide",
+      "last_generated_at": "2026-09-15T15:53:55+08:00",
+      "ownership": "draft",
+      "path": ".project-kb/drafts/run-95733856d30f1448/draft-e08aba736aaaef4f/测试与回归验证-guidance-draft.md",
+      "source_hashes": {
+        "tests/test_guidance_incremental.py": "sha256:b68d9311349233b79564be4183800c179ca4b07d3ddc77264ff3141a85499129"
+      },
+      "sources": [
+        {
+          "hash": "sha256:b68d9311349233b79564be4183800c179ca4b07d3ddc77264ff3141a85499129",
+          "path": "tests/test_guidance_incremental.py",
+          "type": "file"
+        }
+      ],
+      "status": "fresh",
+      "tags": [
+        "draft",
+        "guidance",
+        "d06795ab3cb18db3fadf75a9625631834761b2279d3151d92617443ba45b4623",
+        "test-suite",
+        "测试与回归验证"
+      ],
+      "title": "测试与回归验证项目事实指导草稿"
+    },
+    {
+      "confidence": "generated",
+      "id": "draft.draft-e7ac38c60bb85b07",
+      "kind": "development-guide",
+      "last_generated_at": "2026-09-15T15:53:51+08:00",
+      "ownership": "draft",
+      "path": ".project-kb/drafts/run-95733856d30f1448/draft-e7ac38c60bb85b07/扩展回归与兼容性-guidance-draft.md",
+      "source_hashes": {
+        "tests/test_task_completion.py": "sha256:fe69b181f8f36efb7645c87f7d56444de598a5a073b55fc0151e461e71e7db07"
+      },
+      "sources": [
+        {
+          "hash": "sha256:fe69b181f8f36efb7645c87f7d56444de598a5a073b55fc0151e461e71e7db07",
+          "path": "tests/test_task_completion.py",
+          "type": "file"
+        }
+      ],
+      "status": "fresh",
+      "tags": [
+        "draft",
+        "guidance",
+        "d06795ab3cb18db3fadf75a9625631834761b2279d3151d92617443ba45b4623",
+        "extended-regressions",
+        "扩展回归与兼容性"
+      ],
+      "title": "扩展回归与兼容性项目事实指导草稿"
+    },
+    {
+      "confidence": "generated",
       "id": "generated.frameworks",
       "kind": "framework",
-      "last_generated_at": "2026-09-14T19:43:39+08:00",
+      "last_generated_at": "2026-09-15T16:16:36+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/frameworks.md",
-      "source_commit": "7cc7917d1e8270a24fae97ca12c4f6ee0d7ee68c",
+      "source_commit": "2019d0d2602363b78693589f95f9e865e255f55c",
       "source_hashes": {
         ".github/workflows/quality.yml": "sha256:2b0403615ead5cc041a558b6d6aab547746ef7809f8947adca11e1dbd2819ce1",
         ".project-kb.yml": "sha256:48736e6e85940ae62a4ca22c00aa3c169999c7f1b3d953d343d4db4617a85467",
@@ -790,7 +1409,7 @@
         "scripts/validate_gardenserver_guidance_workflow.py": "sha256:72cb18dc8ee95bee5fe9e7531ea2d56c67eb427f27307af007f0b038528e362f",
         "scripts/validate_mcp_observability.py": "sha256:ffab83349be73e9c94d4b768018e324b1fc369fa5f7813ffed358eb8b1289f40",
         "scripts/validate_npm_bootstrap.py": "sha256:034757ef4c208e12a1c4a50a1ff4760c3e3412d3742c5272c1940570bd9a7b86",
-        "src/project_knowledge/__init__.py": "sha256:1e74df1d7eba5e26b4472c6d4c5710da1afc55d15f236839e20b77fb07a3191e",
+        "src/project_knowledge/__init__.py": "sha256:c50bfbe3b8ab7699372cb1794f2a78f521cdbc0505976b58492c994f8b71809c",
         "src/project_knowledge/__main__.py": "sha256:2cdd23d4f5cd6c3b3e4cb690ad16d560637767b9ca5b2a3cf129fcc0a5ebc82b",
         "src/project_knowledge/cli.py": "sha256:183e1fb4eb5cd876a9d86850a321a9c45e4b45140ee3c67cf2a623ff6a136dac",
         "src/project_knowledge/codegraph.py": "sha256:aaf5f2e1f6fa8f42d142fee7b4561e3f809037089fe4ee0a21207294ed518090",
@@ -809,11 +1428,11 @@
         "src/project_knowledge/guidance_store.py": "sha256:583889c69c7fef329e1fb9528d799cf8169dcc64d20b580999696f488f5d73e7",
         "src/project_knowledge/guidance_templates.py": "sha256:9cdafc3ff2f590f41f83fe0d5ba584d41f59d28d2c3f581ffba6aa95a3c47b72",
         "src/project_knowledge/guidance_workflow.py": "sha256:3d3a37000d87303d94d18b28cff4f452e0944a107c8bb63bf474e52f87c5dc22",
-        "src/project_knowledge/incremental.py": "sha256:c3c54881ad3951736d65aac6426758a85c8b8fa95c1a1d2a684d3b05a53b8ce8",
-        "src/project_knowledge/initialization.py": "sha256:b5f10954a44741e81de2d0aa83c77d4e6524141b272b01f8b71022fd52a17f22",
+        "src/project_knowledge/incremental.py": "sha256:0d788c83d427c309c40d5b49a63a2be96575a4c5716e758ce3548faf77e305d0",
+        "src/project_knowledge/initialization.py": "sha256:3528664f30b32002c6790e98c6be457b0e14f67e0830004d2f26050abfdc824e",
         "src/project_knowledge/instructions.py": "sha256:99ef17b8f8c814820b9d39abe4b7ec8a84b9871e2057a8a82e4c2513c164bd16",
         "src/project_knowledge/knowledge.py": "sha256:34de3a1c51748cf91a8d4211cb0e7279755343db8b92f767d49db6b839f91d27",
-        "src/project_knowledge/mcp.py": "sha256:774b007953c634d5118457e6f2ae668bfd5b03a2b01ebe66760c79955b09a4c5",
+        "src/project_knowledge/mcp.py": "sha256:ff6cb893ef559d2e074b5786b4c30939b346ee22fecfc695435ee87fccb65b86",
         "src/project_knowledge/models.py": "sha256:3517017e77d4edb136cb321b014db25c83a902570ed406c82b719942357cb79e",
         "src/project_knowledge/observability.py": "sha256:afe01b377c8eda0f6319c611f923ff601f45ee593eb2b0f99a67604c79e77ad0",
         "src/project_knowledge/performance.py": "sha256:624de477dee44f9c8ae341538e1566428ee538b9f4228b0fe968cc657519992a",
@@ -825,7 +1444,7 @@
         "src/project_knowledge/retrieval.py": "sha256:00535cdb7abfa9d21e22e245a9446715042ca797c86602293c30e43a1c591c03",
         "src/project_knowledge/schemas.py": "sha256:4a6be75dbd1b4e241a493323da3e83b1626e2adb046a5edb783d20ca4434f74f",
         "src/project_knowledge/semantic.py": "sha256:62a3e83d8e244a63c8d7a4441ab9ca1e5b583bfc89953c12d34d70ea7c32aabb",
-        "src/project_knowledge/service.py": "sha256:a9d8dc75cb8b1efddc0120c631c4f544be1242b3caf0a3be41a42601d3aff8a0",
+        "src/project_knowledge/service.py": "sha256:1617c67d718836346556cdd957d3bcf4ed1b9838359b605e5a8cb260712f21b4",
         "src/project_knowledge/store.py": "sha256:a3c9be2345712d66292144421cd02148794e1f4a9af675e840a82c607c919631",
         "src/project_knowledge/task_workflow.py": "sha256:ed310d2a2e0586d4f752bea56c5b0bee96e5c6359dc26f2471cdbd76c5e0ff4d",
         "src/project_knowledge/util.py": "sha256:11f4902fd9593f986e15add4d047f0fffdd870696704ae10399da6591224fb79",
@@ -850,14 +1469,14 @@
         "tests/test_gardenserver_rules.py": "sha256:afc3add1527802d0f399cffaf302ac8590a2b512af93eb2d3bdf8f2ce6030f84",
         "tests/test_guidance.py": "sha256:ed4557280ad1ee7519628714bc5c35490df2b535711e1a966d8375177b505b21",
         "tests/test_guidance_e2e.py": "sha256:7bbecb420bdc4dbabf53a60313ad4c27b302dd20316e593dc7b5131f9f3264f7",
-        "tests/test_guidance_incremental.py": "sha256:5e322ebcd6e4fd3191a5764e53e028caa8f1a00117e6ce98f3a874adbf7c0b58",
+        "tests/test_guidance_incremental.py": "sha256:b68d9311349233b79564be4183800c179ca4b07d3ddc77264ff3141a85499129",
         "tests/test_guidance_initialization_loop.py": "sha256:dca1eabcba20f8503f537d30b02708c5df82aa4c634f154eed32ab90cab3feb2",
-        "tests/test_guidance_mcp.py": "sha256:73131e4ce4b1bf5f0526c8d829b0d6e3340da2d8b433c2e559183378f6dca030",
+        "tests/test_guidance_mcp.py": "sha256:02fd9c8d46c247e951ecad7dbd341c0b79037b282c7a14a22a6775ab3d761be0",
         "tests/test_guidance_retrieval.py": "sha256:956e46901834fdded86a36ea52d6082d53eaa5ea08ac75e4dd0f349c899b4fd5",
         "tests/test_guidance_store.py": "sha256:d3f0a270052947aa63fab5252e470cf174bf1cf316877145cd7a7d0babd975bf",
         "tests/test_guidance_workflow.py": "sha256:c2701212dd5dcc92264bbc773e8227b275a077c89e7f639d877e5b4dda6629cd",
-        "tests/test_initialization_workflow.py": "sha256:35ecb1f59a96309c2063fcd807222dccec5b104479338680a6dd9ff9aba03df1",
-        "tests/test_integration.py": "sha256:f05909e5b6dd356847d7694bae1e68e0973acaca56fa58fb63343b70ee9bf8a6",
+        "tests/test_initialization_workflow.py": "sha256:82513d3b86e2dfcc2120940bad189e902e382d040ba95e4c71c24ffe93694905",
+        "tests/test_integration.py": "sha256:b87b9229ab716e3dbe1dfa8f4bc1655d2b322fe20b9ef7d886f0a97c4a3ae0f3",
         "tests/test_knowledge_loop_status.py": "sha256:1fb9f6d4de379d27cb092d0e77d57676c8298e40b65f736e63c33c26232aa007",
         "tests/test_mcp_observability.py": "sha256:f25c78fd5df986136051f256abe9ff7e9130e7635ecc36ff868256c5df8a2099",
         "tests/test_mcp_stdio_encoding.py": "sha256:6fe0f3ee9982925987130dbd36918e5e4757d7ce0f3082cb2a4a86e268ad31e8",
@@ -878,7 +1497,7 @@
         "tests/test_task_completion.py": "sha256:fe69b181f8f36efb7645c87f7d56444de598a5a073b55fc0151e461e71e7db07",
         "tests/test_vector_retrieval.py": "sha256:e52ca7df2f8a01085636e1104c39024c15b0587343af43443ae1e616f6620742",
         "tests/test_versioning.py": "sha256:954ef4ea592d10ee884c875a6f51339fcca9a005ce0599fdf1220c6e506175de",
-        "tests/test_watch_wp07.py": "sha256:9f4543729131d0433154216b946dbb54f790bc96708e1942786f3ba8e430a96f",
+        "tests/test_watch_wp07.py": "sha256:64b50b9532872d9e3ecae065cb224c6c9ac8d72e1a0e3e0c2139769e7608e17e",
         "tests/test_wp08.py": "sha256:eef5010fb4bef3befb4759019c23acf53497596e73c734ba492d40cf2c1b36ae"
       },
       "sources": [
@@ -1347,10 +1966,10 @@
       "confidence": "generated",
       "id": "generated.module.evaluation",
       "kind": "module",
-      "last_generated_at": "2026-09-14T19:43:39+08:00",
+      "last_generated_at": "2026-09-15T16:16:36+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/evaluation.md",
-      "source_commit": "7cc7917d1e8270a24fae97ca12c4f6ee0d7ee68c",
+      "source_commit": "2019d0d2602363b78693589f95f9e865e255f55c",
       "source_hashes": {
         "evaluation/performance_harness.py": "sha256:b878ad61af63f561eb43c29a20119438540c0e8a4f39aee09fe965dba5f41403",
         "evaluation/real_project_harness.py": "sha256:d970b13db02dcc3f0f6500599a5018a9fd37595186a275a9f6aa8e4b3922a915"
@@ -1376,10 +1995,10 @@
       "confidence": "generated",
       "id": "generated.module.github",
       "kind": "module",
-      "last_generated_at": "2026-09-14T19:43:39+08:00",
+      "last_generated_at": "2026-09-15T16:16:36+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/github.md",
-      "source_commit": "7cc7917d1e8270a24fae97ca12c4f6ee0d7ee68c",
+      "source_commit": "2019d0d2602363b78693589f95f9e865e255f55c",
       "source_hashes": {
         ".github/workflows/quality.yml": "sha256:2b0403615ead5cc041a558b6d6aab547746ef7809f8947adca11e1dbd2819ce1"
       },
@@ -1400,10 +2019,10 @@
       "confidence": "generated",
       "id": "generated.module.npm",
       "kind": "module",
-      "last_generated_at": "2026-09-14T19:43:39+08:00",
+      "last_generated_at": "2026-09-15T16:16:36+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/npm.md",
-      "source_commit": "7cc7917d1e8270a24fae97ca12c4f6ee0d7ee68c",
+      "source_commit": "2019d0d2602363b78693589f95f9e865e255f55c",
       "source_hashes": {
         "npm/bin/project-kb.js": "sha256:eced41f4fe8f149781e3b18614e772042b42ee713f63413835a40cd244b406c5",
         "npm/lib/agent-installer.js": "sha256:1189f7c0c0fac3685f659a917a12f189a8eb631e67b6d0f01bc0897a0c4a5ec4",
@@ -1454,10 +2073,10 @@
       "confidence": "generated",
       "id": "generated.module.plugins",
       "kind": "module",
-      "last_generated_at": "2026-09-14T19:43:39+08:00",
+      "last_generated_at": "2026-09-15T16:16:36+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/plugins.md",
-      "source_commit": "7cc7917d1e8270a24fae97ca12c4f6ee0d7ee68c",
+      "source_commit": "2019d0d2602363b78693589f95f9e865e255f55c",
       "source_hashes": {
         "plugins/project-knowledge/hooks/sync_after_task.py": "sha256:39eec1665f1818db6f8a77d0e4d1c01a9037d6fac3b52f7defe413397c57310a",
         "plugins/project-knowledge/scripts/project_status.py": "sha256:7f8532a6c877d51ed78ebf71d7c35c700d28691483f44c16717f39fe0b3ec7cc",
@@ -1488,12 +2107,12 @@
       "confidence": "generated",
       "id": "generated.module.project_knowledge",
       "kind": "module",
-      "last_generated_at": "2026-09-14T19:43:39+08:00",
+      "last_generated_at": "2026-09-15T16:16:36+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/project_knowledge.md",
-      "source_commit": "7cc7917d1e8270a24fae97ca12c4f6ee0d7ee68c",
+      "source_commit": "2019d0d2602363b78693589f95f9e865e255f55c",
       "source_hashes": {
-        "src/project_knowledge/__init__.py": "sha256:1e74df1d7eba5e26b4472c6d4c5710da1afc55d15f236839e20b77fb07a3191e",
+        "src/project_knowledge/__init__.py": "sha256:c50bfbe3b8ab7699372cb1794f2a78f521cdbc0505976b58492c994f8b71809c",
         "src/project_knowledge/__main__.py": "sha256:2cdd23d4f5cd6c3b3e4cb690ad16d560637767b9ca5b2a3cf129fcc0a5ebc82b",
         "src/project_knowledge/cli.py": "sha256:183e1fb4eb5cd876a9d86850a321a9c45e4b45140ee3c67cf2a623ff6a136dac",
         "src/project_knowledge/codegraph.py": "sha256:aaf5f2e1f6fa8f42d142fee7b4561e3f809037089fe4ee0a21207294ed518090",
@@ -1512,11 +2131,11 @@
         "src/project_knowledge/guidance_store.py": "sha256:583889c69c7fef329e1fb9528d799cf8169dcc64d20b580999696f488f5d73e7",
         "src/project_knowledge/guidance_templates.py": "sha256:9cdafc3ff2f590f41f83fe0d5ba584d41f59d28d2c3f581ffba6aa95a3c47b72",
         "src/project_knowledge/guidance_workflow.py": "sha256:3d3a37000d87303d94d18b28cff4f452e0944a107c8bb63bf474e52f87c5dc22",
-        "src/project_knowledge/incremental.py": "sha256:c3c54881ad3951736d65aac6426758a85c8b8fa95c1a1d2a684d3b05a53b8ce8",
-        "src/project_knowledge/initialization.py": "sha256:b5f10954a44741e81de2d0aa83c77d4e6524141b272b01f8b71022fd52a17f22",
+        "src/project_knowledge/incremental.py": "sha256:0d788c83d427c309c40d5b49a63a2be96575a4c5716e758ce3548faf77e305d0",
+        "src/project_knowledge/initialization.py": "sha256:3528664f30b32002c6790e98c6be457b0e14f67e0830004d2f26050abfdc824e",
         "src/project_knowledge/instructions.py": "sha256:99ef17b8f8c814820b9d39abe4b7ec8a84b9871e2057a8a82e4c2513c164bd16",
         "src/project_knowledge/knowledge.py": "sha256:34de3a1c51748cf91a8d4211cb0e7279755343db8b92f767d49db6b839f91d27",
-        "src/project_knowledge/mcp.py": "sha256:774b007953c634d5118457e6f2ae668bfd5b03a2b01ebe66760c79955b09a4c5",
+        "src/project_knowledge/mcp.py": "sha256:ff6cb893ef559d2e074b5786b4c30939b346ee22fecfc695435ee87fccb65b86",
         "src/project_knowledge/models.py": "sha256:3517017e77d4edb136cb321b014db25c83a902570ed406c82b719942357cb79e",
         "src/project_knowledge/observability.py": "sha256:afe01b377c8eda0f6319c611f923ff601f45ee593eb2b0f99a67604c79e77ad0",
         "src/project_knowledge/performance.py": "sha256:624de477dee44f9c8ae341538e1566428ee538b9f4228b0fe968cc657519992a",
@@ -1528,7 +2147,7 @@
         "src/project_knowledge/retrieval.py": "sha256:00535cdb7abfa9d21e22e245a9446715042ca797c86602293c30e43a1c591c03",
         "src/project_knowledge/schemas.py": "sha256:4a6be75dbd1b4e241a493323da3e83b1626e2adb046a5edb783d20ca4434f74f",
         "src/project_knowledge/semantic.py": "sha256:62a3e83d8e244a63c8d7a4441ab9ca1e5b583bfc89953c12d34d70ea7c32aabb",
-        "src/project_knowledge/service.py": "sha256:a9d8dc75cb8b1efddc0120c631c4f544be1242b3caf0a3be41a42601d3aff8a0",
+        "src/project_knowledge/service.py": "sha256:1617c67d718836346556cdd957d3bcf4ed1b9838359b605e5a8cb260712f21b4",
         "src/project_knowledge/store.py": "sha256:a3c9be2345712d66292144421cd02148794e1f4a9af675e840a82c607c919631",
         "src/project_knowledge/task_workflow.py": "sha256:ed310d2a2e0586d4f752bea56c5b0bee96e5c6359dc26f2471cdbd76c5e0ff4d",
         "src/project_knowledge/util.py": "sha256:11f4902fd9593f986e15add4d047f0fffdd870696704ae10399da6591224fb79",
@@ -1712,10 +2331,10 @@
       "confidence": "generated",
       "id": "generated.module.root",
       "kind": "module",
-      "last_generated_at": "2026-09-14T19:43:39+08:00",
+      "last_generated_at": "2026-09-15T16:16:36+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/root.md",
-      "source_commit": "7cc7917d1e8270a24fae97ca12c4f6ee0d7ee68c",
+      "source_commit": "2019d0d2602363b78693589f95f9e865e255f55c",
       "source_hashes": {
         ".project-kb.yml": "sha256:48736e6e85940ae62a4ca22c00aa3c169999c7f1b3d953d343d4db4617a85467"
       },
@@ -1736,10 +2355,10 @@
       "confidence": "generated",
       "id": "generated.module.scripts",
       "kind": "module",
-      "last_generated_at": "2026-09-14T19:43:39+08:00",
+      "last_generated_at": "2026-09-15T16:16:36+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/scripts.md",
-      "source_commit": "7cc7917d1e8270a24fae97ca12c4f6ee0d7ee68c",
+      "source_commit": "2019d0d2602363b78693589f95f9e865e255f55c",
       "source_hashes": {
         "scripts/build_npm_package.py": "sha256:130aae32270643fa00f10918652fdf22bf8788c13f9ff8b18808b005e7c2055c",
         "scripts/bump_version.py": "sha256:84f254dec8f3c3e1fd1dd58d995a675db61fd03839c215cf77733ad41c0c821d",
@@ -1800,10 +2419,10 @@
       "confidence": "generated",
       "id": "generated.module.tests",
       "kind": "module",
-      "last_generated_at": "2026-09-14T19:43:39+08:00",
+      "last_generated_at": "2026-09-15T16:16:36+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/tests.md",
-      "source_commit": "7cc7917d1e8270a24fae97ca12c4f6ee0d7ee68c",
+      "source_commit": "2019d0d2602363b78693589f95f9e865e255f55c",
       "source_hashes": {
         "tests/__init__.py": "sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
         "tests/test_codegraph.py": "sha256:0e36c50db060f5320595688ab6e0a86935b7ff500a252694f1289a327fbcb270",
@@ -1824,14 +2443,14 @@
         "tests/test_gardenserver_rules.py": "sha256:afc3add1527802d0f399cffaf302ac8590a2b512af93eb2d3bdf8f2ce6030f84",
         "tests/test_guidance.py": "sha256:ed4557280ad1ee7519628714bc5c35490df2b535711e1a966d8375177b505b21",
         "tests/test_guidance_e2e.py": "sha256:7bbecb420bdc4dbabf53a60313ad4c27b302dd20316e593dc7b5131f9f3264f7",
-        "tests/test_guidance_incremental.py": "sha256:5e322ebcd6e4fd3191a5764e53e028caa8f1a00117e6ce98f3a874adbf7c0b58",
+        "tests/test_guidance_incremental.py": "sha256:b68d9311349233b79564be4183800c179ca4b07d3ddc77264ff3141a85499129",
         "tests/test_guidance_initialization_loop.py": "sha256:dca1eabcba20f8503f537d30b02708c5df82aa4c634f154eed32ab90cab3feb2",
-        "tests/test_guidance_mcp.py": "sha256:73131e4ce4b1bf5f0526c8d829b0d6e3340da2d8b433c2e559183378f6dca030",
+        "tests/test_guidance_mcp.py": "sha256:02fd9c8d46c247e951ecad7dbd341c0b79037b282c7a14a22a6775ab3d761be0",
         "tests/test_guidance_retrieval.py": "sha256:956e46901834fdded86a36ea52d6082d53eaa5ea08ac75e4dd0f349c899b4fd5",
         "tests/test_guidance_store.py": "sha256:d3f0a270052947aa63fab5252e470cf174bf1cf316877145cd7a7d0babd975bf",
         "tests/test_guidance_workflow.py": "sha256:c2701212dd5dcc92264bbc773e8227b275a077c89e7f639d877e5b4dda6629cd",
-        "tests/test_initialization_workflow.py": "sha256:35ecb1f59a96309c2063fcd807222dccec5b104479338680a6dd9ff9aba03df1",
-        "tests/test_integration.py": "sha256:f05909e5b6dd356847d7694bae1e68e0973acaca56fa58fb63343b70ee9bf8a6",
+        "tests/test_initialization_workflow.py": "sha256:82513d3b86e2dfcc2120940bad189e902e382d040ba95e4c71c24ffe93694905",
+        "tests/test_integration.py": "sha256:b87b9229ab716e3dbe1dfa8f4bc1655d2b322fe20b9ef7d886f0a97c4a3ae0f3",
         "tests/test_knowledge_loop_status.py": "sha256:1fb9f6d4de379d27cb092d0e77d57676c8298e40b65f736e63c33c26232aa007",
         "tests/test_mcp_observability.py": "sha256:f25c78fd5df986136051f256abe9ff7e9130e7635ecc36ff868256c5df8a2099",
         "tests/test_mcp_stdio_encoding.py": "sha256:6fe0f3ee9982925987130dbd36918e5e4757d7ce0f3082cb2a4a86e268ad31e8",
@@ -1852,7 +2471,7 @@
         "tests/test_task_completion.py": "sha256:fe69b181f8f36efb7645c87f7d56444de598a5a073b55fc0151e461e71e7db07",
         "tests/test_vector_retrieval.py": "sha256:e52ca7df2f8a01085636e1104c39024c15b0587343af43443ae1e616f6620742",
         "tests/test_versioning.py": "sha256:954ef4ea592d10ee884c875a6f51339fcca9a005ce0599fdf1220c6e506175de",
-        "tests/test_watch_wp07.py": "sha256:9f4543729131d0433154216b946dbb54f790bc96708e1942786f3ba8e430a96f",
+        "tests/test_watch_wp07.py": "sha256:64b50b9532872d9e3ecae065cb224c6c9ac8d72e1a0e3e0c2139769e7608e17e",
         "tests/test_wp08.py": "sha256:eef5010fb4bef3befb4759019c23acf53497596e73c734ba492d40cf2c1b36ae"
       },
       "sources": [
@@ -2064,10 +2683,10 @@
       "confidence": "generated",
       "id": "generated.project-map",
       "kind": "project",
-      "last_generated_at": "2026-09-14T19:43:39+08:00",
+      "last_generated_at": "2026-09-15T16:16:36+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/project-map.md",
-      "source_commit": "7cc7917d1e8270a24fae97ca12c4f6ee0d7ee68c",
+      "source_commit": "2019d0d2602363b78693589f95f9e865e255f55c",
       "source_hashes": {
         ".github/workflows/quality.yml": "sha256:2b0403615ead5cc041a558b6d6aab547746ef7809f8947adca11e1dbd2819ce1",
         ".project-kb.yml": "sha256:48736e6e85940ae62a4ca22c00aa3c169999c7f1b3d953d343d4db4617a85467",
@@ -2092,7 +2711,7 @@
         "scripts/validate_gardenserver_guidance_workflow.py": "sha256:72cb18dc8ee95bee5fe9e7531ea2d56c67eb427f27307af007f0b038528e362f",
         "scripts/validate_mcp_observability.py": "sha256:ffab83349be73e9c94d4b768018e324b1fc369fa5f7813ffed358eb8b1289f40",
         "scripts/validate_npm_bootstrap.py": "sha256:034757ef4c208e12a1c4a50a1ff4760c3e3412d3742c5272c1940570bd9a7b86",
-        "src/project_knowledge/__init__.py": "sha256:1e74df1d7eba5e26b4472c6d4c5710da1afc55d15f236839e20b77fb07a3191e",
+        "src/project_knowledge/__init__.py": "sha256:c50bfbe3b8ab7699372cb1794f2a78f521cdbc0505976b58492c994f8b71809c",
         "src/project_knowledge/__main__.py": "sha256:2cdd23d4f5cd6c3b3e4cb690ad16d560637767b9ca5b2a3cf129fcc0a5ebc82b",
         "src/project_knowledge/cli.py": "sha256:183e1fb4eb5cd876a9d86850a321a9c45e4b45140ee3c67cf2a623ff6a136dac",
         "src/project_knowledge/codegraph.py": "sha256:aaf5f2e1f6fa8f42d142fee7b4561e3f809037089fe4ee0a21207294ed518090",
@@ -2111,11 +2730,11 @@
         "src/project_knowledge/guidance_store.py": "sha256:583889c69c7fef329e1fb9528d799cf8169dcc64d20b580999696f488f5d73e7",
         "src/project_knowledge/guidance_templates.py": "sha256:9cdafc3ff2f590f41f83fe0d5ba584d41f59d28d2c3f581ffba6aa95a3c47b72",
         "src/project_knowledge/guidance_workflow.py": "sha256:3d3a37000d87303d94d18b28cff4f452e0944a107c8bb63bf474e52f87c5dc22",
-        "src/project_knowledge/incremental.py": "sha256:c3c54881ad3951736d65aac6426758a85c8b8fa95c1a1d2a684d3b05a53b8ce8",
-        "src/project_knowledge/initialization.py": "sha256:b5f10954a44741e81de2d0aa83c77d4e6524141b272b01f8b71022fd52a17f22",
+        "src/project_knowledge/incremental.py": "sha256:0d788c83d427c309c40d5b49a63a2be96575a4c5716e758ce3548faf77e305d0",
+        "src/project_knowledge/initialization.py": "sha256:3528664f30b32002c6790e98c6be457b0e14f67e0830004d2f26050abfdc824e",
         "src/project_knowledge/instructions.py": "sha256:99ef17b8f8c814820b9d39abe4b7ec8a84b9871e2057a8a82e4c2513c164bd16",
         "src/project_knowledge/knowledge.py": "sha256:34de3a1c51748cf91a8d4211cb0e7279755343db8b92f767d49db6b839f91d27",
-        "src/project_knowledge/mcp.py": "sha256:774b007953c634d5118457e6f2ae668bfd5b03a2b01ebe66760c79955b09a4c5",
+        "src/project_knowledge/mcp.py": "sha256:ff6cb893ef559d2e074b5786b4c30939b346ee22fecfc695435ee87fccb65b86",
         "src/project_knowledge/models.py": "sha256:3517017e77d4edb136cb321b014db25c83a902570ed406c82b719942357cb79e",
         "src/project_knowledge/observability.py": "sha256:afe01b377c8eda0f6319c611f923ff601f45ee593eb2b0f99a67604c79e77ad0",
         "src/project_knowledge/performance.py": "sha256:624de477dee44f9c8ae341538e1566428ee538b9f4228b0fe968cc657519992a",
@@ -2127,7 +2746,7 @@
         "src/project_knowledge/retrieval.py": "sha256:00535cdb7abfa9d21e22e245a9446715042ca797c86602293c30e43a1c591c03",
         "src/project_knowledge/schemas.py": "sha256:4a6be75dbd1b4e241a493323da3e83b1626e2adb046a5edb783d20ca4434f74f",
         "src/project_knowledge/semantic.py": "sha256:62a3e83d8e244a63c8d7a4441ab9ca1e5b583bfc89953c12d34d70ea7c32aabb",
-        "src/project_knowledge/service.py": "sha256:a9d8dc75cb8b1efddc0120c631c4f544be1242b3caf0a3be41a42601d3aff8a0",
+        "src/project_knowledge/service.py": "sha256:1617c67d718836346556cdd957d3bcf4ed1b9838359b605e5a8cb260712f21b4",
         "src/project_knowledge/store.py": "sha256:a3c9be2345712d66292144421cd02148794e1f4a9af675e840a82c607c919631",
         "src/project_knowledge/task_workflow.py": "sha256:ed310d2a2e0586d4f752bea56c5b0bee96e5c6359dc26f2471cdbd76c5e0ff4d",
         "src/project_knowledge/util.py": "sha256:11f4902fd9593f986e15add4d047f0fffdd870696704ae10399da6591224fb79",
@@ -2152,14 +2771,14 @@
         "tests/test_gardenserver_rules.py": "sha256:afc3add1527802d0f399cffaf302ac8590a2b512af93eb2d3bdf8f2ce6030f84",
         "tests/test_guidance.py": "sha256:ed4557280ad1ee7519628714bc5c35490df2b535711e1a966d8375177b505b21",
         "tests/test_guidance_e2e.py": "sha256:7bbecb420bdc4dbabf53a60313ad4c27b302dd20316e593dc7b5131f9f3264f7",
-        "tests/test_guidance_incremental.py": "sha256:5e322ebcd6e4fd3191a5764e53e028caa8f1a00117e6ce98f3a874adbf7c0b58",
+        "tests/test_guidance_incremental.py": "sha256:b68d9311349233b79564be4183800c179ca4b07d3ddc77264ff3141a85499129",
         "tests/test_guidance_initialization_loop.py": "sha256:dca1eabcba20f8503f537d30b02708c5df82aa4c634f154eed32ab90cab3feb2",
-        "tests/test_guidance_mcp.py": "sha256:73131e4ce4b1bf5f0526c8d829b0d6e3340da2d8b433c2e559183378f6dca030",
+        "tests/test_guidance_mcp.py": "sha256:02fd9c8d46c247e951ecad7dbd341c0b79037b282c7a14a22a6775ab3d761be0",
         "tests/test_guidance_retrieval.py": "sha256:956e46901834fdded86a36ea52d6082d53eaa5ea08ac75e4dd0f349c899b4fd5",
         "tests/test_guidance_store.py": "sha256:d3f0a270052947aa63fab5252e470cf174bf1cf316877145cd7a7d0babd975bf",
         "tests/test_guidance_workflow.py": "sha256:c2701212dd5dcc92264bbc773e8227b275a077c89e7f639d877e5b4dda6629cd",
-        "tests/test_initialization_workflow.py": "sha256:35ecb1f59a96309c2063fcd807222dccec5b104479338680a6dd9ff9aba03df1",
-        "tests/test_integration.py": "sha256:f05909e5b6dd356847d7694bae1e68e0973acaca56fa58fb63343b70ee9bf8a6",
+        "tests/test_initialization_workflow.py": "sha256:82513d3b86e2dfcc2120940bad189e902e382d040ba95e4c71c24ffe93694905",
+        "tests/test_integration.py": "sha256:b87b9229ab716e3dbe1dfa8f4bc1655d2b322fe20b9ef7d886f0a97c4a3ae0f3",
         "tests/test_knowledge_loop_status.py": "sha256:1fb9f6d4de379d27cb092d0e77d57676c8298e40b65f736e63c33c26232aa007",
         "tests/test_mcp_observability.py": "sha256:f25c78fd5df986136051f256abe9ff7e9130e7635ecc36ff868256c5df8a2099",
         "tests/test_mcp_stdio_encoding.py": "sha256:6fe0f3ee9982925987130dbd36918e5e4757d7ce0f3082cb2a4a86e268ad31e8",
@@ -2180,7 +2799,7 @@
         "tests/test_task_completion.py": "sha256:fe69b181f8f36efb7645c87f7d56444de598a5a073b55fc0151e461e71e7db07",
         "tests/test_vector_retrieval.py": "sha256:e52ca7df2f8a01085636e1104c39024c15b0587343af43443ae1e616f6620742",
         "tests/test_versioning.py": "sha256:954ef4ea592d10ee884c875a6f51339fcca9a005ce0599fdf1220c6e506175de",
-        "tests/test_watch_wp07.py": "sha256:9f4543729131d0433154216b946dbb54f790bc96708e1942786f3ba8e430a96f",
+        "tests/test_watch_wp07.py": "sha256:64b50b9532872d9e3ecae065cb224c6c9ac8d72e1a0e3e0c2139769e7608e17e",
         "tests/test_wp08.py": "sha256:eef5010fb4bef3befb4759019c23acf53497596e73c734ba492d40cf2c1b36ae"
       },
       "sources": [
@@ -2652,10 +3271,10 @@
       "confidence": "generated",
       "id": "generated.test-map",
       "kind": "test",
-      "last_generated_at": "2026-09-14T19:43:39+08:00",
+      "last_generated_at": "2026-09-15T16:16:36+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/test-map.md",
-      "source_commit": "7cc7917d1e8270a24fae97ca12c4f6ee0d7ee68c",
+      "source_commit": "2019d0d2602363b78693589f95f9e865e255f55c",
       "source_hashes": {
         "npm/test/agent-installer.test.js": "sha256:09a8bf3ee1a0946a57238ccd5595c30a133ca3f9ee01c52aa7f71533f66c0942",
         "npm/test/runtime.test.js": "sha256:b00fb236afaac757545a754283fe482889d2276922dd8cd1c5c1d35fc36bd62f",
@@ -2678,14 +3297,14 @@
         "tests/test_gardenserver_rules.py": "sha256:afc3add1527802d0f399cffaf302ac8590a2b512af93eb2d3bdf8f2ce6030f84",
         "tests/test_guidance.py": "sha256:ed4557280ad1ee7519628714bc5c35490df2b535711e1a966d8375177b505b21",
         "tests/test_guidance_e2e.py": "sha256:7bbecb420bdc4dbabf53a60313ad4c27b302dd20316e593dc7b5131f9f3264f7",
-        "tests/test_guidance_incremental.py": "sha256:5e322ebcd6e4fd3191a5764e53e028caa8f1a00117e6ce98f3a874adbf7c0b58",
+        "tests/test_guidance_incremental.py": "sha256:b68d9311349233b79564be4183800c179ca4b07d3ddc77264ff3141a85499129",
         "tests/test_guidance_initialization_loop.py": "sha256:dca1eabcba20f8503f537d30b02708c5df82aa4c634f154eed32ab90cab3feb2",
-        "tests/test_guidance_mcp.py": "sha256:73131e4ce4b1bf5f0526c8d829b0d6e3340da2d8b433c2e559183378f6dca030",
+        "tests/test_guidance_mcp.py": "sha256:02fd9c8d46c247e951ecad7dbd341c0b79037b282c7a14a22a6775ab3d761be0",
         "tests/test_guidance_retrieval.py": "sha256:956e46901834fdded86a36ea52d6082d53eaa5ea08ac75e4dd0f349c899b4fd5",
         "tests/test_guidance_store.py": "sha256:d3f0a270052947aa63fab5252e470cf174bf1cf316877145cd7a7d0babd975bf",
         "tests/test_guidance_workflow.py": "sha256:c2701212dd5dcc92264bbc773e8227b275a077c89e7f639d877e5b4dda6629cd",
-        "tests/test_initialization_workflow.py": "sha256:35ecb1f59a96309c2063fcd807222dccec5b104479338680a6dd9ff9aba03df1",
-        "tests/test_integration.py": "sha256:f05909e5b6dd356847d7694bae1e68e0973acaca56fa58fb63343b70ee9bf8a6",
+        "tests/test_initialization_workflow.py": "sha256:82513d3b86e2dfcc2120940bad189e902e382d040ba95e4c71c24ffe93694905",
+        "tests/test_integration.py": "sha256:b87b9229ab716e3dbe1dfa8f4bc1655d2b322fe20b9ef7d886f0a97c4a3ae0f3",
         "tests/test_knowledge_loop_status.py": "sha256:1fb9f6d4de379d27cb092d0e77d57676c8298e40b65f736e63c33c26232aa007",
         "tests/test_mcp_observability.py": "sha256:f25c78fd5df986136051f256abe9ff7e9130e7635ecc36ff868256c5df8a2099",
         "tests/test_mcp_stdio_encoding.py": "sha256:6fe0f3ee9982925987130dbd36918e5e4757d7ce0f3082cb2a4a86e268ad31e8",
@@ -2706,7 +3325,7 @@
         "tests/test_task_completion.py": "sha256:fe69b181f8f36efb7645c87f7d56444de598a5a073b55fc0151e461e71e7db07",
         "tests/test_vector_retrieval.py": "sha256:e52ca7df2f8a01085636e1104c39024c15b0587343af43443ae1e616f6620742",
         "tests/test_versioning.py": "sha256:954ef4ea592d10ee884c875a6f51339fcca9a005ce0599fdf1220c6e506175de",
-        "tests/test_watch_wp07.py": "sha256:9f4543729131d0433154216b946dbb54f790bc96708e1942786f3ba8e430a96f",
+        "tests/test_watch_wp07.py": "sha256:64b50b9532872d9e3ecae065cb224c6c9ac8d72e1a0e3e0c2139769e7608e17e",
         "tests/test_wp08.py": "sha256:eef5010fb4bef3befb4759019c23acf53497596e73c734ba492d40cf2c1b36ae"
       },
       "sources": [
@@ -2924,5 +3543,5 @@
     }
   ],
   "schema_version": 1,
-  "source_commit": "7cc7917d1e8270a24fae97ca12c4f6ee0d7ee68c"
+  "source_commit": "2019d0d2602363b78693589f95f9e865e255f55c"
 }
