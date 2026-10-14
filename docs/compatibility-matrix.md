@@ -72,7 +72,7 @@
 
 ## 6. 版本与发布约束
 
-- 当前核心版本和 Codex 插件版本均为 `0.1.48`。
+- 核心版本以 `src/project_knowledge/__init__.py` 为唯一来源；版本脚本同步更新 Codex 插件清单。
 - 每一批功能修改只执行一次 `python scripts/bump_version.py "中文变更说明"`，递增补丁版本。
 - 构建版本从核心包的 `__version__` 动态读取；升级器同步更新 `CHANGELOG.md` 和插件 `plugin.json`。
 - 发布前必须执行完整测试、构建 wheel/sdist、检查制品文件名和制品内版本，并在目标 Python/操作系统矩阵复验。
@@ -89,6 +89,7 @@
 
 ## 8. 历史 0.1.14 构建验证记录
 
-- wheel：.tmp-dist-0.1.14/project_knowledge_cli-0.1.14-py3-none-any.whl（86.9 KiB），元数据确认 Version: 0.1.14、Requires-Python: >=3.11。
-- sdist：.tmp-dist-0.1.14/project_knowledge_cli-0.1.14.tar.gz（98.5 KiB），已由 setuptools build_sdist 成功生成。
+- wheel：`project_knowledge_cli-0.1.14-py3-none-any.whl`（86.9 KiB），当时元数据确认 Version: 0.1.14、Requires-Python: >=3.11。
+- sdist：`project_knowledge_cli-0.1.14.tar.gz`（98.5 KiB），当时已由 setuptools build_sdist 成功生成。
+- 上述历史制品已在仓库整理中移除；此处只保留验证记录，新制品应从当前源码重新构建。
 - 构建仍报告 setuptools 旧式 license 表与 License classifier 弃用警告；不阻断构建，正式发布前迁移到 SPDX。

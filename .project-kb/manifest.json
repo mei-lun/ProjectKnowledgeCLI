@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-15T16:16:36+08:00",
+  "generated_at": "2026-10-15T01:22:47+08:00",
   "project": "ProjectKnowledgeCLI",
   "records": [
     {
@@ -947,6 +947,33 @@
     },
     {
       "confidence": "generated",
+      "id": "draft.draft-31c029af032da134",
+      "kind": "development-guide",
+      "last_generated_at": "2026-09-15T17:24:40+08:00",
+      "ownership": "draft",
+      "path": ".project-kb/drafts/run-incr-74c6851860ca8780/draft-31c029af032da134/文档与安装说明-guidance-draft.md",
+      "source_hashes": {
+        "src/project_knowledge/__init__.py": "sha256:f078d042eae6b1889cebd3615d4853375e7cf688cce5b21f04f18a99f8e3061f"
+      },
+      "sources": [
+        {
+          "hash": "sha256:f078d042eae6b1889cebd3615d4853375e7cf688cce5b21f04f18a99f8e3061f",
+          "path": "src/project_knowledge/__init__.py",
+          "type": "file"
+        }
+      ],
+      "status": "fresh",
+      "tags": [
+        "draft",
+        "guidance",
+        "313f2910b5ad18e5c27ed3ee1e384033a42fdea6eee10c86333dc716c5b96226",
+        "documentation",
+        "文档与安装说明"
+      ],
+      "title": "文档与安装说明项目事实指导草稿"
+    },
+    {
+      "confidence": "generated",
       "id": "draft.draft-41733ca78a6260be",
       "kind": "development-guide",
       "last_generated_at": "2026-09-15T15:53:50+08:00",
@@ -1190,6 +1217,58 @@
     },
     {
       "confidence": "generated",
+      "id": "draft.draft-aa8d272dc0fed24a",
+      "kind": "development-methodology",
+      "last_generated_at": "2026-09-15T17:24:05+08:00",
+      "ownership": "draft",
+      "path": ".project-kb/drafts/run-incr-74c6851860ca8780/draft-aa8d272dc0fed24a/文档与安装说明-methodology-draft.md",
+      "source_hashes": {
+        "src/project_knowledge/__init__.py": "sha256:f078d042eae6b1889cebd3615d4853375e7cf688cce5b21f04f18a99f8e3061f"
+      },
+      "sources": [
+        {
+          "hash": "sha256:f078d042eae6b1889cebd3615d4853375e7cf688cce5b21f04f18a99f8e3061f",
+          "path": "src/project_knowledge/__init__.py",
+          "type": "file"
+        }
+      ],
+      "status": "fresh",
+      "tags": [
+        "draft",
+        "methodology",
+        "313f2910b5ad18e5c27ed3ee1e384033a42fdea6eee10c86333dc716c5b96226",
+        "documentation",
+        "文档与安装说明"
+      ],
+      "title": "文档与安装说明轻量方法论草稿"
+    },
+    {
+      "confidence": "generated",
+      "id": "draft.draft-b1efd55471c6e0a0",
+      "kind": "guidance-catalog",
+      "last_generated_at": "2026-09-15T17:23:28+08:00",
+      "ownership": "draft",
+      "path": ".project-kb/drafts/run-incr-74c6851860ca8780/draft-b1efd55471c6e0a0/功能分类目录-待审核.md",
+      "source_hashes": {
+        "src/project_knowledge/__init__.py": "sha256:f078d042eae6b1889cebd3615d4853375e7cf688cce5b21f04f18a99f8e3061f"
+      },
+      "sources": [
+        {
+          "hash": "sha256:f078d042eae6b1889cebd3615d4853375e7cf688cce5b21f04f18a99f8e3061f",
+          "path": "src/project_knowledge/__init__.py",
+          "type": "file"
+        }
+      ],
+      "status": "fresh",
+      "tags": [
+        "draft",
+        "category_catalog",
+        "313f2910b5ad18e5c27ed3ee1e384033a42fdea6eee10c86333dc716c5b96226"
+      ],
+      "title": "功能分类目录草稿"
+    },
+    {
+      "confidence": "generated",
       "id": "draft.draft-bb69f5f7d5aa5659",
       "kind": "development-methodology",
       "last_generated_at": "2026-09-15T15:53:46+08:00",
@@ -1381,10 +1460,10 @@
       "confidence": "generated",
       "id": "generated.frameworks",
       "kind": "framework",
-      "last_generated_at": "2026-09-15T16:16:36+08:00",
+      "last_generated_at": "2026-10-15T01:22:47+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/frameworks.md",
-      "source_commit": "2019d0d2602363b78693589f95f9e865e255f55c",
+      "source_commit": "e71566dae5f6b0da7b4264565aaa551d12bffdb0",
       "source_hashes": {
         ".github/workflows/quality.yml": "sha256:2b0403615ead5cc041a558b6d6aab547746ef7809f8947adca11e1dbd2819ce1",
         ".project-kb.yml": "sha256:48736e6e85940ae62a4ca22c00aa3c169999c7f1b3d953d343d4db4617a85467",
@@ -1409,7 +1488,7 @@
         "scripts/validate_gardenserver_guidance_workflow.py": "sha256:72cb18dc8ee95bee5fe9e7531ea2d56c67eb427f27307af007f0b038528e362f",
         "scripts/validate_mcp_observability.py": "sha256:ffab83349be73e9c94d4b768018e324b1fc369fa5f7813ffed358eb8b1289f40",
         "scripts/validate_npm_bootstrap.py": "sha256:034757ef4c208e12a1c4a50a1ff4760c3e3412d3742c5272c1940570bd9a7b86",
-        "src/project_knowledge/__init__.py": "sha256:c50bfbe3b8ab7699372cb1794f2a78f521cdbc0505976b58492c994f8b71809c",
+        "src/project_knowledge/__init__.py": "sha256:33b49821d451e0aac126317e5ca71f74ea0caf57da50dbfa69d51ab70da2159b",
         "src/project_knowledge/__main__.py": "sha256:2cdd23d4f5cd6c3b3e4cb690ad16d560637767b9ca5b2a3cf129fcc0a5ebc82b",
         "src/project_knowledge/cli.py": "sha256:183e1fb4eb5cd876a9d86850a321a9c45e4b45140ee3c67cf2a623ff6a136dac",
         "src/project_knowledge/codegraph.py": "sha256:aaf5f2e1f6fa8f42d142fee7b4561e3f809037089fe4ee0a21207294ed518090",
@@ -1966,10 +2045,10 @@
       "confidence": "generated",
       "id": "generated.module.evaluation",
       "kind": "module",
-      "last_generated_at": "2026-09-15T16:16:36+08:00",
+      "last_generated_at": "2026-10-15T01:22:47+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/evaluation.md",
-      "source_commit": "2019d0d2602363b78693589f95f9e865e255f55c",
+      "source_commit": "e71566dae5f6b0da7b4264565aaa551d12bffdb0",
       "source_hashes": {
         "evaluation/performance_harness.py": "sha256:b878ad61af63f561eb43c29a20119438540c0e8a4f39aee09fe965dba5f41403",
         "evaluation/real_project_harness.py": "sha256:d970b13db02dcc3f0f6500599a5018a9fd37595186a275a9f6aa8e4b3922a915"
@@ -1995,10 +2074,10 @@
       "confidence": "generated",
       "id": "generated.module.github",
       "kind": "module",
-      "last_generated_at": "2026-09-15T16:16:36+08:00",
+      "last_generated_at": "2026-10-15T01:22:47+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/github.md",
-      "source_commit": "2019d0d2602363b78693589f95f9e865e255f55c",
+      "source_commit": "e71566dae5f6b0da7b4264565aaa551d12bffdb0",
       "source_hashes": {
         ".github/workflows/quality.yml": "sha256:2b0403615ead5cc041a558b6d6aab547746ef7809f8947adca11e1dbd2819ce1"
       },
@@ -2019,10 +2098,10 @@
       "confidence": "generated",
       "id": "generated.module.npm",
       "kind": "module",
-      "last_generated_at": "2026-09-15T16:16:36+08:00",
+      "last_generated_at": "2026-10-15T01:22:47+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/npm.md",
-      "source_commit": "2019d0d2602363b78693589f95f9e865e255f55c",
+      "source_commit": "e71566dae5f6b0da7b4264565aaa551d12bffdb0",
       "source_hashes": {
         "npm/bin/project-kb.js": "sha256:eced41f4fe8f149781e3b18614e772042b42ee713f63413835a40cd244b406c5",
         "npm/lib/agent-installer.js": "sha256:1189f7c0c0fac3685f659a917a12f189a8eb631e67b6d0f01bc0897a0c4a5ec4",
@@ -2073,10 +2152,10 @@
       "confidence": "generated",
       "id": "generated.module.plugins",
       "kind": "module",
-      "last_generated_at": "2026-09-15T16:16:36+08:00",
+      "last_generated_at": "2026-10-15T01:22:47+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/plugins.md",
-      "source_commit": "2019d0d2602363b78693589f95f9e865e255f55c",
+      "source_commit": "e71566dae5f6b0da7b4264565aaa551d12bffdb0",
       "source_hashes": {
         "plugins/project-knowledge/hooks/sync_after_task.py": "sha256:39eec1665f1818db6f8a77d0e4d1c01a9037d6fac3b52f7defe413397c57310a",
         "plugins/project-knowledge/scripts/project_status.py": "sha256:7f8532a6c877d51ed78ebf71d7c35c700d28691483f44c16717f39fe0b3ec7cc",
@@ -2107,12 +2186,12 @@
       "confidence": "generated",
       "id": "generated.module.project_knowledge",
       "kind": "module",
-      "last_generated_at": "2026-09-15T16:16:36+08:00",
+      "last_generated_at": "2026-10-15T01:22:47+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/project_knowledge.md",
-      "source_commit": "2019d0d2602363b78693589f95f9e865e255f55c",
+      "source_commit": "e71566dae5f6b0da7b4264565aaa551d12bffdb0",
       "source_hashes": {
-        "src/project_knowledge/__init__.py": "sha256:c50bfbe3b8ab7699372cb1794f2a78f521cdbc0505976b58492c994f8b71809c",
+        "src/project_knowledge/__init__.py": "sha256:33b49821d451e0aac126317e5ca71f74ea0caf57da50dbfa69d51ab70da2159b",
         "src/project_knowledge/__main__.py": "sha256:2cdd23d4f5cd6c3b3e4cb690ad16d560637767b9ca5b2a3cf129fcc0a5ebc82b",
         "src/project_knowledge/cli.py": "sha256:183e1fb4eb5cd876a9d86850a321a9c45e4b45140ee3c67cf2a623ff6a136dac",
         "src/project_knowledge/codegraph.py": "sha256:aaf5f2e1f6fa8f42d142fee7b4561e3f809037089fe4ee0a21207294ed518090",
@@ -2331,10 +2410,10 @@
       "confidence": "generated",
       "id": "generated.module.root",
       "kind": "module",
-      "last_generated_at": "2026-09-15T16:16:36+08:00",
+      "last_generated_at": "2026-10-15T01:22:47+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/root.md",
-      "source_commit": "2019d0d2602363b78693589f95f9e865e255f55c",
+      "source_commit": "e71566dae5f6b0da7b4264565aaa551d12bffdb0",
       "source_hashes": {
         ".project-kb.yml": "sha256:48736e6e85940ae62a4ca22c00aa3c169999c7f1b3d953d343d4db4617a85467"
       },
@@ -2355,10 +2434,10 @@
       "confidence": "generated",
       "id": "generated.module.scripts",
       "kind": "module",
-      "last_generated_at": "2026-09-15T16:16:36+08:00",
+      "last_generated_at": "2026-10-15T01:22:47+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/scripts.md",
-      "source_commit": "2019d0d2602363b78693589f95f9e865e255f55c",
+      "source_commit": "e71566dae5f6b0da7b4264565aaa551d12bffdb0",
       "source_hashes": {
         "scripts/build_npm_package.py": "sha256:130aae32270643fa00f10918652fdf22bf8788c13f9ff8b18808b005e7c2055c",
         "scripts/bump_version.py": "sha256:84f254dec8f3c3e1fd1dd58d995a675db61fd03839c215cf77733ad41c0c821d",
@@ -2419,10 +2498,10 @@
       "confidence": "generated",
       "id": "generated.module.tests",
       "kind": "module",
-      "last_generated_at": "2026-09-15T16:16:36+08:00",
+      "last_generated_at": "2026-10-15T01:22:47+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/modules/tests.md",
-      "source_commit": "2019d0d2602363b78693589f95f9e865e255f55c",
+      "source_commit": "e71566dae5f6b0da7b4264565aaa551d12bffdb0",
       "source_hashes": {
         "tests/__init__.py": "sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
         "tests/test_codegraph.py": "sha256:0e36c50db060f5320595688ab6e0a86935b7ff500a252694f1289a327fbcb270",
@@ -2683,10 +2762,10 @@
       "confidence": "generated",
       "id": "generated.project-map",
       "kind": "project",
-      "last_generated_at": "2026-09-15T16:16:36+08:00",
+      "last_generated_at": "2026-10-15T01:22:47+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/project-map.md",
-      "source_commit": "2019d0d2602363b78693589f95f9e865e255f55c",
+      "source_commit": "e71566dae5f6b0da7b4264565aaa551d12bffdb0",
       "source_hashes": {
         ".github/workflows/quality.yml": "sha256:2b0403615ead5cc041a558b6d6aab547746ef7809f8947adca11e1dbd2819ce1",
         ".project-kb.yml": "sha256:48736e6e85940ae62a4ca22c00aa3c169999c7f1b3d953d343d4db4617a85467",
@@ -2711,7 +2790,7 @@
         "scripts/validate_gardenserver_guidance_workflow.py": "sha256:72cb18dc8ee95bee5fe9e7531ea2d56c67eb427f27307af007f0b038528e362f",
         "scripts/validate_mcp_observability.py": "sha256:ffab83349be73e9c94d4b768018e324b1fc369fa5f7813ffed358eb8b1289f40",
         "scripts/validate_npm_bootstrap.py": "sha256:034757ef4c208e12a1c4a50a1ff4760c3e3412d3742c5272c1940570bd9a7b86",
-        "src/project_knowledge/__init__.py": "sha256:c50bfbe3b8ab7699372cb1794f2a78f521cdbc0505976b58492c994f8b71809c",
+        "src/project_knowledge/__init__.py": "sha256:33b49821d451e0aac126317e5ca71f74ea0caf57da50dbfa69d51ab70da2159b",
         "src/project_knowledge/__main__.py": "sha256:2cdd23d4f5cd6c3b3e4cb690ad16d560637767b9ca5b2a3cf129fcc0a5ebc82b",
         "src/project_knowledge/cli.py": "sha256:183e1fb4eb5cd876a9d86850a321a9c45e4b45140ee3c67cf2a623ff6a136dac",
         "src/project_knowledge/codegraph.py": "sha256:aaf5f2e1f6fa8f42d142fee7b4561e3f809037089fe4ee0a21207294ed518090",
@@ -3271,10 +3350,10 @@
       "confidence": "generated",
       "id": "generated.test-map",
       "kind": "test",
-      "last_generated_at": "2026-09-15T16:16:36+08:00",
+      "last_generated_at": "2026-10-15T01:22:47+08:00",
       "ownership": "generated",
       "path": "docs/knowledge/generated/test-map.md",
-      "source_commit": "2019d0d2602363b78693589f95f9e865e255f55c",
+      "source_commit": "e71566dae5f6b0da7b4264565aaa551d12bffdb0",
       "source_hashes": {
         "npm/test/agent-installer.test.js": "sha256:09a8bf3ee1a0946a57238ccd5595c30a133ca3f9ee01c52aa7f71533f66c0942",
         "npm/test/runtime.test.js": "sha256:b00fb236afaac757545a754283fe482889d2276922dd8cd1c5c1d35fc36bd62f",
@@ -3543,5 +3622,5 @@
     }
   ],
   "schema_version": 1,
-  "source_commit": "2019d0d2602363b78693589f95f9e865e255f55c"
+  "source_commit": "e71566dae5f6b0da7b4264565aaa551d12bffdb0"
 }

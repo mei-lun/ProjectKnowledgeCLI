@@ -7,6 +7,9 @@ __pycache__/
 build/
 dist/
 .codegraph/
+/.tmp-dist*/
+/.project-kb/index.sqlite
+/.project-kb/index.sqlite-*
 
 <!-- project-kb:gitignore:start -->
 .project-kb/index.db
